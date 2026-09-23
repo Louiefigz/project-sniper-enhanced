@@ -35,6 +35,7 @@ def review_implementation_files() -> list[Path]:
     """Pin the shared TypeScript validator and its direct validation dependencies."""
     return [REPO / file for file in (
         'scripts/producer/native-short.ts', 'src/lib/server/native-short-prebuild-review.ts',
+        'src/lib/server/native-motion-review.ts',
         'src/lib/server/auto-edit-hash.ts', 'src/lib/producer/contracts/validation.ts',
         'src/app/api/producer/auto-edit/review-contract.ts',
         'src/app/api/producer/auto-edit/cut-preview-receipt.ts')]
@@ -46,6 +47,8 @@ def require_long_prebuild(project: Path, tools: dict, environment: dict) -> dict
     require(receipt.is_file() and not receipt.is_symlink(),
             'New long export requires PREBUILD-REVIEW.json from a separate full-project review; '
             'native_export.py review-input PROJECT prints the exact review binding')
+    from graphics.visual_source_project import admit_project_sources
+    admit_project_sources(project)
     snapshot = prebuild_snapshot(project)
     receipt_sha = digest(receipt)
     command = [tools['node'], '--import', 'tsx', str(REPO / 'scripts/producer/native-short.ts'),

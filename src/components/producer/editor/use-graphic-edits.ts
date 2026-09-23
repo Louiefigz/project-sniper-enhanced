@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { CompCatalogEntry } from "@/lib/producer/comps-catalog";
+import { requireCatalogKind } from "@/lib/producer/visual-source-policy";
 import type { CutRange } from "./script-words";
 import {
   addSourceRange,
@@ -62,6 +63,7 @@ export function useGraphicEdits(a: Args) {
     (id: string, patch: Partial<GraphicEntry>, coalesce = false) => {
       const index = indexOfId(id, "updateGraphic");
       if (index < 0) return;
+      requireCatalogKind(patch.kind ?? planRef.current.graphicsTrack?.[index].kind);
       mutatePlan(
         (p) => {
           const track = [...(p.graphicsTrack ?? [])];
@@ -71,7 +73,7 @@ export function useGraphicEdits(a: Args) {
         { coalesce },
       );
     },
-    [mutatePlan, indexOfId],
+    [mutatePlan, indexOfId, planRef],
   );
 
   const removeGraphic = useCallback(
@@ -100,6 +102,7 @@ export function useGraphicEdits(a: Args) {
   // the properties panel opens for text editing.
   const addGraphic = useCallback(
     (entry: CompCatalogEntry) => {
+      requireCatalogKind(entry.kind);
       const t = round2(timeRef.current);
       const dur = durationRef.current;
       const win =
@@ -127,6 +130,7 @@ export function useGraphicEdits(a: Args) {
     const id = selRef.current;
     const g = id != null ? planRef.current.graphicsTrack?.find((x) => x.id === id) : undefined;
     if (!g || !(g.outEnd > g.outStart)) return;
+    requireCatalogKind(g.kind);
     const t = timeRef.current;
     const win = moveWindow({ start: t, end: t + (g.outEnd - g.outStart) }, 0, durationRef.current);
     // A copy is a NEW entry — mint its own id (never share the source's).

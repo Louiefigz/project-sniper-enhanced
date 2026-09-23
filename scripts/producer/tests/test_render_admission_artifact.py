@@ -1,4 +1,4 @@
-"""Adversarial regressions for the closed pre-admission render artifact."""
+"""Artifact storage/tamper units with inert source DTOs; no render admission."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from unittest import mock
 
 from _common import pl  # noqa: F401
 from _current_build_release_fixture import current_manifest
+from _retired_r0_artifact_fixture import inert_artifact_sources, store_test_artifact
 from headless import render_admission_artifact as artifact_module
 from headless import render_admission_artifact_reader as artifact_reader
 from headless.render_admission_artifact import (
@@ -67,6 +68,9 @@ def _request(*rows: tuple[str, dict]) -> dict:
 
 class RenderAdmissionArtifactTests(unittest.TestCase):
     def setUp(self) -> None:
+        # This class checks storage/ledger semantics with inert source DTOs.
+        # Actual retired-lane admission is covered outside this TEST context.
+        self.enterContext(inert_artifact_sources())
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
@@ -103,7 +107,7 @@ class RenderAdmissionArtifactTests(unittest.TestCase):
             return_value=manifest,
         )
         with build:
-            return store_render_admission_artifact(
+            return store_test_artifact(
                 RenderArtifactRequest(
                     str(target), "authority-mp4-v1", request, self.runtime
                 )
@@ -182,30 +186,14 @@ class RenderAdmissionArtifactTests(unittest.TestCase):
             },
         )
 
-    def test_request_is_frozen_before_build_capture(self) -> None:
+    def test_canonical_request_is_detached_from_late_mutation(self) -> None:
+        """The production canonicalizer freezes nested caller-owned request values."""
         request = _request(("overlay-1", _entry("Original")))
-
-        def mutate_after_freeze(_runtime):
-            request["overlays"][0]["entry"]["spec"]["line1"] = "Late mutation"
-            return BUILD_A
-
-        with mock.patch.object(
-            artifact_module,
-            "current_render_build_manifest",
-            side_effect=mutate_after_freeze,
-        ):
-            locator = store_render_admission_artifact(
-                RenderArtifactRequest(
-                    str(self.authority),
-                    "authority-mp4-v1",
-                    request,
-                    self.runtime,
-                )
-            )
-        resolved = load_render_admission_artifact(str(self.authority), locator)
-        self.assertEqual(
-            resolved.overlays[0].resolved.expected_copy[1], "Original"
-        )
+        frozen, raw, digest = canonical_request_document(request)
+        request["overlays"][0]["entry"]["spec"]["line1"] = "Late mutation"
+        self.assertEqual(frozen["overlays"][0]["entry"]["spec"]["line1"], "Original")
+        self.assertEqual(canonical_request_document(frozen)[1:], (raw, digest))
+        self.assertNotEqual(canonical_request_document(request)[2], digest)
 
     def test_request_and_build_changes_change_artifact_identity(self) -> None:
         first = self._store(_request(("overlay-1", _entry("A"))))
@@ -232,7 +220,7 @@ class RenderAdmissionArtifactTests(unittest.TestCase):
             side_effect=[BUILD_A, BUILD_B],
         ):
             with self.assertRaisesRegex(RuntimeError, "build changed"):
-                store_render_admission_artifact(
+                store_test_artifact(
                     RenderArtifactRequest(
                         str(self.authority),
                         "authority-mp4-v1",
@@ -290,7 +278,7 @@ class RenderAdmissionArtifactTests(unittest.TestCase):
             artifact_module, "_tar_row", return_value=tar
         ):
             with self.assertRaisesRegex(RuntimeError, "512 MiB"):
-                store_render_admission_artifact(
+                store_test_artifact(
                     RenderArtifactRequest(
                         str(self.authority),
                         "authority-mp4-v1",

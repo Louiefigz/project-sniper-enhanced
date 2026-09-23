@@ -1,44 +1,9 @@
 #!/usr/bin/env python3
-"""graphics_planner — MG-4 auto-graphics PROPOSER (triggers → ranked proposal).
+"""Propose measured upstream catalog ports from transcript opportunities.
 
-Today every graphic is hand-authored into ``edit_plan.json``. This module makes
-the machine PROPOSE: given a cut plan + the source transcripts, it remaps the
-KEPT words into output time, runs the deterministic trigger detectors
-(``motion_triggers``), maps each trigger to a doctrine-legal template, prunes for
-R12 legality + density, and emits a RANKED, reviewable graphics proposal — plus a
-suggested treatment map. It NEVER injects into a plan: the brain (skill) reviews
-the candidates, the operator vetoes, and only ACCEPTED rows are merged.
-
-The planner is deterministic CODE that surfaces options; judgment stays with the
-brain. Placement is a RENDER-time decision (free_space/graphics_anchors) — the
-planner only picks an anchor PREFERENCE from the zone's visual state.
-
-Pipeline: kept words → compile_timeline.remap_words (OUTPUT time) → detect_all →
-candidate assembly (graphics_planner_rules) → density/R12 trim → proposal.
-
-Aspect + longform grammar: the render target's aspect (default = the mode's
-natural aspect: shorts 9:16, longform 16:9) gates every kind through the
-MG-4.3 canvas filter — which consults the MEASURED capability matrix
-(templates/motion/comp_capabilities.json, graphics.comp_capabilities) as the
-only physical authority, so unavailable or aspect-illegal comps cannot be proposed
-(LL-036/LL-037) — and talking-head longform zones are retargeted per
-R14/R17/R18 (whiteboard cutaways / kinetic burns / receipts b-roll) — see
-graphics_planner_longform.
-
-graphics_style axis (the R14 contradiction, pair-2 study): "cutaway-only",
-"overlay-rich" (pair-2: fragment-payoff burns, headroom
-icon stacks, section-takeover chapter cards, gate-legal long-list cutaways,
-R24 concept stock), or "face-bridge" (two-chassis module editorial grammar) —
-see graphics_planner_style and graphics_planner_face_bridge. Produced/full longform must
-persist an explicit target.graphicsStyle plus rationale; lighter scopes retain
-the legacy default. Longform only; the shorts path never branches on it.
-
-CLI:
-    graphics_planner.py <plan.json> <transcripts_dir> <manifest.json>
-        [--visual-state states.json] [--gap SECONDS] [--aspect W:H]
-        [--style cutaway-only|overlay-rich|face-bridge] [--out proposal.json] [--json]
-Prints a human-readable candidate table (unless --json); writes the proposal JSON
-to --out (or stdout with --json). See .claude/skills/producer/SKILL.md.
+This compatibility adapter never substitutes a house template. Visual needs
+outside its measured ports require the complete native HyperFrames catalog
+workflow. Reference/custom decisions belong to the current source-bound job.
 """
 
 from __future__ import annotations
@@ -57,14 +22,11 @@ from planner.motion_triggers import detect_all, flatten_words, momentum_zones
 from producer_config import MOTION
 from planner import graphics_planner_boundaries as boundaries
 from planner import graphics_planner_density as density
-from planner import graphics_planner_gauge as gauge
 from planner import graphics_planner_illustration as illustration
 from planner import graphics_planner_longform as longform
 from planner import graphics_planner_receipts as broll
 from planner import graphics_reference as reference
 from planner import graphics_planner_rules as rules
-from planner import graphics_planner_style as overlay_rich
-from planner import graphics_planner_face_bridge as face_bridge
 from planner import graphics_planner_zoom as zoomp
 
 _PLANNER = MOTION["planner"]
@@ -185,73 +147,10 @@ def _span_times(words: list[dict], indices: list[int]) -> tuple[float, float]:
     return float(words[indices[0]]["start"]), float(words[indices[-1]]["end"])
 
 
-def _entity_records(cands: list[dict], words: list[dict],
-                    corrections: dict) -> tuple[list[dict], list[dict]]:
-    """Classify entity candidates: keep specific ones, reject generic ones (R12)."""
-    kept: list[dict] = []
-    rejected: list[dict] = []
-    for c in cands:
-        if c["trigger"] != "entity":
-            continue
-        text = c["text"]
-        kind, icon = rules.classify_entity(text)
-        if kind == "reject":
-            rejected.append(_reject("entity", c["confidence"], text,
-                                    f"R12: {text!r} is a generic category, not a "
-                                    "specific product — no entity graphic"))
-            continue
-        start, end = _span_times(words, c["wordIndices"])
-        display = rules.apply_corrections(text.strip(string.punctuation + " "),
-                                          corrections)
-        kept.append({"start": start, "end": end, "conf": c["confidence"],
-                     "text": display, "icon": icon})
-    kept.sort(key=lambda r: r["start"])
-    return kept, rejected
 
 
-def _group_entities(records: list[dict], mode: str) -> list[list[dict]]:
-    """Fold specific entities spoken close together into one badge/chip group."""
-    window = _PLANNER["entity_group_window_s"]
-    slots = _PLANNER["max_slots"]
-    groups: list[list[dict]] = []
-    for rec in records:
-        if (groups and rec["start"] - groups[-1][0]["start"] <= window
-                and len(groups[-1]) < slots
-                and not any(g["icon"] and g["icon"] == rec["icon"]
-                            for g in groups[-1])
-                and not any(g["text"].lower() == rec["text"].lower()
-                            for g in groups[-1])):
-            groups[-1].append(rec)
-        else:
-            groups.append([rec])
-    return groups
 
 
-def _entity_candidate(group: list[dict], mode: str, out_dur: float,
-                      state_fn) -> dict:
-    """One icon-badge (all marks) or chip-row (any missing mark) from a group."""
-    out_start = group[0]["start"]
-    all_icons = all(g["icon"] for g in group)
-    kind = "icon-badge" if all_icons else "chip-row"
-    spec: dict = {}
-    for i, g in enumerate(group, start=1):
-        at = round(max(0.0, g["start"] - out_start), 2)
-        if kind == "icon-badge":
-            spec[f"icon{i}"], spec[f"at{i}"] = g["icon"], at
-        else:
-            spec[f"chip{i}"], spec[f"icon{i}"], spec[f"at{i}"] = \
-                g["text"], (g["icon"] or ""), at
-    last = group[-1]["start"] + _PLANNER["entity_hold_s"][mode]
-    start, end = _clamp_window(out_start, last - out_start, mode, out_dur)
-    names = ", ".join(g["text"] for g in group)
-    why = ("bare recognizable marks (R12: icon beats chip)" if all_icons
-           else "no known mark — chips carry the text (R12)")
-    cand = _base_candidate(kind, start, end, spec, "entity",
-                           _max_conf(g["conf"] for g in group),
-                           f"specific entit{'y' if len(group) == 1 else 'ies'} "
-                           f"[{names}] — {why}", names, state_fn, mode)
-    cand["_marks"] = [g["icon"] or g["text"].lower() for g in group]
-    return cand
 
 
 def _beat_candidate(c: dict, words: list[dict], mode: str, out_dur: float,
@@ -309,9 +208,7 @@ def assemble(words: list[dict], mode: str, out_dur: float, corrections: dict,
     if source_boundaries is not None:
         raw = [c for c in raw if c["trigger"] != "topic-boundary"]
         raw = raw + list(source_boundaries)
-    records, rejected = _entity_records(raw, words, corrections)
-    candidates = [_entity_candidate(g, mode, out_dur, state_fn)
-                  for g in _group_entities(records, mode)]
+    rejected, candidates = [], []
     for c in raw:
         if c["trigger"] == "entity":
             continue
@@ -391,26 +288,10 @@ def _apply_scope(proposal: dict, target: dict) -> dict:
 def build_proposal(plan: dict, transcripts_dir: str, manifest: dict,
                    states: list[dict] | None = None, gap_s: float = 1.5,
                    aspect: str | None = None, style: str | None = None) -> dict:
-    """Full proposal: candidates + receipts + rejected + treatmentMap + meta.
-
-    ``aspect`` is the render target's aspect ("16:9"/"9:16"); default = the
-    plan target's aspect, else the mode's natural aspect (shorts 9:16,
-    longform 16:9). It gates the MG-4.3 canvas filter and the R14/R17
-    talking-head longform retarget (graphics_planner_longform).
-
-    ``style`` is the graphics_style axis
-    ("cutaway-only"/"overlay-rich"/"face-bridge"),
-    threaded like aspect (param > plan.target.graphicsStyle > cutaway-only).
-    Overlay-rich swaps the LONGFORM retarget for the pair-2 grammar
-    (graphics_planner_style) and adds the R24 concept-stock lane; the
-    cutaway-only proposal stays byte-identical to the pre-axis planner (no
-    meta.style / brollConcept keys), and shorts never branch on the axis.
-    """
+    """Propose source-bound opportunities with catalog-first selection."""
     mode = (plan.get("target") or {}).get("mode", "short")
     aspect = longform.resolve_aspect(aspect, plan, mode)
     style = longform.resolve_style(style, plan)
-    rich = style == "overlay-rich" and mode == "longform"
-    bridge = style == "face-bridge" and mode == "longform"
     selected_profile = profile_name({**(plan.get("target") or {}),
                                      "graphicsStyle": style})
     words = output_words(plan, transcripts_dir, manifest)
@@ -432,9 +313,7 @@ def build_proposal(plan: dict, transcripts_dir: str, manifest: dict,
     candidates, rejected = assemble(words, mode, out_dur, corrections,
                                     state_fn, gap_s, src_boundaries)
     ctx = longform.Ctx(words, mode, aspect, state_fn, out_dur, style)
-    retarget = face_bridge.retarget if bridge else (
-        overlay_rich.retarget if rich else longform.retarget)
-    candidates, lf_rejected = retarget(candidates, ctx)
+    candidates, lf_rejected = longform.retarget(candidates, ctx)
     budget_zones = plan.get("treatmentMap") or density.suggest_treatment_map(
         mode, out_dur, state_fn)
     accepted, trimmed = density.trim(candidates, budget_zones)
@@ -445,7 +324,7 @@ def build_proposal(plan: dict, transcripts_dir: str, manifest: dict,
         receipt_rows, accepted)
     illus_beats, illus_covered = illustration.suppress_covered(
         illustration.illustration_beats(ctx), receipt_rows, accepted)
-    gauge_beats = gauge.gauge_beats(ctx)
+    gauge_beats = []  # custom gauge grammar retired; use upstream catalog
     ref_beats, ref_covered = reference.suppress_covered(
         reference.reference_beats(ctx),
         accepted + receipt_rows + illus_beats + gauge_beats)
@@ -480,29 +359,10 @@ def build_proposal(plan: dict, transcripts_dir: str, manifest: dict,
         "zoom": zoom,
         "momentumZones": momentum_zones(all_triggers, words),
     }
-    if rich:
-        _apply_overlay_rich(proposal, ctx, receipt_rows, accepted)
-    elif bridge:
-        proposal["meta"]["style"] = ctx.style
-        proposal["meta"]["visualProfile"] = selected_profile
-        proposal["meta"]["maximumFeasibleDistinctForms"] = \
-            form_allocation.get("maximumFeasibleDistinctForms", 0)
+    proposal["meta"]["style"] = "catalog-first"
     return _apply_scope(proposal, plan.get("target") or {})
 
 
-def _apply_overlay_rich(proposal: dict, ctx, receipt_rows: list[dict],
-                        accepted: list[dict]) -> None:
-    """Overlay-rich extras: meta.style + the R24 concept-stock lane.
-
-    Stamped ONLY for overlay-rich so the cutaway-only proposal stays
-    byte-identical to the pre-axis planner (operator instruction 2026-07-06:
-    the default doctrine's output is the regression baseline)."""
-    concept_rows, concept_rejected = broll.concept_lane(ctx, receipt_rows,
-                                                        accepted)
-    proposal["meta"]["style"] = ctx.style
-    proposal["meta"]["conceptCount"] = len(concept_rows)
-    proposal["brollConcept"] = concept_rows
-    proposal["rejected"] = proposal["rejected"] + concept_rejected
 
 
 # =========================================================================== #
@@ -531,8 +391,6 @@ def format_table(proposal: dict) -> str:
             proposal.get("brollIllustration") or []))
         if "brollConcept" in proposal:          # overlay-rich only (R24)
             lines.extend(broll.concept_table_lines(proposal["brollConcept"]))
-    if proposal.get("gaugeBeats"):              # shorts milestone gauges
-        lines.extend(gauge.table_lines(proposal["gaugeBeats"]))
     lines.extend(reference.table_lines(         # cross-format (both modes)
         proposal.get("references") or []))
     lines.append("")
@@ -574,7 +432,7 @@ def _parse_args(argv: list[str]) -> dict:
         raise ValueError("usage: graphics_planner.py <plan.json> <transcripts_dir> "
                          "<manifest.json> [--visual-state s.json] [--gap S] "
                          "[--aspect W:H] "
-                         "[--style cutaway-only|overlay-rich|face-bridge] "
+                         "[--style catalog-first] "
                          "[--out p.json] [--json]")
     return args
 

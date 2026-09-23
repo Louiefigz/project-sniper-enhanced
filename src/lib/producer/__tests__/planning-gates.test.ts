@@ -111,14 +111,19 @@ const referenceInput: GateBundleInput = {
       id: "ref-restrained",
       title: "Measured Restrained edit",
       mode: "short",
-      strategy: "extend",
-      targetStyle: "restrained",
+      strategy: "mimic",
     },
   },
 };
 const referenceCommand = planningGateCommands(referenceInput).at(-1)!;
 assert.equal(referenceCommand.gate, "reference_lint");
-assert.deepEqual(referenceCommand.args.slice(-2), ["--target-style", "restrained"]);
+assert.deepEqual(referenceCommand.args.slice(-2), ["--strategy", "mimic"]);
+assert.ok(!referenceCommand.args.includes("--target-style"));
+assert.throws(() => planningGateCommands({ ...referenceInput, reference: {
+  ...referenceInput.reference!, intent: {
+    ...referenceInput.reference!.intent, strategy: "extend", targetStyle: "restrained",
+  } as unknown as NonNullable<GateBundleInput["reference"]>["intent"],
+} }), /Legacy style extension is retired/);
 
 function jsonResult(value: unknown, exit = 0) {
   return { stdout: JSON.stringify(value), stderr: "", exit, processGroupStopped: true };

@@ -1,3 +1,4 @@
+import { VISUAL_SOURCE_INSTRUCTIONS } from "@/lib/producer/visual-source-policy";
 import path from "node:path";
 import { catalogPromptLines, planCanvas } from "@/lib/producer/comps-catalog";
 import {
@@ -22,7 +23,7 @@ export function buildAiEditPrompt(
   const allowedFields = surgicalScopeFields(scope);
   const captionIndex = path.join(
     path.dirname(planPath), "caption-word-index.json");
-  return [
+  return [VISUAL_SOURCE_INSTRUCTIONS,
     `You are the SURGICAL EDIT WRITER for ${planPath}.`,
     `Apply only the delimited operator request within its controller-owned lane scope.`,
     `BEGIN_OPERATOR_REQUEST_JSON`, requestData, `END_OPERATOR_REQUEST_JSON`,

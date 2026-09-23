@@ -4,6 +4,7 @@ import { gateBundleOperatorIntent } from "./planning-gates";
 import { doctrinePromptPath, doctrinePromptRoot } from "@/lib/server/auto-edit-doctrine";
 import { pipelineAuthorityPath } from "@/lib/server/auto-edit-pipeline-authority";
 import { cutApprovalPath } from "./cut-approval";
+import { validateReferenceIntent } from "@/lib/producer/intent-presets";
 
 type ProducerCommand = (ctx: AutoEditCtx, script: string, args: string[]) => string;
 interface PromptPaths {
@@ -46,10 +47,10 @@ function referenceLintCommand(ctx: AutoEditCtx, command: ProducerCommand): strin
   const reference = ctx.intent?.reference;
   const study = ctx.referenceStudy;
   if (!reference) return null;
+  validateReferenceIntent(reference);
   if (!study) throw new Error(`reference ${reference.id} was not resolved before prompt construction`);
   const args = [ctx.planPath, study.profilePath, "--reference-id", reference.id,
     "--mode", reference.mode, "--strategy", reference.strategy];
-  if (reference.strategy === "extend" && reference.targetStyle) args.push("--target-style", reference.targetStyle);
   return command(ctx, "reference_profile_lint.py", args);
 }
 

@@ -199,5 +199,25 @@ class StreamingProcessTests(unittest.TestCase):
                                     maximum=1000, consume_stdout=lambda data: None)
 
 
+class SelectionExpressionTests(unittest.TestCase):
+    """Long selection construction retains all frames without linear parser depth."""
+
+    def test_contiguous_reel_collapses_to_one_exact_inclusive_range(self) -> None:
+        self.assertEqual(selected.selection_expression(tuple(range(158))), 'between(n,0,157)')
+
+    def test_sparse_large_schedule_has_logarithmic_parenthesis_depth(self) -> None:
+        points = tuple(range(0, 9000, 60))
+        expression = selected.selection_expression(points)
+        depth = maximum = 0
+        for character in expression:
+            depth += (character == '(') - (character == ')')
+            maximum = max(maximum, depth)
+        self.assertEqual(depth, 0)
+        self.assertLess(maximum, 12)
+        self.assertEqual(expression.count('eq(n,'), len(points))
+        for point in points:
+            self.assertIn(f'eq(n,{point})', expression)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -9,6 +9,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from _native_short_pipeline_fixture import ShortPipelineFixture
+from _native_current_source_fixture import bind_test_project_sources
 from _reference_reuse_fixture import ReuseFixture
 from cut_preview_io import file_hash
 from studio import native_preflight as preflight
@@ -27,6 +28,7 @@ class NativeReferenceReuseTests(ReuseFixture):
         self.project = Path(self.body['project'])
         self.project.mkdir()
         (self.project / 'index.html').write_text('<p>TEST ONLY inert native source</p>')
+        bind_test_project_sources(self.project)
         self.mapping = self.root / 'reuse-map.json'
         self.sdk_calls = 0
         self.sdk_change = None

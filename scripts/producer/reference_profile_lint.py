@@ -17,9 +17,9 @@ from dataclasses import dataclass
 from typing import Any
 
 
-STRATEGIES = ("mimic", "extend", "new-style")
+STRATEGIES = ("mimic", "new-style")
 RATE_KEYS = ("cuts", "graphics", "punches", "transitions")
-TOLERANCE = {"mimic": 0.35, "extend": 0.50, "new-style": 0.50}
+TOLERANCE = {"mimic": 0.35, "new-style": 0.50}
 MIMIC_HARD_RATIO = (0.20, 5.0)
 MIMIC_HARD_DELTA_PER_MIN = 4.0
 
@@ -159,14 +159,8 @@ def identity_errors(plan: dict[str, Any], profile: dict[str, Any], expected: Exp
     )
     errors = [f"{label} must be {want!r}, got {got!r}" for label, got, want in checks if got != want]
     actual_style = target.get("style")
-    wanted_style = expected.target_style if expected.strategy == "extend" else None
-    if actual_style != wanted_style:
-        errors.append(f"target.style must be {wanted_style!r} for strategy {expected.strategy!r}, got {actual_style!r}")
-    if expected.strategy == "extend" and target.get("pace") != expected.target_style:
-        errors.append(
-            f"target.pace must be {expected.target_style!r} for strategy 'extend', "
-            f"got {target.get('pace')!r}"
-        )
+    if actual_style is not None:
+        errors.append(f"target.style is retired; use the actual reference, got {actual_style!r}")
     return errors
 
 
@@ -228,6 +222,9 @@ def mimic_rate_errors(plan: dict[str, float | None], reference: dict[str, float 
 
 def lint(plan: dict[str, Any], profile: dict[str, Any], expected: Expected) -> dict[str, Any]:
     """Return the machine-readable route verdict."""
+    if expected.strategy not in STRATEGIES or expected.target_style is not None:
+        return {"ok": False, "errors": ["Legacy style extension is retired; use mimic or new-style"],
+                "warnings": [], "metrics": {}}
     actual, duration = plan_rates(plan)
     reference = profile_rates(profile)
     errors = identity_errors(plan, profile, expected)
@@ -263,10 +260,8 @@ def main() -> int:
     """Load, lint, print one JSON verdict, and use exit 1 only for hard errors."""
     args = parse_args()
     try:
-        if args.strategy == "extend" and not args.target_style:
-            raise ValueError("--target-style is required for strategy extend")
-        if args.strategy != "extend" and args.target_style:
-            raise ValueError("--target-style is valid only for strategy extend")
+        if args.target_style is not None:
+            raise ValueError("--target-style is retired; use the actual selected reference")
         expected = Expected(args.reference_id, args.mode, args.strategy, args.target_style)
         verdict = lint(load_object(args.plan), load_object(args.profile), expected)
     except (OSError, ValueError, json.JSONDecodeError) as exc:

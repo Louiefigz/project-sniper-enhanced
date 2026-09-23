@@ -6,13 +6,32 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
+from types import SimpleNamespace
 
 from current_render_graph_build import GraphBuildInputs, compile_graph
-from current_render_graph_cli import _parse
+from current_render_graph_cli import _parse, execute
 
 
 class CurrentRenderGraphArtifactDirectoryTests(unittest.TestCase):
     """Graph generations can bind isolated child-plan render outputs."""
+
+    def test_failed_readiness_stops_before_cache_reuse_or_child_work(self) -> None:
+        """An old graph cannot waive current review after an intent/plan change."""
+        inputs = SimpleNamespace(audio_clock_policy='legacy-v1', plan_path=Path('/TEST/plan'),
+            manifest_path=Path('/TEST/manifest'), producer_dir=Path('/TEST/producer'))
+        config = SimpleNamespace(inputs=inputs, command=('TEST',))
+        with mock.patch('current_render_graph_cli.validate_audio_command'), \
+                mock.patch('current_render_graph_cli.require_readiness',
+                           side_effect=RuntimeError('TEST stale review')) as admission, \
+                mock.patch('current_render_graph_cli._preflight') as preflight, \
+                mock.patch('current_render_graph_cli._clean_graph_hit') as reuse, \
+                mock.patch('current_render_graph_cli._run_child') as child:
+            with self.assertRaisesRegex(RuntimeError, 'TEST stale review'):
+                execute(config)
+        admission.assert_called_once()
+        preflight.assert_not_called()
+        reuse.assert_not_called()
+        child.assert_not_called()
 
     def test_cli_carries_explicit_artifact_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -42,16 +42,14 @@ export const SCOPE_LANE_DEFAULTS: Record<Scope, Record<Lane, boolean>> = {
 export const PACES = ["talking-head", "client-reel", "restrained", "punch", "slideware"] as const;
 export type Pace = (typeof PACES)[number];
 
-// Built-in short-form styles, each a Sniper style specification (paths in
-// src/lib/server/auto-edit-doctrine.ts STYLE_DOCTRINE). target.style tells the
-// auto-edit brain WHICH specification to read before authoring; target.pace
-// (same name) picks the matching pacing_<style> lint profile.
+// Historical serialized vocabulary only. New intent rejects global styles.
 export const STYLES = ["restrained", "punch", "slideware"] as const;
 export type Style = (typeof STYLES)[number];
 
 /** How the editor should use one measured reference without copying its IP. */
-export const REFERENCE_STRATEGIES = ["mimic", "extend", "new-style"] as const;
-export type ReferenceStrategy = (typeof REFERENCE_STRATEGIES)[number];
+export const REFERENCE_STRATEGIES = ["mimic", "new-style"] as const;
+/** Includes the retired storage value so historical records can be rejected. */
+export type ReferenceStrategy = (typeof REFERENCE_STRATEGIES)[number] | "extend";
 
 // producer_config.AUDIO_ENHANCE catalog keys (mirrored by edit-plan.AudioEnhance).
 export const AUDIO_ENHANCE_PRESETS = ["voice", "voice-rnn", "voice-strong", "separate"] as const;
@@ -62,7 +60,7 @@ export interface ReferenceIntent {
   title: string;
   mode: Mode;
   strategy: ReferenceStrategy;
-  /** Existing, closed style grammar to mimic or extend. Never a new style name. */
+  /** Historical only; current selections reject this field. */
   targetStyle?: Style;
   /** Provisional human label; valid only when strategy is "new-style". */
   candidateStyleName?: string;
@@ -81,7 +79,7 @@ export interface ProjectIntent {
   /** Per-lane overrides vs the scope default (edit_scope target.lanes). */
   lanes: Partial<Record<Lane, LaneDirective>>;
   pace?: Pace;
-  /** Built-in style whose specification the brain must read before authoring. */
+  /** Historical only; current intent rejects this field. */
   style?: Style;
   /** Studied asset mechanics to apply to this edit. */
   reference?: ReferenceIntent;
@@ -189,6 +187,7 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
     throw new Error("reference must be an object");
   }
   const o = v as Record<string, unknown>;
+  if (o.strategy === "extend" || o.targetStyle !== undefined) throw new Error("Legacy style extension is retired; select the actual reference video using mimic or new-style");
   const unknown = Object.keys(o).filter((key) => !REFERENCE_KEYS.has(key));
   if (unknown.length) throw new Error(`reference has unknown field(s): ${unknown.sort().join(", ")}`);
   const id = requiredReferenceText(o.id, "id", 160);
@@ -206,21 +205,8 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
     throw new Error(`reference.strategy must be one of: ${REFERENCE_STRATEGIES.join(", ")}`);
   }
   const ref: ReferenceIntent = { id, title, mode: o.mode, strategy: o.strategy as ReferenceStrategy };
-  if (o.targetStyle !== undefined) {
-    if (!(STYLES as readonly unknown[]).includes(o.targetStyle)) {
-      throw new Error(`reference.targetStyle must be one of: ${STYLES.join(", ")}`);
-    }
-    if (ref.mode !== "short") throw new Error("reference.targetStyle is shorts-only");
-    ref.targetStyle = o.targetStyle as Style;
-  }
   if (o.candidateStyleName !== undefined) {
     ref.candidateStyleName = requiredReferenceText(o.candidateStyleName, "candidateStyleName", 120);
-  }
-  if (ref.strategy === "extend" && !ref.targetStyle) {
-    throw new Error("reference.targetStyle is required for strategy \"extend\"");
-  }
-  if (ref.strategy !== "extend" && ref.targetStyle) {
-    throw new Error(`reference.targetStyle is not allowed for strategy ${JSON.stringify(ref.strategy)}`);
   }
   if (ref.strategy === "new-style" && !ref.candidateStyleName) {
     throw new Error("reference.candidateStyleName is required for strategy \"new-style\"");
@@ -239,6 +225,7 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
 export function validateIntent(v: unknown): ProjectIntent {
   if (!v || typeof v !== "object" || Array.isArray(v)) throw new Error("intent must be an object");
   const o = v as Record<string, unknown>;
+  if (o.style !== undefined) throw new Error("Global creator styles are retired; select a current-job reference or the HyperFrames catalog");
   if (o.mode !== "short" && o.mode !== "longform") {
     throw new Error(`intent.mode must be "short" or "longform", got ${JSON.stringify(o.mode)}`);
   }
@@ -269,23 +256,8 @@ export function validateIntent(v: unknown): ProjectIntent {
     }
     intent.pace = o.pace as Pace;
   }
-  if (o.style !== undefined) {
-    if (!(STYLES as readonly string[]).includes(o.style as string)) {
-      throw new Error(`intent.style must be one of: ${STYLES.join(", ")}`);
-    }
-    intent.style = o.style as Style;
-  }
   if (o.reference !== undefined) {
     intent.reference = validateReferenceIntent(o.reference, intent.mode);
-    if (intent.reference.strategy === "extend" && intent.style !== intent.reference.targetStyle) {
-      throw new Error("intent.style must equal reference.targetStyle for strategy \"extend\"");
-    }
-    if (intent.reference.strategy === "extend" && intent.pace !== intent.reference.targetStyle) {
-      throw new Error("intent.pace must equal reference.targetStyle for strategy \"extend\"");
-    }
-    if (intent.reference.strategy !== "extend" && intent.style) {
-      throw new Error(`intent.style must stay unset for reference strategy ${JSON.stringify(intent.reference.strategy)}`);
-    }
     const conflicts = intent.reference.strategy === "mimic" ? mimicLaneConflicts(intent) : [];
     if (conflicts.length) {
       throw new Error(`reference strategy "mimic" requires every engagement lane; unavailable: ${conflicts.join(", ")}`);
@@ -443,86 +415,4 @@ export const INTENT_PRESETS: IntentPreset[] = [
     ],
   },
 
-  // ── STYLE presets — the three built-in Sniper style specifications (style
-  // set = Styles group). will/wont cite the specification's anchors; pace picks
-  // the matching pacing_<style> lint profile; style tells the auto-edit brain
-  // which specification to read.
-  {
-    id: "restrained-light",
-    label: "Restrained light",
-    mode: "short",
-    scope: "light",
-    lanes: { motion: "off" }, // RESTRAINED_STYLE §3 Z1: no punch-ins, zoom ramps or creep
-    pace: "restrained",
-    style: "restrained",
-    music: false, // RESTRAINED_STYLE §6 M1: no bed; the operator may still tick Music
-    will: [
-      "Plain captions carry the pace: short verbatim cues that replace each other, white, no box (RESTRAINED_STYLE §4 CAP1-CAP2)",
-      "One thesis card from frame one — the clip's only graphic (§1 H1, §5, §11)",
-      "Cuts only to remove flubs, retakes and dead air, placed where a caption changes (§2 C2, C5)",
-      "A single uncut take is on-style — cuts are never added for rhythm (§2 C1, §9)",
-      "9:16 face-aware reframe + −14 LUFS master with the true-peak ceiling (§6 M2)",
-    ],
-    wont: [
-      "No zooms, punch-ins or slow creep (§3 Z1)",
-      "No other graphics, receipts, pills, PIP or b-roll (§5, §7)",
-      "No seam transitions (§7)",
-      "No karaoke, coloured or boxed captions (§4 CAP2)",
-      "No music bed unless you tick Music (§6 M1)",
-      "No dialogue cleanup — natural pauses and breaths stay (§6 M3)",
-    ],
-  },
-  {
-    id: "punch-produced",
-    label: "Punch produced",
-    mode: "short",
-    scope: "produced",
-    // Every Punch seam is a hard cut; seam transitions stay off (PUNCH_STYLE §7).
-    lanes: { transitions: "off" },
-    pace: "punch",
-    style: "punch",
-    music: false, // PUNCH_STYLE §6 M1 recommends a bed; the operator checkbox still owns opt-in
-    audioEnhance: { preset: "voice-rnn" },
-    will: [
-      "Cut engine: hard cuts between wide and tight framings on key words, at least 14 visual changes/min (PUNCH_STYLE §2 C1-C5)",
-      "Two text layers: keyword lockups above the face + small replace-per-cue captions below it (§4)",
-      "Word-locked list/diagram builds and blurred-footage takeovers where beats earn them (§5.4)",
-      "Hook carried by a graphic from frame zero, not by a burst of cuts (§1 H2)",
-      "Dead air stripped hard + voice-rnn cleanup; 9:16 reframe + −14 LUFS master (§2 C3)",
-    ],
-    wont: [
-      "No dissolves, flashes or light leaks — every seam is a hard cut (§2 C6, §7)",
-      "No karaoke captions — emphasis is an inline accent word or a lockup (§4 CAP1, CAP3)",
-      "No slow zoom creep between cuts — the frame stays locked (§3 Z2)",
-      "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
-      "Won't generate or source missing assets",
-    ],
-  },
-  {
-    id: "slideware-involved",
-    label: "Slideware involved",
-    mode: "short",
-    scope: "full",
-    // The style's no-zoom and hard-cut rules are operator-visible lane intent (SLIDEWARE_STYLE §4 AZ1-AZ2).
-    lanes: { motion: "off", transitions: "off" },
-    pace: "slideware",
-    style: "slideware",
-    music: false, // SLIDEWARE_STYLE §7 AM1 recommends a bed; the operator checkbox still owns opt-in
-    will: [
-      "Full-frame slide sections alternate with the talking head — one graphic economy per clip (SLIDEWARE_STYLE §3 AC3)",
-      "Frame zero fully dressed + real proof inside the first 3 seconds (§2 AH1-AH2)",
-      "Cuts land only at section boundaries — the slides provide the change of view (§3 AC1)",
-      "Two caption skins: plain on footage, pill-backed on the slide canvas; bold is the only emphasis (§5 ACAP1-ACAP2)",
-      "One accent colour across every slide, lockup and pill (§1 B1, §9 checklist)",
-      "9:16 reframe + −14 LUFS master with the true-peak ceiling (§7 AM2)",
-    ],
-    wont: [
-      "No punch-ins or zoom steps — the punchIns track stays empty (§4 AZ1)",
-      "No seam transitions — every cut is hard (§4 AZ2)",
-      "No karaoke or coloured captions (§5 ACAP1)",
-      "Won't mix graphic economies — slide deck OR persistent ledger, never both (§3 AC3)",
-      "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
-      "Won't fake evidence — every receipt shows real media, and every number shown is spoken (§6 E3)",
-    ],
-  },
 ];

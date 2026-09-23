@@ -5,6 +5,9 @@ import hashlib
 import json
 import os
 import subprocess
+
+import numpy as np
+from PIL import Image, ImageDraw
 from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
@@ -118,8 +121,8 @@ def cache_media(directory: Path) -> dict[str, dict]:
     return rows
 
 
-def frame_green_border_fraction(path: Path, frame: int, border: int = 8) -> float:
-    """Fraction of delivery-edge pixels still dominated by fixture green."""
+def _rgb_frame(path: Path, frame: int) -> tuple[int, int, bytes]:
+    """Decode one exact frame; never infer artwork placement from container metadata."""
     facts = probe(path)
     width, height = facts["width"], facts["height"]
     tool = resolve_tools()["ffmpeg"]
@@ -130,7 +133,13 @@ def frame_green_border_fraction(path: Path, frame: int, border: int = 8) -> floa
     ])
     expected = width * height * 3
     if len(raw) != expected:
-        raise RuntimeError("delivery border probe decoded the wrong frame size")
+        raise RuntimeError("pixel probe decoded the wrong frame size")
+    return width, height, raw
+
+
+def frame_green_border_fraction(path: Path, frame: int, border: int = 8) -> float:
+    """Fraction of delivery-edge pixels still dominated by fixture green."""
+    width, height, raw = _rgb_frame(path, frame)
     green = total = 0
     for y in range(height):
         edge_y = y < border or y >= height - border
@@ -142,6 +151,51 @@ def frame_green_border_fraction(path: Path, frame: int, border: int = 8) -> floa
             green += channel > red + 60 and channel > blue + 60
             total += 1
     return round(green / total, 9)
+
+
+def _card_white_region(rgb: np.ndarray, scale: int) -> np.ndarray:
+    """Isolate the card from the equally white opaque-video background.
+
+    The authored shadow separates the card's settled white padding from the
+    background. Flood from padding, outside both text lines, without clipping
+    to the expected card bounds; a missing shadow or displaced card must fail.
+    """
+    white = (rgb.min(axis=2) >= 245) & (np.ptp(rgb, axis=2) <= 20)
+    seed = (495 * scale, 770 * scale)
+    if not white[seed[1], seed[0]]:
+        return np.zeros(white.shape, dtype=bool)
+    mask = Image.fromarray(white.astype(np.uint8) * 255).copy()
+    ImageDraw.floodfill(mask, seed, 127)
+    return np.asarray(mask) == 127
+
+
+def frame_card_geometry(path: Path, frame: int, scale: int) -> dict:
+    """Measure this explicit line-swap fixture's settled card and nonempty text.
+
+    The shadow-separated white component must match the authored card bounds.
+    Canvas-wide white, missing artwork and incorrect scaling fail independently.
+    """
+    width, height, raw = _rgb_frame(path, frame)
+    rgb = np.frombuffer(raw, dtype=np.uint8).reshape(height, width, 3)
+    white = _card_white_region(rgb, scale)
+    ys, xs = np.nonzero(white)
+    if not xs.size:
+        raise RuntimeError("line-swap settled frame has no neutral-white card")
+    bbox = [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1]
+    expected = [value * scale for value in (60, 751.5, 930, 958.5)]
+    left, top, right, bottom = [round(value * scale) for value in (116, 795.5, 874, 914.5)]
+    text = rgb[top:bottom, left:right]
+    dark_fraction = float((text.max(axis=2) <= 80).mean())
+    left, top, right, bottom = [round(value * scale) for value in (120, 765, 870, 780)]
+    padding_fraction = float(white[top:bottom, left:right].mean())
+    area_fraction = float(white.sum()) / (870 * 207 * scale * scale)
+    bounds_ok = all(abs(actual - target) <= 3 * scale for actual, target in zip(bbox, expected))
+    return {"frame": frame, "scale": scale, "whiteBBox": bbox,
+            "whiteAreaFraction": round(area_fraction, 9),
+            "paddingWhiteFraction": round(padding_fraction, 9),
+            "textDarkFraction": round(dark_fraction, 9),
+            "passed": bounds_ok and area_fraction >= 0.70 and padding_fraction >= 0.95
+                      and 0.005 <= dark_fraction <= 0.30}
 
 
 def changed_picture_frames(left: Path, right: Path) -> list[int]:

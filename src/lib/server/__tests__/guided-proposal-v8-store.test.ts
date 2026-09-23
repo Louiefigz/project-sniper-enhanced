@@ -47,7 +47,7 @@ function syntheticV8(input: ProposalBrainInput) {
   assert.equal(data.evidence.schemaVersion, 8);
   const last = data.evidence.anchors.length - 1, raw = data.rawIntent;
   return { schemaVersion: 8, summary: "TEST ONLY complete V8 storage and cold read, not rendered treatment.",
-    graphicsStyle: "cutaway-only", graphicsStyleRationale: "TEST ONLY retain the synthetic cut without authoring a catalog graphic.",
+    graphicsStyle: "catalog-first", graphicsStyleRationale: "TEST ONLY retain the synthetic cut without authoring a catalog graphic.",
     clauses: [{ start: 0, end: raw.length, quote: raw, disposition: "supported",
       rationale: "TEST ONLY preserve the exact held synthetic program.", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: last, purpose: "opening",

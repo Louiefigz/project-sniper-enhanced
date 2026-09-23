@@ -36,7 +36,7 @@ class XfadeBanLintTests(unittest.TestCase):
         self.assertIn("panel sweep", msg)
         self.assertIn("LL-014", msg)
 
-    def test_flash_and_leak_stay_legal_both_modes(self) -> None:
+    def test_historical_flash_and_leak_shape_parser_is_readable(self) -> None:
         events = [{"outTime": 10.0, "kind": "white-flash"},
                   {"outTime": 20.0, "kind": "light-leak"}]
         for mode in ("short", "longform"):
@@ -58,14 +58,12 @@ class XfadeBanPrimitiveTests(unittest.TestCase):
     def test_parse_events_rejects_xfade_kind(self) -> None:
         with self.assertRaises(ValueError) as ctx:
             tr.parse_events([{"outTime": 2.0, "kind": "xfade:fade"}], 10.0)
-        self.assertIn("operator-rejected", str(ctx.exception))
+        self.assertIn("retired", str(ctx.exception))
 
-    def test_flash_and_leak_still_parse(self) -> None:
-        events = tr.parse_events(
-            [{"outTime": 2.0, "kind": "white-flash"},
-             {"outTime": 4.0, "kind": "light-leak"}], 10.0)
-        self.assertEqual([e.kind for e in events],
-                         ["white-flash", "light-leak"])
+    def test_all_old_presets_reject_in_current_primitive(self) -> None:
+        for kind in ("white-flash", "light-leak", "zoom-pull"):
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, "retired"):
+                tr.parse_events([{"outTime": 2.0, "kind": kind}], 10.0)
 
     def test_xfade_module_is_deleted(self) -> None:
         with self.assertRaises(ImportError):

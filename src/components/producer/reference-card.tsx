@@ -61,7 +61,6 @@ function ProfileSummary({ reference }: { reference: ReferenceEntry }) {
   const duration = formatDuration(source.durationS);
   const dimensions = source.width && source.height ? `${source.width}×${source.height}` : null;
   const mode = suggestedMode(reference);
-  const known = reference.profile?.suggestedKnownStyle;
   const facts = [dimensions, duration, source.fps ? `${source.fps.toFixed(2)} fps` : null].filter(Boolean);
   const mechanics = reference.profile?.mechanics;
   const eventCount = Object.values(mechanics?.eventCounts ?? {}).reduce((sum, count) => sum + count, 0);
@@ -84,7 +83,6 @@ function ProfileSummary({ reference }: { reference: ReferenceEntry }) {
       )}
       <p className="text-[11px] text-muted-foreground">
         {mode ? <>Study suggests <span className="font-medium text-foreground">{mode === "short" ? "Short" : "Long"}</span>. You still confirm it below.</> : "The study could not make a format suggestion; choose explicitly below."}
-        {known && <> Closest measured grammar: <span className="font-medium text-foreground">{known === "punch" ? "Punch" : known[0].toUpperCase() + known.slice(1)}</span>.</>}
       </p>
     </div>
   );
@@ -150,7 +148,7 @@ export default function ReferenceCard(props: Props) {
       {studied && <QualityNotes reference={props.reference} />}
       {studied && (
         <ReferenceDecisionForm
-          key={`${props.reference.id}:${JSON.stringify(props.reference.decision)}:${props.reference.profile?.suggestedKnownStyle ?? ""}`}
+          key={`${props.reference.id}:${JSON.stringify(props.reference.decision)}`}
           reference={props.reference}
           saving={props.saving}
           onSave={props.onSave}

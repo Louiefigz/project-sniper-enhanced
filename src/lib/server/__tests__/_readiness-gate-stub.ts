@@ -51,6 +51,6 @@ export function guidedProposalOutput(input: ProposalBrainInput, rawIntent = "Pre
   if (![4, 5].includes(data.evidence.schemaVersion)) throw new Error("TEST proposal fixture does not support this evidence version");
   return { schemaVersion: data.evidence.schemaVersion, ...base,
     operations: [{ ...operation, reason: null, ...(data.evidence.schemaVersion === 5 ? { captions: null } : {}) }],
-    graphicsStyle: "cutaway-only", graphicsStyleRationale: "TEST ONLY: the accepted cut is preserved without any authored graphic.",
+    graphicsStyle: "catalog-first", graphicsStyleRationale: "TEST ONLY: the accepted cut is preserved without any authored graphic.",
     beatDecisions: [], hookSeamDecisions: [] };
 }

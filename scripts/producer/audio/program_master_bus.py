@@ -11,6 +11,7 @@ from audio.float_master import FloatMasterInput, render_float_master
 from audio.music_stage import resolve_music_track
 from audio.program_audio_clock import float_audio_clock
 from audio.program_finish_bus import assert_finishing_stable, finishing_identity, verify_finishing
+from audio.program_finish_contract import finishing_request
 from audio.program_mix_bus import ProgramMix, build_program_mix
 from audio.render_audio_authority import (SOURCE_FLOAT_POLICY_V2, audio_policy_reason,
                                           seal_audio_record)
@@ -70,6 +71,7 @@ def build_program_master(bus: SourceAudioBus, plan: dict) -> ProgramMaster:
     reason = audio_policy_reason(plan, SOURCE_FLOAT_POLICY_V2)
     if reason:
         raise RuntimeError(reason)   # the explicit finishing/policy reason, before any media work
+    finishing_request(plan, bus.samples / 48_000)
     directory = Path(tempfile.mkdtemp(prefix=".program-master-v2-", dir=bus.directory))
     mix = build_program_mix(bus, plan, directory)
     _mix_stable(mix, bus)

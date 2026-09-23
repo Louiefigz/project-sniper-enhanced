@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import type { EditPlan } from "../edit-plan";
-import { canonicalJsonSha256 } from "../../server/auto-edit-hash";
 import { compileTypedCompatibilityEdit } from
   "../../../app/api/producer/ai-edit/typed-compatibility-edit";
 
@@ -19,16 +18,12 @@ function parent(): EditPlan {
   };
 }
 
-function typedTextChangeIsSelected(): void {
+function retiredTextChangeIsRefused(): void {
   const before = parent();
   const after = structuredClone(before);
   if (!after.graphicsTrack?.[0].spec) throw new Error("broken fixture");
   after.graphicsTrack[0].spec.text = "After";
-  const compiled = compileTypedCompatibilityEdit(before, after);
-  assert.equal(compiled?.kind, "set-graphic-text");
-  assert.equal(compiled?.operation.text, "After");
-  assert.equal(compiled?.operation.expectedCurrentText, "Before");
-  assert.equal(compiled?.operationHash, canonicalJsonSha256(compiled?.operation));
+  assert.throws(() => compileTypedCompatibilityEdit(before, after), /retired/);
 }
 
 function adjacentMutationCannotFallBack(): void {
@@ -41,7 +36,7 @@ function adjacentMutationCannotFallBack(): void {
   after.graphicsTrack[0].outStart = 2;
   assert.throws(
     () => compileTypedCompatibilityEdit(before, after),
-    /changes more than graphicsTrack\[id\]\.spec\.text/,
+    /retired/,
   );
 }
 
@@ -50,14 +45,14 @@ function otherGraphicsRemainOnLegacyPath(): void {
   const rail = structuredClone(before);
   if (!rail.graphicsTrack?.[1].spec) throw new Error("broken fixture");
   rail.graphicsTrack[1].spec.title = "Updated rail";
-  assert.equal(compileTypedCompatibilityEdit(before, rail), null);
+  assert.throws(() => compileTypedCompatibilityEdit(before, rail), /retired/);
 
   const added = structuredClone(before);
   added.graphicsTrack?.push({
     id: "g-00000003", kind: "statement-card",
     outStart: 6, outEnd: 8, spec: { text: "New card" },
   });
-  assert.equal(compileTypedCompatibilityEdit(before, added), null);
+  assert.throws(() => compileTypedCompatibilityEdit(before, added), /retired/);
 }
 
 function reorderedTextSwapCannotBypassTypedPath(): void {
@@ -77,7 +72,7 @@ function reorderedTextSwapCannotBypassTypedPath(): void {
   ];
   assert.throws(
     () => compileTypedCompatibilityEdit(before, after),
-    /cannot change or reorder graphic ids/,
+    /retired/,
   );
 }
 
@@ -93,7 +88,7 @@ function legacyIdlessTextTouchFailsClosed(): void {
   after.graphicsTrack[0].outStart = 2;
   assert.throws(
     () => compileTypedCompatibilityEdit(before, after),
-    /missing or invalid stable id/,
+    /retired/,
   );
 }
 
@@ -113,14 +108,16 @@ function reorderedIdlessCardsFailClosed(): void {
   ];
   assert.throws(
     () => compileTypedCompatibilityEdit(before, after),
-    /missing or invalid stable id/,
+    /retired/,
   );
 }
 
-typedTextChangeIsSelected();
+retiredTextChangeIsRefused();
 adjacentMutationCannotFallBack();
 otherGraphicsRemainOnLegacyPath();
 reorderedTextSwapCannotBypassTypedPath();
 legacyIdlessTextTouchFailsClosed();
 reorderedIdlessCardsFailClosed();
+const current = { ...parent(), graphicsTrack: [{ id: "g-00000001", kind: "line-swap", outStart: 1, outEnd: 3, spec: { lineA: "Current" } }] };
+assert.equal(compileTypedCompatibilityEdit(current, structuredClone(current)), null);
 console.log("typed-compatibility-edit.test.ts: all assertions passed");

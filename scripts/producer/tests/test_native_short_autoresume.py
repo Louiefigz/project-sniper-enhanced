@@ -18,7 +18,7 @@ from studio.native_short_pipeline import NativeShortPipeline
 
 
 class AutomaticShortRecoveryTests(unittest.TestCase):
-    """No flag is needed; exact current input and retained authority remain mandatory."""
+    """Final recovery needs review intent; ordinary unreviewed commands stop at previews."""
 
     def setUp(self) -> None:
         """Keep fixture discovery and immutable history entirely within a private directory."""
@@ -33,10 +33,20 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
         self.f.terminal()
         return seal
 
+    def review_options(self, **changes: object) -> object:
+        """Express final-work intent without inventing a review of synthetic media.
+
+        The empty bundle is not editorial approval. These tests reuse sealed
+        completed TEST media; a fresh picture worker would reject the bundle.
+        """
+        file = self.base / 'TEST-empty-review-input.json'
+        write_json(file, {'schemaVersion': 1, 'reviews': []})
+        return self.f.options(preview_reviews=file, **changes)
+
     def test_normal_command_reuses_media_then_capture_across_repeated_retries(self) -> None:
         """Use the actual CLI execute path; only preflight/environment and children are stubs."""
         self.completed()
-        options = self.f.options(cache=Path(self.f.request['cache']))
+        options = self.review_options(cache=Path(self.f.request['cache']))
         with patch('studio.native_short_export.local_environment', return_value=(self.f.request['tools'], {})), \
                 patch('studio.native_short_export.subprocess.run') as validator, \
                 patch('studio.native_short_export.install_runtime', return_value=self.f.runtime), \
@@ -54,6 +64,24 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
         self.assertTrue(result['renderReused'])
         self.assertFalse(result['humanApproved'])
         self.assertEqual(digest(options.output / 'review.mp4'), digest(self.f.root / 'review.mp4'))
+
+    def test_unreviewed_default_stops_at_preview_without_reusing_final_delivery(self) -> None:
+        """An old completed render cannot silently turn preview intent into final export."""
+        self.completed()
+        options = self.f.options(cache=Path(self.f.request['cache']))
+        with patch('studio.native_short_export.local_environment', return_value=(self.f.request['tools'], {})), \
+                patch('studio.native_short_export.subprocess.run'), \
+                patch('studio.native_short_export.install_runtime', return_value=self.f.runtime), \
+                patch('studio.native_short_export.input_pins', return_value=dict(self.f.inputs)), \
+                patch('studio.native_short_pipeline.NativeRun', side_effect=self.f.owner_factory):
+            self.assertTrue(execute(options))
+        self.assertEqual([label for label, _ in self.f.calls],
+                         ['capture', 'preview-picture-0', 'preview-package-0', 'preview'])
+        result = json.loads((options.output / 'delivery.json').read_text())
+        self.assertEqual(result['status'], 'native-motion-previews-complete')
+        self.assertEqual(result['editorialReview'], 'pending')
+        self.assertFalse(result['humanApproved'])
+        self.assertFalse((options.output / 'review.mp4').exists())
 
     def test_current_source_and_every_policy_change_start_fresh(self) -> None:
         """Automatic discovery must not silently inherit an old route or omit a new reference map."""
@@ -113,11 +141,11 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
     def test_published_request_blocks_another_retry_before_worker_starts(self) -> None:
         """Discovery and registration finish inside reservation before returning to execution."""
         self.completed()
-        request = select_and_publish(self.f.options(), self.f.current(), None)
+        request = select_and_publish(self.review_options(), self.f.current(), None)
         self.assertEqual(json.loads((Path(request['output']) / 'export-request.json').read_text()), request)
         self.assertEqual(known_attempts(request), [Path(request['output'])])
         with self.assertRaisesRegex(ValueError, 'active or interrupted'):
-            select_and_publish(self.f.options(), self.f.current(self.base / 'third'), None)
+            select_and_publish(self.review_options(), self.f.current(self.base / 'third'), None)
         self.assertFalse((self.base / 'third').exists())
 
     def test_explicit_donor_remains_selected_without_automatic_override(self) -> None:

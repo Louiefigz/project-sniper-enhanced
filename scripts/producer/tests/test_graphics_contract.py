@@ -18,214 +18,93 @@ from planner import graphics_planner_longform as longform
 
 
 def _entry(spec: dict, anchor: str = "own-screen") -> dict:
-    return {"kind": "statement-card", "outStart": 5.0, "outEnd": 8.5,
-            "anchor": anchor, "reason": "earned thesis", "spec": spec}
+    """A current catalog entry; tests never reinstall a retired HTML source."""
+    return {"kind": "line-swap", "outStart": 5.0, "outEnd": 8.5,
+            "anchor": anchor, "reason": "TEST copy contract", "spec": spec}
 
 
-class StatementCardContractTests(unittest.TestCase):
-    """The production defect cannot fall through to the template demo copy."""
+class CatalogContentContractTests(unittest.TestCase):
+    """Current source selection still rejects defaults and invalid copy."""
 
-    def assert_error(self, spec: dict, needle: str) -> None:
-        errors = tc.entry_errors(_entry(spec))
-        self.assertTrue(any(needle in error for error in errors), errors)
+    def test_retired_statement_variants_are_not_executable(self) -> None:
+        for spec in ({}, {"variant": "classic", "text": "Real copy"},
+                     {"variant": "module", "statements": "ONE|TWO", "statementLands": 2},
+                     {"variant": "classic", "text": "Real", "headlineLines": ""}):
+            entry = {**_entry(spec), "kind": "statement-card"}
+            with self.subTest(spec=spec):
+                self.assertTrue(any("retired" in error for error in tc.entry_errors(entry)))
 
-    def test_current_defect_requires_module_variant(self) -> None:
-        self.assert_error({
-            "statements": "A DECADE AS A *SOFTWARE ENGINEER*|OBSESSED WITH *AI*",
-            "statementLands": 2.1, "bg": "dark", "accent": "#D7FF3F",
-        }, "variant must be explicitly")
+    def test_catalog_requires_both_authored_lines(self) -> None:
+        for field in ("lineA", "lineB"):
+            spec = {"lineA": "First claim", "lineB": "Second claim", "underlineWord": ""}
+            del spec[field]
+            self.assertTrue(any(field in error for error in tc.entry_errors(_entry(spec))))
 
-    def test_classic_requires_explicit_text(self) -> None:
-        self.assert_error({"variant": "classic", "bg": "dark"},
-                          "explicit non-empty spec.text")
-
-    def test_classic_rejects_unused_module_fields(self) -> None:
-        self.assert_error({"variant": "classic", "text": "Real copy",
-                           "statements": "Ignored copy"},
-                          "classic does not read spec.statements")
-
-    def test_classic_rejects_populated_statement_lands(self) -> None:
-        self.assert_error({"variant": "classic", "text": "Real copy",
-                           "statementLands": 2.1},
-                          "classic does not read spec.statementLands")
-
-    def test_classic_accepts_measured_empty_statement_defaults(self) -> None:
-        """The measured catalog defaults these to "" and compilers must emit
-        every declared default key; a blank drops no planned content."""
-        entry = _entry({"variant": "classic", "text": "Real copy",
-                        "headlineLines": "", "statements": "",
-                        "statementLands": ""})
+    def test_current_copy_and_intentional_blank_override_are_preserved(self) -> None:
+        entry = _entry({"lineA": "First claim", "lineB": "Second claim", "underlineWord": ""})
         self.assertEqual(tc.entry_errors(entry), [])
-        self.assertEqual(tc.planned_copy(entry), ["Real copy"])
+        self.assertEqual(tc.planned_copy(entry), ["First claim", "Second claim"])
 
-    def test_module_statement_sequence_passes(self) -> None:
-        entry = _entry({"variant": "module",
-                        "statements": "FIRST CLAIM|SECOND CLAIM",
-                        "statementLands": 2.0, "bg": "dark"})
-        self.assertEqual(tc.entry_errors(entry), [])
-        self.assertEqual(tc.planned_copy(entry), ["FIRST CLAIM", "SECOND CLAIM"])
+    def test_default_emphasis_cannot_leak_into_authored_copy(self) -> None:
+        errors = tc.entry_errors(_entry({"lineA": "First claim", "lineB": "Second claim"}))
+        self.assertTrue(any("underlineWord" in error and "demo copy" in error for error in errors), errors)
 
-    def test_module_requires_one_content_source(self) -> None:
-        self.assert_error({"variant": "module", "text": "Used?",
-                           "statements": "Actually used"}, "exactly one")
-
-    def test_multi_statement_needs_explicit_lands(self) -> None:
-        self.assert_error({"variant": "module",
-                           "statements": "FIRST|SECOND"},
-                          "statementLands needs 1 explicit")
-
-    def test_unknown_template_variable_fails(self) -> None:
-        self.assert_error({"variant": "classic", "text": "Real copy",
-                           "typoText": "silently ignored"},
-                          "template does not read spec.typoText")
-
-    def test_plan_lint_blocks_default_copy_defect(self) -> None:
-        plan = good_plan()
-        plan["graphicsTrack"] = [_entry({
-            "statements": "ENGINEER|AI SYSTEMS", "statementLands": 2.0})]
-        errors = pl.lint(plan, MANIFEST).errors
-        self.assertTrue(any("variant must be explicitly" in error
-                            for error in errors), errors)
+    def test_unknown_variable_and_nonstring_copy_fail(self) -> None:
+        for extra, needle in (({"typoText": "ignored"}, "spec.typoText"), ({"lineA": None}, "lineA")):
+            entry = _entry({"lineA": "First", "lineB": "Second", "underlineWord": "", **extra})
+            self.assertTrue(any(needle in error for error in tc.entry_errors(entry)))
 
     def test_catalog_is_source_derived_and_json_safe(self) -> None:
+        from graphics.visual_source_policy import integrated_kinds
         catalog = tc.template_catalog()
-        statement = catalog["statement-card"]
-        self.assertIn("variant", statement["variables"])
-        self.assertFalse(statement["contentContract"]["defaultsCountAsContent"])
+        self.assertEqual(set(catalog), integrated_kinds())
+        self.assertNotIn("statement-card", catalog)
+        contract = catalog["line-swap"]["contentContract"]
+        self.assertFalse(contract["defaultsCountAsContent"])
+        self.assertIn("lineA", contract["requiredDefaultOverrides"])
         json.dumps(catalog)
 
+    def test_plan_lint_rejects_retired_default_and_explicit_copy(self) -> None:
+        for spec in ({}, {"variant": "classic", "text": "Actual copy"}):
+            plan = good_plan()
+            plan["graphicsTrack"] = [{**_entry(spec), "kind": "statement-card"}]
+            errors = pl.lint(plan, MANIFEST).errors
+            self.assertTrue(any("retired" in error for error in errors), errors)
 
-class GenericTemplateContentTests(unittest.TestCase):
-    """Every non-statement template also fails closed on demo copy."""
-
-    @staticmethod
-    def _graphic(kind: str, spec: dict) -> dict:
-        return {"kind": kind, "outStart": 0.0, "outEnd": 3.0,
-                "anchor": "own-screen", "spec": spec}
-
-    def test_omitted_agenda_defaults_are_rejected(self) -> None:
-        errors = tc.entry_errors(self._graphic("agenda-slide", {}))
-        self.assertEqual(len(errors), 1, errors)
-        self.assertIn("template demo copy would leak", errors[0])
-        self.assertIn("spec.title1", errors[0])
-        self.assertIn("spec.sub3", errors[0])
-
-    def test_explicit_blanks_are_intent_and_do_not_leak(self) -> None:
-        required = tc.template_catalog()["agenda-slide"]["contentContract"] \
-            ["requiredDefaultOverrides"]
-        spec = {key: "" for key in required}
-        self.assertEqual(tc.entry_errors(self._graphic("agenda-slide", spec)), [])
-
-    def test_asset_only_template_requires_explicit_resolved_identity(self) -> None:
-        errors = tc.entry_errors(self._graphic("logo-card", {}))
-        self.assertTrue(any("explicitly override spec.iconFile" in error
-                            for error in errors), errors)
-        self.assertEqual(tc.entry_errors(
-            self._graphic("logo-card", {"iconFile": "notion.svg"})), [])
-        contract = tc.template_catalog()["logo-card"]["contentContract"]
-        self.assertNotIn("iconFile", contract["contentVariables"])
-        self.assertEqual(contract["requiredDefaultOverrides"], [])
-        asset = tc.template_catalog()["logo-card"]["assetContract"]
-        self.assertTrue(asset["assetOnly"])
-        self.assertEqual(asset["requiredExplicitSelectors"], ["iconFile"])
-
-    def test_blank_asset_only_overlay_is_rejected_before_render(self) -> None:
-        entry = self._graphic("icon-badge-wide", {
-            "icon1": "", "icon2": "", "icon3": ""})
-        errors = tc.entry_errors(entry)
-        self.assertTrue(any("at least one non-empty resolved selector" in error
-                            for error in errors), errors)
-
-    def test_icon_selector_rejects_non_svg_and_whitespace_aliases(self) -> None:
-        for selector in ("manifest.json", " notion.svg ", "notion.svg?x=1"):
-            with self.subTest(selector=selector):
-                errors = tc.entry_errors(self._graphic(
-                    "logo-card", {"iconFile": selector}))
-                self.assertTrue(any("does not resolve" in error
-                                    for error in errors), errors)
-
-    def test_explicit_content_override_must_be_a_string(self) -> None:
-        entry = self._graphic("widget-gauge", {"label": None})
-        errors = tc.entry_errors(entry)
-        self.assertTrue(any("spec.label must be a string" in error
-                            for error in errors), errors)
-
-    def test_planned_copy_is_source_derived_beyond_statement_card(self) -> None:
-        entry = self._graphic("blur-tease", {
-            "image": "/tmp/reference.png", "label": "The *real* reveal"})
-        self.assertEqual(tc.entry_errors(entry), [])
-        self.assertEqual(tc.planned_copy(entry), ["The real reveal"])
-
-    def test_catalog_exposes_default_override_obligation(self) -> None:
-        contract = tc.template_catalog()["versus-split"]["contentContract"]
-        self.assertFalse(contract["defaultsCountAsContent"])
-        self.assertIn("leftTitle", contract["contentVariables"])
-        self.assertIn("leftTitle", contract["requiredDefaultOverrides"])
+    def test_catalog_image_requires_a_real_explicit_local_asset(self) -> None:
+        for spec in ({}, {"image": "assets/nonexistent.png"}, {"image": "assets/test.png?x=1"}):
+            entry = {**_entry(spec), "kind": "ui-focus-zoom"}
+            self.assertTrue(any("spec.image" in error for error in tc.entry_errors(entry)))
 
 
 class GraphicsStyleDecisionTests(unittest.TestCase):
-    """Produced longform cannot silently inherit cutaway-only grammar."""
+    """Every scope defaults to catalog selection; no house style can override it."""
 
-    @staticmethod
-    def _plan(**target: object) -> dict:
-        return {"target": target}
+    def test_catalog_is_default_for_short_long_and_graphics_off(self) -> None:
+        for mode in ("short", "longform"):
+            for scope in ("trim", "light", "produced", "full"):
+                for lanes in ({}, {"graphics": "off"}):
+                    plan = {"target": {"mode": mode, "scope": scope, "lanes": lanes}}
+                    self.assertEqual(longform.resolve_style(None, plan), "catalog-first")
 
-    def test_produced_longform_requires_explicit_style(self) -> None:
-        plan = self._plan(mode="longform", scope="produced",
-                          graphicsStyleRationale="Reference uses overlays")
-        with self.assertRaisesRegex(ValueError, "requires explicit"):
-            longform.resolve_style(None, plan)
+    def test_retired_or_unknown_saved_and_explicit_styles_fail(self) -> None:
+        for style in ("overlay-rich", "cutaway-only", "face-bridge", "wallpaper", "", False, {}):
+            plan = {"target": {"graphicsStyle": style, "graphicsStyleRationale": "Does not confer approval"}}
+            with self.subTest(style=style), self.assertRaisesRegex(ValueError, "retired|catalog"):
+                longform.resolve_style(None, plan)
+            with self.assertRaises(ValueError):
+                longform.resolve_style(style, {"target": {}})
 
-    def test_produced_longform_requires_rationale(self) -> None:
-        plan = self._plan(mode="longform", scope="produced",
-                          graphicsStyle="overlay-rich")
-        with self.assertRaisesRegex(ValueError, "graphicsStyleRationale"):
-            longform.resolve_style(None, plan)
-
-    def test_target_style_and_rationale_pass(self) -> None:
-        plan = self._plan(mode="longform", scope="full",
-                          graphicsStyle="overlay-rich",
-                          graphicsStyleRationale="Dense first-minute visual grammar")
-        self.assertEqual(longform.resolve_style(None, plan), "overlay-rich")
-
-    def test_api_style_still_requires_persisted_rationale(self) -> None:
-        plan = self._plan(mode="longform", scope="produced",
-                          graphicsStyleRationale="Operator chose restrained cutaways")
-        self.assertEqual(longform.resolve_style("cutaway-only", plan),
-                         "cutaway-only")
-
-    def test_short_and_light_retain_legacy_default(self) -> None:
-        self.assertEqual(longform.resolve_style(
-            None, self._plan(mode="short", scope="produced")), "cutaway-only")
-        self.assertEqual(longform.resolve_style(
-            None, self._plan(mode="longform", scope="light")), "cutaway-only")
-
-    def test_unknown_explicit_style_still_fails(self) -> None:
-        plan = self._plan(mode="longform", scope="produced",
-                          graphicsStyle="wallpaper",
-                          graphicsStyleRationale="Bad value")
-        with self.assertRaisesRegex(ValueError, "unknown graphics style"):
-            longform.resolve_style(None, plan)
-
-    def test_plan_lint_blocks_author_bypassing_the_planner(self) -> None:
+    def test_plan_lint_cannot_bypass_retired_style_admission(self) -> None:
         plan = good_plan()
-        plan["target"].update({"mode": "longform", "scope": "produced",
-                               "excerpt": True})
-        errors = pl.lint(plan, MANIFEST).errors
-        self.assertTrue(any("graphics style decision" in error
-                            and "requires explicit" in error
-                            for error in errors), errors)
-
-    def test_graphics_off_discharge_needs_no_style_decision(self) -> None:
-        plan = self._plan(mode="longform", scope="produced",
-                          lanes={"graphics": "off"})
-        self.assertEqual(longform.resolve_style(None, plan), "cutaway-only")
+        plan["target"]["graphicsStyle"] = "overlay-rich"
+        self.assertTrue(any("retired" in error for error in pl.lint(plan, MANIFEST).errors))
 
 
 class RenderedAssetProofTests(unittest.TestCase):
     PROBE = {"streams": [{"codec_type": "video", "codec_name": "h264",
                            "profile": "High", "pix_fmt": "yuv420p",
-                           "width": 1920, "height": 1080,
+                           "width": 1080, "height": 1920,
                            "duration": "3.500000", "nb_frames": "105",
                            "avg_frame_rate": "30/1", "r_frame_rate": "30/1"}],
              "format": {"duration": "3.500000", "size": "8"}}
@@ -234,7 +113,7 @@ class RenderedAssetProofTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "card.mp4")
             Path(path).write_bytes(b"not-empty")
-            entry = _entry({"variant": "classic", "text": "The *real* copy"})
+            entry = _entry({"lineA": "The *real* copy", "lineB": "Second line", "underlineWord": ""})
             measured = {"sustainedRatio": 0.125, "sampledFrames": 35}
             with mock.patch.object(ap, "_probe", return_value=self.PROBE), \
                     mock.patch.object(ap, "_full_decode",
@@ -242,8 +121,8 @@ class RenderedAssetProofTests(unittest.TestCase):
                     mock.patch.object(ap, "_visible_opaque",
                                       return_value=measured):
                 proof = ap.prove_rendered_asset(ap.AssetProofRequest(
-                    path, entry, "mp4", (1920, 1080), 3.5, "render-key"))
-            self.assertEqual(proof["copy"]["expected"], ["The real copy"])
+                    path, entry, "mp4", (1080, 1920), 3.5, "render-key"))
+            self.assertEqual(proof["copy"]["expected"], ["The real copy", "Second line"])
             self.assertEqual(proof["copy"]["renderInputKey"], "render-key")
             self.assertEqual(proof["occupancy"]["mode"], "opaque-measured-content")
             self.assertEqual(proof["occupancy"]["areaRatio"], 0.125)
@@ -258,9 +137,9 @@ class RenderedAssetProofTests(unittest.TestCase):
             with mock.patch.object(ap, "_probe", return_value={"streams": [stream]}):
                 with self.assertRaisesRegex(RuntimeError, "requires pix_fmt"):
                     ap.prove_rendered_asset(ap.AssetProofRequest(
-                        path, _entry({"variant": "classic", "text": "Copy"},
+                        path, _entry({"lineA": "Copy", "lineB": "Second line", "underlineWord": ""},
                                      anchor="free-band"),
-                        "mov", (1920, 1080), 3.5, "render-key"))
+                        "mov", (1080, 1920), 3.5, "render-key"))
 
     @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg required")
     def test_fully_transparent_overlay_fails_visible_pixel_proof(self) -> None:
@@ -271,7 +150,7 @@ class RenderedAssetProofTests(unittest.TestCase):
                 "nullsrc=s=64x64:d=0.2:r=10,format=rgba,geq=r=0:g=0:b=0:a=0",
                 "-c:v", "qtrle", path,
             ], check=True)
-            entry = _entry({"variant": "classic", "text": "Invisible"},
+            entry = _entry({"lineA": "Invisible", "lineB": "Second line", "underlineWord": ""},
                            anchor="free-band")
             with mock.patch.object(ap, "_validate_codec"):
                 with self.assertRaisesRegex(RuntimeError, "blank/transparent"):
@@ -287,11 +166,11 @@ class RenderedAssetProofTests(unittest.TestCase):
             with mock.patch.object(ap, "_probe", return_value=probe):
                 with self.assertRaisesRegex(RuntimeError, "dimensions"):
                     ap.prove_rendered_asset(ap.AssetProofRequest(
-                        path, _entry({"variant": "classic", "text": "Copy"}),
-                        "mp4", (1920, 1080), 3.5, "render-key"))
+                        path, _entry({"lineA": "Copy", "lineB": "Second line", "underlineWord": ""}),
+                        "mp4", (1080, 1920), 3.5, "render-key"))
 
     def test_render_entry_always_returns_pre_handoff_proof(self) -> None:
-        entry = _entry({"variant": "classic", "text": "Real copy"})
+        entry = _entry({"lineA": "Real copy", "lineB": "Second line", "underlineWord": ""})
         with tempfile.TemporaryDirectory() as tmp:
             def fake_render(_rel: str, _fmt: str, _spec: dict, out: str) -> None:
                 Path(out).write_bytes(b"render")

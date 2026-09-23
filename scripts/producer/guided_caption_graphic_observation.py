@@ -16,6 +16,7 @@ from color.deadline import wall_budget, require_time
 from cut_preview_io import digest, file_hash
 from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.frame_quantization import hyperframes_duration
+from graphics.template_contract import validate_entry
 from guided_opening_graphic_proof import OpeningGraphicIntent, intent_record
 from guided_caption_dependencies import Guard
 from headless.container_policy import required_runtime
@@ -127,6 +128,7 @@ def render_observed_graphic(intent: OpeningGraphicIntent, output: Path, context:
     event = {"stage": "actual-owned-caption-layout-graphic", "status": "failed"}
     try:
         clock.remaining()
+        validate_entry(intent.row["entry"])
         request = observation_request(intent_record(intent))
         with wall_budget(deadline):
             documents = sealed_documents(intent.snapshot, request)

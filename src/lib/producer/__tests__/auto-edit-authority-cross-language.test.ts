@@ -80,6 +80,12 @@ function pipelineFiles(repo: string): string {
   write(repo, REGISTRY_PATH, readFileSync(path.join(process.cwd(), REGISTRY_PATH)));
   write(repo, REGISTRY_SCHEMA_PATH,
     readFileSync(path.join(process.cwd(), REGISTRY_SCHEMA_PATH)));
+  for (const relative of [
+    "schemas/producer/visual-source-policy-v1.json",
+    "vendor/hyperframes-catalog/catalog-index.json",
+    "vendor/hyperframes-catalog/hyperframes-catalog-lock.json",
+    "docs/producer/catalog-study/catalog-study.json",
+  ]) write(repo, relative, readFileSync(path.join(process.cwd(), relative)));
   write(repo, "templates/motion/tokens.css", ":root { --accent: #abcdef; }\n");
   write(repo, "templates/motion/hyperframes.json", "{}\n");
   write(repo, "templates/motion/index.html", "<main></main>\n");
@@ -132,7 +138,7 @@ function fixture(root: string): Fixture {
   write(project, "reference/reference.json", "{\"strategy\":\"mimic\"}\n");
   write(project, "reference/fingerprint.json", "{\"sha256\":\"source\"}\n");
   write(project, "reference/reference-source.json", "{\"source\":\"local\"}\n");
-  const intent = { mode: "short" as const, style: "restrained" as const, brief: "café 🎬", lanes: {} };
+  const intent = { mode: "short" as const, brief: "café 🎬", lanes: {} };
   write(project, "project.json", JSON.stringify({ origin: "raw", history: [], intent }));
   return { repo, transcript, frame, probe, ctx: {
     dir, scope: "produced", intent, planPath, manifestPath, transcriptsDir: source,
@@ -182,6 +188,8 @@ function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
   assert.ok(ctx.pipeline?.files.some((row) => row.path === PRELOAD_PATH));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_PATH));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_SCHEMA_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "schemas/producer/visual-source-policy-v1.json"));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "vendor/hyperframes-catalog/catalog-index.json"));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === "tsconfig.json"));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === "next.config.ts"));
   assert.ok(!ctx.pipeline?.files.some(

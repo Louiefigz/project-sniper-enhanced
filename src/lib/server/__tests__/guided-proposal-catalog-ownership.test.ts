@@ -80,7 +80,7 @@ test("actual V6 candidate compiler blocks a structurally valid graphic against o
   proposal.clauses.push({ start: RAW_V6_SHORT.length, end: RAW_V6_SHORT.length + extra.length, quote: extra,
     disposition: "supported", rationale: "TEST ONLY adversarial graphic request without catalog authority.", operationIndices: [2] });
   (proposal.operations as unknown[]).push({ type: "catalog-graphic", clauseIndex: 2, beatIndex: 0,
-    catalogKind: "statement-card", variables: [{ name: "title", value: "TEST ONLY" }], grade: null,
+    catalogKind: "marker-highlight", variables: [{ name: "text", value: "TEST ONLY" }], grade: null,
     startAnchor: 0, endAnchorExclusive: 1, captions: null, reframe: null,
     reason: "TEST ONLY attempt to borrow a graphics-off catalog omission.",
     presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal",

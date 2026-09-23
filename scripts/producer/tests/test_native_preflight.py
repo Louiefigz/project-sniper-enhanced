@@ -14,6 +14,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from cut_preview_io import file_hash
+from _native_current_source_fixture import bind_test_project_sources
 from headless.process_runner import ProcessDeadlineError, ProcessOutputLimitError
 from studio import native_preflight as native
 from studio import native_preflight_inputs as inputs
@@ -44,6 +45,7 @@ class NativePreflightTests(unittest.TestCase):
         (self.assets / 'gsap.js').write_text('throw Error("TEST source must never execute");')
         (self.assets / 'test.woff2').write_bytes(b'TEST FONT PLACEHOLDER, NOT QUALIFIED FONT DATA')
         (self.assets / 'mark.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        bind_test_project_sources(self.project)
         node = os.environ.get('SNIPER_NODE_PATH') or shutil.which('node')
         self.assertIsNotNone(node, 'Installed local Node is required; never download it')
         environment = patch.dict(os.environ, {'SNIPER_NODE_PATH': str(Path(node).resolve()),
@@ -51,8 +53,10 @@ class NativePreflightTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
 
-    def execute(self, name: str = 'evidence') -> dict:
+    def execute(self, name: str = 'evidence', renew_sources: bool = False) -> dict:
         """Run actual installed SDK lint under the existing bounded text runner."""
+        if renew_sources:
+            bind_test_project_sources(self.project)
         return native.preflight(self.project, self.root / name)
 
     def codes(self, report: dict) -> set[str]:
@@ -98,12 +102,12 @@ class NativePreflightTests(unittest.TestCase):
     def test_missing_timeline_registry_preserves_sdk_error(self) -> None:
         """No invented fallback timeline can turn malformed source into success."""
         self.entry.write_text(HTML.replace('window.__timelines', 'window.testOnly'))
-        self.assertIn('missing_timeline_registry', self.codes(self.execute()))
+        self.assertIn('missing_timeline_registry', self.codes(self.execute(renew_sources=True)))
 
     def test_remote_dependency_is_reported_without_network(self) -> None:
         """External fonts are not fetched, silently substituted or auto-installed."""
         self.entry.write_text(HTML.replace('assets/test.woff2', 'https://example.invalid/font.woff2'))
-        result = self.execute()
+        result = self.execute(renew_sources=True)
         self.assertEqual(result['status'], 'blocked')
         self.assertIn('native_nonlocal_dependency', self.codes(result))
         self.assertEqual(result['sdk']['deniedAttempts'], [])
@@ -115,9 +119,9 @@ class NativePreflightTests(unittest.TestCase):
         (styles / 'main.css').write_text('@import "child.css";')
         (styles / 'child.css').write_text('@font-face{font-family:Other;src:url("../assets/test.woff2")}')
         self.entry.write_text(HTML.replace('</head>', '<link rel="stylesheet" href="styles/main.css"></head>'))
-        self.assertEqual(self.execute()['status'], 'static-checks-pass')
+        self.assertEqual(self.execute(renew_sources=True)['status'], 'static-checks-pass')
         (styles / 'child.css').write_text('@font-face{font-family:Other;src:url("../assets/missing.woff2")}')
-        self.assertEqual(self.execute('missing')['status'], 'blocked')
+        self.assertEqual(self.execute('missing', renew_sources=True)['status'], 'blocked')
 
     def test_nested_template_mount_missing_is_not_silently_skipped(self) -> None:
         """SDK missing-child traversal must see inert nested template content."""
@@ -127,13 +131,13 @@ class NativePreflightTests(unittest.TestCase):
 <div data-composition-src="compositions/missing.html" data-start="0" data-duration="2"></div>
 </div></template>''')
         self.entry.write_text(HTML.replace('TEST ONLY', '<div data-composition-src="compositions/child.html" data-start="0" data-duration="2"></div>'))
-        self.assertEqual(self.execute()['status'], 'blocked')
+        self.assertEqual(self.execute(renew_sources=True)['status'], 'blocked')
 
     def test_source_mount_escape_refuses_without_reading_outside(self) -> None:
         """No malformed child reference can make the SDK inspect outside HTML."""
         self.entry.write_text(HTML.replace('TEST ONLY', '<div data-composition-src="../outside.html"></div>'))
         with self.assertRaisesRegex(RuntimeError, 'worker refused'):
-            self.execute()
+            self.execute(renew_sources=True)
         process = json.loads((self.root / 'evidence/process.json').read_text())
         self.assertIn('mount escapes', process['stderr'])
 
@@ -164,7 +168,7 @@ class NativePreflightTests(unittest.TestCase):
         (self.assets / 'test.mp4').write_bytes(b'TEST ONLY: NOT DECODABLE MEDIA')
         self.entry.write_text(HTML.replace('TEST ONLY', '<video id="v" class="clip" '
             'src="assets/test.mp4" data-start="0" data-duration="2" data-track-index="0" muted></video>'))
-        result = self.execute()
+        result = self.execute(renew_sources=True)
         self.assertEqual(result['status'], 'static-checks-pass', self.codes(result))
         self.assertEqual(result['sdk']['deniedAttempts'], [])
         state = json.loads((self.root / 'evidence/inputs.json').read_text())
@@ -229,7 +233,14 @@ class NativePreflightTests(unittest.TestCase):
         (excluded / 'unobserved.css').write_text('body{color:blue}')
         self.entry.write_text(HTML.replace('</head>', '<link rel="stylesheet" href="node_modules/unobserved.css"></head>'))
         with self.assertRaisesRegex(RuntimeError, 'worker refused'):
+            self.execute(renew_sources=True)
+
+    def test_changed_design_without_rebinding_refuses_before_worker(self) -> None:
+        """Fixture migration does not make changed authored bytes silently trusted."""
+        self.entry.write_text(HTML.replace('TEST ONLY', 'TEST changed design'))
+        with patch.object(native, 'run_text') as run, self.assertRaisesRegex(ValueError, 'authored design changed'):
             self.execute()
+        run.assert_not_called()
 
     def test_file_limit_refuses_before_the_sdk(self) -> None:
         """Bounded static work cannot accidentally traverse a frame-cache tree."""

@@ -40,6 +40,7 @@ class NativeReviewAdmissionTests(unittest.TestCase):
 
     def capture(self, root: Path, request: dict) -> None:
         """Use actual shared stage sealing around tiny fictional JPEG content."""
+        (root / 'seam-samples.mp4').write_bytes(b'TEST encoded sample reel')
         rows = []
         for index, frame in enumerate([0, 24, 0]):
             path = root / f'pose-{index}.jpg'; path.write_bytes(b'TEST JPEG bytes')

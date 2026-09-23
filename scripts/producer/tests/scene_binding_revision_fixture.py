@@ -13,7 +13,7 @@ from palmier.scene_bindings import (
     build_scene_bindings,
     scene_binding_delta,
 )
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 BUNDLE_HASH = "b" * 64
 ANIMATION_HASH = "c" * 64
@@ -98,6 +98,7 @@ def make_scene_revision_fixture(
     current_scene = fire_sparkles_scene(
         BUNDLE_HASH, "Repaired right copy")
     current_scene["version"] = 2
+    bind_test_scene_source(current_scene)
     previous = _bindings(previous_scene, left, old_right)
     current = _bindings(current_scene, left, new_right)
     return SceneRevisionFixture(
@@ -111,6 +112,7 @@ def moved_current(fixture: SceneRevisionFixture) -> tuple[dict, dict]:
     scene["timing"]["startFrame"] += 30
     scene["timing"]["endFrameExclusive"] += 30
     scene["timing"]["timelineMapHash"] = "a" * 63 + "b"
+    bind_test_scene_source(scene)
     left = Path(fixture.current_bindings["entries"][0]["media"]["path"])
     bindings = _bindings(scene, left, fixture.new_right)
     return scene, bindings

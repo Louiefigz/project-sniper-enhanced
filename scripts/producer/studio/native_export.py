@@ -53,11 +53,16 @@ def validate_export_launch(settings: NativeRunConfig) -> dict | None:
             and Path(request['runtime']) / 'dist/cli.js' == settings.cli,
             'Native export request does not bind this project, output and runtime')
     phase, worker = admitted_worker(settings, request, file)
+    from graphics.visual_source_project import admit_project_sources
+    admit_project_sources(settings.project)
     require(settings.additional_pins.get(str(file)) == digest(file)
             and settings.additional_pins.get(str(worker)) == digest(worker), 'Native export worker/request is unpinned')
     if adapter == 'native-long' and phase in {'picture', 'render'}:
         require(bound_json(settings.root / 'sample-qc/result.json').get('passed') is True,
                 'Long picture requires passed encoded seam samples')
+    if phase in {'picture', 'render'} and not request.get('verifyStage'):
+        from studio.native_motion_previews import require_motion_previews
+        require_motion_previews(request)
     return request
 
 
@@ -70,7 +75,11 @@ def admitted_worker(settings: NativeRunConfig, request: dict, file: Path) -> tup
                      'native_short_capture.mjs' if short_capture else 'native_short_worker.py')
     interpreter = request['tools']['node'] if short_capture else sys.executable
     child = [interpreter, str(worker), str(file), *([] if short_capture else [phase])]
-    outputs = {'capture': 'native-frames.json', 'picture': 'picture.mp4', 'render': 'review.mp4', 'verify': 'checks.json'}
+    outputs = {'capture': 'native-frames.json', 'preview': 'motion-previews.json',
+               'picture': 'picture.mp4', 'render': 'review.mp4', 'verify': 'checks.json'}
+    from studio.native_preview_sections import section_phase, section_output
+    if section_phase(phase):
+        outputs[phase] = section_output(phase)
     require(phase in outputs and (long or phase != 'picture')
             and settings.command == ['/usr/bin/sandbox-exec', '-f', str(settings.sandbox), *child]
             and settings.admission['output'] == str(settings.root / outputs[phase]),
@@ -116,6 +125,11 @@ def worker_environment(settings: NativeRunConfig, owner_file: Path) -> dict[str,
 
 def main() -> None:
     """Forward adapter options unchanged; malformed/ambiguous projects never fall back."""
+    if len(sys.argv) == 3 and sys.argv[1] == 'source-input':
+        import json
+        from graphics.visual_source_project import describe_project
+        print(json.dumps(describe_project(Path(sys.argv[2]).resolve(strict=True)), indent=2))
+        return
     if len(sys.argv) == 3 and sys.argv[1] == 'review-input':
         import json
         from studio.native_long_prebuild import prebuild_snapshot

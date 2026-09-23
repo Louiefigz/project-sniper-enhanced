@@ -16,16 +16,13 @@ from graphics.frame_quantization import (
 )
 
 
-def _chip(start: float, end: float) -> dict:
+def _catalog_entry(start: float, end: float) -> dict:
     return {
-        "kind": "chip-row", "anchor": "free-band",
+        "kind": "line-swap", "anchor": "free-band",
         "outStart": start, "outEnd": end,
         "spec": {
-            "accent": "#0B5FFF",
-            "at1": 0.2, "at2": 0.55, "at3": 0.9, "at4": 1.25,
-            "chip1": "AI", "chip2": "CODE", "chip3": "WORKFLOWS",
-            "chip4": "", "icon1": "", "icon2": "", "icon3": "",
-            "icon4": "",
+            "lineA": "First action", "lineB": "Better result",
+            "underlineWord": "result",
         },
     }
 
@@ -46,7 +43,7 @@ class FrameQuantizationTests(unittest.TestCase):
         return captured[0]
 
     def test_real_word_edges_shorten_to_placement_span(self) -> None:
-        entry = _chip(7.16, 9.10)
+        entry = _catalog_entry(7.16, 9.10)
         work = self._work(entry)
         self.assertEqual(placement_frame_span(7.16, 9.10, 30.0), 58)
         self.assertLess(work.duration, 9.10 - 7.16)
@@ -56,7 +53,7 @@ class FrameQuantizationTests(unittest.TestCase):
         self.assertTrue(render._terminal_clear_required(work))
 
     def test_word_edges_extend_to_placement_span(self) -> None:
-        entry = _chip(7.16, 9.084)
+        entry = _catalog_entry(7.16, 9.084)
         work = self._work(entry)
         self.assertEqual(placement_frame_span(7.16, 9.084, 30.0), 58)
         self.assertGreater(work.duration, 9.084 - 7.16)
@@ -69,7 +66,7 @@ class FrameQuantizationTests(unittest.TestCase):
             with self.subTest(start=start, end=end, fps=fps):
                 expected = placement_frame_span(start, end, fps)
                 first = render.timeline_padded_entry(
-                    _chip(start, end), fps)
+                    _catalog_entry(start, end), fps)
                 second = render.timeline_padded_entry(first, fps)
                 self.assertEqual(first, second)
                 self.assertAlmostEqual(first["outEnd"] - first["outStart"],
@@ -83,7 +80,7 @@ class FrameQuantizationTests(unittest.TestCase):
             r'data-duration="([^"]+)"', transformed).group(1))
         self.assertEqual(math.ceil(encoded * 30.0), 58)
 
-    def test_shortening_fails_if_it_would_cut_required_content(self) -> None:
+    def test_retired_statement_sequence_fails_before_rendering(self) -> None:
         entry = {
             "kind": "statement-card", "anchor": "free-band",
             "outStart": 7.16, "outEnd": 9.70,
@@ -93,21 +90,20 @@ class FrameQuantizationTests(unittest.TestCase):
             },
         }
         with tempfile.TemporaryDirectory() as cache, self.assertRaisesRegex(
-                ValueError, "leave 0.3s"):
+                ValueError, "retired"):
             render.render_entry_at_rate(entry, cache, 30.0)
 
     def test_subframe_window_fails_before_hyperframes(self) -> None:
         with self.assertRaisesRegex(ValueError, "at least one timeline frame"):
-            render.timeline_padded_entry(_chip(1.001, 1.002), 30.0)
+            render.timeline_padded_entry(_catalog_entry(1.001, 1.002), 30.0)
 
-    def test_module_array_reaches_renderer_as_declared_string_without_plan_change(self) -> None:
+    def test_retired_module_array_cannot_reach_renderer(self) -> None:
         entry = {"kind": "module-pipeline", "anchor": "own-screen",
                  "outStart": 0, "outEnd": 4,
                  "spec": {"headlineLines": "First", "footChip": "Second",
                           "moduleLands": [0, 2], "exit": "hold"}}
-        work = self._work(entry)
-        self.assertEqual(work.spec["moduleLands"], "0.0|2.0")
-        self.assertEqual(work.entry["spec"]["moduleLands"], [0, 2])
+        with self.assertRaisesRegex(ValueError, "retired"):
+            self._work(entry)
 
 
 if __name__ == "__main__":

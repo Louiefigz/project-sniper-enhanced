@@ -1,3 +1,5 @@
+import { assertPlanVisualSources } from "@/lib/producer/visual-source-policy";
+import { requireCatalogKind } from "@/lib/producer/visual-source-policy";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
 import { assertProposalClauseCoverage } from "@/lib/producer/contracts/treatment-proposal-v2";
 import { objectValue } from "@/lib/producer/contracts/validation";
@@ -30,6 +32,7 @@ export interface TreatmentCandidateResult {
 }
 
 function graphicCandidate(operation: TreatmentProposal["operations"][number], proposal: TreatmentProposal, evidence: ProposalEvidence) {
+  requireCatalogKind(operation.catalogKind);
   const catalog = evidence.catalog.find((item) => item.kind === operation.catalogKind), beat = proposal.beats[operation.beatIndex!];
   if (!catalog || !beat) throw new Error("Requested catalog kind or grounded story beat is unavailable");
   const entries = operation.variables!, names = entries.map((item) => item.name);
@@ -174,6 +177,7 @@ export function buildTreatmentCandidate(input: { cut: AcceptedGuidedCut; rawInte
   if (new Set(ids).size !== ids.length) return { proposal, blockers: [{ clauseIndex: null, reason: "Graphic identity collision requires explicit resolution" }], candidate: null, range };
   if (longform && graphicProposal.schemaVersion === 4) longformCandidate({ candidate, proposal: graphicProposal, longform, ids, inheritedCount });
   if (before !== canonicalJsonSha256({ cutTrack: candidate.cutTrack, cutDecisions: candidate.cutDecisions })) throw new Error("Proposal attempted to mutate the accepted cut");
+  assertPlanVisualSources(candidate);
   return { proposal, blockers, candidate, range, ...(proposal.schemaVersion === 2 ? {} : {
     executionBindings: buildGuidedFrameBindings({ proposal, evidence: input.evidence, candidate, inheritedCount }),
   }) };

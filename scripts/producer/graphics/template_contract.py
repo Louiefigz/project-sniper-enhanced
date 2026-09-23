@@ -8,6 +8,8 @@ GUI/native authoring cannot invent a second, looser template contract.
 """
 from __future__ import annotations
 
+from graphics.visual_source_policy import integrated_kinds, require_integrated
+
 import glob
 import json
 import math
@@ -224,6 +226,10 @@ def _value_errors(spec: dict, declared: dict[str, dict]) -> list[str]:
 def entry_errors(entry: dict, comp_html: str | None = None) -> list[str]:
     """Return every template/spec incompatibility for one planned graphic."""
     kind = str(entry.get("kind", ""))
+    try:
+        require_integrated(kind, comp_html)
+    except ValueError as error:
+        return [str(error)]
     errors = statement_card_errors(entry) if kind == _STATEMENT_KIND else \
         hw_entry_errors(entry) + catalog_entry_errors(entry)
     if comp_html is None:
@@ -263,8 +269,9 @@ def template_catalog() -> dict[str, dict]:
     """JSON-safe catalog for GUI/native planners; sorted and source-derived."""
     catalog: dict[str, dict] = {}
     for path in sorted(glob.glob(os.path.join(COMPOSITIONS_DIR, "*.html"))):
-        if os.path.basename(path).startswith("_gs-"):
+        if os.path.splitext(os.path.basename(path))[0] not in integrated_kinds():
             continue
+        require_integrated(os.path.splitext(os.path.basename(path))[0])
         with open(path, encoding="utf-8") as handle:
             html = handle.read()
         kind = os.path.splitext(os.path.basename(path))[0]
@@ -276,9 +283,6 @@ def template_catalog() -> dict[str, dict]:
                          "variables": schema,
                          "contentContract": content_contract(variables),
                          "assetContract": asset_contract(kind, variables)}
-    catalog.get(_STATEMENT_KIND, {}).update({
-        "contentContract": {**catalog[_STATEMENT_KIND]["contentContract"],
-                            "variants": list(_VARIANTS)}})
     return catalog
 
 

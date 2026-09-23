@@ -36,7 +36,9 @@ class HeldPreparationTests(unittest.TestCase):
         cls.manifest = with_synthetic_music(cls.root, manifest, chord)
         for cut in cls.plan["cutTrack"]:
             cut.pop("audioLeadMs", None)
-        cls.plan["target"].update(width=160, height=90, fps=30)
+        cls.plan["target"].setdefault("width", 160)
+        cls.plan["target"].setdefault("height", 90)
+        cls.plan["target"]["fps"] = 30
         cls.plan["music"] = {"enabled": True, "assetId": "test-only-bed", "gapDb": 12}
         cls.plan_path = cls.root / "candidate.json"
         write_new(cls.plan_path, cls.plan)

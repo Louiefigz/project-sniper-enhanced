@@ -9,6 +9,7 @@ import shutil
 import stat
 import uuid
 from dataclasses import dataclass
+from graphics.template_contract import validate_entry
 
 from .authority_record import AuthorityRecordError, ensure_authority_record
 from .durable_files import (
@@ -33,7 +34,7 @@ from .render_admission_schema import (
     _selection_directory,
 )
 from .render_build_receipt import encode_render_build_receipt
-from .render_build_receipt_v3_semantics import parse_render_build_receipt_v3
+from .render_build_receipt_v4_semantics import parse_render_build_receipt_v4
 from .render_runtime import RendererRuntime, current_render_build_manifest
 from .request_artifact import canonical_request_document
 
@@ -143,7 +144,7 @@ def _build_payloads(
     request, request_raw, request_digest = canonical_request_document(frozen)
     build_manifest = current_render_build_manifest(runtime)
     build_raw = encode_render_build_receipt(build_manifest)
-    build_digest = parse_render_build_receipt_v3(build_raw).build_digest
+    build_digest = parse_render_build_receipt_v4(build_raw).build_digest
     if len(build_raw) > _MAX_BUILD_BYTES:
         raise RuntimeError("render build receipt exceeds 2 MiB")
     _write_file(pending_fd, "request.json", request_raw)
@@ -265,6 +266,8 @@ def store_render_admission_artifact(
     if type(request) is not RenderArtifactRequest:
         raise RuntimeError("render artifact request is invalid")
     frozen = canonical_request_document(request.request)[0]
+    for item in frozen["overlays"]:
+        validate_entry(item["entry"])
     closed = RenderArtifactRequest(
         request.authority_root, request.authority_id, frozen, request.runtime
     )

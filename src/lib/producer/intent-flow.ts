@@ -15,6 +15,7 @@ function starterTarget(intent: ProjectIntent, durationTargetS: number) {
   const mode = intent.mode;
   return {
     mode,
+    graphicsStyle: "catalog-first",
     durationTargetS,
     platforms: mode === "longform" ? LONGFORM_PLATFORMS : SHORT_PLATFORMS,
     scope: intent.scope,
@@ -49,9 +50,7 @@ export function buildStarterPlan(manifest: AssetManifest, intent: ProjectIntent)
       rationale: "",
     }],
     reframe: { strategy: longform ? "none" : "face" },
-    titleCards: trimOnly
-      ? []
-      : [{ outStart: 0, outEnd: 3, text: "Your hook here", style: "hook" }],
+    titleCards: [], // Titles are selected from the catalog in the native project.
     captions: {
       burn: !trimOnly && !longform,
       style: longform ? "line" : "karaoke",

@@ -32,6 +32,7 @@ class EnrolledAdmittedQualityPassAuthorityTests(unittest.TestCase):
     def setUp(self) -> None:
         self.case = _Fixture(methodName="runTest")
         self.case.setUp()
+        self.addCleanup(self.case.doCleanups)
 
     def tearDown(self) -> None:
         self.case.tearDown()

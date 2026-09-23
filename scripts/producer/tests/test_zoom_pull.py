@@ -1,12 +1,10 @@
-"""Zoom-pull seam transitions (continuity mechanism CM-1, EDITCRAFT_LESSONS §2.7).
+"""Historical zoom-pull grammar/math units and current retired-route refusal.
 
-Pins the zoom-pull grammar: three variants (punch-cut / whip / settle) with
-band-validated magnitudes, the punch-cut's SEQUENTIAL seam cover, the whip's
-blur-masked peak, longform-only + seam-role lint, budget counting, and the
-1:1 frame-count contract through transitions.py.
+Curve and expression tests are inert DTO inspection, not render admission or
+frame-preservation evidence. Real public parser/render refusal is separate.
 """
 import os
-import subprocess
+from unittest.mock import patch
 import tempfile
 import unittest
 
@@ -15,6 +13,13 @@ from _common import *  # noqa: F401,F403
 
 def _ev(variant: str, t: float = 10.0, **extra) -> dict:
     return {"outTime": t, "kind": "zoom-pull", "variant": variant, **extra}
+
+
+def _inert_event(variant: str, **extra) -> tr.TransitionEvent:
+    """TEST-only legacy DTO for pure expression inspection, never execution."""
+    raw = _ev(variant, **extra)
+    return tr.TransitionEvent(raw['outTime'], 'zoom-pull', False,
+                              zp.parse_event(0, raw, 60.0))
 
 
 class ZoomPullParseTests(unittest.TestCase):
@@ -115,39 +120,42 @@ class ZoomPullCurveTests(unittest.TestCase):
 
 
 class ZoomPullTransitionsTests(unittest.TestCase):
-    """transitions.py integration: parse, cover synthesis, filter chain."""
+    """Real parser refusal plus inert cover and filter expression inspection."""
 
-    def test_parse_events_accepts_zoom_pull(self) -> None:
-        events = tr.parse_events([_ev("punch-cut", t=5.0)], 60.0)
-        self.assertEqual(events[0].kind, "zoom-pull")
-        self.assertIsNotNone(events[0].zoom)
+    def test_public_parser_refuses_all_retired_variants(self) -> None:
+        for variant in ('punch-cut', 'whip', 'settle'):
+            with self.subTest(variant=variant), patch.object(tr, 'resolve_sfx') as sfx:
+                with self.assertRaisesRegex(ValueError, 'Legacy transition presets are retired'):
+                    tr.parse_events([_ev(variant, t=5.0, sfx='TEST-named')], 60.0)
+                sfx.assert_not_called()
 
-    def test_overlapping_zoom_footprints_rejected(self) -> None:
-        # whip@5.0 settles until 5.6s; punch-cut@6.0 starts zooming at ~4.77s
-        with self.assertRaises(ValueError):
-            tr.parse_events([_ev("whip", t=5.0), _ev("punch-cut", t=6.0)], 60.0)
-        # non-overlapping footprints stay legal (whip tail 5.6 < settle 7.0)
-        events = tr.parse_events([_ev("whip", t=5.0), _ev("settle", t=7.0)], 60.0)
-        self.assertEqual(len(events), 2)
+    def test_historical_footprints_remain_inspectable_but_never_admitted(self) -> None:
+        whip = _inert_event('whip', t=5.0)
+        overlapping = _inert_event('punch-cut', t=6.0)
+        separate = _inert_event('settle', t=7.0)
+        self.assertLess(overlapping.zoom.span[0], whip.zoom.span[1])
+        self.assertGreaterEqual(separate.zoom.span[0], whip.zoom.span[1])
+        for variant, time in (('punch-cut', 6.0), ('settle', 7.0)):
+            with self.assertRaisesRegex(ValueError, 'retired'):
+                tr.parse_events([_ev('whip', t=5.0), _ev(variant, t=time)], 60.0)
 
     def test_punch_cut_cover_lands_in_the_video_chain(self) -> None:
-        events = tr.parse_events([_ev("punch-cut", t=5.0)], 60.0)
+        events = [_inert_event("punch-cut", t=5.0)]
         fc = tr.build_video_filter(events, 30.0, (1920, 1080))
         self.assertIn("scale=w=", fc)               # the zoom branch
         self.assertIn("geq=lum='255-", fc)          # the light-leak cover
-        flash = tr.parse_events(
-            [_ev("punch-cut", t=5.0, cover="white-flash")], 60.0)
+        flash = [_inert_event("punch-cut", t=5.0, cover="white-flash")]
         self.assertIn("eq(N,150)",                  # cover flash at seam frame
                       tr.build_video_filter(flash, 30.0, (1920, 1080)))
 
     def test_flash_leak_only_chain_unchanged(self) -> None:
-        events = tr.parse_events([{"outTime": 5.0, "kind": "white-flash"}], 60.0)
+        events = [tr.TransitionEvent(5.0, "white-flash")]
         fc = tr.build_video_filter(events, 30.0, (1920, 1080))
         self.assertNotIn("scale=w=", fc)            # additive: no zoom branch
 
 
 class ZoomPullLintTests(unittest.TestCase):
-    """plan_lint_motion: longform-only, seam-role advisory, budget-counted."""
+    """Historical grammar-only lint; passing it grants no current admission."""
 
     def _lint(self, events: list, mode: str, out_dur: float = 600.0):
         rep = pl.Report()
@@ -179,26 +187,19 @@ class ZoomPullLintTests(unittest.TestCase):
         self.assertTrue(any("budget" in e for e in rep.errors), rep.errors)
 
 
-@unittest.skipUnless(_HAVE_FFMPEG, "ffmpeg not on PATH")
 class ZoomPullRenderTests(unittest.TestCase):
-    """apply_transitions renders a zoom-pull with the frame count preserved."""
+    """Real retired entry point refuses before reading media or making output."""
 
-    def test_whip_render_preserves_frames(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="zoompull-") as tmp:
-            src = os.path.join(tmp, "src.mp4")
-            out = os.path.join(tmp, "out.mp4")
-            subprocess.run(
-                ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-                 "-i", "testsrc2=size=320x180:rate=30:duration=6",
-                 "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", src],
-                check=True)
-            result = tr.apply_transitions(
-                src, [_ev("whip", t=3.0, sfx=False)], out)
-            self.assertEqual(result["zoomPulls"], 1)
-            self.assertEqual(result["inFrames"], result["outFrames"])
-            # the peak frame really is magnified: the frame at the seam
-            # differs from the source far more than a pre-ramp frame does.
-            self.assertTrue(os.path.exists(out))
+    def test_variants_refuse_before_probe_process_or_write(self) -> None:
+        with tempfile.TemporaryDirectory(prefix='TEST-retired-zoom-pull-') as root:
+            source, output = os.path.join(root, 'absent.mp4'), os.path.join(root, 'output', 'out.mp4')
+            for variant in ('whip', 'punch-cut', 'settle'):
+                with self.subTest(variant=variant), patch.object(tr, 'probe_video') as probe, patch(
+                        'subprocess.Popen') as process, self.assertRaisesRegex(ValueError, 'retired'):
+                    tr.apply_transitions(source, [_ev(variant, t=3.0, sfx=False)], output)
+                probe.assert_not_called()
+                process.assert_not_called()
+                self.assertEqual(os.listdir(root), [])
 
 
 if __name__ == "__main__":

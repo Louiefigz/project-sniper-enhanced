@@ -69,7 +69,7 @@ class FillModuleLandsTests(unittest.TestCase):
 
 
 class ModuleLandsLintTests(unittest.TestCase):
-    """plan_lint end-to-end: the moduleLands rules fire through lint()."""
+    """Retained schedule parsing is independent of current source admission."""
 
     def _plan(self, lands) -> dict:
         plan = good_plan()
@@ -81,7 +81,14 @@ class ModuleLandsLintTests(unittest.TestCase):
         return plan
 
     def _errors(self, plan) -> list[str]:
-        return [e for e in pl.lint(plan, MANIFEST).errors if "moduleLands" in e]
+        row = plan["graphicsTrack"][0]
+        report = pl.Report()
+        plm._check_module_lands("TEST retained schedule", row, row["outEnd"] - row["outStart"], report)
+        return report.errors
+
+    def test_current_plan_gate_rejects_retired_kind_even_with_valid_lands(self) -> None:
+        errors = pl.lint(self._plan([0, 0.8, 2]), MANIFEST).errors
+        self.assertTrue(any("retired" in error for error in errors))
 
     def test_valid_lands_pass(self) -> None:
         self.assertEqual(self._errors(self._plan([0.0, 0.8, 2.0, 3.9])), [])

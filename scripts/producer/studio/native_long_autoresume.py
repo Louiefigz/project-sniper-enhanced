@@ -33,6 +33,8 @@ def matching_attempt(current: dict, attempt: Path) -> tuple[int, str] | None:
         return None
     require(delivery_file.is_file(), 'Compatible attempt is active or interrupted; reconcile its owner before starting again')
     delivery = bound_json(delivery_file)
+    if original.get('previewOnly') and delivery.get('status') == 'native-motion-previews-complete':
+        return None  # Preview discovery owns these; they have no final-media owner.
     require(delivery.get('status') in {'failed', 'native-long-checked-for-review'}
             and isinstance(delivery.get('completedAt'), str), 'Compatible recovery attempt has no terminal delivery state')
     if (attempt / 'render-stage.json').exists() or original.get('verifyStage'):

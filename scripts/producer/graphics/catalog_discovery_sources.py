@@ -8,6 +8,7 @@ import json
 import os
 from dataclasses import dataclass
 
+from graphics.visual_source_policy import require_integrated
 from graphics import comp_capabilities
 from graphics import comp_capability_artifact as artifact
 from graphics.template_contract import composition_dimensions, declared_variables
@@ -181,6 +182,7 @@ def load_local() -> tuple[dict[str, dict], list[str]]:
     issues: list[str] = []
     for path in artifact.composition_paths():
         kind = os.path.splitext(os.path.basename(path))[0]
+        require_integrated(kind)
         with open(path, encoding="utf-8") as handle:
             html = handle.read()
         records[kind], issue = _local_record(kind, html)

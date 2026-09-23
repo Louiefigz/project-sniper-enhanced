@@ -25,8 +25,8 @@ from headless.render_build import render_build_manifest_digest
 from headless.render_build_manifest_v1_contract import (
     RENDER_BUILD_V1_IMPLEMENTATION_PATHS,
 )
-from headless.render_build_manifest_v3_contract import RENDER_BUILD_V3_IMPLEMENTATION_PATHS
-from headless.render_build_receipt_v3_semantics import parse_render_build_receipt_v3
+from headless.render_build_manifest_v4_semantics import RENDER_BUILD_V4_IMPLEMENTATION_PATHS
+from headless.render_build_receipt_v4_semantics import parse_render_build_receipt_v4
 from headless.render_build_receipt_semantics import (
     RenderBuildReceiptSchemaError,
     parse_render_build_receipt_v1,
@@ -86,19 +86,19 @@ def _live_manifest(paths: tuple[str, ...], reader: object) -> dict:
 
 
 class RenderBuildReceiptSemanticTests(unittest.TestCase):
-    def test_current_v3_catalog_covers_every_local_execution_import(self) -> None:
-        catalog = frozenset(RENDER_BUILD_V3_IMPLEMENTATION_PATHS)
-        closure = local_import_closure(RENDER_BUILD_V3_IMPLEMENTATION_PATHS)
+    def test_current_v4_catalog_covers_every_local_execution_import(self) -> None:
+        catalog = frozenset(RENDER_BUILD_V4_IMPLEMENTATION_PATHS)
+        closure = local_import_closure(RENDER_BUILD_V4_IMPLEMENTATION_PATHS)
         self.assertFalse(closure - catalog)
         self.assertIn("scripts/producer/headless/render_worker.py", closure)
         self.assertFalse(dynamic_import_calls(closure))
 
-    def test_live_writer_and_current_v3_parser_enforce_the_same_tool_contract(
+    def test_live_writer_and_current_v4_parser_enforce_the_same_tool_contract(
         self,
     ) -> None:
         paths = tuple(f"/opt/sniper/bin/tool-{index}" for index in range(4))
         manifest = _live_manifest(paths, lambda path: path.encode("utf-8"))
-        parsed = parse_render_build_receipt_v3(current_receipt(manifest))
+        parsed = parse_render_build_receipt_v4(current_receipt(manifest))
         self.assertEqual(parsed.manifest.document_json, canonical(manifest))
         for bad_paths, reader, message in (
             ((paths[0],) * 4, lambda path: path.encode("utf-8"), "alias"),

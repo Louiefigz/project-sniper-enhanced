@@ -12,8 +12,8 @@ import type { GuidedPresenterProfileInput } from "../contracts/guided-presenter-
 export { layoutOperation, oldOperation, presenterProposal };
 
 export function profileGraphic(startAnchor = 0, endAnchorExclusive = 2): Row {
-  return layoutOperation({ type: "catalog-graphic", presenterLayout: null, catalogKind: "TEST-card",
-    variables: [{ name: "title", value: "TEST ONLY presentation" }], startAnchor, endAnchorExclusive,
+  return layoutOperation({ type: "catalog-graphic", presenterLayout: null, catalogKind: "line-swap",
+    variables: [{ name: "lineA", value: "TEST ONLY presentation" }], startAnchor, endAnchorExclusive,
     presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal",
       baseTreatment: "preserve", rationale: "TEST ONLY full-canvas native picture metadata." } });
 }
@@ -46,7 +46,7 @@ export function presenterProfileFixture(options: { short?: boolean; captioned?: 
   const target = f.plan.target as Row;
   const evidence = { ...f.evidence, schemaVersion: 8, cleanEnds: [600], occurrences: [], timelineMapHash: "c".repeat(64),
     introSeams: [], hookWindowS: 60, graphicsAdvice: { "graphics_planner.py": { introSemanticBeats: [] } },
-    catalog: [{ kind: "TEST-card", canvas: [target.width, target.height], defaults: { title: "TEST" }, fields: ["title"] }],
+    catalog: [{ kind: "line-swap", canvas: [target.width, target.height], defaults: { lineA: "TEST" }, fields: ["lineA"] }],
     captionPolicy: guidedCaptionPolicy(GUIDED_CAPTION_CONFIG_FILES.map(name => ({ name, sha256: "d".repeat(64) }))),
     musicPolicy: guidedMusicPolicy(f.plan, f.manifest), presenterPolicy: guidedPresenterPolicy(f.plan, f.manifest) } as unknown as ProposalEvidence;
   return materializeProfile({ accepted: f.plan, manifest: f.manifest, proposal: presenterProposal(options.operations ?? operations), evidence });

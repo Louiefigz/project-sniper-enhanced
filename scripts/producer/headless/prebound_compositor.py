@@ -9,6 +9,7 @@ from dataclasses import dataclass
 
 from graphics.composite_core import CompositeOptions, build_graph, composite
 from graphics.composite_smoothness import YDIF_DUP_FAIL, read_inline_ydif
+from graphics.visual_source_policy import require_plan_sources
 
 from .composite_media_checks import (
     MediaCommandConfig,
@@ -43,11 +44,7 @@ from .prebound_compositor_build import (
 )
 from .prebound_compositor_store import CandidateStore
 from .quality_pass_contract import (
-    ArtifactRefV1,
-    GraphicAssetRefV1,
-    MediaRefV1,
-    validate_approved_parent,
-)
+    ArtifactRefV1, GraphicAssetRefV1, MediaRefV1, validate_approved_parent)
 from .quality_pass_outputs import (
     CandidateMediaV1,
     graphic_asset_set_digest,
@@ -135,6 +132,8 @@ def _prepare(
 ) -> _PreparedV1:
     validate_approved_parent(request.candidate.parent)
     plan = request.candidate.application.decoded_plan()
+    require_plan_sources(plan)
+    require_plan_sources(request.candidate.parent.decoded_plan())
     music = plan.get("music")
     if music is not None and (
         type(music) is not dict or music.get("enabled") is not False

@@ -14,7 +14,6 @@ export const VERIFIED_MIMIC_BLOCKERS = [
 
 export type ReferenceExecutionClass =
   | "reference-inspired"
-  | "measured-style-extension"
   | "provisional-style-candidate";
 
 /** Translate the legacy strategy ID into the truthful current product promise. */
@@ -22,7 +21,6 @@ export function referenceExecutionClass(
   strategy: ReferenceStrategy,
 ): ReferenceExecutionClass {
   if (strategy === "mimic") return "reference-inspired";
-  return strategy === "extend"
-    ? "measured-style-extension"
-    : "provisional-style-candidate";
+  if (strategy === "new-style") return "provisional-style-candidate";
+  throw new Error("Legacy style extension is retired; select the actual reference video");
 }

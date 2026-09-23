@@ -39,8 +39,8 @@ def check_graphics(plan: dict, rep: Report) -> None:
         if kind not in comps:
             rep.error(
                 f"graphicsTrack[{i}].kind {kind!r} is not a registered comp — a "
-                f"graphic must be picked from templates/motion/compositions/, "
-                f"never invented (producer-study is the only path to a new one)")
+                f"select the HyperFrames catalog; use a source-bound native "
+                f"project for reference or evidenced custom work")
         for hx in brand.find_hexes(json.dumps(entry.get("spec") or {})):
             if hx not in tokens:
                 rep.error(f"graphicsTrack[{i}] color #{hx} is not a brand token "
@@ -48,14 +48,9 @@ def check_graphics(plan: dict, rep: Report) -> None:
 
 
 def check_title_cards(plan: dict, rep: Report) -> None:
-    """A title/section beat resolves to a title comp — never freeform text."""
-    for i, card in enumerate(plan.get("titleCards") or []):
-        comp = card.get("kind") or card.get("comp")
-        if comp is not None and comp not in brand.TITLE_COMPS:
-            rep.error(
-                f"titleCards[{i}] must render through a title comp "
-                f"{sorted(brand.TITLE_COMPS)} (got {comp!r}); a hand-drawn text "
-                f"overlay is off-system")
+    """Retired title presets cannot pass a standalone brand check."""
+    if plan.get("titleCards"):
+        rep.error("Legacy titleCards are retired; use a HyperFrames catalog title in the native project")
 
 
 def _iter_py(paths: list[str]):

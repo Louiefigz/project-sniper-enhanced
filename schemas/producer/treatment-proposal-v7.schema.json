@@ -77,7 +77,7 @@
     },
     "graphicsStyle": {
       "enum": [
-        "cutaway-only",
+        "catalog-first", "cutaway-only",
         "overlay-rich",
         "face-bridge"
       ]

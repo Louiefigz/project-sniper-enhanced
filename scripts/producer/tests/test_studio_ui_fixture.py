@@ -92,17 +92,6 @@ def _validate_workflow(producer: Path) -> dict:
     return outcomes
 
 
-def _mean_luma(video: Path, seconds: float) -> int:
-    """Measure the hook band only; this is structural media proof, not QC."""
-    result = subprocess.run([
-        "ffmpeg", "-nostdin", "-v", "error", "-ss", str(seconds), "-i", str(video),
-        "-frames:v", "1", "-vf", "crop=1080:600:0:0,scale=1:1,format=gray",
-        "-f", "rawvideo", "-", ], capture_output=True, check=True, timeout=10)
-    if len(result.stdout) != 1:
-        raise AssertionError("expected one luminance sample")
-    return result.stdout[0]
-
-
 class StudioUiFixtureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -131,11 +120,14 @@ class StudioUiFixtureTests(unittest.TestCase):
         self.assertFalse((self.producer / "critic.json").exists())
         self.assertFalse((self.producer / "delivery-receipt.json").exists())
 
-    def test_declared_hook_is_really_in_base_and_exits(self) -> None:
+    def test_base_preserves_source_and_graphics_remain_editable(self) -> None:
         source = self.producer.parent / "source/raw-1.mp4"
         base = self.producer / "base_final.mp4"
-        self.assertGreater(_mean_luma(base, 0) - _mean_luma(source, 0), 20)
-        self.assertLessEqual(abs(_mean_luma(base, 2) - _mean_luma(source, 2)), 1)
+        self.assertEqual(base.read_bytes(), source.read_bytes())
+        plan = json.loads((self.producer / "edit_plan.json").read_text())
+        self.assertEqual(plan["titleCards"], [])
+        self.assertEqual([entry["kind"] for entry in plan["graphicsTrack"]],
+                         ["marker-highlight", "line-swap", "hw-callout-circle"])
 
     def test_timing_copy_repeat_and_undo_pass_strict_import_and_real_gates(self) -> None:
         outcomes = _run([__file__, "--validate", str(self.producer)])

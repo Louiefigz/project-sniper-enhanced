@@ -8,6 +8,7 @@ import json
 import os
 from typing import Optional
 
+from graphics.visual_source_policy import integrated_kinds
 from headless.source_closure import discover_root_sources, discover_source_set
 
 SCHEMA_VERSION = 2
@@ -25,7 +26,7 @@ def composition_paths() -> list[str]:
     """Registered composition paths, excluding throwaway render copies."""
     return [path for path in sorted(glob.glob(
         os.path.join(COMPOSITIONS_DIR, "*.html")))
-        if not os.path.basename(path).startswith("_gs-")]
+        if os.path.splitext(os.path.basename(path))[0] in integrated_kinds()]
 
 
 def composition_kinds() -> set[str]:

@@ -50,7 +50,7 @@ it does not replace source review. Ensure the output manifest describes the
 prepared HTML's IDs and clocks.
 
 ```sh
-.venv/bin/python scripts/producer/studio/native_export.py \
+./sniper .venv/bin/python scripts/producer/studio/native_export.py \
   /absolute/project /absolute/new-attempt \
   --cache /absolute/cache --audio-profile default-v3
 ```
@@ -65,16 +65,16 @@ Before export, an independent reviewer supplies `PREBUILD-REVIEW.json` beside
 the composition. Obtain the exact input binding with:
 
 ```sh
-.venv/bin/python scripts/producer/studio/native_export.py review-input /absolute/project
+./sniper .venv/bin/python scripts/producer/studio/native_export.py review-input /absolute/project
 ```
 
 This command returns a digest and complete file pins; it does not create a pass.
 The review uses the existing native prebuild schema: `schemaVersion: 1`,
 `scope: "native-long-full-project"`, the returned `planHash`, declared separate
-reviewer/planner session IDs and `independent: true`, seven nonempty `coverage`
+reviewer/planner session IDs and `independent: true`, eight nonempty `coverage`
 assessments (`briefAndRetainedMessage`, `assetsAndSourceEvidence`,
 `cuesAndSceneCoverage`, `layoutCropAndText`, `motionAndTransitions`,
-`pacingAndAudio`, `feasibility`), nonempty hash-bound `evidence` references,
+`pacingAndAudio`, `feasibility`, `visualSourceSelection`), nonempty hash-bound `evidence` references,
 and a passing plan-stage `ProducerReview` with no material issues. The shared
 TypeScript validator checks the complete record. All project assets and HTML
 participate in the hash, excluding the review sidecar and generated manifest to
@@ -116,9 +116,16 @@ review quality or prevent an operator using a separate external renderer.
    and every two seconds, then visit them in reverse. Check active media, exact
    scene/source state, pixel stability and a full-quality encoded sample reel.
    The reel contains selected neighborhoods, not an unbroken preview of the edit.
-5. Run the unchanged high-quality/CRF 15, one-worker SDK picture render. Source
+5. Generate continuous moving windows with the same native picture path and exact
+   excerpts of the whole-program audio master. The default invocation stops here.
+   An independent critic reviews picture, motion, context and audio, then supplies
+   a `--preview-reviews /absolute/reviews.json` bundle for a new attempt. See
+   [render readiness](RENDER_READINESS.md) for the bundle and region-map contracts.
+   Unchanged dependency-bound previews and detailed reviews can be reused. A new
+   full-project prebuild review remains required after editorial changes.
+6. Run the unchanged high-quality/CRF 15, one-worker SDK picture render. Source
    frames remain PNG. No resolution, frame rate or quality gate is lowered.
-6. Seal the completed picture under its own verified owner. Then run shared AAC,
+7. Seal the completed picture under its own verified owner. Then run shared AAC,
    mux, sRGB metadata/payload checks, encoded/native comparisons and full decode.
 
 All expensive stages retain the shared heavy-work lease, current memory/disk
@@ -126,6 +133,22 @@ limits and verified descendant cleanup. Long owners can wait up to 600 seconds
 for temporary contention/pressure, recording `waiting-for-capacity` with no
 launched child. Missing telemetry and unverified cleanup still fail explicitly.
 The owner records `running` only after the child exists.
+
+Moving-preview windows have separate `preview-picture-N` and
+`preview-package-N` owners. Each releases its processes and heavy-work lease,
+verifies cleanup and seals its output before the next capacity admission.
+A new attempt automatically restores compatible sealed windows; an audio-package
+failure can reuse its completed picture. Unsealed media from failed older
+monolithic preview attempts is not reusable evidence. Source, runtime, tools,
+media hashes and original cleanup are revalidated before reuse.
+
+Memory telemetry brackets footprint collection with direct owned-process
+identity reads inside one helper. Exited children are distinguished from newly
+observed or unreadable live children; missing live measurements remain errors.
+The existing four-attempt/18-second telemetry bound and memory-pressure limits
+remain in force. Failure receipts distinguish `measurement-unavailable`,
+`host-memory-pressure`, `render-memory-limit`, `cleanup-unverified`,
+`cancelled` and `renderer-failure`.
 
 Picture deadlines are frame-derived, with an explicit cleanup/assembly margin
 and six-hour absolute configuration ceiling. At 30 fps/15 minutes the child

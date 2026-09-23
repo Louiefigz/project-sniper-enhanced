@@ -1,5 +1,38 @@
 # CLAUDE.md — PRODUCER (`scripts/producer/`)
 
+September 22 ordinary render admission: `render_readiness.py` calls the shared
+TypeScript `plan-readiness.ts` validator before `render.py` or `assemble.py`
+starts media work. `readiness_preview.py` uses the existing native full-decode
+admission and retained receipt reader for bounded early preview evidence. Final
+and watermarked draft readiness are separate. No scope/graphics/resume exception.
+See `docs/producer/RENDER_READINESS.md` for the agent-authored review bundle.
+`ordinary_previews.py` generates/registers bounded ordinary context clips after
+deterministic draft admission. `ordinary_preview_media.py` reuses the real
+graphics-free base, ordinary compositor and whole-program master; cold base
+preparation remains full-program work. `ordinary_preview_windows.py` binds local
+reuse and context coverage. `studio/owned_inspection.py` owns each preparation or
+window with the shared native resource/cleanup supervisor. None grants a review
+or final delivery approval.
+Native Short now captures before full render, sharing `check_samples` from
+`studio/native_picture_references.py` with Long. SDK source-cache acquisition
+precedes capture; final output QC still follows encoding. `native_motion_previews.py`
+and `.mjs` automatically generate continuous moving windows and exact whole-master
+audio excerpts. `native_review_regions.py` binds their dependencies;
+`native_preview_history.py` checks completed owners and the complete retained chain.
+`native_motion_review.py` and the shared TS validator require current recorded
+independent preview reviews before full picture work. With no `--preview-reviews`,
+the export stops at previews and records editorial review as pending.
+
+Preview memory recovery: `native_preview_sections.py` supervises and seals each
+window's picture and audio package independently. `native_preview_recovery.py`
+discovers exact-input seals and independently validates restored copies in each
+worker. Cleanup and existing capacity admission separate successive owners.
+`native_render_sampling.py` brackets footprint reads inside one helper;
+`native_render_process_table.py` reads SDK-declared libproc identities without
+spawning `ps` between samples. Live missing measurements still fail closed under
+the existing retry ceiling. See `docs/findings/NATIVE_PROCESS_CHURN_AND_PREVIEW_CHECKPOINTS.md`.
+
+
 September 16 enforced native export: `studio/native_export.py` is the public
 Short/Long selector and common owner admission boundary. The installed native
 SDK CLI and capture workers require a live shared owner. `native_long_prebuild.py`

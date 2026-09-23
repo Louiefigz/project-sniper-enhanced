@@ -239,7 +239,7 @@ function cutDocumentBindings(docs: ReturnType<typeof readDocuments>, authority: 
   return request;
 }
 
-const GRAPHICS_STYLES = ["cutaway-only", "overlay-rich", "face-bridge"];
+const GRAPHICS_STYLES = ["catalog-first"];
 
 /** A v4 candidate may add ONLY the declared graphics style to the accepted target; canvas, rate, mode, scope and excerpt stay exact. */
 function styleFreeTarget(target: unknown): Record<string, unknown> {

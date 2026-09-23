@@ -137,8 +137,7 @@ def good_plan() -> dict:
                    "platforms": ["tiktok", "reels", "shorts"]},
         "cutTrack": [{"sourceId": "raw-1", "start": 0.0, "end": 30.0, "speed": 1.0}],
         "reframe": {"strategy": "face"},
-        "titleCards": [{"outStart": 0.0, "outEnd": 2.5, "text": "Zero sales this month",
-                        "style": "hook", "position": "upper-safe"}],
+        "titleCards": [],  # House title-card designs are retired; native catalog titles are separate.
         "captions": {"burn": True, "style": "karaoke"},
         "brollTrack": [{"outStart": 9.0, "outEnd": 10.5, "assetId": "broll-1",
                         "reason": "covers a jump cut"}],

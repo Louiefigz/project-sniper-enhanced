@@ -49,8 +49,8 @@ function stage(item: ReturnType<typeof fixture>, title: string): void {
     planVersion: 4, target: { mode: "longform" },
     cutTrack: [{ sourceId: "source-1", start: 0, end: 10 }],
     graphicsTrack: [{
-      outStart: 2, outEnd: 5, kind: "statement-card",
-      anchor: "own-screen", reason: "Clarify", spec: { title },
+      outStart: 2, outEnd: 5, kind: "line-swap",
+      anchor: "own-screen", reason: "Clarify", spec: { lineA: title, lineB: "The TEST result", underlineWord: "result" },
     }],
   }));
   beginSurgicalReview(item.dir, { lanes: ["graphics"] });

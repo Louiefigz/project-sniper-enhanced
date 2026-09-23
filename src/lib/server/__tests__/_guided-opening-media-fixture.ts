@@ -25,30 +25,38 @@ import { runOpeningCleanupCasFaults } from "./_guided-opening-cleanup-faults";
 import { executeGuidedOpeningUnderLease } from "../guided-opening-execution";
 import { readGuidedOpeningStatus } from "../guided-opening-status";
 import { approveGuidedOpening } from "../guided-opening-approval";
+import { requiredSemanticBeats } from "../guided-proposal-longform";
 
-const RAW = "Show one own-screen statement card with the exact TEST transcript.";
+const RAW = "Show one own-screen catalog bar chart comparing the exact TEST transcript values 12 and 28.";
 const RAW_LONGFORM = "Dress every strong transcript beat with one own-screen catalog cutaway; keep the cut, audio and color exactly as accepted.";
-const TEXT = "We can make this much clearer today.";
 
-function statementProposal(input: ProposalBrainInput) {
+function numericChartProposal(input: ProposalBrainInput) {
   const evidence = JSON.parse(input.prompt.split("INPUT_DATA_JSON\n")[1]).evidence;
-  if (![4, 5].includes(evidence.schemaVersion)) throw new Error("TEST statement fixture requires explicit V4/V5 evidence");
-  const catalog = evidence.catalog.find((row: { kind: string }) => row.kind === "statement-card");
-  if (!catalog || catalog.canvas.join(",") !== "1920,1080") throw new Error("Actual measured statement-card catalog is unavailable");
+  if (![4, 5].includes(evidence.schemaVersion)) throw new Error("TEST numeric chart fixture requires explicit V4/V5 evidence");
+  const catalog = evidence.catalog.find((row: { kind: string }) => row.kind === "chart-story");
+  if (!catalog || catalog.canvas.join(",") !== "1920,1080") throw new Error("Actual measured landscape chart-story catalog is unavailable");
   const last = evidence.anchors.length - 1;
-  if (last < 3) throw new Error("Synthetic statement needs actual interior frame anchors");
-  const spec = { ...catalog.defaults, text: TEXT, bg: "dark", exit: "hold", iconFile: "", splitText: false };
+  if (last < 3) throw new Error("Synthetic numeric chart needs actual interior frame anchors");
+  const spec = { type: "bars", data: "12,28", labels: ",", emphasize: 1, unit: "", accent: "#054BC9", exit: "hold" };
+  const required = requiredSemanticBeats(evidence);
+  if (required.length !== 1 || required[0].shape !== "comparison" || !required[0].compatibleKinds.includes("chart-story")) {
+    throw new Error("TEST numeric comparison must derive exactly one chart-compatible comparison obligation");
+  }
   const seams: Array<{ seamIndex: number }> = evidence.introSeams ?? [];
-  return { schemaVersion: evidence.schemaVersion, summary: "TEST ONLY statement-card timing/input fixture, not creative approval.",
-    graphicsStyle: "cutaway-only", graphicsStyleRationale: "TEST ONLY: one own-screen full-canvas statement card; the legacy cutaway grammar is the only lane this mechanics fixture exercises.",
-    clauses: [{ start: 0, end: RAW.length, quote: RAW, disposition: "supported", rationale: "TEST transcript copy, locked picture retained.", operationIndices: [0] }],
+  return { schemaVersion: evidence.schemaVersion, summary: "TEST ONLY transcript-grounded chart timing/input fixture, not creative approval.",
+    graphicsStyle: "catalog-first", graphicsStyleRationale: "TEST ONLY: the landscape catalog bar chart compares 12 and 28 from the explicit numeric transcript variant.",
+    clauses: [{ start: 0, end: RAW.length, quote: RAW, disposition: "supported", rationale: "TEST transcript values, locked picture retained.", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: last, purpose: "opening", summary: "TEST whole short program", supportsBeatIndices: [] }],
-    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "statement-card",
+    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "chart-story",
       variables: Object.entries(spec).map(([name, value]) => ({ name, value })), grade: null, startAnchor: 1, endAnchorExclusive: last - 1,
-      presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal", baseTreatment: "preserve", rationale: "TEST full-canvas card with source visible before/after." },
-      reason: "TEST ONLY: exercises one measured own-screen statement card through the exact private opening mechanics.",
+      presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal", baseTreatment: "preserve", rationale: "TEST full-canvas chart with source visible before/after." },
+      reason: "TEST ONLY: compares the exact numeric transcript values through the private own-screen opening mechanics.",
       ...(evidence.schemaVersion === 5 ? { captions: null } : {}) }],
-    beatDecisions: [], hookSeamDecisions: seams.map((seam) => ({ seamIndex: seam.seamIndex, decision: "clean-hook",
+    beatDecisions: [{ beatId: required[0].beatId, decision: "graphic", kind: "chart-story", operationIndex: 0,
+      alternativesConsidered: required[0].compatibleKinds.filter((kind) => kind !== "chart-story"),
+      reason: "TEST ONLY: the explicit 12 versus 28 comparison needs a single side-by-side numeric chart.",
+      selectionReason: "The catalog bar chart displays exactly the two values in this synthetic comparison." }],
+    hookSeamDecisions: seams.map((seam) => ({ seamIndex: seam.seamIndex, decision: "clean-hook",
       reason: "TEST ONLY: a hard cut keeps the synthetic seam clean; no transition lane is exercised.", evidence: "TEST synthetic seam evidence" })),
     openingEndAnchor: last, continuityEndAnchor: last, audioPolicy: "preserve-full-program", colorPolicy: "preserve" };
 }
@@ -79,10 +87,11 @@ export async function createOpeningReadyFixture(options: OpeningFixtureOptions =
   const rawIntent = graphicsIntent + (options.captionPreset ? TEST_CAPTION_INTENT : "");
   const fixture = await createGuidedProposalFixture({ workspace: options.workspace, rawIntent,
     output: (input) => {
-      const proposal = options.program ? longformProposal(input, graphicsIntent) : statementProposal(input);
+      const proposal = options.program ? longformProposal(input, graphicsIntent) : numericChartProposal(input);
       return options.captionPreset ? appendTestCaptionProposal(proposal, graphicsIntent, options.captionPreset) : proposal;
     },
     sourceCanvas: options.sourceCanvas ?? "1920x1080", retainFailure: true, program: options.program,
+    ...(options.program ? {} : { transcriptVariant: "numeric-comparison" as const }),
     ...(options.program && options.captionPreset ? { captionIntent: "auto" as const } : {}) });
   // The default 3-second program can never pass the real deterministic bundle; unit tests stub it. A synthetic
   // long-form program runs the REAL gates so the opening worker only ever receives a lintable draft.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .admitted_quality_pass_composition import (
     inspect_durable_admitted_quality_pass_composition,
+    require_current_composition,
 )
 from .admitted_quality_pass_composition_types import (
     AdmittedQualityPassCompositionRequestV1,
@@ -209,6 +210,10 @@ def inspect_enrolled_admitted_quality_pass_composition(
     request = _checked_request(value)
     operation = _operation(request)
     _precheck(request, operation)
+    try:
+        require_current_composition(request.admitted)
+    except RuntimeError as exc:
+        raise EnrolledAdmittedQualityPassCompositionError(str(exc)) from exc
     enrollment_created, enrolled = _persist_enrollment(request)
     ordered = _persist_ordered_admission(request, operation, enrolled)
     binding = _bind(enrolled, ordered)

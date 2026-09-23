@@ -47,52 +47,15 @@ class ModuleTokensTests(unittest.TestCase):
 
 
 class ModuleCompContractTests(unittest.TestCase):
-    """New comp variables exist; every default names the pre-pack build."""
+    """Retired module opt-ins cannot make house HTML executable again."""
 
-    def _comp(self, name: str) -> str:
-        return (_COMPS / f"{name}.html").read_text(encoding="utf-8")
-
-    def test_statement_card_module_variant(self) -> None:
-        html = self._comp("statement-card")
-        self.assertIn("/motion-tokens.js", html)
-        for var in ('"id":"variant"', '"id":"eyebrow"', '"id":"headlineLines"',
-                    '"id":"statements"', '"id":"statementLands"',
-                    '"id":"exit"', '"id":"evidenceSource"'):
-            self.assertIn(var, html)
-        # Defaults keep the classic path: variant classic, exit hold.
-        self.assertIn('"id":"variant","type":"enum","label":"Build grammar","default":"classic"', html)
-        self.assertIn('"id":"exit","type":"enum","label":"Exit","default":"hold"', html)
-        # The classic word-rise build survives verbatim (untouched lane).
-        self.assertIn("y: 22", html)
-        self.assertIn("stagger: 0.055", html)
-        # v2 replace grammar pieces: 2 empty frames + 0.3s ramp (T-E).
-        self.assertIn("2 / M.FPS", html)
-        self.assertIn("SWAP_RAMP_S = 0.3", html)
-
-    def test_glass_rail_opt_ins(self) -> None:
-        html = self._comp("glass-rail")
-        self.assertIn("/motion-tokens.js", html)
-        self.assertIn('"id":"build","type":"enum","label":"Build grammar","default":"stamp"', html)
-        self.assertIn('"id":"exit","type":"enum","label":"Exit","default":"fade"', html)
-        self.assertIn("skeletonFirst", html)
-        self.assertIn("blurRecede", html)
-        self.assertIn('back.out(1.6)', html)            # stamp build intact
-
-    def test_stat_card_opt_ins(self) -> None:
-        html = self._comp("stat-card")
-        self.assertIn("/motion-tokens.js", html)
-        self.assertIn('"id":"build","type":"enum","label":"Build grammar","default":"pop"', html)
-        for var in ('"id":"eyebrow"', '"id":"evidenceSource"', '"id":"evidenceDate"'):
-            self.assertIn(var, html)
-        self.assertIn("skeletonFirst", html)
-        self.assertIn('back.out(1.5)', html)            # pop build intact
-
-    def test_list_build_opt_in(self) -> None:
-        html = self._comp("list-build")
-        self.assertIn("/motion-tokens.js", html)
-        self.assertIn('"id":"build","type":"enum","label":"Build grammar","default":"pop"', html)
-        self.assertIn("skeletonFirst", html)
-        self.assertIn('back.out(1.5)', html)            # pop build intact
+    def test_all_prior_variants_are_rejected(self) -> None:
+        from graphics.template_contract import entry_errors
+        for kind in ("statement-card", "glass-rail", "stat-card", "list-build"):
+            for spec in ({"variant": "classic"}, {"variant": "module"}, {"build": "pop"}, {"build": "skeleton"}):
+                row = {"kind": kind, "outStart": 0, "outEnd": 4, "spec": spec}
+                self.assertTrue(any("retired" in error for error in entry_errors(row)))
+                self.assertFalse((_COMPS / (kind + ".html")).exists())
 
 
 class ExitGrammarTests(unittest.TestCase):
@@ -146,44 +109,14 @@ class ExitGrammarTests(unittest.TestCase):
 
 
 class ExitGrammarLintWireTests(unittest.TestCase):
-    """The rule fires through plan_lint (same wire the renderers trust)."""
+    """Current source admission runs before an old template's exit grammar."""
 
-    def _plan(self, graphics: list[dict]) -> dict:
-        return {
-            "planVersion": 1,
-            "target": {"mode": "longform", "durationTargetS": 60, "excerpt": True},
-            "cutTrack": [{"sourceId": "raw-1", "start": i * 3.0,
-                          "end": (i + 1) * 3.0, "speed": 1.0} for i in range(20)],
-            "reframe": {"strategy": "face"},
-            "captions": {"burn": False, "style": "line"},
-            "graphicsTrack": graphics,
-        }
-
-    def test_blur_recede_passes_on_a_healthy_window(self) -> None:
-        # Windows end 0.5-1.0s clear of the 3s-grid seams: a blur-recede that
-        # ends ON a seam is now the LL-001 runway ERROR (FAILURE_LEDGER.md),
-        # so "healthy" includes seam runway, not just window length.
-        gfx = [{"outStart": s, "outEnd": s + 9.0, "kind": "statement-card",
-                "spec": {"text": "x", "exit": "blur-recede"},
-                "anchor": "own-screen", "reason": "beat"}
-               for s in (4.0, 24.5, 44.0)]
-        rep = pl.lint(self._plan(gfx), MANIFEST)
-        self.assertFalse([e for e in rep.errors if "exit" in e], rep.errors)
-
-    def test_degenerate_clamp_fails_through_lint(self) -> None:
-        gfx = [{"outStart": 2.95, "outEnd": 11.9, "kind": "statement-card",
-                "spec": {"text": "x", "exit": "blur-recede"},
-                "anchor": "own-screen", "reason": "beat", "exitOnCut": True}]
-        rep = pl.lint(self._plan(gfx), MANIFEST)
-        self.assertTrue(any("cannot complete" in e for e in rep.errors),
-                        rep.errors)
-
-    def test_unknown_exit_fails_through_lint(self) -> None:
-        gfx = [{"outStart": 4.0, "outEnd": 13.0, "kind": "statement-card",
-                "spec": {"text": "x", "exit": "poof"},
-                "anchor": "own-screen", "reason": "beat"}]
-        rep = pl.lint(self._plan(gfx), MANIFEST)
-        self.assertTrue(any("spec.exit" in e for e in rep.errors), rep.errors)
+    def test_retired_statement_cannot_pass_with_any_exit(self) -> None:
+        for exit_kind in ("hold", "fade", "blur-recede", "poof"):
+            plan = good_plan()
+            plan["graphicsTrack"] = [{"kind": "statement-card", "outStart": 2.95,
+                "outEnd": 11.9, "spec": {"text": "TEST", "exit": exit_kind}, "exitOnCut": True}]
+            self.assertTrue(any("retired" in error for error in pl.lint(plan, MANIFEST).errors))
 
 
 if __name__ == "__main__":

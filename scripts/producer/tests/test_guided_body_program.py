@@ -14,12 +14,10 @@ from _guided_body_program import BODY_PROGRAM, CONTRAST_SENTENCE
 from _guided_longform_check import previsual_problems, write_inputs
 from _guided_longform_program import build_program
 from _guided_longform_treatment import build_treatment, kept_words, program_beats
-from _guided_longform_treatment_check import (build_edit_plan, run_gates,
-                                             treatment_problems)
+from _guided_longform_treatment_check import build_edit_plan
 from compile_timeline import compile_plan
 from cut_preview_io import digest
 from graphics.frame_quantization import rounded_frame_index
-from graphics.template_visual_contract import visible_timing
 from guided_body_admission import admit_body_workload
 from guided_graphic_template import inspect_full_program_graphics
 from guided_opening_frames import executable_frames, full_program_frames
@@ -56,103 +54,107 @@ def metadata_packet(plan: dict, rate: str) -> OpeningInputs:
     return inputs
 
 
+def catalog_metadata_plan() -> dict:
+    """Eight TEST chart instances exercise workload only, not editorial selection."""
+    from _guided_longform_program import program_plan
+    plan = program_plan(build_program(312, BODY_PROGRAM))
+    plan['graphicsTrack'] = [
+        {'id': f'test-{index}', 'kind': 'chart-story', 'anchor': 'own-screen',
+         'outStart': start, 'outEnd': start + 3,
+         'spec': {'type': 'bars', 'data': '10,20', 'labels': 'system,', 'emphasize': 0, 'unit': 'minutes'}}
+        for index, start in enumerate((1, 9, 17, 25, 33, 41, 49, 90))]
+    return plan
+
+
 class GuidedBodyProgramTests(unittest.TestCase):
-    """Old hole examples remain; only explicit new source authoring enables chart."""
+    """Retained script metadata and real current template checks stay distinct."""
 
-    def historical_treatment_view(self, treatment: dict) -> dict:
-        """Check today's executable fields before comparing historical authored data.
+    def test_historical_program_values_are_unchanged(self) -> None:
+        expected = {96: '9fec159458be8e4612106114e5dfb7dc2ce9e4bd62e6cea2b60403bf680425f7',
+                    312: 'c244942738f8ca67bbd0605ede5b3cca403e3cfbf0cb1fd80b0e36cfb394f097'}
+        for duration, hashed in expected.items():
+            self.assertEqual(digest(build_program(duration)), hashed)
 
-        The retained 312-second treatment has the original expected digest.
-        Its only current differences are two new layout defaults and the
-        pipeline's necessary 3.45s completion floor, not measurement noise.
-        This detached old view is never used for planning or current gates.
-        """
-        kinds = ("module-pipeline", "agenda-slide")
-        rows = [row for row in treatment["beats"] if row["kind"] in kinds]
-        self.assertEqual([row["kind"] for row in rows], list(kinds))
-        for row in rows:
-            layouts = [value for value in row["variables"] if value["name"] == "layout"]
-            self.assertEqual(layouts, [{"name": "layout", "value": "full-canvas"}])
-        self.assertEqual(rows[0]["minimumHoldS"], 3.45)
-        spec = {value["name"]: value["value"] for value in rows[0]["variables"]}
-        self.assertEqual(visible_timing(kinds[0], spec), (3.45, 2.0, 0.2, 1.25, 0.0))
-        historical = copy.deepcopy(treatment)
-        old_rows = [row for row in historical["beats"] if row["kind"] in kinds]
-        for row in old_rows:
-            row["variables"] = [value for value in row["variables"] if value["name"] != "layout"]
-        old_rows[0]["minimumHoldS"] = 1.5
-        return historical
-
-    def test_historical_program_and_treatment_values_are_unchanged(self) -> None:
-        # Treatment digests after the neutral rename of the module-* graphic kinds. The
-        # historical view is byte-identical to the pre-rename one apart from those kind
-        # names (pre-rename values: fd4f2c21…, 8d8b0234…); program digests are unchanged.
-        expected = {
-            96: ("9fec159458be8e4612106114e5dfb7dc2ce9e4bd62e6cea2b60403bf680425f7",
-                 "43367928337b17ef7a96ce059f67d62cc3aa87f9bf15e24186e205a7bc30a5ad"),
-            312: ("c244942738f8ca67bbd0605ede5b3cca403e3cfbf0cb1fd80b0e36cfb394f097",
-                  "06ede061d2366ded6e4f43a649b4a42ea34c91d040af72712d5cdb6e47de3991"),
-        }
-        for duration, hashes in expected.items():
-            program = build_program(duration)
+    def test_retired_treatment_is_refused_without_rewriting_script(self) -> None:
+        """The old eight-form recipe cannot select retired forms under current policy."""
+        from unittest.mock import patch
+        for variant, error, reason in ((None, KeyError, 'no allocated kind'),
+                                       (BODY_PROGRAM, ValueError, 'statement-card.*outside')):
+            program = build_program(312, variant)
+            before = copy.deepcopy(program)
             beats, allocation = program_beats(program)
-            treatment = build_treatment(program, beats, allocation)
-            historical = self.historical_treatment_view(treatment)
-            self.assertEqual((digest(program), digest(historical)), hashes)
+            with self.subTest(variant=variant), patch('subprocess.Popen') as spawn:
+                with self.assertRaisesRegex(error, reason):
+                    build_treatment(program, beats, allocation)
+                spawn.assert_not_called()
+            self.assertEqual(program, before)
 
-    def test_new_script_has_eight_distinct_forms_and_source_grounded_later_chart(self) -> None:
-        program, beats, treatment, plan = authored()
-        self.assertGreaterEqual(program["meta"]["outputDurationS"], 300)
-        self.assertFalse(program["meta"]["excerpt"])
-        self.assertIn(CONTRAST_SENTENCE, [row["text"] for row in program["transcript"]["transcript"]])
+    def test_script_retains_eight_beats_and_source_grounded_numeric_contrast(self) -> None:
+        program = build_program(312, BODY_PROGRAM)
+        beats, _ = program_beats(program)
+        self.assertGreaterEqual(program['meta']['outputDurationS'], 300)
+        self.assertFalse(program['meta']['excerpt'])
+        self.assertIn(CONTRAST_SENTENCE, [row['text'] for row in program['transcript']['transcript']])
         self.assertEqual(len(beats), 8)
-        self.assertEqual(len({row["kind"] for row in plan["graphicsTrack"]}), 8)
-        self.assertEqual(treatment_problems(treatment, beats), [])
-        self.assertEqual(plan["graphicsTrack"][-1]["kind"], "chart-story")
-        self.assertGreater(plan["graphicsTrack"][-1]["outStart"], 67)
-        self.assertTrue(all(row["anchor"] == "own-screen" for row in plan["graphicsTrack"]))
+        self.assertGreater(beats[-1]['outStart'], 67)
 
     def test_actual_all_row_frame_template_and_workload_checks(self) -> None:
-        plan = authored()[-1]
-        for rate in ("30", "30000/1001"):
+        plan = catalog_metadata_plan()
+        for rate in ('30', '30000/1001'):
             inputs = metadata_packet(plan, rate)
             before = copy.deepcopy(inputs.documents)
             result = inspect_full_program_graphics(inputs, lambda: None)
-            self.assertEqual(len(result["graphics"]), 8)
+            self.assertEqual(len(result['graphics']), 8)
             self.assertEqual(len(executable_frames(inputs)), 7)
-            workload = admit_body_workload(inputs, {"fullProgram": {"base": {"sizeBytes": 1}}})
-            self.assertEqual(workload["fullGraphics"], 8)
-            self.assertFalse(result["bodyRendered"])
+            workload = admit_body_workload(inputs, {'fullProgram': {'base': {'sizeBytes': 1}}})
+            self.assertEqual(workload['fullGraphics'], 8)
+            self.assertFalse(result['bodyRendered'])
+            self.assertFalse(result['deliveryApproved'])
             self.assertEqual(inputs.documents, before)
 
-    def test_historical_later_hole_is_still_rejected_not_silently_changed(self) -> None:
-        inputs = metadata_packet(authored(None)[-1], "30000/1001")
+    def test_historical_later_hole_is_rejected_without_silent_substitution(self) -> None:
+        plan = catalog_metadata_plan()
+        plan['graphicsTrack'][-1]['kind'] = 'module-takeover'
+        inputs = metadata_packet(plan, '30000/1001')
+        before = copy.deepcopy(inputs.documents)
         self.assertEqual(len(executable_frames(inputs)), 7)
-        with self.assertRaisesRegex(RuntimeError, "placement/effect intent"):
+        with self.assertRaisesRegex(RuntimeError, 'placement/effect intent'):
             full_program_frames(inputs)
+        self.assertEqual(inputs.documents, before)
 
-    def test_real_cut_and_four_quality_clis_pass_without_media_or_gate_stubs(self) -> None:
-        program, _, _, plan = authored()
-        with tempfile.TemporaryDirectory(prefix="sniper-body-program-gates-") as root:
+    def test_real_cut_preserves_full_duration_without_visual_recipe(self) -> None:
+        from _guided_longform_program import program_plan
+        program = build_program(312, BODY_PROGRAM)
+        plan = program_plan(program)
+        self.assertAlmostEqual(compile_plan(plan).output_duration, program['meta']['outputDurationS'])
+        self.assertGreaterEqual(compile_plan(plan).output_duration, 300)
+        self.assertFalse(plan.get('graphicsTrack'))
+        with tempfile.TemporaryDirectory(prefix='TEST-body-cut-gate-') as root:
             paths = write_inputs(program, root)
             with contextlib.redirect_stdout(io.StringIO()) as log:
-                cut_problems = previsual_problems(paths)
-                Path(paths["plan"]).write_text(json.dumps(plan))
-                problems = run_gates(paths)
-            self.assertEqual(cut_problems + problems, [], log.getvalue())
+                problems = previsual_problems(paths)
+            self.assertEqual(problems, [], log.getvalue())
 
     def test_unspoken_numeric_copy_and_unknown_or_short_variants_fail(self) -> None:
         from claims_contract import check_claims_contract
         from plan_lint import Report
-        program, _, _, plan = authored()
-        plan["graphicsTrack"][-1]["spec"]["data"] = "10, 99"
+        program = build_program(312, BODY_PROGRAM)
+        plan = catalog_metadata_plan()
+        plan['graphicsTrack'] = [plan['graphicsTrack'][-1]]
+        graphic = plan['graphicsTrack'][0]
+        graphic.update(outStart=76.704, outEnd=79.872)
+        graphic['spec']['data'] = '10, 20'
+        baseline = Report()
+        check_claims_contract(plan, kept_words(program), baseline)
+        self.assertEqual(baseline.errors, [])
+        graphic['spec']['data'] = '10, 99'
         report = Report()
         check_claims_contract(plan, kept_words(program), report)
-        self.assertTrue(any("99" in error for error in report.errors), report.errors)
-        for duration, variant in ((96, BODY_PROGRAM), (312, "unregistered")):
+        self.assertTrue(any('99' in error for error in report.errors), report.errors)
+        for duration, variant in ((96, BODY_PROGRAM), (312, 'unregistered')):
             with self.assertRaises(ValueError):
                 build_program(duration, variant)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(verbosity=2)

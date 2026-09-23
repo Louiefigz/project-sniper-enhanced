@@ -1,6 +1,27 @@
 import type { SceneSpecV1 } from "../contracts/scene-spec";
+import path from "node:path";
+import { canonicalJsonSha256, fileSha256 } from "../../server/auto-edit-hash";
+import { VISUAL_SOURCE_POLICY } from "../visual-source-policy";
 
 export const fixtureHash = (value: string): string => value.repeat(64);
+
+/** Synthetic source admission matching the Python fixture; no creative approval. */
+function bindTestSceneSource(scene: SceneSpecV1): SceneSpecV1 {
+  const request = path.join(process.cwd(), "scripts/producer/tests/fixtures/fire-sparkles-bundle/bundle.json");
+  scene.visualSources = {
+    schemaVersion: 1, policyVersion: VISUAL_SOURCE_POLICY.policyVersion,
+    subjectSha256: canonicalJsonSha256(scene),
+    request: { path: request, sha256: fileSha256(request)! },
+    decisions: [{ route: "custom", targets: scene.elements.map(row => row.elementId),
+      reason: "TEST-only two-unit scene for deterministic operation and SDK contracts.",
+      gapType: "missing-capability", query: "Two independently addressable seeded particle cards",
+      gap: "The inspected line-swap component does not expose two separate seeded particle units.",
+      scope: "TEST fixture only: keep two addressable units for mutation and isolation checks.",
+      inspected: [{ id: "line-swap", sourceSha256: VISUAL_SOURCE_POLICY.integrated["line-swap"].upstreamSha256,
+        limitation: "One text replacement component does not implement the synthetic two-unit API." }] }],
+  };
+  return scene;
+}
 
 export function fireSparklesScene(
   bundleHash = fixtureHash("b"),
@@ -13,7 +34,7 @@ export function fireSparklesScene(
     fireIntensity: 1,
     sparkleCount: 22,
   };
-  return {
+  return bindTestSceneSource({
     schemaVersion: 1,
     sceneId: "scene-045",
     version: 1,
@@ -91,7 +112,7 @@ export function fireSparklesScene(
       origin: "operator",
       requestId: "request-fire-sparkles",
     },
-  };
+  });
 }
 
 export function treatmentEnvelope(action: unknown) {

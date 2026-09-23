@@ -1,3 +1,4 @@
+import { assertNativeMotionReviews } from "../../src/lib/server/native-motion-review";
 /** Local native Shorts entry point; this command never invokes a model/provider. */
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -29,6 +30,7 @@ function guidedVisual(file: string) {
 
 export async function executeNativeShortCommand(argv: string[]) {
   const [operation, input, destination] = argv;
+  if (operation === "check-motion-reviews" && argv.length === 3) return assertNativeMotionReviews(path.resolve(input), path.resolve(destination));
   if (operation === "check-long-review" && argv.length === 3) return assertNativeLongPrebuildReview(path.resolve(input), destination);
   if (operation === "check-export" && argv.length === 2) {
     const plan = readNativeShortProject(path.resolve(input));

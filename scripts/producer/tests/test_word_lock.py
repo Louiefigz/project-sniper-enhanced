@@ -92,7 +92,7 @@ class WordLockLintTests(unittest.TestCase):
 
     def test_plan_lint_runs_word_lock_only_when_words_given(self) -> None:
         plan = good_plan()
-        plan["transitions"] = [{"outTime": 9.37, "kind": "white-flash"}]
+        plan["graphicsTrack"] = [{"outStart": 9.37, "outEnd": 11.37, "anchor": "free-band", "kind": "line-swap", "spec": {"lineA": "x", "lineB": "x", "underlineWord": "x", "swapAt": 0.5}}]
         base = pl.lint(plan, MANIFEST)                    # no words: unchanged
         self.assertFalse([w for w in base.warnings if "word boundary" in w])
         with_words = pl.lint(plan, MANIFEST, WORDS)

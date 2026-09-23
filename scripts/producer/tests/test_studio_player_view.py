@@ -72,25 +72,26 @@ def _skip_reason() -> str | None:
 
 
 def _player_plan() -> dict:
-    """3 real kinds at separated windows over a 12s base (like _studio_plan)."""
+    """3 real catalog entries at separated windows over a 12s base (like _studio_plan)."""
     return {
         "planVersion": 1,
-        "target": {"mode": "longform"},
+        "target": {"mode": "short"},
         "cutTrack": [
             {"sourceId": "raw-1", "start": 0.0, "end": 12.0, "speed": 1.0},
         ],
         "graphicsTrack": [
-            {"kind": "statement-card", "outStart": 1.0, "outEnd": 3.5,
+            {"kind": "line-swap", "outStart": 1.0, "outEnd": 3.5,
              "anchor": "own-screen", "reason": "thesis takeover",
-             "spec": {"variant": "classic",
-                      "text": "Ship the *system* not the tactic"}},
-            {"kind": "text-element-wide", "outStart": 4.5, "outEnd": 6.5,
+             "spec": {"lineA": "More tactics", "lineB": "One system",
+                      "swapAt": 1.2, "underlineWord": ""}},
+            {"kind": "marker-highlight", "outStart": 4.5, "outEnd": 6.5,
              "anchor": "free-band", "reason": "callout",
-             "spec": {"text": "Callout copy", "fontSize": 72}},
-            {"kind": "kinetic-quote-wide", "outStart": 7.5, "outEnd": 10.5,
+             "spec": {"text": "Callout copy", "emphasisWord": "copy",
+                      "drawAt": 1, "style": "highlight"}},
+            {"kind": "marker-highlight", "outStart": 7.5, "outEnd": 10.5,
              "anchor": "own-screen", "reason": "quote",
-             "spec": {"words": "More tactics was never the answer",
-                      "emphasisWords": "never"}},
+             "spec": {"text": "More tactics was never the answer",
+                      "emphasisWord": "never", "drawAt": 1}},
         ],
     }
 
@@ -98,7 +99,7 @@ def _player_plan() -> dict:
 def _make_base_4k(path: str) -> None:
     subprocess.run(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-         "-i", "color=c=0x336699:s=3840x2160:d=12:r=30",
+         "-i", "color=c=0x336699:s=2160x3840:d=12:r=30",
          "-c:v", "libx264", "-preset", "ultrafast", "-crf", "30",
          "-pix_fmt", "yuv420p", path], check=True)
 

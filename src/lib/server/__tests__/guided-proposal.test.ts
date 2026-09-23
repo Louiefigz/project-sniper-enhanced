@@ -68,7 +68,9 @@ test("raw request and actual pinned advisors compile one private unapproved prop
       readRawTreatmentAdmission(fixture.ctx.dir).clock.hash);
     assert.equal(result.result.candidate!.baselineLook, undefined);
     assert.equal(result.result.range!.approval.endFrameExclusive, fixture.receipt.media.videoFrames);
-    assert.ok(result.evidence.catalog.length > 10); assert.ok(result.evidence.graphicsAdvice["graphics_planner.py"]);
+    assert.deepEqual(result.evidence.catalog.map((row) => row.kind).sort(), ["chart-story", "ui-focus-zoom"]);
+    assert.ok(result.evidence.catalog.every((row) => row.canvas.join(",") === "1920,1080"));
+    assert.ok(result.evidence.graphicsAdvice["graphics_planner.py"]);
     assert.equal((await compileGuidedTreatmentProposal({ dir: fixture.ctx.dir, submission: compile }, { brain: async () => { throw new Error("replay must not call model"); } })).replayed, true);
     await assert.rejects(compileGuidedTreatmentProposal({ dir: fixture.ctx.dir, submission: { ...compile, idempotencyKey: randomUUID() } }), /different proposal/);
     assert.deepEqual(readFileSync(fixture.ctx.planPath), before); assert.equal(canonicalJsonSha256(fixture.ctx), ctx); noPromotion(fixture);
@@ -202,7 +204,7 @@ test("unsupported natural-language clauses remain a blocking proposal, not false
     const text = "Add punchy music, captions, and move my conclusion first.", request = intake(fixture, text);
     await admitRawTreatment({ dir: fixture.ctx.dir, submission: request });
     const output = { schemaVersion: CURRENT_TREATMENT_PROPOSAL_VERSION, summary: "TEST ONLY unresolved raw request.",
-      graphicsStyle: "cutaway-only", graphicsStyleRationale: "TEST ONLY grammar choice; it asserts no creative or renderer quality.",
+      graphicsStyle: "catalog-first", graphicsStyleRationale: "TEST ONLY grammar choice; it asserts no creative or renderer quality.",
       clauses: [{ start: 0, end: text.length, quote: text, disposition: "cut-affecting", rationale: "The cut-order change and unimplemented music require resolution; a caption preset cannot satisfy the whole clause.", operationIndices: [] }],
       beats: [], operations: [], beatDecisions: [], hookSeamDecisions: [],
       openingEndAnchor: null, continuityEndAnchor: null, audioPolicy: "preserve-full-program", colorPolicy: "preserve" };

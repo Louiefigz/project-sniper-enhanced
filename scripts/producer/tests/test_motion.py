@@ -1,61 +1,50 @@
 """motion tests (split from selftest.py)."""
 import unittest
+from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
 
 
 class TransitionEngineTests(unittest.TestCase):
-    """transitions.py — seam-cover primitives (R15: no naked butt joints)."""
+    """Inert seam expression units and real refusal of retired render routes."""
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        if shutil.which("ffmpeg") is None:
-            raise unittest.SkipTest("ffmpeg not on PATH")
-        cls.dir = tempfile.mkdtemp(prefix="selftest-transitions-")
-        cls.src = os.path.join(cls.dir, "src.mp4")
-        tr.run_ff(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                   "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=24:duration=4",
-                   "-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000:duration=4",
-                   "-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p",
-                   "-c:a", "aac", "-b:a", "128k", "-shortest", cls.src])
-        cls.out = os.path.join(cls.dir, "out.mp4")
-        cls.result = tr.apply_transitions(
-            cls.src, [{"outTime": 2.0, "kind": "white-flash", "sfx": True}], cls.out)
+    def test_retired_parser_refuses_before_sfx_resolution(self) -> None:
+        for kind in ('white-flash', 'light-leak', 'zoom-pull', 'cross-dissolve'):
+            with self.subTest(kind=kind), patch.object(tr, 'resolve_sfx') as sfx:
+                with self.assertRaisesRegex(ValueError, 'Legacy transition presets are retired'):
+                    tr.parse_events([{'outTime': 2.0, 'kind': kind, 'sfx': 'TEST-named'}], 10.0)
+                sfx.assert_not_called()
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        shutil.rmtree(cls.dir, ignore_errors=True)
+    def test_retired_render_refuses_before_probe_process_or_output(self) -> None:
+        with tempfile.TemporaryDirectory(prefix='TEST-retired-transition-') as root:
+            source = os.path.join(root, 'inert-source.mp4')
+            output = os.path.join(root, 'uncreated', 'out.mp4')
+            with open(source, 'wb') as handle:
+                handle.write(b'TEST inert source bytes, never decoded')
+            for kind in ('white-flash', 'light-leak'):
+                with self.subTest(kind=kind), patch.object(tr, 'probe_video') as probe, patch(
+                        'subprocess.Popen') as process, self.assertRaisesRegex(ValueError, 'retired'):
+                    tr.apply_transitions(source, [{'outTime': 2.0, 'kind': kind, 'sfx': True}], output)
+                probe.assert_not_called()
+                process.assert_not_called()
+                self.assertEqual(os.listdir(root), ['inert-source.mp4'])
+                with open(source, 'rb') as handle:
+                    self.assertEqual(handle.read(), b'TEST inert source bytes, never decoded')
 
-    def test_event_validation_rejects_bad_input(self) -> None:
-        with self.assertRaises(ValueError):     # unsorted / too close
-            tr.parse_events([{"outTime": 3.0, "kind": "white-flash"},
-                             {"outTime": 2.0, "kind": "light-leak"}], 10.0)
-        with self.assertRaises(ValueError):     # unknown kind
-            tr.parse_events([{"outTime": 2.0, "kind": "cross-dissolve"}], 10.0)
-        with self.assertRaises(ValueError):     # outside the edge margin
-            tr.parse_events([{"outTime": 9.9, "kind": "white-flash"}], 10.0)
-        with self.assertRaises(ValueError):     # non-boolean sfx
-            tr.parse_events([{"outTime": 2.0, "kind": "white-flash",
-                              "sfx": "yes"}], 10.0)
+    def test_inert_flash_expression_has_one_seam_and_one_preframe(self) -> None:
+        events = [tr.TransitionEvent(2.0, 'white-flash')]
+        expression = tr.build_video_filter(events, 24.0, (320, 180))
+        self.assertIn('0.6*eq(N,47)+eq(N,48)', expression)
+        self.assertIn('between(n,47,48)', expression)
+        self.assertNotIn('eq(N,49)', expression)
+        self.assertNotIn('scale=w=', expression)
 
-    def test_frame_count_preserved_exactly(self) -> None:
-        self.assertEqual(self.result["inFrames"], self.result["outFrames"])
-        self.assertEqual(tr.probe_video_frames(self.out),
-                         tr.probe_video_frames(self.src))
+    def test_inert_flash_expression_uses_native_rational_frame_clock(self) -> None:
+        expression = tr.build_video_filter([tr.TransitionEvent(2.0, 'white-flash')],
+                                          30000 / 1001, (320, 180))
+        self.assertIn('eq(N,60)', expression)
+        self.assertIn('between(n,59,60)', expression)
 
-    def test_seam_frame_is_white(self) -> None:
-        # The full-white frame sits exactly on outTime (frame 48 @24fps).
-        self.assertGreater(_frame_yavg(self.out, 48), 200.0)
-
-    def test_neighbor_frames_stay_clean(self) -> None:
-        # One frame after the seam is already the clean new shot (3-frame law);
-        # compare against the source's own frame so scene content cancels out.
-        self.assertLess(abs(_frame_yavg(self.out, 49) - _frame_yavg(self.src, 49)), 8.0)
-        self.assertLess(abs(_frame_yavg(self.out, 36) - _frame_yavg(self.src, 36)), 8.0)
-
-    def test_audio_duration_preserved(self) -> None:
-        self.assertLess(abs(self.result["audioOutS"] - self.result["audioInS"]),
-                        tr.AUDIO_DUR_TOL_S)
 
 
 class BaselineLookTests(unittest.TestCase):

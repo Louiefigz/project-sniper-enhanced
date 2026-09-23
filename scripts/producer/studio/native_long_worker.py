@@ -10,8 +10,6 @@ from dataclasses import replace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import numpy as np
-
 from audio.mastering_profile import resolve_mastering_profile
 from audio.native_audio_donor import prepare_audio_donor
 from audio.native_master_preparation import NativeMasterPreparation, prepare_native_master
@@ -19,38 +17,11 @@ from cut_preview_io import bound_json, write_new
 from stage_timing import stage_span
 from studio.native_long_contract import read_long_plan, long_audio_canvas
 from studio.native_preflight import preflight
-from studio.native_picture_references import picture_metrics, qualify_reverse_frames
-from studio.native_selected_frames import SelectedFrames, compare_selected_frames
+from studio.native_picture_references import check_samples
 from studio.native_short_delivery import finish_dialogue, native_srgb_delivery, clock, dialogue_review_sections
 from studio.native_short_worker import render_command, verify_files, verify_media
-from studio.native_stage_evidence import read_native_capture_receipt, read_stage
+from studio.native_stage_evidence import read_stage
 from studio.native_runtime import digest
-
-
-def check_samples(request: dict, plan: dict) -> None:
-    """Decode actual encoded sample neighborhoods and apply the existing pixel gates."""
-    root = Path(request['output'])
-    native = read_native_capture_receipt(root / 'native-frames.json')
-    if native['status'] != 'native-references-and-seek-states-pass':
-        raise RuntimeError('Long native seam/reverse checks failed')
-    rows = [row for row in native['frames'] if not row['repeat']]
-    canvas = plan['canvas']
-    selection = SelectedFrames(tuple(range(len(rows))), canvas['width'], canvas['height'], len(rows))
-    qualify_reverse_frames(native, selection.shape)
-    reel = native['sampleReel']
-    if digest(Path(reel['path'])) != reel['sha256'] or reel['frames'] != [row['frame'] for row in rows]:
-        raise RuntimeError('Long encoded sample reel changed')
-    directory = root / 'sample-qc'
-    directory.mkdir()
-    def compare(frame: int, pixels: np.ndarray) -> dict:
-        """Compare encoded reel frames to their original absolute-time references."""
-        row = rows[frame]
-        return {'frame': row['frame'], **picture_metrics(Path(row['path']), pixels, selection.shape, row['sha256'])}
-    comparisons, decoded = compare_selected_frames(Path(reel['path']), selection, compare, directory)
-    result = {'passed': all(row['passed'] for row in comparisons), 'comparisons': comparisons, 'decode': decoded}
-    write_new(directory / 'result.json', result)
-    if not result['passed']:
-        raise RuntimeError('Long encoded seam sample failed before master render')
 
 
 def capture(request: dict, plan: dict) -> None:
@@ -102,7 +73,15 @@ def execute(request: dict, phase: str) -> None:
     verify_files(request)
     if phase == 'capture':
         capture(request, plan)
+    elif phase.startswith(('preview-picture-', 'preview-package-')):
+        from studio.native_preview_sections import execute_section
+        execute_section(request, plan, phase)
+    elif phase == 'preview':
+        from studio.native_motion_previews import render_previews
+        render_previews(request, plan)
     elif phase == 'picture':
+        from studio.native_motion_previews import require_motion_previews
+        require_motion_previews(request)
         if bound_json(Path(request['output']) / 'sample-qc/result.json').get('passed') is not True:
             raise RuntimeError('Long picture requires passed encoded seam samples')
         with stage_span(request['output'], 'native_picture_render'):

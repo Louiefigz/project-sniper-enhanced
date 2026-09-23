@@ -26,9 +26,9 @@ _DIMS = (1080, 1920)
 
 
 def _entry(**over) -> dict:
-    base = {"outStart": 4.0, "outEnd": 6.0, "kind": "stat-card",
+    base = {"outStart": 4.0, "outEnd": 6.0, "kind": "line-swap",
             "anchor": "free-band",
-            "spec": {"value": "TEST", "label": "PLACEMENT"},
+            "spec": {"lineA": "TEST first", "lineB": "TEST second", "underlineWord": "second", "swapAt": 0.5},
             "reason": "test"}
     base.update(over)
     return base

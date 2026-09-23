@@ -1,4 +1,4 @@
-import type { ReferenceIntent } from "@/lib/producer/intent-presets";
+import { validateReferenceIntent, type ReferenceIntent } from "@/lib/producer/intent-presets";
 
 export type { ReferenceIntent };
 
@@ -92,12 +92,6 @@ export interface StudyActivity {
   percent?: number;
 }
 
-export const KNOWN_STYLES: Array<{ id: KnownReferenceStyle; label: string }> = [
-  { id: "restrained", label: "Restrained" },
-  { id: "punch", label: "Punch" },
-  { id: "slideware", label: "Slideware" },
-];
-
 export function suggestedMode(reference: ReferenceEntry): ReferenceMode | undefined {
   return reference.profile?.suggestedMode ?? reference.profile?.modeSuggestion ?? undefined;
 }
@@ -107,14 +101,18 @@ export function referenceIntent(reference: ReferenceEntry): ReferenceIntent | nu
   if (!decision) return null;
   if (typeof reference.status !== "string" && reference.status.state !== "ready") return null;
   if (typeof reference.status === "string" && !reference.studied) return null;
-  return {
+  try {
+    return validateReferenceIntent({
     id: reference.id,
     title: reference.title,
     mode: decision.mode,
     strategy: decision.strategy,
     ...(decision.targetStyle ? { targetStyle: decision.targetStyle } : {}),
     ...(decision.candidateStyleName ? { candidateStyleName: decision.candidateStyleName } : {}),
-  };
+    });
+  } catch {
+    return null;
+  }
 }
 
 export function formatDuration(seconds?: number | null): string | null {

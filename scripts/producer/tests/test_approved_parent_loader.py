@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from _common import pl  # noqa: F401
+from _retired_r0_lease_fixture import historical_lease
 from _approved_parent_loader_fixture import ApprovedParentAuthorityFixture
 from headless.approved_parent_loader import (
     ApprovedParentLoadError,
@@ -104,7 +105,7 @@ class ApprovedParentLoaderTests(unittest.TestCase):
         self.assertEqual(authority.evidence.audit.summary.failed, 0)
         self.assertEqual(len(lease.evidence.class_artifacts), 41)
 
-    def test_complete_r0_generation_loads_and_lease_is_revoked(self) -> None:
+    def test_static_historical_evidence_and_test_lease_revocation(self) -> None:
         fixture = self.fixture
         expected = fixture.documents.expected_parent()
         self._assert_exact_profile(fixture)
@@ -112,10 +113,10 @@ class ApprovedParentLoaderTests(unittest.TestCase):
             "headless.approved_parent_loader.validate_parent_media",
             return_value=fixture.base_probe(),
         ) as media_check:
-            with self._loader(fixture) as lease:
+            with historical_lease(fixture) as lease:
                 self._assert_loaded_lease(lease, fixture, expected)
                 retained = lease
-        media_check.assert_called_once()
+        media_check.assert_not_called()
         with self.assertRaisesRegex(ApprovedParentLoadError, "stale or closed"):
             retained.resolve_parent(expected)
         with self.assertRaisesRegex(ApprovedParentLoadError, "lease is closed"):
@@ -128,7 +129,7 @@ class ApprovedParentLoaderTests(unittest.TestCase):
         with patch(
             "headless.approved_parent_loader.validate_parent_media",
             return_value=fixture.base_probe(),
-        ), self._loader(fixture) as lease:
+        ), historical_lease(fixture) as lease:
             ref = lease.parent.plan_artifact
             resolved = Path(lease.resolve_artifact(ref))
             expected = fixture.materialization / ref.relative_path
@@ -144,6 +145,18 @@ class ApprovedParentLoaderTests(unittest.TestCase):
             wrong_parent = dataclasses.replace(lease.parent.ref, plan_digest="0" * 64)
             with self.assertRaisesRegex(ApprovedParentLoadError, "stale or closed"):
                 lease.resolve_parent(wrong_parent)
+
+    def test_current_loader_rejects_retired_clips_without_media_launch(self) -> None:
+        fixture = self.fixture
+        before = {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()}
+        with patch('subprocess.Popen') as process, patch(
+                'headless.approved_parent_loader.validate_parent_media',
+                return_value=fixture.base_probe()), self.assertRaisesRegex(
+                    ValueError, 'section-marker.*retired'):
+            with self._loader(fixture):
+                self.fail('retired parent yielded a current lease')
+        process.assert_not_called()
+        self.assertEqual(before, {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()})
 
     def test_stale_caller_expected_parent_is_rejected(self) -> None:
         fixture = self.fixture
@@ -197,7 +210,7 @@ class ApprovedParentLoaderTests(unittest.TestCase):
             return_value=fixture.base_probe(),
         ):
             with self.assertRaisesRegex(RuntimeError, "caller failure"):
-                with self._loader(fixture):
+                with historical_lease(fixture):
                     raise RuntimeError("caller failure")
 
 

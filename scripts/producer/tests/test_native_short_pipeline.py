@@ -40,15 +40,15 @@ class NativeShortPipelineTests(unittest.TestCase):
         """Read the actual coordinator's persisted final status."""
         return json.loads(((root or self.fixture.root) / 'delivery.json').read_text())
 
-    def test_default_runs_three_separate_owners_in_order(self) -> None:
+    def test_default_runs_separate_section_and_delivery_owners_in_order(self) -> None:
         """No final success appears until render, capture and encoded QC complete."""
         self.assertTrue(self.pipeline().execute())
         calls = self.fixture.calls
-        self.assertEqual([label for label, _ in calls], ['pipeline', 'capture', 'verification'])
-        self.assertEqual([config.deadline for _, config in calls], [600, 600, 600])
-        self.assertEqual(len({id(config) for _, config in calls}), 3)
-        self.assertEqual(calls[0][1].command[-1], 'render')
-        self.assertEqual(calls[2][1].command[-1], 'verify')
+        self.assertEqual([label for label, _ in calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview', 'pipeline', 'verification'])
+        self.assertEqual([config.deadline for _, config in calls], [600, 1200, 1200, 600, 600, 600])
+        self.assertEqual(len({id(config) for _, config in calls}), 6)
+        self.assertEqual(calls[4][1].command[-1], 'render')
+        self.assertEqual(calls[5][1].command[-1], 'verify')
         self.assertEqual(self.delivery()['status'], FINAL_STATUS)
         self.assertFalse(self.delivery()['humanApproved'])
         for _, config in calls:
@@ -59,7 +59,7 @@ class NativeShortPipelineTests(unittest.TestCase):
         """Original single-session Node capture is unmodified and independently bounded."""
         with mock.patch('studio.native_short_delivery.run', side_effect=AssertionError('wrong runner')):
             self.assertTrue(self.pipeline().execute())
-        config = self.fixture.calls[1][1]
+        config = self.fixture.calls[0][1]
         self.assertEqual(config.command[3], str(self.fixture.node))
         self.assertTrue(config.command[4].endswith('/native_short_capture.mjs'))
         self.assertEqual(config.command[5:], [str(self.fixture.root / 'export-request.json')])
@@ -72,7 +72,7 @@ class NativeShortPipelineTests(unittest.TestCase):
         self.fixture.request['captureMode'] = 'cached-native-batches'
         self.fixture.write_request(self.fixture.request)
         self.assertTrue(self.pipeline().execute())
-        config = self.fixture.calls[1][1]
+        config = self.fixture.calls[0][1]
         self.assertTrue(config.command[4].endswith('/native_short_worker.py'))
         self.assertEqual(config.command[-1], 'capture')
         self.assertEqual(self.delivery()['status'], FINAL_STATUS)
@@ -80,7 +80,7 @@ class NativeShortPipelineTests(unittest.TestCase):
     def test_render_only_is_reusable_but_never_final_qualified(self) -> None:
         """Successful media generation cannot masquerade as a checked deliverable."""
         self.assertTrue(self.pipeline().execute(render_only=True))
-        self.assertEqual([label for label, _ in self.fixture.calls], ['pipeline'])
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview', 'pipeline'])
         result = self.delivery()
         self.assertEqual(result['status'], RENDER_STATUS)
         self.assertNotIn('fullAudioVideoDecodePassed', result)
@@ -89,36 +89,52 @@ class NativeShortPipelineTests(unittest.TestCase):
         self.assertEqual(record['artifacts']['review']['sha256'], result['sha256'])
 
     def assert_capture_failure(self, failure: BaseException | bool) -> None:
-        """A failed native capture leaves media reusable without starting decode."""
+        """A failed early capture never starts full picture/audio rendering."""
         self.fixture.failures['capture'] = failure
         self.assertFalse(self.pipeline().execute())
-        self.assertEqual([label for label, _ in self.fixture.calls], ['pipeline', 'capture'])
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture'])
         result = self.delivery()
         self.assertEqual(result['status'], 'failed')
-        self.assertTrue((self.fixture.root / 'render-stage.json').is_file())
-        self.assertEqual(result['renderStage'], str(self.fixture.root / 'render-stage.json'))
+        self.assertFalse((self.fixture.root / 'render-stage.json').exists())
+        self.assertNotIn('renderStage', result)
         self.assertFalse((self.fixture.root / 'checks.json').exists())
-        read_stage(Path(result['renderStage']), self.fixture.inputs, 'render')
 
-    def test_capture_failure_preserves_completed_render_without_decode(self) -> None:
+    def test_capture_failure_prevents_full_render(self) -> None:
         """A failed owner cannot cause implicit picture/audio retry."""
         self.assert_capture_failure(False)
 
-    def test_capture_timeout_preserves_completed_render_without_decode(self) -> None:
+    def test_preview_failure_prevents_full_render(self) -> None:
+        """A failed moving-preview phase cannot launch the full picture pass."""
+        self.fixture.failures['preview'] = False
+        self.assertFalse(self.pipeline().execute())
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview'])
+        self.assertFalse((self.fixture.root / 'picture.mp4').exists())
+
+    def test_preview_only_stops_before_full_render(self) -> None:
+        """Generate review material without claiming delivery or finishing the whole picture."""
+        self.fixture.request['previewOnly'] = True
+        self.fixture.write_request(self.fixture.request)
+        self.assertTrue(self.pipeline().execute())
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview'])
+        self.assertEqual(self.delivery()['editorialReview'], 'pending')
+        self.assertFalse((self.fixture.root / 'picture.mp4').exists())
+
+    def test_capture_timeout_prevents_full_render(self) -> None:
         """Owner timeout is terminal for this attempt, not a reason to rerender."""
         self.assert_capture_failure(subprocess.TimeoutExpired('TEST node capture', 600))
         self.assertEqual(self.delivery()['errorType'], 'TimeoutExpired')
 
-    def test_capture_cancellation_preserves_completed_render_without_decode(self) -> None:
-        """Cancellation still records the failed invocation and reusable stage path."""
+    def test_capture_cancellation_prevents_full_render(self) -> None:
+        """Cancellation still records the failed invocation without rendering."""
         self.assert_capture_failure(KeyboardInterrupt('TEST cancellation'))
         self.assertEqual(self.delivery()['errorType'], 'KeyboardInterrupt')
+        self.assertEqual(self.delivery()['failureCategory'], 'cancelled')
 
     def test_child_zero_exit_with_failed_capture_receipt_cannot_run_decode(self) -> None:
         """A process success label cannot override failed actual capture checks."""
         self.fixture.capture_status = 'failed'
         self.assertFalse(self.pipeline().execute())
-        self.assertEqual([label for label, _ in self.fixture.calls], ['pipeline', 'capture'])
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture'])
         self.assertIn('reference checks', self.delivery()['error'])
 
     def test_resume_copies_exact_output_and_runs_only_capture_and_verification(self) -> None:
@@ -150,12 +166,13 @@ class NativeShortPipelineTests(unittest.TestCase):
     def test_each_later_owner_binds_completed_media_and_earlier_evidence(self) -> None:
         """Phase separation cannot drop immutable output or preceding owner receipts."""
         self.assertTrue(self.pipeline().execute())
-        capture, verify = self.fixture.calls[1][1], self.fixture.calls[2][1]
+        render, verify = self.fixture.calls[4][1], self.fixture.calls[5][1]
         root = self.fixture.root
-        for config in (capture, verify):
-            self.assertEqual(config.additional_pins[str(root / 'review.mp4')], digest(root / 'review.mp4'))
-            self.assertIn(str(root / 'render-stage.json'), config.additional_pins)
-            self.assertIn(str(root / 'pipeline.render.json'), config.additional_pins)
+        self.assertIn(str(root / 'capture.render.json'), render.additional_pins)
+        self.assertIn(str(root / 'native-frames.json'), render.additional_pins)
+        self.assertEqual(verify.additional_pins[str(root / 'review.mp4')], digest(root / 'review.mp4'))
+        self.assertIn(str(root / 'render-stage.json'), verify.additional_pins)
+        self.assertIn(str(root / 'pipeline.render.json'), verify.additional_pins)
         self.assertIn(str(root / 'capture.render.json'), verify.additional_pins)
         self.assertIn(str(root / 'native-frames.json'), verify.additional_pins)
 
@@ -185,7 +202,7 @@ class NativeShortPipelineTests(unittest.TestCase):
         """Only successful supervised media work receives a render-stage seal."""
         self.fixture.failures['pipeline'] = False
         self.assertFalse(self.pipeline().execute())
-        self.assertEqual([label for label, _ in self.fixture.calls], ['pipeline'])
+        self.assertEqual([label for label, _ in self.fixture.calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview', 'pipeline'])
         self.assertFalse((self.fixture.root / 'render-stage.json').exists())
         self.assertNotIn('renderStage', self.delivery())
 

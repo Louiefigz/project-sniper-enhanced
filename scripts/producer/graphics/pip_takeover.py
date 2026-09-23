@@ -232,17 +232,8 @@ class TakeoverInputs:
 
 def render_takeover(inp: TakeoverInputs, geom: CardGeom, length: float,
                     out_path: str) -> None:
-    """Composite the takeover window (bg + rail + animated rounded card) → out."""
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-           "-t", f"{length:g}", "-i", inp.bg_path,
-           "-i", inp.slice_path,
-           "-loop", "1", "-t", f"{length:g}", "-i", inp.mask_path]
-    if inp.rail_path:
-        cmd += ["-t", f"{length:g}", "-i", inp.rail_path]
-    cmd += ["-filter_complex", build_graph(geom, length, bool(inp.rail_path)),
-            "-map", "[v]", "-map", "1:a?", "-t", f"{length:g}"]
-    cmd += _encode_args() + ["-c:a", "aac", "-movflags", "+faststart", out_path]
-    run_ff(cmd)
+    """Retired house-layout compositor; use a source-bound native composition."""
+    raise ValueError("Legacy glass takeover layouts are retired; select a HyperFrames catalog layout or an explicit current-job reference/custom design")
 
 
 # --------------------------------------------------------------------------- #
@@ -289,51 +280,13 @@ def _prepare(spec: Spec, work: str) -> tuple[CardGeom, float, str]:
 
 
 def run_segment(spec: Spec) -> dict:
-    """Render just the takeover window (bg + rail + card) → spec.out."""
-    work = tempfile.mkdtemp(prefix="pip-seg-")
-    try:
-        geom, length, mask = _prepare(spec, work)
-        slice_path = os.path.join(work, "slice.mp4")
-        _window_slice(spec.base, float(spec.window[0]), length, slice_path)
-        render_takeover(TakeoverInputs(slice_path, spec.bg, mask, spec.rail),
-                        geom, length, spec.out)
-        return {"mode": "segment", "out": spec.out, "length": round(length, 3),
-                "card": list(spec.card)}
-    finally:
-        _rmtree(work)
+    """Retired house-layout compositor; use a source-bound native composition."""
+    raise ValueError("Legacy glass takeover layouts are retired; select a HyperFrames catalog layout or an explicit current-job reference/custom design")
 
 
 def run_demo(spec: Spec, lead_s: float, tail_s: float, xfade_s: float) -> dict:
-    """full-frame → takeover → full-frame, xfade-stitched, continuous audio.
-
-    A single continuous base window feeds every piece on ONE frame grid, so the
-    two dissolves blend identical base timestamps (seamless talking); the takeover
-    card's scale ramp reads as the resize under the dissolve.
-    """
-    work = tempfile.mkdtemp(prefix="pip-demo-")
-    try:
-        geom, length, mask = _prepare(spec, work)
-        w0 = float(spec.window[0])
-        total = lead_s + length + tail_s
-        full = os.path.join(work, "full.mp4")
-        _window_slice(spec.base, w0 - lead_s, total, full)
-
-        take_base = os.path.join(work, "take_base.mp4")
-        lead_full = os.path.join(work, "lead.mp4")
-        tail_full = os.path.join(work, "tail.mp4")
-        _cut(full, lead_s, length, take_base)
-        _cut(full, 0.0, lead_s + xfade_s, lead_full)
-        _cut(full, lead_s + length - xfade_s, xfade_s + tail_s, tail_full)
-
-        take = os.path.join(work, "take.mp4")
-        render_takeover(TakeoverInputs(take_base, spec.bg, mask, spec.rail),
-                        geom, length, take)
-        _stitch_demo((lead_full, take, tail_full), (lead_s, length, xfade_s),
-                     full, spec.out)
-        return {"mode": "demo", "out": spec.out, "length": round(total, 3),
-                "takeover": round(length, 3)}
-    finally:
-        _rmtree(work)
+    """Retired house-layout compositor; use a source-bound native composition."""
+    raise ValueError("Legacy glass takeover layouts are retired; select a HyperFrames catalog layout or an explicit current-job reference/custom design")
 
 
 def _stitch_demo(pieces: tuple[str, str, str], timing: tuple[float, float, float],

@@ -69,6 +69,11 @@ class GraphicRenderReceiptBindingTests(unittest.TestCase):
         self.assertFalse(report.execution_attested)
         self.assertFalse(report.execution_authorized)
         self.assertFalse(report.publication_authorized)
+        from graphics.template_contract import validate_entry
+        source = json.loads(value.graphic_source_seal_jsons[0])
+        row = json.loads(value.plan_json)["graphicsTrack"][0]
+        with self.assertRaisesRegex(ValueError, "retired"):
+            validate_entry(row, source["compositionHtml"])
         with self.assertRaisesRegex(
             GraphicRenderReceiptBindingError, GRAPHIC_RENDER_RECEIPT_STATUS
         ):

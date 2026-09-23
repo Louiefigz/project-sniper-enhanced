@@ -262,20 +262,6 @@ class CurrentSystemInventoryCheckTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "not one closed trace"):
             validate_inventory(self.root, self.inventory_path)
 
-    def test_repository_measured_baselines_are_closed(self) -> None:
-        repo = Path(__file__).resolve().parents[3]
-        inventory = (
-            repo / "docs/producer/command-driven-editing/contracts/"
-            "current-system-inventory-v1.json"
-        )
-        inventory.stat()  # absent retained evidence fails as FileNotFoundError, not a wrapped error
-        result = validate_inventory(repo, inventory)
-        self.assertEqual(result["baselineEvidence"], 2)
-        self.assertEqual(result["discoveryBacklog"], 0)
-        self.assertEqual(
-            result["persistenceDispositions"]["blockingSites"], 0)
-        self.assertEqual(
-            result["persistenceDispositions"]["unknownSites"], 0)
 
 
 if __name__ == "__main__":

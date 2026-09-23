@@ -83,6 +83,29 @@ test('existing-only remains a cache-miss failure with no extraction fallback',()
   assert.equal(f.extractions.length,0);assert.equal(f.calls.sessions.length,0);
 }));
 
+test('ordinary streaming preflight acquires exact cold SDK source frames before browser capture',()=>withFixture(async f=>{
+  f.request.sourceCacheMode='acquire-sdk-preflight';f.request.captureMode='sdk-streaming';
+  const context=await f.context();await prepareNativeCaptureContext(context);
+  assert.equal(f.extractions.length,1);assert.equal(f.calls.sessions.length,0);
+  assert.equal(f.calls.encodes.length,0);assert.equal(context.sourceCacheAcquisition.status,'exact-source-caches-ready');
+  assert.deepEqual(f.extractions[0][0],[f.video]);
+  assert.ok(context.cacheEntries.every(row=>row.width===3840&&row.height===2160));
+}));
+
+test('streaming preflight refuses mutated SDK windows and incomplete retained caches',async()=>{
+  await withFixture(async f=>{
+    f.request.sourceCacheMode='acquire-sdk-preflight';f.changedWindow=true;
+    await assert.rejects(()=>f.context().then(prepareNativeCaptureContext),/changed source timing/);
+    assert.equal(f.calls.sessions.length,0);
+  });
+  await withFixture(async f=>{
+    f.request.sourceCacheMode='acquire-sdk-preflight';fs.mkdirSync(f.entry);
+    fs.writeFileSync(path.join(f.entry,'retain.txt'),'TEST partial cache');
+    await assert.rejects(()=>f.context().then(prepareNativeCaptureContext),/must be preserved/);
+    assert.equal(f.extractions.length,0);
+  });
+});
+
 test('unknown modes and cold acquisition without batch mode reject before extraction',async()=>{
   await withFixture(async f=>{
     f.request.sourceCacheMode='automatic-unqualified-fallback';

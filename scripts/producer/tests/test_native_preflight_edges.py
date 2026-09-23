@@ -35,7 +35,7 @@ class NativePreflightEdgeTests(unittest.TestCase):
         for index, declaration in enumerate(declarations):
             with self.subTest(declaration=declaration):
                 self.entry.write_text(HTML.replace('TEST ONLY', declaration))
-                result = self.execute(f'declaration-{index}')
+                result = self.execute(f'declaration-{index}', renew_sources=True)
                 self.assertEqual(result['status'], 'blocked')
                 self.assertTrue(result['sdk']['dependencyFindings'])
                 self.assertEqual(result['sdk']['deniedAttempts'], [])
@@ -46,15 +46,15 @@ class NativePreflightEdgeTests(unittest.TestCase):
         child = self.project / 'child.CSS'
         child.write_text('@font-face{font-family:Edge;src:URL("assets/test.woff2")}')
         self.entry.write_text(HTML.replace('</head>', '<link rel="stylesheet" href="MAIN.CSS"></head>'))
-        self.assertEqual(self.execute()['status'], 'static-checks-pass')
+        self.assertEqual(self.execute(renew_sources=True)['status'], 'static-checks-pass')
         child.write_text('@font-face{font-family:Edge;src:URL("missing.woff2")}')
-        self.assertIn('native_missing_dependency', self.codes(self.execute('missing')))
+        self.assertIn('native_missing_dependency', self.codes(self.execute('missing', renew_sources=True)))
 
     def test_unlinted_html_is_unsupported_not_silently_successful(self) -> None:
         """Files outside the SDK composition scan must be identified as unlinted."""
         (self.project / 'outside.HTML').write_text(HTML)
         self.entry.write_text(HTML.replace('TEST ONLY', '<div data-composition-src="outside.HTML"></div>'))
-        result = self.execute()
+        result = self.execute(renew_sources=True)
         self.assertEqual(result['status'], 'blocked')
         self.assertIn('native_unlinted_html', self.codes(result))
 
@@ -62,7 +62,7 @@ class NativePreflightEdgeTests(unittest.TestCase):
         """Valid-looking HTML behind another extension does not escape coverage."""
         (self.project / 'scene.txt').write_text(HTML)
         self.entry.write_text(HTML.replace('TEST ONLY', '<div data-composition-src="scene.txt"></div>'))
-        self.assertIn('native_unsupported_dependency', self.codes(self.execute()))
+        self.assertIn('native_unsupported_dependency', self.codes(self.execute(renew_sources=True)))
 
     def test_parent_checks_complete_html_coverage(self) -> None:
         """A worker cannot hide an omitted HTML row by returning consistent totals."""

@@ -49,46 +49,6 @@ function operation(overrides: Partial<SetGraphicTextV1> = {}): unknown {
   };
 }
 
-function happyPathIsImmutableAndDeterministic(): void {
-  const parent = fixture();
-  const snapshot = structuredClone(parent);
-  const first = applySetGraphicTextV1(parent, operation());
-  const second = applySetGraphicTextV1(parent, operation());
-  assert.deepEqual(parent, snapshot, "the parent is immutable");
-  assert.deepEqual(first, second, "same parent plus operation is deterministic");
-  assert.notEqual(first, parent);
-  assert.notEqual(first.graphicsTrack, parent.graphicsTrack);
-  assert.equal(first.graphicsTrack?.[0].spec?.text, "After");
-  assert.equal(first.graphicsTrack?.[0].spec?.bg, "dark");
-  assert.equal(first.graphicsTrack?.[1], parent.graphicsTrack?.[1]);
-  assert.deepEqual(first.customSidecar, { preserved: true });
-}
-
-function compilerProvesTheSinglePathDelta(): void {
-  const parent = fixture();
-  const candidate = structuredClone(parent);
-  if (!candidate.graphicsTrack?.[0].spec) throw new Error("broken fixture");
-  candidate.graphicsTrack[0].spec.text = "Compiled copy";
-  const compiled = compileSetGraphicTextV1(parent, candidate);
-  assert.deepEqual(compiled, {
-    schemaVersion: 1,
-    operation: "SetGraphicTextV1",
-    target: { lane: "graphicsTrack", id: "g-00000001" },
-    text: "Compiled copy",
-    expectedCurrentText: "Before",
-  });
-  assert.deepEqual(applySetGraphicTextV1(parent, compiled), candidate);
-
-  const withoutSpec = fixture();
-  delete withoutSpec.graphicsTrack?.[0].spec;
-  const addedText = structuredClone(withoutSpec);
-  if (!addedText.graphicsTrack?.[0]) throw new Error("broken fixture");
-  addedText.graphicsTrack[0].spec = { text: "First copy" };
-  const addition = compileSetGraphicTextV1(withoutSpec, addedText);
-  assert.equal(addition.expectedCurrentText, undefined);
-  assert.deepEqual(applySetGraphicTextV1(withoutSpec, addition), addedText);
-}
-
 function strictOperationValidation(): void {
   assert.throws(() => parseSetGraphicTextV1({
     ...(operation() as object), surprise: true,
@@ -118,67 +78,6 @@ function strictOperationValidation(): void {
   })), /exceeds 1000 characters/);
 }
 
-function addressAndPreconditionFailuresAreLoud(): void {
-  const missing = fixture();
-  delete missing.graphicsTrack?.[0].id;
-  assert.throws(() => applySetGraphicTextV1(missing, operation()), /missing or invalid stable id/);
-
-  const duplicate = fixture();
-  if (!duplicate.graphicsTrack?.[1]) throw new Error("broken fixture");
-  duplicate.graphicsTrack[1].id = "g-00000001";
-  assert.throws(() => applySetGraphicTextV1(duplicate, operation()), /duplicate id g-00000001/);
-
-  assert.throws(() => applySetGraphicTextV1(fixture(), operation({
-    target: { lane: "graphicsTrack", id: "g-ffffffff" },
-  })), /did not match exactly once/);
-  assert.throws(() => applySetGraphicTextV1(fixture(), operation({
-    target: { lane: "graphicsTrack", id: "g-00000002" },
-  })), /only kind=statement-card/);
-  assert.throws(() => applySetGraphicTextV1(fixture(), operation({
-    expectedCurrentText: "Stale copy",
-  })), /precondition failed/);
-  assert.throws(() => applySetGraphicTextV1(fixture(), operation({
-    text: "Before",
-  })), /would not change/);
-}
-
-function compilerRejectsEveryBroaderMutation(): void {
-  const parent = fixture();
-  const cases: Array<[string, (plan: ReturnType<typeof fixture>) => void, RegExp]> = [
-    ["top-level", (plan) => { plan.planVersion = 5; }, /outside the requested scope: planVersion/],
-    ["second graphic", (plan) => {
-      if (!plan.graphicsTrack?.[1].spec) throw new Error("broken fixture");
-      plan.graphicsTrack[1].spec.title = "Also changed";
-    }, /exactly one changed graphic/],
-    ["timing", (plan) => {
-      if (!plan.graphicsTrack?.[0]) throw new Error("broken fixture");
-      plan.graphicsTrack[0].outStart = 2;
-    }, /changes more than/],
-    ["kind", (plan) => {
-      if (!plan.graphicsTrack?.[0]) throw new Error("broken fixture");
-      plan.graphicsTrack[0].kind = "glass-rail";
-    }, /targets only kind=statement-card|changes more than/],
-    ["id", (plan) => {
-      if (!plan.graphicsTrack?.[0]) throw new Error("broken fixture");
-      plan.graphicsTrack[0].id = "g-00000003";
-    }, /cannot change or reorder graphic ids/],
-  ];
-  for (const [, mutate, expected] of cases) {
-    const candidate = structuredClone(parent);
-    if (!candidate.graphicsTrack?.[0].spec) throw new Error("broken fixture");
-    candidate.graphicsTrack[0].spec.text = "Changed";
-    mutate(candidate);
-    assert.throws(() => compileSetGraphicTextV1(parent, candidate), expected);
-  }
-  const added = structuredClone(parent);
-  added.graphicsTrack?.push({
-    id: "g-00000003", kind: "statement-card", outStart: 8, outEnd: 10,
-    spec: { text: "Added" },
-  });
-  assert.throws(() => compileSetGraphicTextV1(parent, added), /cannot add or remove graphics/);
-  assert.throws(() => compileSetGraphicTextV1(parent, structuredClone(parent)), /without changing/);
-}
-
 function schemaMatchesRuntimeEnvelope(): void {
   const schemaPath = path.join(process.cwd(), "schemas/producer/set-graphic-text-v1.schema.json");
   const schema = JSON.parse(readFileSync(schemaPath, "utf8")) as {
@@ -191,10 +90,10 @@ function schemaMatchesRuntimeEnvelope(): void {
   assert.equal(schema.properties.text.maxLength, SET_GRAPHIC_TEXT_MAX_LENGTH);
 }
 
-happyPathIsImmutableAndDeterministic();
-compilerProvesTheSinglePathDelta();
 strictOperationValidation();
-addressAndPreconditionFailuresAreLoud();
-compilerRejectsEveryBroaderMutation();
 schemaMatchesRuntimeEnvelope();
-console.log("set-graphic-text-v1.test.ts: all assertions passed");
+const parent = fixture(), before = structuredClone(parent);
+assert.throws(() => applySetGraphicTextV1(parent, operation()), /retired.*HyperFrames/);
+assert.throws(() => compileSetGraphicTextV1(parent, structuredClone(parent)), /retired.*HyperFrames/);
+assert.deepEqual(parent, before);
+console.log("set-graphic-text-v1.test.ts: historical decoding and retirement assertions passed");

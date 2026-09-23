@@ -5,7 +5,6 @@ import {
   AUDIO_ENHANCE_PRESETS,
   mimicLaneConflicts,
   PACES,
-  STYLES,
   validateLaneOverrides,
   validateReferenceIntent,
   type Lane,
@@ -35,7 +34,7 @@ export interface AutoEditIntent {
   brief?: string;
   shortDirection?: ShortDirectionRequest;
   pace?: Pace;
-  /** Measured style grammar — the prompt tells the brain to READ its doc. */
+  /** Historical storage only; new requests reject global style selection. */
   style?: Style;
   reference?: ReferenceIntent;
   music?: boolean;
@@ -91,15 +90,6 @@ function parseReference(body: Record<string, unknown>, out: AutoEditIntent): voi
   if (body.reference === undefined) return;
   if (!out.mode) throw new Error("mode is required when reference is set");
   out.reference = validateReferenceIntent(body.reference, out.mode);
-  if (out.reference.strategy === "extend" && out.style !== out.reference.targetStyle) {
-    throw new Error("style must equal reference.targetStyle for strategy \"extend\"");
-  }
-  if (out.reference.strategy === "extend" && out.pace !== out.reference.targetStyle) {
-    throw new Error("pace must equal reference.targetStyle for strategy \"extend\"");
-  }
-  if (out.reference.strategy !== "extend" && out.style) {
-    throw new Error(`style must stay unset for reference strategy ${JSON.stringify(out.reference.strategy)}`);
-  }
   assertMimicLaneContract(body, out);
 }
 
@@ -130,11 +120,13 @@ function parseAudioEnhance(body: Record<string, unknown>): AudioEnhance | undefi
 /** Parse the optional intent extras off the auto-edit body — malformed values
  * THROW (fail loudly; a typo'd lane must not silently run the produced stack). */
 export function parseAutoEditIntent(body: Record<string, unknown>): AutoEditIntent | undefined {
+  if (body.style !== undefined) {
+    throw new Error("Global creator styles are retired; select a current-job reference or the HyperFrames catalog");
+  }
   const out: AutoEditIntent = {
     brief: optionalBrief(body),
     mode: optionalMode(body),
     pace: optionalEnum(body, "pace", PACES),
-    style: optionalEnum(body, "style", STYLES),
     music: parseMusic(body),
     audioEnhance: parseAudioEnhance(body),
   };

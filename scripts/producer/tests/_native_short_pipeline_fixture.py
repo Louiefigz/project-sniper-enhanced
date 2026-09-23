@@ -50,7 +50,7 @@ class ShortPipelineFixture:
         self.request = {'schemaVersion': 1, 'project': str(self.project), 'output': str(self.root),
                         'runtime': str(self.runtime), 'tools': {'node': str(self.node)},
                         'cache': str(base / 'cache'), 'captureMode': 'sdk-streaming',
-                        'sourceCacheMode': 'existing-only', 'audioDonor': None, 'pictureDonor': None,
+                        'sourceCacheMode': 'acquire-sdk-preflight', 'audioDonor': None, 'pictureDonor': None,
                         'audioProfile': NATIVE_SHORT_MASTERING_PROFILE.identity, 'pins': self.inputs}
         self.calls: list[tuple[str, object]] = []
         self.failures: dict[str, BaseException | bool] = {}
@@ -113,18 +113,41 @@ class ShortPipelineFixture:
         owner.execute = execute
         return owner
 
+    def write_section(self, phase: str, root: Path) -> None:
+        """Write clearly synthetic section media under real seal validation."""
+        from studio.native_preview_sections import section_windows, section_phase
+        request = json.loads((root / 'export-request.json').read_text())
+        packet, windows = section_windows(request)
+        kind, index = section_phase(phase)
+        media = root / f'{phase}.mp4'
+        media.write_bytes(b'TEST section media, not decodable')
+        window = windows[index]
+        row = {**window, 'path': str(media), 'sha256': digest(media),
+               'frames': window['endFrame'] - window['startFrame']}
+        if kind == 'package':
+            row['absoluteFrameRange'] = [window['startFrame'], window['endFrame']]
+        write_json(root / f'{phase}.json', {'schemaVersion': 1, 'packet': packet,
+                   'window': window, 'media': row, 'phase': phase})
+
     def write_phase(self, label: str, root: Path) -> None:
         """Model native phase artifacts without calling a renderer, decoder or browser."""
         if label == 'pipeline':
             self.write_media(root)
         elif label == 'capture':
             self.write_capture(root)
+        elif label.startswith(('preview-picture-', 'preview-package-')):
+            self.write_section(label, root)
+        elif label == 'preview':
+            from studio.native_review_regions import region_packet
+            write_json(root / 'motion-previews.json', {'status': 'native-motion-previews-complete',
+                'packet': region_packet(self.request), 'clips': [], 'TEST': 'No actual preview media or review'})
         elif label == 'verification':
             write_json(root / 'checks.json', {'status': 'checks-passed-awaiting-owned-cleanup',
                 'sha256': digest(root / 'review.mp4'), 'fullAudioVideoDecodePassed': True})
 
     def write_capture(self, root: Path) -> None:
         """Emit bounded TEST forward/reverse JPEG bindings for real recovery admission."""
+        (root / 'seam-samples.mp4').write_bytes(b'TEST encoded sample reel')
         rows = []
         for index, frame in enumerate([0, 24, 0]):
             image = root / f'pose-{index}.jpg'

@@ -1249,37 +1249,10 @@ MOTION = {
     # scanner-lanes -> qa — MODULE_CARDS §4). Data catalog — exempt from
     # the line budget.
     "card_form_map": {
-        # numbers vs a baseline / hero-vs-comparison hierarchy (module #9/#11)
-        "comparison": ("module-bullet-bars", "module-scoreboard",
-                       "module-takeover", "versus-split", "chart-story"),
-        # change over time — the trend hole ledger/scoreboard cannot draw
-        # (catalog wave B; decline-chart / mk-line-graph join when ported)
-        "trend": ("chart-story",),
-        # ordered or parallel steps — pipeline tiles / steps rail (#8/#17/#18)
-        "process": ("module-pipeline", "module-rail", "glass-rail",
-                    "agenda-slide", "whiteboard-map", "list-build"),
-        # receipts / KV ledgers / tool-identity + authorization (#3/#5/#13)
-        "evidence": ("slideware-receipt-cell", "module-ledger-dark",
-                     "whiteboard-connector", "logo-card", "icon-badge",
-                     "icon-badge-wide"),
-        # speaker authority / biography / earned identity proof
-        "credibility": ("avatar-bio-card", "module-ledger-dark",
-                        "whiteboard-connector", "logo-card"),
-        # a new chapter or promised roadmap, not a generic thesis card
-        "chapter": ("section-takeover", "agenda-slide", "whiteboard-map",
-                    "module-pipeline"),
-        # measurements vs a LIMIT — threshold tick + amber footer (#11/#12)
-        "limit": ("module-bullet-bars", "module-scoreboard"),
-        # a single hero metric / gauge (#9 boxed callout, #11 hero number)
-        "scale": ("module-scoreboard", "stat-card", "widget-gauge",
-                  "count-up"),
-        # multi-point lists / checklists (#8/#10; LL-011 row lands apply)
-        "list": ("glass-rail", "module-rail", "whiteboard-list",
-                 "canvas-pip-list", "agenda-slide", "list-build"),
-        # pure thesis — no data, just the sentence (#19); line-swap is the
-        # setup-then-subvert masked replacement beat (catalog wave B)
-        "thesis": ("statement-card", "fragment-payoff", "kinetic-quote",
-                   "kinetic-quote-wide", "line-swap"),
+        "comparison": ("chart-story",), "trend": ("chart-story",),
+        "scale": ("count-up", "chart-story"), "thesis": ("line-swap",),
+        "process": (), "evidence": (), "credibility": (), "chapter": (),
+        "limit": (), "list": (),
     },
     # Deterministic SUPPORT for the form contract (strict-scope lint ERROR,
     # plan_lint_visual.check_form_shape): a card whose spec carries >=

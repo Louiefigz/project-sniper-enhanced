@@ -54,8 +54,24 @@ class SelectedFrames:
     @property
     def filter_bytes(self) -> bytes:
         """Keep the original selection expression outside the operating-system argv limit."""
-        select = '+'.join(f'eq(n,{frame})' for frame in self.frames)
+        select = selection_expression(self.frames)
         return f"select='{select}',{COLOR_FILTER}".encode('ascii')
+
+
+def selection_expression(frames: tuple[int, ...]) -> str:
+    """Merge runs and balance sums so long schedules do not exhaust FFmpeg's parser stack."""
+    terms = []
+    start = previous = frames[0]
+    for frame in (*frames[1:], None):
+        if frame == previous + 1:
+            previous = frame
+            continue
+        terms.append(f'eq(n,{start})' if start == previous else f'between(n,{start},{previous})')
+        start = previous = frame
+    while len(terms) > 1:
+        terms = [f'({terms[index]}+{terms[index + 1]})' if index + 1 < len(terms) else terms[index]
+                 for index in range(0, len(terms), 2)]
+    return terms[0]
 
 
 def selected_frames(canvas: dict, rows: list[dict]) -> SelectedFrames:

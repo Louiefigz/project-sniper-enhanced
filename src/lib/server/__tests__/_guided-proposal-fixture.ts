@@ -24,11 +24,12 @@ import type { DirectorBrain } from "../native-director-store";
 /** Real synthetic bytes/pinned advisors; admission decode/image facts and every creative/critic reply are TEST stubs. */
 export async function createGuidedProposalFixture(options: { workspace?: string; rawIntent?: string; output?: (input: ProposalBrainInput) => unknown;
   sourceCanvas?: "160x90" | "1920x1080"; retainFailure?: boolean; program?: SyntheticProgram; captionIntent?: "auto";
+  transcriptVariant?: "numeric-comparison";
   proposalVersion?: 4 | 5 | 6 | 7 | 8 | 9 | 10; graphicsOff?: boolean; presentationAsset?: "admitted-silent-video";
   nativeReferences?: NativeReferenceSelection[]; directorBrain?: DirectorBrain } = {}) {
   const workflow = parseGuidedWorkflowV2({ schemaVersion: 2, mode: "guided", afterCut: "treatment-then-intro", approvalPolicy: "explicit-human" });
   const fixture = await createHumanCutFixture({ workflowV2: workflow, workspace: options.workspace, sourceCanvas: options.sourceCanvas,
-    program: options.program, captionIntent: options.captionIntent, graphicsOff: options.graphicsOff,
+    program: options.program, captionIntent: options.captionIntent, graphicsOff: options.graphicsOff, transcriptVariant: options.transcriptVariant,
     presentationAsset: options.presentationAsset, nativeShort: options.proposalVersion === 9 || options.proposalVersion === 10 });
   if (options.retainFailure) process.stderr.write(`TEST fixture retained root: ${fixture.root}\n`);
   try {

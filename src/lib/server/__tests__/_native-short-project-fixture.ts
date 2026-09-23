@@ -1,3 +1,4 @@
+import { refreshVisualSourceFixture } from "./_visual-source-fixture";
 /** Synthetic contract data only; no visual/source-quality claim. */
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
 import { writeFileSync } from "node:fs";
@@ -49,6 +50,7 @@ export function nativeShortFixture(directory: string): NativeShortProjectInput {
 
 /** Explicitly re-author synthetic fixture budgets after a test's intended revision. */
 export function refreshNativePacingFixture(input: NativeShortProjectInput): void {
+  refreshVisualSourceFixture(input);
   input.strategy.schemaVersion = 3;
   const windows = nativePacingVisualWindows(input, buildNativeCanvas(input.canvas) + (input.extension?.markup ?? ""));
   refreshNativeAssetUseFixture(input);

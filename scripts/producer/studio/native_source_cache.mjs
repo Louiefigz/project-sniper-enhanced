@@ -112,6 +112,7 @@ async function acquireVideo(context, video, receipt) {
 export async function prepareNativeSourceCache(context) {
   const mode=context.request.sourceCacheMode??'existing-only';
   if(mode==='existing-only')return;
+  if(mode==='acquire-sdk-preflight')return prepareSdkPreflightCache(context);
   assert.equal(mode,SEQUENTIAL_SOURCE_CACHE_MODE,'Unsupported source cache acquisition mode');
   assert.equal(context.request.captureMode,'cached-native-batches','Cold cache acquisition requires explicit bounded native batches');
   assert.equal(typeof context.sdk.extractAllVideoFrames,'function','Pinned SDK lacks source extraction primitive');
@@ -123,6 +124,37 @@ export async function prepareNativeSourceCache(context) {
     await inspectSources(context,receipt);
     for(const video of context.result.composition.videos)await acquireVideo(context,video,receipt);
     receipt.status='exact-source-caches-ready';
+  }catch(error){receipt.status='failed';receipt.error=String(error?.stack||error);throw error;}
+  finally{persist(context,receipt);}
+}
+
+/** Warm the same SDK cache before early references, retaining its whole-source color negotiation. */
+async function prepareSdkPreflightCache(context) {
+  const videos=context.result.composition.videos;
+  if(!videos.length)return;
+  const identities=videos.map(video=>localVideo(context,video));
+  for(const {entry} of identities)assert.ok(!fs.existsSync(entry)||fs.existsSync(path.join(entry,'.hf-complete')),
+    'Incomplete cache directory must be preserved; select a new cache root');
+  const selected=structuredClone(videos),before=JSON.stringify(selected);
+  const receipt={schemaVersion:1,scope:'native-sdk-preflight-source-cache',status:'preparing'};
+  context.sourceCacheAcquisition=receipt;persist(context,receipt);
+  try {
+    const result=await context.sdk.extractAllVideoFrames(selected,context.project,
+      {fps:context.fps,outputDir:path.join(context.work,'source-extraction'),format:'png',
+        timelineEnd:context.plan.canvas.totalFrames/context.rate,maxTransientRetries:0,collectProbeFailures:true},
+      undefined,{extractCacheDir:context.request.cache,extractCacheMaxBytes:context.cfg.extractCacheMaxBytes},
+      path.join(context.work,'compiled'));
+    assert.ok(result.success&&result.errors.length===0&&result.extracted.length===videos.length,
+      'Early SDK source preparation failed');
+    assert.equal(JSON.stringify(selected),before,'Early SDK preparation changed source timing');
+    for(const [index,video] of videos.entries()){
+      assert.deepEqual(nativeSourceCacheIdentity(context,video),identities[index],'Early SDK source changed');
+      const cached=nativeSourceCacheEntry(context,video),actual=result.extracted.find(row=>row.videoId===video.id);
+      assert.ok(actual,'Early SDK extraction omitted a source');
+      assert.equal(actual.outputDir,cached.entry);assert.equal(actual.totalFrames,cached.names.length);
+      assert.deepEqual([...actual.framePaths],[...cached.framePaths],'Early SDK source frame inventory differs');
+    }
+    receipt.status='exact-source-caches-ready';receipt.phaseBreakdown=result.phaseBreakdown;
   }catch(error){receipt.status='failed';receipt.error=String(error?.stack||error);throw error;}
   finally{persist(context,receipt);}
 }

@@ -56,11 +56,9 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
                 self.assertIn("vendor/gsap/gsap.min.js", closure)
         self.assertEqual(_sha256(gr.GSAP_CORE), EXPECTED_GSAP_SHA256)
 
-    def test_section_marker_keeps_proved_terminal_fade(self) -> None:
-        with open(gr.comp_path("section-marker"), encoding="utf-8") as handle:
-            html = handle.read()
-        self.assertRegex(html, r'tl\.to\(\s*["\']#marker-stage["\']\s*,\s*\{')
-        self.assertIn('D - (1 / RENDER_FPS)', html)
+    def test_retired_section_marker_cannot_resolve_runtime_bytes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "retired"):
+            gr.comp_path("section-marker")
 
     def test_terminal_policy_uses_measured_fade_physics(self) -> None:
         base = dict(entry={"kind": "synthetic"}, fmt="mov", dimensions=(1, 1),

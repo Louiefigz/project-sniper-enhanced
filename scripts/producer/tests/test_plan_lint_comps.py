@@ -39,20 +39,17 @@ from graphics.comp_capability_artifact import (
 # Synthetic capability matrix: every fade class + both aspects + the
 # degenerate rows (static-only, renderError, canvasNote ambiguity).
 _COMPS = {
-    "chip-row": {"canvas": [1080, 1920], "fadeClass": "fades-clean"},
-    "stat-card": {"canvas": [1080, 1920], "fadeClass": "hold-to-cut",
+    "line-swap": {"canvas": [1080, 1920], "fadeClass": "fades-clean"},
+    "count-up": {"canvas": [1080, 1920], "fadeClass": "hold-to-cut",
                   "terminalAlpha": {"maxAlpha8": 255, "meanAlpha8": 211.5}},
-    "kinetic-quote": {"canvas": [1080, 1920], "fadeClass": "fades-clean"},
-    "kinetic-quote-wide": {"canvas": [1920, 1080],
+    "chart-story": {"canvas": [1920, 1080],
                            "fadeClass": "fades-clean"},
-    "agenda-slide": {"canvas": [1920, 1080],
-                     "fadeClass": "fades-clean"},
-    "glass-rail": {"canvas": [1080, 1920], "fadeClass": "partial-fade",
+    "hw-callout-circle": {"canvas": [1080, 1920], "fadeClass": "partial-fade",
                    "terminalAlpha": {"maxAlpha8": 180, "meanAlpha8": 12.4}},
-    "statement-card": {"canvas": [1080, 1920]},          # probe mid-run
-    "logo-card": {"canvas": [1080, 1920],
+    "marker-highlight": {"canvas": [1080, 1920]},          # probe mid-run
+    "ui-focus-zoom": {"canvas": [1080, 1920],
                   "renderError": "hyperframes died"},
-    "section-takeover": {"canvas": [1080, 1920],
+    "hw-scribble-transition": {"canvas": [1080, 1920],
                          "canvasNote": "css root (1080, 1920) != declared "
                                        "data-width/height (1920, 1080)"},
 }
@@ -99,7 +96,7 @@ def _plan(entries: list, mode: str = "short") -> dict:
 
 
 def _entry(**overrides) -> dict:
-    entry = {"kind": "chip-row", "anchor": "free-band", "outStart": 8.0,
+    entry = {"kind": "line-swap", "anchor": "free-band", "outStart": 8.0,
              "outEnd": 9.5, "spec": {}, "reason": "r"}
     entry.update(overrides)
     return entry
@@ -121,30 +118,36 @@ class OverlayAspectTests(_MatrixCase):
     """(a) overlay anchors: comp canvas aspect must match delivery aspect."""
 
     def test_wide_comp_under_free_band_in_short_fails(self) -> None:
-        (v,) = self.verdicts(_plan([_entry(kind="kinetic-quote-wide")]))
+        (v,) = self.verdicts(_plan([_entry(kind="chart-story")]))
         self.assertEqual((v.gate, v.severity), ("comp_capabilities", "FAIL"))
         self.assertIn("1920x1080", v.evidence)          # the real canvas
         self.assertIn("16:9", v.evidence)
-        self.assertIn("kinetic-quote", v.evidence)      # the legal sibling
+        self.assertIn("no aspect-legal same-family comp", v.evidence)
+
+    def test_same_family_aspect_suggestion_uses_measured_synthetic_rows(self) -> None:
+        comps = {"test": {"canvas": [1080, 1920]},
+                 "test-wide": {"canvas": [1920, 1080]},
+                 "unrelated": {"canvas": [1080, 1920]}}
+        self.assertEqual(plc._aspect_siblings("test-wide", comps, "9:16"), ["test"])
 
     def test_headroom_and_beside_face_also_fire(self) -> None:
         for anchor in ("headroom", "beside-face"):
             verdicts = self.verdicts(
-                _plan([_entry(kind="kinetic-quote-wide", anchor=anchor)]))
+                _plan([_entry(kind="chart-story", anchor=anchor)]))
             self.assertEqual([v.severity for v in verdicts], ["FAIL"], anchor)
 
     def test_matching_aspect_is_clean(self) -> None:
         self.assertEqual(self.verdicts(_plan([_entry()])), [])
-        wide = _plan([_entry(kind="kinetic-quote-wide")], mode="longform")
+        wide = _plan([_entry(kind="chart-story")], mode="longform")
         self.assertEqual(self.verdicts(wide), [])
 
     def test_no_registered_sibling_named_honestly(self) -> None:
-        (v,) = self.verdicts(_plan([_entry(kind="agenda-slide")]))
+        (v,) = self.verdicts(_plan([_entry(kind="chart-story")]))
         self.assertIn("no aspect-legal same-family comp is registered",
                       v.evidence)
 
     def test_own_screen_anchor_uses_rule_b_not_rule_a(self) -> None:
-        plan = _plan([_entry(kind="kinetic-quote-wide", anchor="own-screen")])
+        plan = _plan([_entry(kind="chart-story", anchor="own-screen")])
         (v,) = self.verdicts(plan)      # exactly one — no (a)+(b) double fire
         self.assertIn("own-screen comp's measured canvas", v.evidence)
 
@@ -167,7 +170,7 @@ class OwnScreenAspectTests(_MatrixCase):
         # An ambiguous static measurement (css root != declared dims) must
         # not fail fast — the render-side check stays authoritative. The
         # row is also static-only, so the fade rules SKIP with evidence.
-        plan = _plan([_entry(kind="section-takeover", anchor="own-screen")],
+        plan = _plan([_entry(kind="hw-scribble-transition", anchor="own-screen")],
                      mode="longform")
         (v,) = self.verdicts(plan)
         self.assertEqual(v.severity, "FAIL")
@@ -178,31 +181,31 @@ class HoldToCutTests(_MatrixCase):
     """(c) hold-to-cut comps must exit on a cut."""
 
     def test_off_seam_end_fails(self) -> None:
-        (v,) = self.verdicts(_plan([_entry(kind="stat-card", outStart=4.0,
+        (v,) = self.verdicts(_plan([_entry(kind="count-up", outStart=4.0,
                                            outEnd=6.0)]))
         self.assertEqual(v.severity, "FAIL")
         self.assertIn("hold-to-cut comp must exit on a cut", v.evidence)
         self.assertIn("outEnd 6", v.evidence)
 
     def test_end_on_seam_is_clean(self) -> None:
-        plan = _plan([_entry(kind="stat-card", outStart=8.0, outEnd=10.0)])
+        plan = _plan([_entry(kind="count-up", outStart=8.0, outEnd=10.0)])
         self.assertEqual(self.verdicts(plan), [])
 
     def test_end_within_tolerance_is_clean(self) -> None:
-        plan = _plan([_entry(kind="stat-card", outStart=8.0, outEnd=10.04)])
+        plan = _plan([_entry(kind="count-up", outStart=8.0, outEnd=10.04)])
         self.assertEqual(self.verdicts(plan), [])
 
     def test_end_at_output_end_is_clean(self) -> None:
-        plan = _plan([_entry(kind="stat-card", outStart=15.0, outEnd=18.0)])
+        plan = _plan([_entry(kind="count-up", outStart=15.0, outEnd=18.0)])
         self.assertEqual(self.verdicts(plan), [])
 
     def test_exit_on_cut_flag_satisfies_the_law(self) -> None:
-        plan = _plan([_entry(kind="stat-card", outStart=4.0, outEnd=6.0,
+        plan = _plan([_entry(kind="count-up", outStart=4.0, outEnd=6.0,
                              exitOnCut=True)])
         self.assertEqual(self.verdicts(plan), [])
 
     def test_unbuildable_seam_map_skips_with_evidence(self) -> None:
-        plan = _plan([_entry(kind="stat-card", outStart=4.0, outEnd=6.0)])
+        plan = _plan([_entry(kind="count-up", outStart=4.0, outEnd=6.0)])
         plan["cutTrack"] = []
         (v,) = self.verdicts(plan)
         self.assertEqual(v.severity, "SKIP")
@@ -213,7 +216,7 @@ class PartialFadeTests(_MatrixCase):
     """(d) partial-fade WARNs with the measured terminal alpha."""
 
     def test_partial_fade_warns_with_measured_alpha(self) -> None:
-        (v,) = self.verdicts(_plan([_entry(kind="glass-rail")]))
+        (v,) = self.verdicts(_plan([_entry(kind="hw-callout-circle")]))
         self.assertEqual(v.severity, "WARN")
         self.assertIn("max=180", v.evidence)
         self.assertIn("mean=12.4", v.evidence)
@@ -229,15 +232,15 @@ class LintDispatchTests(unittest.TestCase):
              "budget": "high", "visualState": "talking-head"},
         ]
         plan["graphicsTrack"] = [
-            {"outStart": 4.0, "outEnd": 6.0, "kind": "stat-card",
-             "spec": {"value": "10+ years", "label": ""},
+            {"outStart": 4.0, "outEnd": 6.0, "kind": "count-up",
+             "spec": {"from": 0, "to": 10, "suffix": " years", "label": "Experience"},
              "anchor": "free-band",
              "reason": "restates 'ten years' — number trigger"},
         ]
         return plan
 
     def test_hold_to_cut_fail_lands_in_lint_errors(self) -> None:
-        # stat-card is hold-to-cut in the fixture; the single-segment
+        # count-up is hold-to-cut in the fixture; the single-segment
         # cutTrack has no seams and the window ends mid-take at 6.0s.
         with tempfile.TemporaryDirectory() as tmp:
             matrix = _write_matrix(tmp)

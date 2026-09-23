@@ -43,10 +43,9 @@ function savedPack(study: ResolvedReferenceStudy, deep: StrategyFilePin) {
 }
 
 /** Raw per-frame arrays stay on disk; every event, word timing and interpretation is retained. */
-export function longformReferenceInputs(study?: ResolvedReferenceStudy) {
+export function nativeReferenceInputs(study?: ResolvedReferenceStudy) {
   const files: Record<string, string> = {}, pins: StrategyFilePin[] = [];
   if (!study) return { files, pins, selected: null };
-  if (study.mode !== "longform") throw new Error("Selected reference mode must remain longform");
   const profile = strategyFile(study.profilePath), deep = strategyFile(study.deepStudyPath);
   pins.push(profile.pin, deep.pin);
   const profileValue = objectValue(JSON.parse(profile.text), "reference profile");
@@ -79,4 +78,10 @@ export function longformReferenceInputs(study?: ResolvedReferenceStudy) {
     representativeFrames: study.representativeFrames,
     editorialStudy: packAvailable ? "saved-pack-requires-current-evidence-review" : "whole-video-editorial-study-required",
     verifiedMimicQualified: false } };
+}
+
+/** Keep the Long request entry strict while sharing current-reference pins with Shorts. */
+export function longformReferenceInputs(study?: ResolvedReferenceStudy) {
+  if (study && study.mode !== "longform") throw new Error("Selected reference mode must remain longform");
+  return nativeReferenceInputs(study);
 }

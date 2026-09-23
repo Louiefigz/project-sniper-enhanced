@@ -132,13 +132,22 @@ def render_media(request: dict, plan: dict) -> dict:
     root, project = Path(request['output']), Path(request['project'])
     canvas = plan['canvas']
     verify_files(request)
+    from studio.native_motion_previews import require_motion_previews
+    require_motion_previews(request)
+    from studio.native_stage_evidence import read_native_capture_receipt, require
+    native = read_native_capture_receipt(root / 'native-frames.json')
+    require(native.get('status') == 'native-references-and-seek-states-pass',
+            'Short picture render requires passed upstream reference checks')
+    from studio.native_picture_references import check_samples
+    check_samples(request, {**plan, 'canvas': {'width': 1080, 'height': 1920, **canvas}})
     with stage_span(str(root), 'native_static_preflight'):
         options = {'reference_map': Path(request['referenceMap'])} if request.get('referenceMap') else {}
         static = preflight(project, root / 'static', **options)
         if static['status'] != 'static-checks-pass':
             raise RuntimeError('Native static preflight blocked export')
     with stage_span(str(root), 'native_dialogue_preparation'):
-        prepared_audio = prepare_dialogue(request, canvas, plan.get('audioFinishing'))
+        from studio.native_motion_previews import prepare_audio
+        prepared_audio = prepare_audio(request, plan)
     verify_files(request)
     picture_stage = 'native_picture_reuse' if request.get('pictureDonor') else 'native_picture_render'
     with stage_span(str(root), picture_stage):
@@ -184,17 +193,31 @@ def verify_media(request: dict, plan: dict) -> dict:
 
 def execute(request: dict, request_file: Path, phase: str = 'all') -> dict:
     """Keep legacy callers while exposing independently supervised execution phases."""
-    if phase not in {'all', 'render', 'capture', 'verify'}:
+    from studio.native_preview_sections import section_phase, execute_section
+    if phase not in {'all', 'render', 'capture', 'preview', 'verify'} and not section_phase(phase):
         raise ValueError('Unsupported native export phase')
     root = Path(request['output'])
     plan = bound_json(Path(request['project']) / 'SHORT-PROJECT.json')
     verify_files(request)
+    if section_phase(phase):
+        result = execute_section(request, plan, phase)
+        verify_files(request)
+        return result
+    if phase == 'preview':
+        from studio.native_motion_previews import render_previews
+        result = render_previews(request, plan)
+        verify_files(request)
+        return result
+    if phase == 'all':
+        capture_checks(request, request_file)
+        from studio.native_motion_previews import render_previews
+        render_previews(request, plan)
     if phase in {'all', 'render'}:
         media = render_media(request, plan)
         write_new(root / 'render-result.json', media)
         if phase == 'render':
             return media
-    if phase in {'all', 'capture'}:
+    if phase == 'capture':
         with stage_span(str(root), 'native_capture_and_seek_checks'):
             capture_checks(request, request_file)
         verify_files(request)

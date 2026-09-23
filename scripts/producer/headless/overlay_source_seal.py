@@ -125,6 +125,7 @@ def capture_overlay_source(request: OverlaySourceCapture,
              and _KIND.fullmatch(request.selection_id))
     if not valid:
         raise RuntimeError("overlay source capture identity is invalid")
+    validate_entry(entry_from_intent(intent))
     html = _read_composition(request.pipeline_root, intent["kind"])
     entry = entry_from_intent(intent)
     validate_entry(entry, html)

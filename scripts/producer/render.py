@@ -75,6 +75,7 @@ from motion.recompose import (apply_recompose, requires_recompose,
                               stamp_entry_face_bboxes)
 from motion.transitions import apply_transitions
 from template_usage_approval import require_current as require_template_usage_approval
+from render_readiness import ReadinessRequest, require_readiness, require_draft_destination, finish_draft
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -978,6 +979,8 @@ def _burn_explicit_caption_shards(ctx: RenderCtx, tmap: TimelineMap,
 
 def render(ctx: RenderCtx, audit: bool = True) -> dict:
     """Run the full chain (+ automatic Audit B); returns the render report."""
+    from graphics.visual_source_policy import require_plan_sources
+    require_plan_sources(ctx.plan)
     from guided_presenter_base import require_presenter_base
     require_presenter_base(ctx)
     from guided_source_color_base_context import hold_source_color_base_guard, source_color_stage
@@ -1105,6 +1108,9 @@ def main() -> None:
                          "base.fingerprint.json (assemble.py overlays graphics after)")
     ap.add_argument("--approval-dir", default=None,
                     help="producer dir owning the template-history approval")
+    ap.add_argument("--draft-only", action="store_true",
+                    help="require separate draft admission and retain only watermarked draft.mp4")
+    ap.add_argument("--draft-font", default=None, help="font for the draft-only watermark")
     policy = ap.add_mutually_exclusive_group()
     policy.add_argument(
         "--require-source-set-admission", action="store_true",
@@ -1118,6 +1124,11 @@ def main() -> None:
 
     temp_dir = None
     try:
+        authority_dir = args.approval_dir or args.out_dir
+        if args.draft_only:
+            require_draft_destination(authority_dir, args.out_dir)
+            if args.resume or args.skip_graphics:
+                raise ValueError("Draft-only rendering cannot resume or publish a reusable base")
         with open(args.plan_path) as f:
             plan = json.load(f)
         from guided_presenter_base import require_unowned_presenter_absent
@@ -1126,6 +1137,8 @@ def main() -> None:
             manifest = json.load(f)
         validate_render_documents(plan, manifest)
         verify_execution_media_authority(plan, manifest, args.manifest_path)
+        require_readiness(ReadinessRequest(args.plan_path, args.manifest_path,
+                                           authority_dir, args.draft_only))
         require_template_usage_approval(
             args.plan_path, args.manifest_path, args.approval_dir or args.out_dir,
             os.path.dirname(os.path.abspath(args.manifest_path)))
@@ -1146,6 +1159,9 @@ def main() -> None:
                         plan_path=os.path.abspath(args.plan_path))
         publish_plan(args.plan_path, args.out_dir)
         report = render(ctx, audit=not args.no_audit)
+        if args.draft_only:
+            report = {"draft": finish_draft(args.plan_path, args.manifest_path, authority_dir, args.draft_font),
+                      "shippable": False}
         emit(status="done", **report)
     except (OSError, json.JSONDecodeError, KeyError,
             ValueError, RuntimeError) as exc:

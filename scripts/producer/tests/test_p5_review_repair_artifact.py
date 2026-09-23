@@ -9,10 +9,13 @@ from current_render_graph_contract import file_hash
 from current_render_toolchain import current_toolchain_hash
 from tests.live_p5_review_repair_acceptance import CLOSURE, REPO
 from tests.p4_exit_media import source_closure, toolchain
+from tests.p5_review_project_fixture import _scene_copy
+from tests.scene_fixtures import fire_sparkles_scene
+from graphics.scene_contract import SceneContractError, validate_scene
 
 ARTIFACT = REPO / (
     "docs/producer/command-driven-editing/contracts/"
-    "p5-one-unit-review-repair-v1.json")
+    "p5-one-unit-review-repair-2026-09-23.json")
 
 
 def _strings(value: object) -> list[str]:
@@ -26,6 +29,17 @@ def _strings(value: object) -> list[str]:
 
 
 class P5ReviewRepairArtifactTests(unittest.TestCase):
+    def test_authored_fixture_copy_binds_its_own_scene_and_clock(self) -> None:
+        original = fire_sparkles_scene("a" * 64)
+        copied = _scene_copy(original, 2)
+        validate_scene(copied)
+        self.assertEqual(copied["sceneId"], "scene-002")
+        self.assertEqual(copied["timing"]["startFrame"], 1000)
+        self.assertEqual(original["sceneId"], "scene-045")
+        copied["timing"]["startFrame"] += 1
+        with self.assertRaisesRegex(SceneContractError, "authored design changed"):
+            validate_scene(copied)
+
     def test_retained_review_repair_is_fresh_and_load_bearing(self) -> None:
         value = json.loads(ARTIFACT.read_text(encoding="utf-8"))
         self.assertEqual(set(value), {

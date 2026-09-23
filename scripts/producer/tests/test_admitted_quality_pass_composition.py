@@ -10,6 +10,7 @@ from unittest.mock import patch
 from _approved_parent_loader_fixture import ApprovedParentAuthorityFixture
 from _approved_parent_loader_values import canonical
 from _common import pl  # noqa: F401
+from _retired_r0_diagnostics_fixture import historical_diagnostics, assert_retired_inspection, _leaves
 from test_quality_pass_preflight import _operation
 from headless.admitted_quality_pass_composition import (
     ADMISSION_BINDING_REQUIREMENT,
@@ -40,6 +41,11 @@ _OTHER_UNIT = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 
 class AdmittedQualityPassCompositionTests(unittest.TestCase):
     def setUp(self) -> None:
+        # Inert ledger/promotion seam: no current R0 execution is represented.
+        seam = patch("headless.admitted_quality_pass_composition.inspect_quality_pass_composition",
+                     side_effect=historical_diagnostics)
+        seam.start()
+        self.addCleanup(seam.stop)
         self.fixture = ApprovedParentAuthorityFixture()
         self.historical = self.fixture.root / "historical-materialization"
         self.historical.mkdir(mode=0o700)
@@ -59,6 +65,10 @@ class AdmittedQualityPassCompositionTests(unittest.TestCase):
         authority_path = self.fixture.authority / "authority.json"
         authority_path.write_bytes(authority_raw)
         authority_path.chmod(0o600)
+
+    def test_real_retired_parent_never_dispatches_or_changes_publication(self) -> None:
+        """Real source rejection precedes any enrollment, admission, or rendering."""
+        assert_retired_inspection(self, ("operation-admissions-v3",))
 
     def tearDown(self) -> None:
         self.fixture.close()
@@ -114,7 +124,7 @@ class AdmittedQualityPassCompositionTests(unittest.TestCase):
         baseline = []
 
         def capture(value: object):
-            result = inspect_quality_pass_composition(value)
+            result = historical_diagnostics(value)
             baseline.append(result)
             return result
 
@@ -187,7 +197,7 @@ class AdmittedQualityPassCompositionTests(unittest.TestCase):
         )
 
         def forge_authority(value: object):
-            inspected = inspect_quality_pass_composition(value)
+            inspected = historical_diagnostics(value)
             return dataclasses.replace(inspected, execution_authorized=True)
 
         with patch(target, side_effect=forge_authority), self.assertRaisesRegex(
@@ -285,12 +295,3 @@ class AdmittedQualityPassCompositionTests(unittest.TestCase):
         )
         strings = (value for value in leaves if type(value) is str)
         self.assertFalse(any(value.startswith("/") for value in strings))
-
-
-def _leaves(value: object) -> tuple[object, ...]:
-    if dataclasses.is_dataclass(value):
-        rows = tuple(getattr(value, field.name) for field in dataclasses.fields(value))
-        return tuple(item for row in rows for item in _leaves(row))
-    if type(value) in {tuple, list}:
-        return tuple(item for row in value for item in _leaves(row))
-    return (value,)

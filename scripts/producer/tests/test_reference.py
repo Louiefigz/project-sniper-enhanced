@@ -88,12 +88,12 @@ class FillReferenceSpecTests(unittest.TestCase):
     def test_brain_picks_a_comp_system_keeps_placement(self) -> None:
         beat = self._long_beat()
         cand = gref.fill_reference_spec(
-            beat, "statement-card", {"text": "The one workflow", "bg": "cream"})
+            beat, "ui-focus-zoom", {"image": "assets/sample-screen.png"})
         self.assertIsNotNone(cand)
-        self.assertEqual(cand["kind"], "statement-card")
+        self.assertEqual(cand["kind"], "ui-focus-zoom")
         self.assertEqual(cand["anchor"], "own-screen")     # system's, unchanged
         self.assertNotIn("needsContent", cand)
-        self.assertEqual(cand["spec"]["text"], "The one workflow")
+        self.assertEqual(cand["spec"]["image"], "assets/sample-screen.png")
 
     def test_empty_spec_drops_the_slot(self) -> None:
         self.assertIsNone(gref.fill_reference_spec(self._long_beat(), "statement-card", {}))
@@ -106,7 +106,7 @@ class FillReferenceSpecTests(unittest.TestCase):
     def test_short_uses_a_vertical_comp_at_headroom(self) -> None:
         beat = self._short_beat()
         cand = gref.fill_reference_spec(
-            beat, "kinetic-quote", {"quote": "the one workflow"})
+            beat, "marker-highlight", {"text": "the one workflow", "emphasisWord": "workflow"})
         self.assertIsNotNone(cand)
         self.assertEqual(cand["anchor"], "headroom")
 

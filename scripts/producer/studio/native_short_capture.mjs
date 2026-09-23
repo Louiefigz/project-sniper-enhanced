@@ -6,6 +6,7 @@ import {pathToFileURL} from 'node:url';
 import {assertNativeCaptureOwner} from './runtime/native-export-guard.mjs';
 import {reuseNativeForwardQc} from './native_forward_qc.mjs';
 import {capturePoints,checkTypography,visualState} from './native_short_capture_checks.mjs';
+import {encodeSamples} from './native_long_capture.mjs';
 import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,captureNativeFrame,
   nativeCaptureHash,nativeCaptureBatches,nativeCaptureEvidence,nativeCaptureFailure,NATIVE_CAPTURE_BATCH_FRAMES} from './native_short_capture_context.mjs';
 
@@ -74,6 +75,7 @@ export async function runNativeShortCapture(request, dependencies={}) {
     assert.equal(receipt.failedSceneStates.length,0,JSON.stringify(receipt.failedSceneStates));
     assert.equal(context.sourceHtmlSha256,nativeCaptureHash(path.join(request.project,'index.html')));
     receipt.transport={sessions:receipt.sessions.map(row=>row.transport),errors:0};
+    await encodeSamples(context,receipt,dependencies.encode);
     receipt.status='native-references-and-seek-states-pass';
   }catch(error){receipt.error=nativeCaptureFailure(error);}
   finally{

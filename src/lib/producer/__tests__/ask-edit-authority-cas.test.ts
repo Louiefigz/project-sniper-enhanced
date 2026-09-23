@@ -71,10 +71,10 @@ function stageCandidate(item: Fixture, title: string): void {
     graphicsTrack: [{
       outStart: 2,
       outEnd: 5,
-      kind: "statement-card",
+      kind: "line-swap",
       anchor: "own-screen",
       reason: "Clarify the thesis",
-      spec: { title },
+      spec: { lineA: title, lineB: "The TEST result", underlineWord: "result" },
     }],
   }));
   beginSurgicalReview(item.dir, { lanes: ["graphics"] });

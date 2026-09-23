@@ -13,6 +13,7 @@ from headless.prebound_clips import (
     parse_prebound_clips,
     prebound_clip_set_digest,
     validate_prebound_clips,
+    _validate_asset,
 )
 from headless.quality_pass_contract import (
     ArtifactRefV1,
@@ -94,10 +95,13 @@ def _fixture() -> tuple[dict, tuple[GraphicAssetRefV1, ...], bytes]:
 
 
 class PreboundClipContractTests(unittest.TestCase):
-    def test_canonical_manifest_binds_and_has_domain_digest(self) -> None:
+    def test_historical_manifest_has_domain_digest_but_cannot_execute(self) -> None:
         plan, assets, document = _fixture()
         clips = parse_prebound_clips(document)
-        validate_prebound_clips(clips, plan, assets)
+        before = copy.deepcopy(plan)
+        with self.assertRaisesRegex(ValueError, "section-marker.*retired"):
+            validate_prebound_clips(clips, plan, assets)
+        self.assertEqual(plan, before)
         expected = hashlib.sha256(
             b"sniper-prebound-clip-set-v1\0" + document).hexdigest()
         self.assertEqual(prebound_clip_set_digest(clips), expected)
@@ -158,13 +162,14 @@ class PreboundClipContractTests(unittest.TestCase):
     def test_direct_dataclass_change_cannot_bypass_row_identity(self) -> None:
         plan, assets, document = _fixture()
         clip = parse_prebound_clips(document)[0]
+        _validate_asset(plan["graphicsTrack"][0], clip, assets[0])
         for forged in (dataclasses.replace(clip, x=clip.x + 1),
                        dataclasses.replace(clip, x=True)):
             with self.subTest(forged=forged), self.assertRaisesRegex(
                     PreboundClipContractError, "identity"):
                 validate_prebound_clips((forged,), plan, assets)
 
-    def test_timing_anchor_and_placement_must_equal_plan(self) -> None:
+    def test_retired_plan_cannot_reenter_through_timing_anchor_or_placement(self) -> None:
         plan, assets, document = _fixture()
         clips = parse_prebound_clips(document)
         mutations = []
@@ -178,8 +183,8 @@ class PreboundClipContractTests(unittest.TestCase):
             changed["graphicsTrack"][0]["placement"][axis] += 1
             mutations.append(changed)
         for changed in mutations:
-            with self.subTest(changed=changed), self.assertRaises(
-                    PreboundClipContractError):
+            with self.subTest(changed=changed), self.assertRaisesRegex(
+                    ValueError, "section-marker.*retired"):
                 validate_prebound_clips(clips, changed, assets)
 
     def test_asset_media_receipt_and_render_intent_are_all_bound(self) -> None:
@@ -201,24 +206,25 @@ class PreboundClipContractTests(unittest.TestCase):
         for changed in (wrong_media, wrong_receipt, wrong_intent):
             with self.subTest(asset=changed), self.assertRaisesRegex(
                     PreboundClipContractError, "match"):
-                validate_prebound_clips(clips, plan, (changed,))
+                _validate_asset(plan["graphicsTrack"][0], clips[0], changed)
 
-    def test_counts_duplicates_and_order_fail_closed_before_r0(self) -> None:
+    def test_historical_order_is_retained_but_r0_never_admitted(self) -> None:
         first, second = _plan_row(1), _plan_row(2)
         assets = (_asset(first, "a"), _asset(second, "b"))
         plan = {"graphicsTrack": [first, second]}
         rows = [_clip_row(first, assets[0]), _clip_row(second, assets[1])]
         clips = parse_prebound_clips(_document(rows))
-        with self.assertRaisesRegex(PreboundClipContractError, "exactly one"):
-            validate_prebound_clips(clips, plan, assets)
-        with self.assertRaisesRegex(PreboundClipContractError, "order"):
-            validate_prebound_clips(tuple(reversed(clips)), plan, assets)
-        with self.assertRaisesRegex(PreboundClipContractError, "order"):
-            validate_prebound_clips(clips, plan, tuple(reversed(assets)))
+        self.assertEqual(tuple(clip.graphic_id for clip in clips),
+                         tuple(row['id'] for row in (first, second)))
+        for selected_clips, selected_assets in ((clips, assets),
+                (tuple(reversed(clips)), assets), (clips, tuple(reversed(assets)))):
+            with self.subTest(order=selected_clips), self.assertRaisesRegex(
+                    ValueError, "section-marker.*retired"):
+                validate_prebound_clips(selected_clips, plan, selected_assets)
         with self.assertRaisesRegex(PreboundClipContractError, "duplicated"):
             parse_prebound_clips(_document([rows[0], rows[0]]))
 
-    def test_r0_plan_rejects_optional_effects_and_implicit_placement(self) -> None:
+    def test_retired_r0_is_rejected_even_with_effect_or_placement_variants(self) -> None:
         plan, assets, document = _fixture()
         clips = parse_prebound_clips(document)
         cases = []
@@ -234,8 +240,8 @@ class PreboundClipContractTests(unittest.TestCase):
         implicit["graphicsTrack"][0].pop("placement")
         cases.append(implicit)
         for changed in cases:
-            with self.subTest(changed=changed), self.assertRaises(
-                    PreboundClipContractError):
+            with self.subTest(changed=changed), self.assertRaisesRegex(
+                    ValueError, "section-marker.*retired"):
                 validate_prebound_clips(clips, changed, assets)
 
 

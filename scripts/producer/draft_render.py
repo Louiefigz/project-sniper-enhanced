@@ -1,44 +1,16 @@
 #!/usr/bin/env python3
-"""draft_render — pre-review-wall WATCHABLE draft with a burned DRAFT watermark.
+"""Render an explicitly admitted, watermarked draft before independent review.
 
-Nothing watchable existed until minute 62 of the real run (geometry-contract v3
-addendum, build item #8). Doctrine already permits unapproved rendered
-candidates; this CLI produces one the operator can WATCH while the review wall
-(critic rounds + rendered QC) still runs before anything is presented as final.
-
-Two steps, both reusing existing seams — no new governance surface:
-
-1. **Base render** — subprocess the EXISTING ``render.py`` into
-   ``<producer_dir>/draft/`` with ``--approval-dir <producer_dir>``. The
-   delivery-approval gate (``template_usage_approval.require_current``) runs
-   inside render.py exactly as it does for the final render: produced/full
-   plans need the receipt minted by the deterministic gate bundle
-   (``scripts/infra/mint-delivery-approval.ts``) or the render fails closed.
-   Audit B is skipped by default (``--audit`` opts in) — the draft never
-   participates in any approval chain, so no shipping gate is weakened.
-   **The draft CONSUMES that receipt**: after the run (success or failure)
-   this CLI deletes ``.sniper-template-usage-approved.json`` from the
-   producer dir, so a gates-only pre-wall mint can never persist as the
-   ship-unlock for a plan the independent critic wall has not reviewed —
-   the final render stays fail-closed until a fresh receipt is minted
-   post-wall (revoking a legitimately post-wall receipt merely forces a
-   re-mint through the same gates: fail-safe, never fail-open).
-2. **Watermark burn** — one fast ffmpeg drawtext pass (veryfast, ``-c:a copy``)
-   burns a big translucent center "DRAFT" plus a solid corner "DRAFT - NOT
-   FINAL" badge on EVERY frame into ``draft.mp4``, then the unwatermarked
-   intermediate ``final.mp4`` AND its ``.assembled.json`` provenance sidecar
-   are deleted so nothing in ``draft/`` can masquerade as an approved master.
-
-A draft can never ship: delivery governance (``palmier/master.py``) keys on
-``<out_dir>/final.mp4`` + its provenance + ``.sniper-qc-approved.json`` — the
-draft has the wrong name, no provenance, and this CLI writes NO approval
-sidecar (and refuses to run if one appears in the draft dir).
+Mint with ``mint-delivery-approval.ts <producer_dir> --draft`` first. The shared
+renderer validates separate draft readiness, writes only inside producer/draft,
+burns the DRAFT watermark, and removes the unwatermarked final and provenance.
+This wrapper consumes only the draft receipt, including on failure. Final
+readiness and existing independent review evidence remain separate.
 
 CLI: draft_render.py <edit_plan.json> <asset_manifest.json> <producer_dir>
                      [--audit] [--font FILE]
-
-NDJSON progress on stdout (render.py's own events pass through verbatim);
-fail-loud on any error.
+A draft is not final QC or editorial approval. Long full drafts can be expensive;
+prefer small representative/changed-region previews from existing renderers.
 """
 
 from __future__ import annotations
@@ -59,7 +31,7 @@ from stage_timing_context import timing_environment
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FONTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "assets", "fonts"))
 APPROVAL_SIDECAR = ".sniper-qc-approved.json"
-DELIVERY_RECEIPT = ".sniper-template-usage-approved.json"
+DELIVERY_RECEIPT = ".sniper-draft-ready.json"
 DRAFT_NAME = "draft.mp4"
 INTERMEDIATE_NAME = "final.mp4"
 
@@ -196,9 +168,8 @@ def scrub_intermediates(draft_dir: str) -> None:
 def run_base_render(job: DraftJob) -> None:
     """Subprocess render.py into the draft dir, streaming its NDJSON through.
 
-    ``--approval-dir <producer_dir>`` makes render.py enforce the SAME
-    delivery-approval receipt the final render uses (fail-closed inside
-    render.py). Audit B is skipped unless the job opts in.
+    ``--draft-only`` validates separate draft readiness and makes watermarking
+    mandatory even for direct renderer calls. Audit B is optional for drafts.
 
     Args:
         job: The draft run parameters.
@@ -208,7 +179,9 @@ def run_base_render(job: DraftJob) -> None:
     """
     cmd = [sys.executable, os.path.join(SCRIPT_DIR, "render.py"),
            job.plan_path, job.manifest_path, job.draft_dir,
-           "--approval-dir", job.producer_dir]
+           "--approval-dir", job.producer_dir, "--draft-only"]
+    if job.fontfile:
+        cmd.extend(["--draft-font", job.fontfile])
     if not job.audit:
         cmd.append("--no-audit")
     emit(status="stage_start", stage="draft_base_render", out=job.draft_dir)
@@ -255,24 +228,16 @@ def burn_watermark(job: DraftJob) -> str:
 
 
 def revoke_delivery_receipt(producer_dir: str) -> None:
-    """A draft run CONSUMES the LESSON-039 delivery-approval receipt.
-
-    A receipt minted before the draft proves only the deterministic gates;
-    left in place it would be the ship-unlock for a plan the independent
-    critic wall never reviewed (the two-lane divergence the 2026-07 review
-    flagged). Deleting it after every draft run keeps the invariant: no
-    pre-wall unlock survives step 5.5 — the final render fails closed until
-    a fresh receipt is minted AFTER the review wall.
+    """Consume only draft admission; preserve final readiness and review evidence.
 
     Args:
-        producer_dir: The producer dir owning the receipt.
+        producer_dir: The producer directory owning the draft receipt.
     """
     path = os.path.join(producer_dir, DELIVERY_RECEIPT)
     if os.path.exists(path):
         os.remove(path)
         emit(status="draft_receipt_revoked", path=path,
-             note="draft consumed the delivery approval; re-mint after the "
-                  "critic review wall before rendering the final")
+             note="draft admission consumed; final rendering requires current independent review")
 
 
 def run_draft(job: DraftJob) -> str:
@@ -286,8 +251,9 @@ def run_draft(job: DraftJob) -> str:
     """
     assert_no_approval_sidecar(job.draft_dir)
     run_base_render(job)
-    dst = burn_watermark(job)
-    scrub_intermediates(job.draft_dir)
+    dst = os.path.join(job.draft_dir, DRAFT_NAME)
+    if not os.path.isfile(dst):
+        raise RuntimeError("Draft-only renderer did not publish its watermarked output")
     assert_no_approval_sidecar(job.draft_dir)
     return dst
 
@@ -319,7 +285,7 @@ def main() -> None:
         emit(error=str(exc))
         sys.exit(1)
     finally:
-        # Success OR failure: no pre-wall delivery unlock may survive a draft.
+        # Success or failure consumes only the separate draft admission.
         revoke_delivery_receipt(job.producer_dir)
 
 

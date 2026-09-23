@@ -56,12 +56,12 @@ class RealSearchTests(_Live):
             self.assertTrue(row["match"]["matchedTerms"])
             self.assertIn(row["integration"]["status"], cd.STATUSES)
 
-    def test_comparison_card_spans_reference_and_local(self) -> None:
-        """Verify comparison card spans reference and local."""
+    def test_comparison_card_uses_upstream_without_retired_local_fallback(self) -> None:
+        """Comparison discovery does not restore a retired house card."""
         result = self.search("comparison card", limit=30)
         refs = self.refs(result)
         self.assertIn("mirror:comparison-split", refs)
-        self.assertTrue(any(ref.startswith("local:") for ref in refs))
+        self.assertFalse(any(ref in ("local:module-takeover", "local:statement-card") for ref in refs))
         reference = next(r for r in result["results"] if r["ref"] == "mirror:comparison-split")
         self.assertEqual(reference["integration"]["status"], cd.STATUS_REFERENCE)
         self.assertIsNone(reference["integration"]["kind"])
@@ -77,24 +77,24 @@ class RealSearchTests(_Live):
         self.assertEqual(self.refs(emphasis)[0], "local:marker-highlight")
         self.assertIn("presentation", emphasis["results"][0]["match"]["unmatchedTerms"])
 
-    def test_filters_narrow_to_measured_16x9_kinds(self) -> None:
-        """Verify filters narrow to measured 16x9 kinds."""
-        result = self.search("highlight emphasis", declared_aspect="16:9",
+    def test_filters_narrow_to_measured_9x16_kinds(self) -> None:
+        """Verify filters narrow to measured 9x16 kinds."""
+        result = self.search("highlight emphasis", declared_aspect="9:16",
                              status=cd.STATUS_MEASURED, limit=8)
         self.assertTrue(result["results"])
         for row in result["results"]:
             self.assertEqual(row["integration"]["status"], cd.STATUS_MEASURED)
-            self.assertEqual(row["integration"]["measured"]["aspect"], "16:9")
-            self.assertEqual(row["declared"]["aspects"], ["16:9"])
+            self.assertEqual(row["integration"]["measured"]["aspect"], "9:16")
+            self.assertEqual(row["declared"]["aspects"], ["9:16"])
 
 
 class DeterminismAndBoundsTests(_Live):
     def test_exact_refs_outrank_extra_prefix_word_hits(self) -> None:
         """A competing description containing 'local' cannot hide an exact ref."""
-        for name in ("local:icon-badge", "local:chip-row", "mirror:push-in"):
+        for name in ("local:line-swap", "local:count-up", "mirror:push-in"):
             self.assertEqual(self.refs(self.search(name, limit=1)), [name])
-        self.assertEqual(self.refs(self.search("comparison card", limit=3)),
-                         ["local:module-takeover", "mirror:social-proof-card", "mirror:card-resize"])
+        self.assertEqual(self.refs(self.search("comparison card", limit=2)),
+                         ["mirror:social-proof-card", "mirror:card-resize"])
 
     def test_same_query_twice_is_identical_and_limits_are_explicit(self) -> None:
         """Verify same query twice is identical and limits are explicit."""

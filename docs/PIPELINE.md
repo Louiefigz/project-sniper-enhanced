@@ -1,4 +1,13 @@
 # THE PIPELINE — footage in, approved Sniper final out
+## Current visual source rule
+
+Read `docs/producer/VISUAL_SOURCE_POLICY.md` before visual planning or execution.
+Use the complete HyperFrames catalog first. Retired house templates and global
+style presets cannot execute, including renamed release variants. Reference
+adaptations need this job’s selected reference; custom work needs an inspected
+capability or quality gap. Native Shorts stage `catalogFiles` and `catalogTitle`.
+This source rule replaces historical template/style recipes below.
+
 
 **This is the canonical statement of where PROJECT SNIPER is going.** Every other
 doc (skills, CLAUDE.md, READMEs) points here. If another doc contradicts this
@@ -22,9 +31,19 @@ The agent route, which every Short and long-form edit now takes:
    `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent …`.
 3. The agent authors `edit_plan.json` under the Producer skill, runs the full gate bundle and
    converges the plan with independent critics that are fresh subagents, not the author.
-4. Delivery approval from the deterministic gates:
+4. For an ordinary plan, mint separate `--draft` admission, then generate bounded
+   moving clips with `./sniper python3 scripts/producer/ordinary_previews.py
+   <project>/producer <project>/source/asset_manifest.json <new-preview-attempt>`.
+   On revisions, pass `--previous <prior-attempt>/ordinary-previews.json` so unchanged
+   preparation and clips can be verified and reused. Inspect and revise those clips.
+   Record the current reviews and decoded preview evidence under
+   [render readiness](producer/RENDER_READINESS.md), then mint admission from those
+   records and the deterministic gates (all scopes, including graphics-off):
    `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
-5. Render/assemble or the native exporter, then Audit B on the exact output and the Audit C
+5. For native Short/Long, the first export stops after continuous moving previews.
+   Inspect picture, motion, neighboring context and the actual mastered audio;
+   record independent region reviews, revise, and rerun with `--preview-reviews`.
+   Render/assemble or complete the native export, then Audit B on the exact output and the Audit C
    rendered review by a fresh subagent (Producer skill steps 7–7.5).
 6. Hand off the encoded video and the matching Studio project (`install/studio.command`).
 
@@ -32,6 +51,17 @@ On this route, **final** means the output of step 5 whose Audit B passed and who
 review found no unresolved material issue, recorded in the conversation's handoff with the
 measurements. The controller's `.sniper-qc-approved.json` promotion receipt is not produced
 here and is not required. Human playback review remains the operator's.
+
+September 22 enforcement: ordinary `render.py` and `assemble.py` now reject absent,
+failed or stale readiness before full media work. Separate draft admission permits only
+watermarked draft output or the owned bounded ordinary-preview command. Its cold
+preparation still requires a full graphics-free base and whole-program audio master;
+only composed context windows are bounded. Native Short and Long retain their current prebuild review
+contracts and run native reference/seek checks plus encoded sample checks before continuous
+moving previews. Full picture encoding additionally requires current recorded preview
+reviews. Dependency-current preview clips and detailed reviews can be reused; whole-plan
+assessment and final encoded QC remain required. The agent makes
+the revisions; engine commands validate supplied evidence and never invoke a provider.
 
 ## Operator direction — September 9, 2026
 

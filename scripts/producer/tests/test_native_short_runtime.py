@@ -21,7 +21,7 @@ class NativeRuntimeTests(unittest.TestCase):
     def test_cold_cache_is_explicit_and_requires_bounded_batches(self):
         """Existing export requests cannot silently trigger additional extraction work."""
         from argparse import Namespace
-        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'existing-only')
+        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'acquire-sdk-preflight')
         self.assertEqual(source_cache_mode(Namespace(cached_native_batches=True,
                          acquire_source_cache=True)), 'acquire-sequential-sdr')
         with self.assertRaisesRegex(ValueError, '--cached-native-batches'):

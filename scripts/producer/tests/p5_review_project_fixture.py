@@ -8,6 +8,7 @@ from pathlib import Path
 
 from graphics.scene_package_contract import load_scene_package
 from tests.p4_exit_media import file_identity, probe, write_canonical
+from tests.scene_fixtures import bind_test_scene_source
 
 _DURATION_FRAMES = 25_200
 _SCENE_COUNT = 50
@@ -35,7 +36,7 @@ def _scene_copy(scene: dict, index: int) -> dict:
         "timelineMapHash": hashlib.sha256(identity.encode()).hexdigest(),
     })
     value["provenance"]["requestId"] = f"request-{identity}"
-    return value
+    return bind_test_scene_source(value)
 
 
 def _row(scene: dict, package_hash: str) -> dict:

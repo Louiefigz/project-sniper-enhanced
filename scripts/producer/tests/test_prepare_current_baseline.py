@@ -17,6 +17,8 @@ REQUESTED = "1680:17580,17660:21899"
 
 
 def _project(root: Path, declared_frames: int = 21_905) -> dict:
+    root = root / "source"
+    root.mkdir()
     receipt = {"decoded": {"facts": {"declaredFrames": declared_frames}}}
     payload = json.dumps(receipt, sort_keys=True).encode("utf-8")
     digest = hashlib.sha256(payload).hexdigest()
@@ -106,6 +108,10 @@ class PrepareCurrentBaselineTests(unittest.TestCase):
                 for row in plan["cutTrack"])
             self.assertEqual(duration, Fraction(6_719_713, 8_000))
             self.assertEqual(fixture["durationFrames"], 20_139)
+            self.assertEqual(plan_path, project / "producer/edit_plan.json")
+            self.assertEqual(fixture["inputAuthority"]["planPath"], "producer/edit_plan.json")
+            self.assertEqual(fixture["inputAuthority"]["manifestPath"], "source/asset_manifest.json")
+            self.assertEqual(fixture["outputPaths"], ["producer/render/final.mp4"])
             self.assertEqual(
                 fixture["inputAuthority"]["planSha256"],
                 hashlib.sha256(plan_path.read_bytes()).hexdigest(),

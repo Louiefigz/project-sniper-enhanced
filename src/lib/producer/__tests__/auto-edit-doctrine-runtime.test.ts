@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -154,7 +155,7 @@ function testLiveDriftKeepsPinnedPromptAuthority(root: string): void {
   ];
   for (const prompt of prompts) {
     assert.ok(prompt.includes(doctrine.files[PRODUCER_CORE_DOCTRINE_PATHS[0]]));
-    assert.ok(prompt.includes(doctrine.files[PRODUCER_CORE_DOCTRINE_PATHS[3]]));
+    assert.ok(prompt.includes(doctrine.files["scripts/producer/docs/findings/FAILURE_LEDGER.md"]));
     assert.ok(!prompt.includes(liveSkill));
   }
   assert.equal(restoreAutoEditDoctrine(doctrine).doctrineHash, doctrine.doctrineHash);
@@ -191,11 +192,11 @@ function testSelectedStyleDoctrineIsPinned(root: string): void {
     ...ctx,
     intent: { ...ctx.intent!, mode: "short", style: "restrained" },
   };
-  const doctrine = captureAutoEditDoctrine(styled, "style-run", repo);
-  assert.equal(
-    readFileSync(doctrine.files["docs/studies/RESTRAINED_STYLE.md"], "utf8"),
-    "PINNED docs/studies/RESTRAINED_STYLE.md\n",
-  );
+  assert.throws(() => captureAutoEditDoctrine(styled, "style-run", repo), /retired/);
+  assert.equal(existsSync(path.join(ctx.dir, ".sniper-learning")), false);
+  const doctrine = captureAutoEditDoctrine(ctx, "catalog-run", repo);
+  assert(doctrine.files["docs/producer/VISUAL_SOURCE_POLICY.md"]);
+  assert.equal(doctrine.files["docs/studies/RESTRAINED_STYLE.md"], undefined);
 }
 
 function testPromotedReferenceTeachingsArePinned(root: string): void {

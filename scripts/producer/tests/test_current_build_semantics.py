@@ -12,20 +12,20 @@ from _current_build_release_fixture import (
     canonical, current_compositor_manifest, current_compositor_receipt,
     current_manifest, current_receipt,
 )
-from headless.compositor_build_manifest_v2_semantics import (
-    parse_compositor_build_manifest_v2, validate_compositor_build_manifest_v2,
+from headless.compositor_build_manifest_v3_semantics import (
+    parse_compositor_build_manifest_v3, validate_compositor_build_manifest_v3,
 )
 from headless.compositor_build_receipt_semantics import parse_compositor_build_receipt_v1
-from headless.compositor_build_receipt_v2_semantics import (
-    parse_compositor_build_receipt_v2, validate_compositor_build_receipt_v2,
+from headless.compositor_build_receipt_v3_semantics import (
+    parse_compositor_build_receipt_v3, validate_compositor_build_receipt_v3,
 )
-from headless.render_build_manifest_v3_semantics import (
-    parse_render_build_manifest_v3, validate_render_build_manifest_v3,
+from headless.render_build_manifest_v4_semantics import (
+    parse_render_build_manifest_v4, validate_render_build_manifest_v4,
 )
 from headless.render_build_receipt_semantics import parse_render_build_receipt_v1
 from headless.render_build_receipt_v2_semantics import parse_render_build_receipt_v2
-from headless.render_build_receipt_v3_semantics import (
-    parse_render_build_receipt_v3, validate_render_build_receipt_v3,
+from headless.render_build_receipt_v4_semantics import (
+    parse_render_build_receipt_v4, validate_render_build_receipt_v4,
 )
 
 
@@ -39,8 +39,8 @@ class _AlwaysEqual:
 
 CASES = (
     (current_compositor_manifest, current_compositor_receipt,
-     parse_compositor_build_receipt_v2, validate_compositor_build_receipt_v2),
-    (current_manifest, current_receipt, parse_render_build_receipt_v3, validate_render_build_receipt_v3),
+     parse_compositor_build_receipt_v3, validate_compositor_build_receipt_v3),
+    (current_manifest, current_receipt, parse_render_build_receipt_v4, validate_render_build_receipt_v4),
 )
 
 
@@ -56,9 +56,9 @@ class CurrentBuildSemanticTests(unittest.TestCase):
                 validate(parsed)
                 self.assertEqual(parsed.document_json, raw)
                 self.assertEqual(parsed.manifest.build_digest, parsed.build_digest)
-        validate_compositor_build_manifest_v2(parse_compositor_build_manifest_v2(
+        validate_compositor_build_manifest_v3(parse_compositor_build_manifest_v3(
             canonical(current_compositor_manifest())))
-        validate_render_build_manifest_v3(parse_render_build_manifest_v3(canonical(current_manifest())))
+        validate_render_build_manifest_v4(parse_render_build_manifest_v4(canonical(current_manifest())))
 
     def test_historical_parsers_reject_new_wire_versions(self) -> None:
         """A new build receipt cannot enter an old typed receipt lane."""
@@ -146,7 +146,7 @@ class CurrentBuildSemanticTests(unittest.TestCase):
             document = current_manifest()
             mutate(document)
             with self.subTest(mutation=mutate), self.assertRaises(RuntimeError):
-                parse_render_build_receipt_v3(current_receipt(document))
+                parse_render_build_receipt_v4(current_receipt(document))
 
 
 if __name__ == "__main__":

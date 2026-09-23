@@ -9,7 +9,7 @@ import type { NativeShortProjectInput } from "./native-short-project";
 
 export interface NativePrebuildReviewBinding { path: string; sha256: string }
 export const NATIVE_PREBUILD_COVERAGE = ["briefAndRetainedMessage", "assetsAndSourceEvidence", "cuesAndSceneCoverage",
-  "layoutCropAndText", "motionAndTransitions", "pacingAndAudio", "feasibility"] as const;
+  "layoutCropAndText", "motionAndTransitions", "pacingAndAudio", "feasibility", "visualSourceSelection"] as const;
 export interface NativePrebuildReview {
   schemaVersion: 1; scope: "native-short-full-plan" | "native-long-full-project"; planHash: string;
   reviewer: { identity: string; sessionId: string; plannerSessionId: string; independent: true };
@@ -37,7 +37,7 @@ function binding(value: unknown): NativePrebuildReviewBinding {
   return { path: file, sha256: sha256(row.sha256, "Native prebuild review file hash") };
 }
 
-function reviewer(value: unknown): NativePrebuildReview["reviewer"] {
+export function reviewIdentity(value: unknown): NativePrebuildReview["reviewer"] {
   const row = objectValue(value, "Native prebuild reviewer"), keys = ["identity", "sessionId", "plannerSessionId", "independent"];
   exactKeys(row, keys, keys, "Native prebuild reviewer");
   const identity = stringValue(row.identity, "Reviewer identity", 256);
@@ -47,14 +47,14 @@ function reviewer(value: unknown): NativePrebuildReview["reviewer"] {
   return { identity, sessionId, plannerSessionId, independent: true };
 }
 
-function coverage(value: unknown): NativePrebuildReview["coverage"] {
+export function reviewCoverage(value: unknown): NativePrebuildReview["coverage"] {
   const row = objectValue(value, "Native prebuild full-plan coverage");
   exactKeys(row, NATIVE_PREBUILD_COVERAGE, NATIVE_PREBUILD_COVERAGE, "Native prebuild full-plan coverage");
   return Object.fromEntries(NATIVE_PREBUILD_COVERAGE.map(key => [key,
     stringValue(row[key], `Native prebuild coverage ${key}`, 2000)])) as NativePrebuildReview["coverage"];
 }
 
-function evidence(value: unknown): NativePrebuildReviewBinding[] {
+export function reviewEvidence(value: unknown): NativePrebuildReviewBinding[] {
   if (!Array.isArray(value) || !value.length || value.length > 32) throw new Error("Native prebuild review needs 1–32 evidence files");
   const files = value.map(binding);
   if (new Set(files.map(file => file.path)).size !== files.length) throw new Error("Native prebuild review evidence duplicates a path");
@@ -76,7 +76,7 @@ function parseReview(value: unknown, planHash: string, scope: NativePrebuildRevi
   const review = validateProducerReview(row.review, "plan");
   if (review.verdict !== "pass" || review.materialIssues.length) throw new Error("Native prebuild review must pass with zero material issues");
   return { schemaVersion: 1, scope, planHash: row.planHash as string,
-    reviewer: reviewer(row.reviewer), coverage: coverage(row.coverage), evidence: evidence(row.evidence), review };
+    reviewer: reviewIdentity(row.reviewer), coverage: reviewCoverage(row.coverage), evidence: reviewEvidence(row.evidence), review };
 }
 
 /** Fail before dependent preparation. This is a recorded judgment, not a pixel or playback test. */

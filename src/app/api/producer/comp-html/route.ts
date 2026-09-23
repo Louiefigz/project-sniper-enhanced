@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { VISUAL_SOURCE_POLICY } from "@/lib/producer/visual-source-policy";
 import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
@@ -42,6 +44,10 @@ const ROOT_TAG_RE = /<[^>]*data-composition-id="[^"]*"[^>]*>/;
 function buildPreviewHtml(kind: string, spec: Record<string, unknown>, duration: number | null): string {
   const compPath = path.join(COMPOSITIONS_DIR, `${kind}.html`);
   let html = fs.readFileSync(compPath, "utf-8");
+  const authority = VISUAL_SOURCE_POLICY.integrated[kind as keyof typeof VISUAL_SOURCE_POLICY.integrated];
+  if (!authority || createHash("sha256").update(html).digest("hex") !== authority.sha256) {
+    throw new Error("Catalog source changed; preview cannot relabel a replacement template");
+  }
   const media = mediaShim(buildMediaMap(html, kind, spec));
 
   if (duration !== null) {

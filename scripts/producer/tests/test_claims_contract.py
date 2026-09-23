@@ -135,17 +135,19 @@ class TimingControlClaimsTests(unittest.TestCase):
     """Reveal schedules never substitute for, or become, visible claims."""
 
     def _statement_plan(self, timing: object = "2.58") -> dict:
-        """Use the registered module grammar and an actual string control."""
+        """Inert historical slot metadata, never an executable current template."""
         plan = _plan({"variant": "module", "statements": "Review it|Catch it",
                       "statementLands": timing})
         plan["graphicsTrack"][0]["kind"] = "statement-card"
         return plan
 
     def test_declared_timing_is_not_spoken_copy_and_plan_is_unchanged(self) -> None:
-        """Check the real statement control without mutating authored input."""
+        """Check retained string-control semantics with explicit inert declarations."""
         plan = self._statement_plan()
         before = copy.deepcopy(plan)
-        self.assertEqual(_errors(plan, _words("review it and catch it")), [])
+        metadata = {"statement-card": {"variables": {"statementLands": {"type": "string"}}}}
+        with patch.object(cc, "template_catalog", return_value=metadata):
+            self.assertEqual(_errors(plan, _words("review it and catch it")), [])
         self.assertEqual(plan, before)
 
     def test_each_catalog_timing_control_uses_the_shared_classification(self) -> None:
@@ -158,8 +160,7 @@ class TimingControlClaimsTests(unittest.TestCase):
             plan["graphicsTrack"][0]["kind"] = kind
             with self.subTest(kind=kind, key=key):
                 self.assertEqual(_errors(plan, _words("nothing numeric")), [])
-        self.assertEqual({key for _, key in controls},
-                         {"moduleLands", "rowLands", "statementLands"})
+        self.assertEqual(controls, [])  # No retired string schedule enters the live catalog.
 
     def test_visible_numeric_claim_is_still_rejected(self) -> None:
         """A valid reveal time cannot hide an unspoken painted number."""
@@ -196,8 +197,28 @@ class TimingControlClaimsTests(unittest.TestCase):
         from graphics.template_contract import entry_errors
 
         plan = self._statement_plan("not-a-time")
-        self.assertTrue(any("statementLands" in error
+        self.assertTrue(any("retired" in error
                             for error in entry_errors(plan["graphicsTrack"][0])))
+
+
+class ChartCsvClaimTests(unittest.TestCase):
+    def test_each_csv_datum_is_grounded_separately_and_input_is_unchanged(self) -> None:
+        for csv in ("10,20", "10, 20", "10.5,20.25"):
+            plan = _plan({"data": csv})
+            plan["graphicsTrack"][0]["kind"] = "chart-story"
+            before = copy.deepcopy(plan)
+            self.assertEqual(_errors(plan, _words(csv.replace(",", " "))), [])
+            self.assertEqual(plan, before)
+
+    def test_concatenated_value_does_not_ground_two_datums(self) -> None:
+        plan = _plan({"data": "10,20"})
+        plan["graphicsTrack"][0]["kind"] = "chart-story"
+        self.assertTrue(_errors(plan, _words("1020")))
+
+    def test_unspoken_individual_datum_is_rejected(self) -> None:
+        plan = _plan({"data": "10,99"})
+        plan["graphicsTrack"][0]["kind"] = "chart-story"
+        self.assertTrue(any("'99'" in error for error in _errors(plan, _words("ten twenty"))))
 
 
 if __name__ == "__main__":

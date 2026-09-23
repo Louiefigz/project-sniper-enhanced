@@ -177,13 +177,14 @@
       "sourceToken": "amix=inputs={len(delayed) + 1}",
       "expectedOccurrences": 1,
       "consumerKind": "program-mix",
-      "normalizationAuthority": "apply_transitions observes a content-bound source receipt and injects its exact stereo filter on the program leg before amix",
+      "normalizationAuthority": "Retained internal audio preparation helper: _transition_audio injects the observed stereo filter. The public apply_transitions entry point unconditionally rejects retired visual presets before media or output work.",
       "authorityPaths": [
         "scripts/producer/audio/channel_normalization.py",
         "scripts/producer/motion/transitions.py"
       ],
       "testPaths": [
-        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_motion.py"
       ],
       "exemption": null
     },
@@ -463,7 +464,7 @@
         },
         {
           "path": "scripts/producer/motion/transitions.py",
-          "token": "authority.assert_stable()"
+          "token": "raise ValueError(\"Legacy transition presets are retired; use an upstream \""
         }
       ]
     },

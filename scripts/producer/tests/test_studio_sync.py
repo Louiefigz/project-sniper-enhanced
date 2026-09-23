@@ -26,39 +26,39 @@ from studio.studio_sync import main as sync_main
 from studio.sync_diff import compute_report, load_state
 from studio.sync_model import StudioSyncError
 from studio.view_manifest import MANIFEST_NAME, unsynced_changes
+from plan_lint import lint
 
 
 def _sync_plan() -> dict:
-    """Lint-green longform excerpt; entry 3 exit-clamps to the 6.0s seam."""
+    """Portrait catalog excerpt; entry 3 exit-clamps to the 6.0s seam."""
     return {
         "planVersion": 1,
-        "target": {"mode": "longform", "excerpt": True, "scope": "light",
-                   "graphicsStyle": "overlay-rich",
+        "target": {"mode": "short", "excerpt": True, "scope": "light",
+                   "graphicsStyle": "catalog-first",
                    "graphicsStyleRationale": "dense overlay pass for a "
                    "talking-head excerpt: every beat carries a card"},
         "cutTrack": [
             {"sourceId": "raw-1", "start": 0.0, "end": 6.0, "speed": 1.0},
             {"sourceId": "raw-1", "start": 10.0, "end": 16.0, "speed": 1.0}],
         "graphicsTrack": [
-            {"kind": "statement-card", "outStart": 1.0, "outEnd": 4.2,
-             "anchor": "own-screen", "reason": "thesis takeover",
-             "spec": {"variant": "module",
-                      "statements": "More tactics|One system",
-                      "statementLands": 1.2}},
-            {"kind": "text-element-wide", "outStart": 2.0, "outEnd": 4.5,
+            {"kind": "line-swap", "outStart": 1.0, "outEnd": 4.2,
+             "anchor": "free-band", "reason": "thesis card",
+             "spec": {"lineA": "More tactics", "lineB": "One system",
+                      "swapAt": 1.2, "underlineWord": ""}},
+            {"kind": "marker-highlight", "outStart": 2.0, "outEnd": 4.5,
              "anchor": "free-band", "reason": "callout over the card",
              "id": "callout-1",
-             "spec": {"text": "Callout copy", "fontSize": 72}},
-            {"kind": "kinetic-quote-wide", "outStart": 4.0, "outEnd": 6.4,
+             "spec": {"text": "Callout copy", "drawAt": 1,
+                      "emphasisWord": "copy", "style": "highlight"}},
+            {"kind": "marker-highlight", "outStart": 4.0, "outEnd": 6.4,
              "anchor": "own-screen", "reason": "quote dies on the cut",
              "exitOnCut": True,
-             "spec": {"words": "More tactics was never the answer",
-                      "emphasisWords": "never"}},
-            {"kind": "glass-lower-third", "outStart": 8.2, "outEnd": 10.7,
+             "spec": {"text": "Choose one system", "emphasisWord": "system"}},
+            {"kind": "hw-callout-circle", "outStart": 8.2, "outEnd": 10.7,
              "anchor": "free-band", "reason": "speaker credibility beat",
              "id": "lower-3",
-             "spec": {"eyebrow": "COACH", "titleBase": "Aaron ",
-                      "titleHighlight": "Figueroa", "accent": "#054BC9"}}],
+             "spec": {"x": 240, "y": 780, "w": 400, "h": 200,
+                      "label": "Review", "labelAt": "below", "scribble": False}}],
     }
 
 
@@ -106,7 +106,7 @@ class StudioSyncTests(unittest.TestCase):
         cls.base = os.path.join(cls.tmp, "base_final.mp4")
         subprocess.run(
             ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-             "-i", "color=c=gray:s=1920x1080:d=12:r=30",
+             "-i", "color=c=gray:s=1080x1920:d=12:r=30",
              "-c:v", "libx264", "-crf", "28", "-pix_fmt", "yuv420p",
              cls.base], check=True)
 
@@ -144,7 +144,10 @@ class StudioSyncTests(unittest.TestCase):
 
     def test_untouched_project_is_clean(self) -> None:
         _, studio = self._build()
-        report = compute_report(load_state(studio))
+        state = load_state(studio)
+        manifest = {"sources": [{"id": "raw-1", "duration": 20.0}]}
+        self.assertEqual(lint(state.plan, manifest).errors, [])
+        report = compute_report(state)
         self.assertTrue(report.clean)
         code, out = _run_main([studio])
         self.assertEqual(code, 0)
@@ -183,28 +186,24 @@ class StudioSyncTests(unittest.TestCase):
         self.assertEqual(unsynced_changes(studio), [])
         self.assertTrue(compute_report(load_state(studio)).clean)
 
-    def test_variable_edit_including_non_panel_key(self) -> None:
+    def test_text_and_numeric_panel_edits_apply(self) -> None:
+        """Both declared scalar fields survive the full sync round trip."""
         src, studio = self._build()
-        index = os.path.join(studio, "index.html")
-        _patch_slot_attr(
-            index, "gfx-01", "data-variable-values",
-            '{"statementLands":1.0,"statements":"More tactics|One engine",'
-            '"variant":"module"}')
+        _patch_slot_attr(os.path.join(studio, "index.html"), "gfx-01",
+                         "data-variable-values", json.dumps({
+                             "lineA": "More tactics", "lineB": "One engine",
+                             "swapAt": 1.0, "underlineWord": ""}))
         report = compute_report(load_state(studio))
         diff = next(d for d in report.entry_diffs if d.slot == "gfx-01")
         changes = {c.key: (c.old, c.new) for c in diff.value_changes}
-        self.assertEqual(changes["statementLands"], (1.2, 1))
-        self.assertEqual(changes["statements"][1], "More tactics|One engine")
-        self.assertIn("statementLands",
-                      self._manifest(studio)["entries"][0]["nonPanelKeys"])
+        self.assertEqual(changes["swapAt"], (1.2, 1))
+        self.assertEqual(changes["lineB"], ("One system", "One engine"))
         code, out = _run_main([studio, "--apply"])
         self.assertEqual(code, 0, out)
         spec = self._plan(src)["graphicsTrack"][0]["spec"]
-        self.assertEqual(spec["statementLands"], 1)
-        self.assertEqual(spec["statements"], "More tactics|One engine")
-        self.assertEqual(
-            self._manifest(studio)["entries"][0]["nonPanelKeys"],
-            ["statementLands"])
+        self.assertEqual(spec["swapAt"], 1)
+        self.assertEqual(spec["lineB"], "One engine")
+        self.assertEqual(self._manifest(studio)["entries"][0]["nonPanelKeys"], [])
         self.assertTrue(compute_report(load_state(studio)).clean)
 
     def test_formatting_only_values_rewrite_is_clean(self) -> None:
@@ -212,7 +211,8 @@ class StudioSyncTests(unittest.TestCase):
         _patch_slot_attr(
             os.path.join(studio, "index.html"), "gfx-02",
             "data-variable-values",
-            '{"text": "Callout copy", "fontSize": 72.0}')
+            '{"text":"Callout copy","drawAt":1.0,'
+            '"emphasisWord":"copy","style":"highlight"}')
         report = compute_report(load_state(studio))
         self.assertFalse([d for d in report.entry_diffs if d.plan_facing])
 
@@ -220,7 +220,7 @@ class StudioSyncTests(unittest.TestCase):
         src, studio = self._build()
         _patch_slot_attr(os.path.join(studio, "index.html"),
                          "gfx-02", "data-variable-values",
-                         '{"fontSize":80,"text":"Callout copy"}')
+                         '{"drawAt":1.2,"emphasisWord":"copy","style":"highlight","text":"Callout copy"}')
         code, out = _run_main([studio, "--apply"])
         self.assertEqual(code, 0, out)
         entry = self._plan(src)["graphicsTrack"][2]
@@ -290,7 +290,7 @@ class StudioSyncTests(unittest.TestCase):
     def test_instance_file_structural_change_blocks_with_review_note(self) -> None:
         """The advisory is still visible, but unresolved bytes cannot be rebaselined."""
         _, studio = self._build()
-        rel = "compositions/gfx-02-text-element-wide.html"
+        rel = "compositions/gfx-02-marker-highlight.html"
         path = os.path.join(studio, rel)
         with open(path, encoding="utf-8") as handle:
             text = handle.read()
@@ -305,14 +305,14 @@ class StudioSyncTests(unittest.TestCase):
     def test_instance_declaration_rewrite_is_machinery_note(self) -> None:
         """A native-serialized default edit is visible and cannot silently sync."""
         src, studio = self._build()
-        rel = "compositions/gfx-02-text-element-wide.html"
+        rel = "compositions/gfx-02-marker-highlight.html"
         path = os.path.join(studio, rel)
         with open(path, encoding="utf-8") as handle:
             text = handle.read()
         decl = re.search(r'''data-composition-variables=(["'])(.*?)\1''', text, re.DOTALL)
         self.assertIsNotNone(decl)
         rows = json.loads(html.unescape(decl.group(2)))
-        next(r for r in rows if r["id"] == "fontSize")["default"] = 96
+        next(r for r in rows if r["id"] == "drawAt")["default"] = 1.5
         replacement = 'data-composition-variables="' + html.escape(json.dumps(rows), quote=True) + '"'
         edited = text.replace(decl.group(0), replacement, 1)
         self.assertNotEqual(edited, text)
@@ -350,28 +350,31 @@ class StudioSyncTests(unittest.TestCase):
     def test_legacy_plan_preexisting_failures_do_not_block(self) -> None:
         """Baseline-diff gating: a benign edit syncs on a legacy plan."""
         legacy = _sync_plan()
-        del legacy["target"]["excerpt"]      # 12s output < 300s floor: ERROR
+        legacy["cutTrack"][1]["end"] = 15.9
+        del legacy["target"]["excerpt"]      # 11.9s output < 12s floor: ERROR
         src, studio = self._build(legacy)
         _patch_slot_attr(os.path.join(studio, "index.html"),
                          "gfx-02", "data-variable-values",
-                         '{"fontSize":80,"text":"Callout copy"}')
+                         '{"drawAt":1.2,"emphasisWord":"copy","style":"highlight","text":"Callout copy"}')
         code, out = _run_main([studio, "--apply"])
         self.assertEqual(code, 0, out)
         summary = json.loads(out)
         self.assertEqual(summary["status"], "applied")
-        self.assertTrue(any("mode floor" in f
+        self.assertTrue(summary["preexistingGateFailures"])
+        self.assertTrue(all("mode floor" in f
                             for f in summary["preexistingGateFailures"]))
         self.assertIn("predates this edit", summary["preexistingNote"])
         spec = self._plan(src)["graphicsTrack"][1]["spec"]
-        self.assertEqual(spec["fontSize"], 80)
+        self.assertEqual(spec["drawAt"], 1.2)
         self.assertTrue(compute_report(load_state(studio)).clean)
 
     def test_edit_introduced_lint_failure_still_blocks(self) -> None:
         """A NEW failure the edit caused blocks even on a legacy plan."""
         legacy = _sync_plan()
+        legacy["cutTrack"][1]["end"] = 15.9
         del legacy["target"]["excerpt"]
         src, studio = self._build(legacy)
-        # 11.0 + 3.2 = 14.2s window overruns the 12s output: new lint ERROR
+        # 11.0 + 3.2 = 14.2s overruns the 11.9s output: new lint ERROR
         _patch_slot_attr(os.path.join(studio, "index.html"),
                          "gfx-01", "data-start", "11")
         before_plan = _read(os.path.join(src, "edit_plan.json"))

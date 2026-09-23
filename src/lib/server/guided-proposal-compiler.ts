@@ -1,3 +1,4 @@
+import { VISUAL_SOURCE_INSTRUCTIONS } from "@/lib/producer/visual-source-policy";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 import path from "node:path";
 import { observeCutPreviewFile } from "@/app/api/producer/auto-edit/cut-preview-receipt";
@@ -73,8 +74,8 @@ export function proposalCompilerAuthority(cut: AcceptedGuidedCut, options: { ver
 /** Condensed autopilot rules 3a/3b/3c the deterministic renderer gates actually enforce. No new authority. */
 function longformDoctrine(evidence: ProposalEvidence): string {
   if (evidence.schemaVersion < 4) return "";
-  return `\nV4 adds the produced/full long-form decisions the deterministic renderer gates require; a missing one is a hard failure, not a style note.
-State graphicsStyle ("cutaway-only" or "overlay-rich") with a substantive graphicsStyleRationale explaining why that grammar fits THIS edit. The deterministic advisor's recommendedTargetFields in evidence.graphicsAdvice is input, not authority, and a silent inherited default is invalid. face-bridge needs an unimplemented visual-profile/presenter-hole authority here: choosing it is retained as a blocker, not executed.
+  return `${VISUAL_SOURCE_INSTRUCTIONS}\nV4 adds the produced/full long-form decisions the deterministic renderer gates require; a missing one is a hard failure, not a style note.
+Set graphicsStyle="catalog-first" with a rationale for this edit. Unsupported compatibility needs require native catalog authoring.
 Every evidence.graphicsAdvice["graphics_planner.py"].introSemanticBeats row with decisionRequired=true is a transcript-bound obligation even when candidates were pruned: give it exactly one beatDecisions row bound to one catalog-graphic operationIndex. Start from formAllocation.recommendedAssignment, which is a deterministic maximum-distinct witness, not catalog rank; kind MUST come from that beat's compatibleKinds and MUST equal the operation's catalogKind. Persist alternativesConsidered naming 2 OTHER compatible kinds when the beat exposes 3 or more, plus a 20+ character transcript-specific selectionReason and reason. One graphic discharges exactly one beat: never reuse or duplicate a binding, and never invent filler to reach a floor.
 The bound operation's anchor window must be on screen at the beat's exact outStart and hold at least minimumGraphicHoldS seconds, extended further when the template's build/reveal needs to settle; the floor is not a target. A hold-to-cut graphic must end on a real cut seam (an anchor that is also a segment boundary) or at the program end. Every catalog-graphic operation also needs its own purposeful reason (8+ characters) saying what it earns.
 Author no transitions. Every evidence.introSeams row (an internal cut boundary inside the ${evidence.hookWindowS ?? 60}s hook window) needs exactly one hookSeamDecisions row: decision "clean-hook", a 20+ character reason, and 12+ characters of transcript evidence for THAT seam. An unresolved seam is not an editorial decision.

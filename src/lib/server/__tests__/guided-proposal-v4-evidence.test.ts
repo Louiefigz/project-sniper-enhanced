@@ -38,9 +38,9 @@ test("only V4 evidence receives the produced-longform decision doctrine, and it 
   const evidence = { schemaVersion: 4, hookWindowS: 60, anchors: [0, 1], introSeams: [],
     target: { mode: "longform", width: 1920, height: 1080 } } as unknown as ProposalEvidence;
   const prompt = buildProposalPrompt("Keep the cut.", evidence);
-  for (const rule of ["graphicsStyle", "graphicsStyleRationale", "decisionRequired", "compatibleKinds", "alternativesConsidered",
+  for (const rule of ['graphicsStyle="catalog-first"', "with a rationale for this edit", "decisionRequired", "compatibleKinds", "alternativesConsidered",
     "selectionReason", "minimumGraphicHoldS", "formAllocation.recommendedAssignment", "hookSeamDecisions", "clean-hook",
-    "face-bridge", "60s hook window", "V3 requires presentation on EVERY operation"]) {
+    "Unsupported compatibility needs require native catalog authoring", "60s hook window", "V3 requires presentation on EVERY operation"]) {
     assert.ok(prompt.includes(rule), `V4 doctrine is missing ${rule}`);
   }
   const v3 = buildProposalPrompt("Keep the cut.", { ...evidence, schemaVersion: 3 } as unknown as ProposalEvidence);

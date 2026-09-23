@@ -126,7 +126,7 @@ class NativeCaptureReceiptTests(unittest.TestCase):
 
     def pipeline(self) -> NativeShortPipeline:
         """Use real capture handoff with its owner explicitly replaced by an inert stub."""
-        request = {'output': str(self.root), 'captureMode': 'sdk-streaming',
+        request = {'output': str(self.root), 'captureMode': 'sdk-streaming', 'verifyStage': 'TEST already rendered',
                    'tools': {'node': 'TEST-NO-LAUNCH'}}
         pipeline = NativeShortPipeline(request, {})
         self.enterContext(patch.object(pipeline, 'supervise'))

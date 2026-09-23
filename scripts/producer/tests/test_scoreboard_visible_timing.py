@@ -2,16 +2,13 @@
 from __future__ import annotations
 
 import copy
-import json
-import subprocess
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
 from graphics import template_visual_contract as visual
-from graphics.comp_catalog_probe import probe_duration, probe_spec
-from graphics.template_contract import declared_variables, entry_errors
+from graphics.template_contract import entry_errors
 
 ROOT = Path(__file__).resolve().parents[3]
 SCOREBOARD = ROOT / "templates/motion/compositions/module-scoreboard.html"
@@ -27,34 +24,16 @@ def entry(spec: dict, duration: float) -> dict:
     return {"kind": "module-scoreboard", "outStart": 0, "outEnd": duration, "spec": spec}
 
 
-def actual_ramps(cases: list[dict]) -> list[float]:
-    """Execute the actual template's module-build block with recording GSAP stubs."""
-    script = r"""
-const fs=require('node:fs'),vm=require('node:vm');
-const html=fs.readFileSync(process.argv[1],'utf8');
-const tokens=fs.readFileSync(process.argv[2],'utf8');
-const cases=JSON.parse(fs.readFileSync(0,'utf8'));
-const block=html.split('// ---- Narration-paced lands')[1].split('// exit:')[0];
-const build=block.slice(block.indexOf('const modules'));
-const constants=html.slice(html.indexOf('const CHIP_SWEEP_S'),html.indexOf('const STATES'));
-const result=cases.map(vars=>{
- const ramps=[],context={window:{}};vm.runInNewContext(tokens,context);
- const M=context.window.__motionTokens;
- const parts=k=>String(vars[k]||'').split('|').filter(x=>x.trim()).map(()=>({}));
- const tl={fromTo(a,b,c,at){ramps.push(at+c.duration);}};
- Object.assign(context,{vars,M,ebText:vars.eyebrow||'',heroValue:vars.heroValue||'',
-  limitText:vars.limitText||'',ctxEls:parts('contextChips'),tileEls:parts('tiles'),stripEls:parts('stripChips'),
-  ebEl:{},ctxEl:{},heroRowEl:{},tilesEl:{},stripEl:{},limitEl:{},document:{getElementById:()=>({})},
-  gsap:{timeline:()=>tl}});
- vm.runInNewContext(constants+build,context);return Math.max(...ramps);
-});process.stdout.write(JSON.stringify(result));
-"""
-    result = subprocess.run(["node", "-e", script, str(SCOREBOARD), str(ROOT / "templates/motion/motion-tokens.js")],
-                            input=json.dumps(cases), text=True, capture_output=True, check=True, timeout=10)
-    return json.loads(result.stdout)
+# Inert historical numeric constants; no retired JavaScript is executed.
+TEST_TIMING = {'LAND_DEFAULT_START_S': 0.2, 'LAND_DEFAULT_GAP_S': 0.9, 'CTX_STAGGER_S': 0.1, 'TILE_STAGGER_S': 0.1, 'CHIP_SWEEP_S': 0.085, 'TEXT_RAMP_S': 0.2, 'EYEBROW_LEAD_S': 0.25, 'EXIT_BLUR_S': 0.15}
 
 
 class ScoreboardTimingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        patcher = mock.patch.object(visual, "_scoreboard_tokens", return_value=TEST_TIMING)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_actual_failed_ui_card_rejects_missing_late_modules(self) -> None:
         issues = visual.visual_entry_errors(entry(SPEC, 1.8018))
         self.assertTrue(any("4.35s" in issue and "last reveal 2.90s" in issue for issue in issues), issues)
@@ -66,16 +45,10 @@ class ScoreboardTimingTests(unittest.TestCase):
         self.assertEqual(visual.visual_entry_errors(entry(spec, 1.8)), [])
         self.assertTrue(visual.visual_entry_errors(entry(spec, 1.6)))
 
-    def test_actual_javascript_build_matches_defaults_custom_lands_and_fanout(self) -> None:
-        cases = [SPEC, {"heroValue": "100"}, {"contextChips": "a|b|c|d"},
-                 {**SPEC, "moduleLands": "0|0.5|1.2|3.5"},
-                 {"tiles": "one~first|two~second|three~third"},
-                 {"eyebrow": "TEST", "stripChips": "|".join(f"{i}~win" for i in range(13))},
-                 {"limitText": "Only caveat"}]
-        for spec, actual in zip(cases, actual_ramps(cases), strict=True):
-            with self.subTest(spec=spec):
-                reveal, settle, _ = visual.scoreboard_timing(spec)
-                self.assertAlmostEqual(reveal + settle, actual)
+    def test_retired_source_is_absent_and_current_contract_rejects(self) -> None:
+        self.assertFalse(SCOREBOARD.exists())
+        for spec in (SPEC, {"heroValue": "100"}):
+            self.assertTrue(any("retired" in issue for issue in entry_errors(entry(spec, 10))))
 
     def test_exit_has_its_own_runway_after_readable_dwell(self) -> None:
         spec = {**SPEC, "exit": "blur-recede"}
@@ -93,13 +66,10 @@ class ScoreboardTimingTests(unittest.TestCase):
             self.assertTrue(visual.visual_entry_errors(entry(SPEC, 10)))
         self.assertTrue(visual.visual_entry_errors(entry({}, 10)))
 
-    def test_probe_and_test_authoring_use_the_same_required_hold(self) -> None:
-        from _guided_longform_treatment import minimum_hold_s
-        beat = {"shape": "scale", "trigger": "number", "minimumGraphicHoldS": 1.8}
-        self.assertAlmostEqual(minimum_hold_s("module-scoreboard", beat), 4.35)
-        declared = declared_variables(SCOREBOARD.read_text())
-        spec = probe_spec("module-scoreboard", declared)
-        self.assertEqual(visual.visual_entry_errors(entry(spec, probe_duration("module-scoreboard", spec))), [])
+    def test_retained_timing_default_and_custom_schedule_stay_distinct(self) -> None:
+        baseline = visual.scoreboard_timing(SPEC)
+        later = visual.scoreboard_timing({**SPEC, "moduleLands": "0|0.5|1.2|3.5"})
+        self.assertGreater(later[0], baseline[0])
 
     def test_validation_does_not_retime_or_remove_content(self) -> None:
         before = copy.deepcopy(SPEC)

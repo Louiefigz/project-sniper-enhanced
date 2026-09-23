@@ -61,6 +61,24 @@ export function assertNativeCaptureOwner(file, environment = process.env) {
   'capture did not originate from its shared worker');
 }
 
+/** Preview capture is restricted to its own shared worker and output phase. */
+export function assertNativePreviewOwner(file, environment = process.env) {
+  requireValue(file === environment.SNIPER_NATIVE_EXPORT_REQUEST, 'preview requires the shared export supervisor');
+  const request = readRecord(file), owner = readRecord(environment.SNIPER_NATIVE_EXPORT_OWNER).value;
+  const pid = Number(environment.SNIPER_NATIVE_EXPORT_PID);
+  requireValue(Number.isSafeInteger(pid) && pid > 1, 'preview has no live supervisor');
+  process.kill(pid, 0);
+  const worker = request.value.adapter === 'native-long' ? 'native_long_worker.py' : 'native_short_worker.py';
+  requireValue(owner.project === request.value.project && !owner.completedAt && !owner.abortReason
+    && owner.additionalFilePinsBefore?.[file] === request.sha, 'preview owner/request differs');
+  const args = owner.args;
+  const phase=Array.isArray(args)?args[6]:null;
+  const match=/^preview-picture-(0|[1-9][0-9]{0,2})$/.exec(phase??'');
+  requireValue(match&&Number(match[1])<768&&args.length===7&&args[0]==='/usr/bin/sandbox-exec'
+    &&path.basename(args[4])===worker&&args[5]===file
+    &&owner.output===path.join(request.value.output,`${phase}.json`), 'preview did not originate from its shared section worker');
+}
+
 /** Kept separate from module import so tests never initialize or launch the SDK. */
 export function admitNativeCommand() {
   try {

@@ -7,6 +7,9 @@ The composite node aliases the audio-bearing final artifact in this fixture.
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+from pathlib import Path
 from typing import Any
 
 from audio.audio_mix_picture import packet_signature
@@ -50,3 +53,13 @@ def audio_only_revision(
     case.assertEqual(nodes['node-composite']['outputArtifactHash'], nodes['node-final']['outputArtifactHash'],
                      'composite and final share one artifact here; composite inputs are unchanged')
     return rows, after
+
+
+def prepare_test_review(project: Path, output: Path) -> None:
+    """Isolate real graph/audio tests with declared TEST-only editorial evidence."""
+    approval = project / 'src/lib/server/__tests__/_plan-readiness-fixture.ts'
+    reviewed = subprocess.run([os.environ.get('SNIPER_NODE_PATH', 'node'), '--import', 'tsx',
+        str(approval), str(output)], cwd=project, check=False,
+        capture_output=True, text=True, timeout=120)
+    if reviewed.returncode:
+        raise RuntimeError(f'TEST review fixture failed: {reviewed.stderr}')

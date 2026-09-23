@@ -36,13 +36,7 @@ interface Props {
 export default function ElementsPanel({ playhead, canvas, onAdd, pendingInsert, onClearPending }: Props) {
   const loop = usePreviewLoop();
   const [showcase, setShowcase] = useState<CompCatalogEntry | null>(null);
-  // Sectioned groups (slideware reference pack, module card pack, then raw
-  // primitives) follow dividers so the curated designed comps stay the
-  // first read.
-  const comps = COMPS_CATALOG.filter((c) => !c.section);
-  const slideware = COMPS_CATALOG.filter((c) => c.section === "slideware");
-  const moduleCards = COMPS_CATALOG.filter((c) => c.section === "module");
-  const primitives = COMPS_CATALOG.filter((c) => c.section === "primitives");
+  const comps = COMPS_CATALOG;
   const card = (c: CompCatalogEntry) => (
     <ElementCard
       key={c.kind}
@@ -69,30 +63,6 @@ export default function ElementsPanel({ playhead, canvas, onAdd, pendingInsert, 
         </div>
       )}
       {comps.map(card)}
-      {slideware.length > 0 && (
-        <div className="flex items-center gap-2 pt-2 text-[10px] uppercase tracking-wide text-neutral-500">
-          <span className="h-px flex-1 bg-neutral-800" />
-          Slideware pack
-          <span className="h-px flex-1 bg-neutral-800" />
-        </div>
-      )}
-      {slideware.map(card)}
-      {moduleCards.length > 0 && (
-        <div className="flex items-center gap-2 pt-2 text-[10px] uppercase tracking-wide text-neutral-500">
-          <span className="h-px flex-1 bg-neutral-800" />
-          Module pack
-          <span className="h-px flex-1 bg-neutral-800" />
-        </div>
-      )}
-      {moduleCards.map(card)}
-      {primitives.length > 0 && (
-        <div className="flex items-center gap-2 pt-2 text-[10px] uppercase tracking-wide text-neutral-500">
-          <span className="h-px flex-1 bg-neutral-800" />
-          Primitives
-          <span className="h-px flex-1 bg-neutral-800" />
-        </div>
-      )}
-      {primitives.map(card)}
       {showcase && (
         <ElementShowcase
           entry={showcase}

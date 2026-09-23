@@ -1,6 +1,34 @@
 """Shared P4 scene fixtures with stable authority identities."""
 from __future__ import annotations
 
+import hashlib
+from pathlib import Path
+
+from graphics.visual_source_policy import policy
+from graphics.visual_source_receipt import subject_hash
+
+
+def bind_test_scene_source(scene: dict) -> dict:
+    """Attach explicit TEST-only custom evidence to the synthetic SDK fixture.
+
+    These declarations exercise source admission, not real creative approval.
+    The fixture's existing bundle manifest is its immutable local request input.
+    """
+    request = Path(__file__).resolve().parent / 'fixtures/fire-sparkles-bundle/bundle.json'
+    port = policy()['integrated']['line-swap']
+    scene['visualSources'] = {
+        'schemaVersion': 1, 'policyVersion': policy()['policyVersion'],
+        'subjectSha256': subject_hash({key: value for key, value in scene.items() if key != 'visualSources'}),
+        'request': {'path': str(request), 'sha256': hashlib.sha256(request.read_bytes()).hexdigest()},
+        'decisions': [{'route': 'custom', 'targets': [row['elementId'] for row in scene['elements']],
+            'reason': 'TEST-only two-unit scene for deterministic operation and SDK contracts.',
+            'gapType': 'missing-capability', 'query': 'Two independently addressable seeded particle cards',
+            'gap': 'The inspected line-swap component does not expose two separate seeded particle units.',
+            'scope': 'TEST fixture only: keep two addressable units for mutation and isolation checks.',
+            'inspected': [{'id': 'line-swap', 'sourceSha256': port['upstreamSha256'],
+                'limitation': 'One text replacement component does not implement the synthetic two-unit API.'}]}]}
+    return scene
+
 
 def fire_sparkles_scene(bundle_hash: str,
                         right_title: str = "Change only this card") -> dict:
@@ -13,7 +41,7 @@ def fire_sparkles_scene(bundle_hash: str,
         "fireIntensity": 1,
         "sparkleCount": 22,
     }
-    return {
+    return bind_test_scene_source({
         "schemaVersion": 1,
         "sceneId": "scene-045",
         "version": 1,
@@ -91,4 +119,4 @@ def fire_sparkles_scene(bundle_hash: str,
             "origin": "operator",
             "requestId": "request-fire-sparkles",
         },
-    }
+    })

@@ -3,11 +3,16 @@
 One test class per FAILURE_LEDGER.md row (LL-001..LL-011), plus the ledger
 machinery itself (``ledger_lessons.parse_lessons`` / ``parse_rows``) and the
 prompt wiring that makes the Brain lessons a hard authoring contract.
+Historical layout DTOs below exercise pure arithmetic/token rules only; current
+full-gate admission and retired-source refusal are tested separately.
 """
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from graphics.template_contract import validate_entry
+from graphics.visual_source_policy import require_integrated
 
 from _common import *  # noqa: F401,F403
 import claims_contract as cc
@@ -142,12 +147,15 @@ class ExitRunwayTests(unittest.TestCase):
             self._entry(19.6, 25.04, on_cut=True), "g[0]", [25.04], 1.5)
         self.assertFalse(any("no runway" in e for e in errs), errs)
 
-    def test_fires_through_plan_lint(self) -> None:
+    def test_retired_source_stops_full_lint_before_legacy_rule(self) -> None:
         cuts = [{"sourceId": "raw-1", "start": 0.0, "end": 25.04, "speed": 1.0},
                 {"sourceId": "raw-1", "start": 26.0, "end": 58.0, "speed": 1.0}]
         gfx = [self._entry(19.6, 25.04)]
         rep = pl.lint(_longform_plan(cuts, gfx), MANIFEST)
-        self.assertTrue(any("no runway" in e for e in rep.errors), rep.errors)
+        self.assertEqual(len(rep.errors), 1, rep.errors)
+        self.assertIn("statement-card", rep.errors[0])
+        self.assertIn("retired", rep.errors[0])
+        self.assertEqual(rep.warnings, [])
 
 
 # ------------------------------------------------------------------ LL-002 --
@@ -189,14 +197,16 @@ class FirstLandTests(unittest.TestCase):
         rep = _visual_report(self._entry("own-screen", {"item1": "x"}))
         self.assertEqual(rep.errors, [])
 
-    def test_fires_through_plan_lint(self) -> None:
+    def test_retired_source_stops_full_lint_before_legacy_rule(self) -> None:
         cuts = [{"sourceId": "raw-1", "start": i * 3.0, "end": (i + 1) * 3.0,
                  "speed": 1.0} for i in range(20)]
         gfx = [self._entry("own-screen",
                            {"title": "Five tips", "item1": "x", "at1": 2.29})]
         rep = pl.lint(_longform_plan(cuts, gfx), MANIFEST)
-        self.assertTrue(any("first content land" in e for e in rep.errors),
-                        rep.errors)
+        self.assertEqual(len(rep.errors), 1, rep.errors)
+        self.assertIn("whiteboard-list", rep.errors[0])
+        self.assertIn("retired", rep.errors[0])
+        self.assertEqual(rep.warnings, [])
 
 
 # ------------------------------------------------------------------ LL-003 --
@@ -323,11 +333,14 @@ class ReceiptLineTests(unittest.TestCase):
             encoding="utf-8")
         self.assertIn("--receipt-gray: rgba(255, 255, 255, 0.72)", css)
 
-    def test_both_ribbon_comps_use_token_and_separator(self) -> None:
-        for name in ("module-takeover.html", "statement-card.html"):
-            html = (_COMPS / name).read_text(encoding="utf-8")
-            self.assertIn("var(--receipt-gray", html, name)
-            self.assertIn('join(" \\u00b7 ")', html, name)
+    def test_retired_ribbon_sources_cannot_be_selected(self) -> None:
+        for kind in ('module-takeover', 'statement-card'):
+            with self.subTest(kind=kind), patch('subprocess.Popen') as process:
+                with self.assertRaisesRegex(ValueError, kind + '.*retired'):
+                    validate_entry({'kind': kind, 'outStart': 0, 'outEnd': 3,
+                                    'anchor': 'own-screen', 'spec': {}})
+                process.assert_not_called()
+            self.assertFalse((_COMPS / f'{kind}.html').exists())
 
 
 # ------------------------------------------------------------------ LL-007 --
@@ -410,7 +423,14 @@ class GapFillerZoomTests(unittest.TestCase):
 
     def test_fires_through_plan_lint(self) -> None:
         cuts = [{"sourceId": "raw-1", "start": 0.0, "end": 60.0, "speed": 1.0}]
-        plan = _longform_plan(cuts, [g.copy() for g in self.V2_GRAPHICS])
+        graphics = [{'kind': 'chart-story', 'anchor': 'own-screen',
+                     'outStart': g['outStart'], 'outEnd': g['outEnd'],
+                     'reason': 'TEST gap boundary', 'spec': {
+                         'type': 'bars', 'data': '10, 20', 'labels': 'First,Next',
+                         'emphasize': 0, 'unit': ''}} for g in self.V2_GRAPHICS]
+        for graphic in graphics:
+            validate_entry(graphic)
+        plan = _longform_plan(cuts, graphics)
         plan["punchIns"] = [dict(self.V2_PAIR)]
         rep = pl.lint(plan, MANIFEST)
         self.assertTrue(any("LL-007" in w for w in rep.warnings),
@@ -814,12 +834,14 @@ class RowLandsTests(unittest.TestCase):
         # Invalid picks return None — re-pick upstream, no fallback.
         self.assertIsNone(gcopy.fill_row_lands(entry, [0, 9], words))
 
-    def test_the_comp_consumes_row_lands(self) -> None:
-        html = (_COMPS / "glass-rail.html").read_text(encoding="utf-8")
-        self.assertIn('"id":"rowLands"', html)          # declared variable
-        self.assertEqual(html.count("rowLands ? rowLands[i]"), 2,
-                         "both builds (rail-push + classic) must word-lock")
-        self.assertIn("rowLands needs", html)           # count-mismatch throw
+    def test_legacy_row_land_metadata_cannot_reopen_retired_source(self) -> None:
+        entry = self._rail(dict(self.TITLES, rowLands=[2.29, 6.21, 9.32]))
+        self.assertEqual(self._errs(entry), [])  # pure historical timing contract
+        with patch('subprocess.Popen') as process, self.assertRaisesRegex(
+                ValueError, 'glass-rail.*retired'):
+            validate_entry(entry)
+        process.assert_not_called()
+        self.assertFalse((_COMPS / 'glass-rail.html').exists())
 
 
 # -------------------------------------------- LL-015 form-selection contract --
@@ -828,25 +850,20 @@ class CardFormMapTests(unittest.TestCase):
 
     MAP = MOTION["card_form_map"]
 
-    def test_every_family_is_a_nonempty_tuple_of_built_comps(self) -> None:
+    def test_available_families_only_reference_authenticated_current_ports(self) -> None:
         self.assertGreaterEqual(len(self.MAP), 7)
         for family, kinds in self.MAP.items():
             self.assertIsInstance(kinds, tuple, family)
-            self.assertTrue(kinds, f"{family} family is empty")
             for kind in kinds:
-                self.assertTrue((_COMPS / f"{kind}.html").exists(),
-                                f"{family}: comp {kind!r} has no HTML")
+                require_integrated(kind)  # both installed and upstream bytes
+                self.assertTrue((_COMPS / f'{kind}.html').is_file())
 
-    def test_the_module_mapping_rows_are_covered(self) -> None:
-        # MODULE_CARDS §1.4 — one spot check per table row we encode.
-        self.assertIn("module-bullet-bars", self.MAP["comparison"])   # #9/#12
-        self.assertIn("versus-split", self.MAP["comparison"])
-        self.assertIn("module-pipeline", self.MAP["process"])         # #18
-        self.assertIn("module-ledger-dark", self.MAP["evidence"])     # #3/#5
-        self.assertIn("module-bullet-bars", self.MAP["limit"])        # #12
-        self.assertIn("module-scoreboard", self.MAP["scale"])         # #11
-        self.assertIn("whiteboard-list", self.MAP["list"])              # #8/#10
-        self.assertIn("statement-card", self.MAP["thesis"])             # #19
+    def test_unported_families_stay_explicitly_unallocated(self) -> None:
+        expected = {'comparison': ('chart-story',), 'trend': ('chart-story',),
+                    'scale': ('count-up', 'chart-story'), 'thesis': ('line-swap',),
+                    'process': (), 'evidence': (), 'credibility': (), 'chapter': (),
+                    'limit': (), 'list': ()}
+        self.assertEqual(self.MAP, expected)
 
     def test_thesis_forms_never_double_as_comparison_forms(self) -> None:
         # The LESSON-029 defect shape: numbers belong on comparison forms.
@@ -1181,14 +1198,17 @@ class LessonWireTests(unittest.TestCase):
         self.assertIn("docs/findings/FAILURE_LEDGER.md", skill)
         self.assertIn("Brain lessons", skill)
 
-    def test_card_form_map_is_wired_into_both_authoring_surfaces(self) -> None:
-        # LL-015/LL-016: one line each pointing the brain at the catalog.
+    def test_catalog_discovery_and_missing_port_routing_are_wired(self) -> None:
         ts = self._auto_prompt_source()
-        self.assertIn("card_form_map", ts)
-        self.assertIn("INFORMATION SHAPE", ts)
-        skill = (_REPO / ".claude" / "skills" / "producer"
-                 / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("card_form_map", skill)
+        self.assertIn('...graphicsProposalSteps(ctx)', ts)
+        self.assertIn('Inspect the whole HyperFrames catalog', ts)
+        self.assertIn('compatibleKinds is empty', ts)
+        self.assertIn('native-project migration required', ts)
+        self.assertIn('never substitute an old kind', ts)
+        skill = (_REPO / '.claude/skills/producer/SKILL.md').read_text(encoding='utf-8')
+        self.assertIn('search the WHOLE recorded catalog', skill)
+        self.assertIn('only `integrated-measured` kinds enter the', skill)
+        self.assertIn('a search hit never makes a mirror item plannable', skill)
 
 
 if __name__ == "__main__":

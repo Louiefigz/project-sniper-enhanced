@@ -22,6 +22,14 @@ const selected = intentForReference(mimic);
 assert.equal(selected.preset, "produced-short");
 assert.equal(selected.reference?.id, mimic.id);
 assert.equal(selected.music, false);
+for (const mode of ["short", "longform"] as const) {
+  const retired: ReferenceIntent = { ...mimic, mode, strategy: "extend", targetStyle: "restrained" };
+  assert.throws(() => intentForReference(retired), /retired/, "no preset fallback for retired styles");
+  assert.throws(() => applyReferenceChange(selected, retired), /retired/);
+  const current = intentForReference({ ...mimic, mode });
+  assert.equal(current.preset, mode === "short" ? "produced-short" : "longform-produced");
+  assert.equal(current.style, undefined);
+}
 
 const musicOn = applyReferenceChange({ ...selected, music: true }, mimic);
 assert.equal(musicOn.cleared, false, "music is operator-owned and does not contradict mechanics");

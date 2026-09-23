@@ -126,7 +126,8 @@ class TimingPropagationTests(unittest.TestCase):
             with stage_span(str(self.root), "draft_parent"), contextlib.redirect_stdout(io.StringIO()):
                 parent = PARENT_SPAN.get()
                 draft_render.run_base_render(job)
-        self.assertEqual(spawn.call_args.args[0][-3:], ["--approval-dir", str(self.root), "--no-audit"])
+        self.assertEqual(spawn.call_args.args[0][-4:],
+                         ["--approval-dir", str(self.root), "--draft-only", "--no-audit"])
         self.assert_environment(spawn.call_args.kwargs["env"], parent)
 
     def test_studio_sync_and_assemble_keep_parent_and_do_not_mutate_environment(self) -> None:

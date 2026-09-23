@@ -45,6 +45,7 @@ class FinalQcResumeTests(unittest.TestCase):
             'runtimeLibrarySha256': digest(library), 'expectedCapturePoints': [0, 24, 0], 'frames': self.rows}
         self.file = self.f.root / 'native-frames.json'
         write_json(self.file, self.native)
+        (self.f.root / 'seam-samples.mp4').write_bytes(b'TEST sample reel; not playable media')
         request_file = self.f.root / 'export-request.json'
         pins = {**self.f.inputs, str(request_file): digest(request_file)}
         self.owner = self.f.owner_record(self.f.request, pins, recovery.CAPTURE_STATUS, str(self.file))
@@ -61,7 +62,7 @@ class FinalQcResumeTests(unittest.TestCase):
         before = {file: digest(file) for file in self.f.root.rglob('*') if file.is_file()}
         receipt = self.seal()
         record, pins = recovery.read_capture(receipt, self.render)
-        self.assertEqual(len(record['artifacts']), 4)
+        self.assertEqual(len(record['artifacts']), 5)
         self.assertTrue(all(row['path'] in pins and pins[row['path']] == row['sha256'] for row in self.rows))
         self.assertFalse(any('/TEST/deleted' in file for file in pins))
         self.assertEqual(before, {file: digest(file) for file in before})

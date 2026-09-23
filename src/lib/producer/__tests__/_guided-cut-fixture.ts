@@ -27,7 +27,13 @@ function authoredMediaFixture(root: string): AutoEditCtx {
     intent: project.intent, workflowPolicy: "cut-first", deliveryPolicy: "mp4-only" };
 }
 
-function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false, nativeShort = false): AutoEditCtx {
+interface GuidedFixtureOptions { reuseAuthored?: boolean; graphicsOff?: boolean; nativeShort?: boolean;
+  transcriptVariant?: "numeric-comparison" }
+
+function mediaFixture(root: string, options: GuidedFixtureOptions): AutoEditCtx {
+  const { reuseAuthored = false, graphicsOff = false, nativeShort = false, transcriptVariant } = options;
+  if (transcriptVariant !== undefined && transcriptVariant !== "numeric-comparison") throw new Error("Unknown TEST transcript variant");
+  if (transcriptVariant && (reuseAuthored || nativeShort)) throw new Error("TEST numeric transcript requires a fresh default landscape fixture");
   if (reuseAuthored && nativeShort) throw new Error("TEST native Short must be authored before capture");
   if (reuseAuthored && graphicsOff) throw new Error("TEST explicit graphics-off may not retrofit an authored program");
   if (reuseAuthored) return authoredMediaFixture(root);
@@ -40,13 +46,15 @@ function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false, 
   const intent = { mode, scope: "produced" as const, lanes, music: false };
   writeFileSync(path.join(root, "project.json"), JSON.stringify({ origin: "upload", intent }));
   const transcript = path.join(source, "raw.transcript.json");
+  // Select the TEST words before any job/source/pipeline authority exists; preserve every original endpoint.
+  const numericWords = transcriptVariant ? ["Compare", "12", "versus", "28", "in", "this", "test."] : null;
   writeFileSync(transcript, JSON.stringify({ transcript: [{
-    start: 0, end: 3, text: "We can make this much clearer today.", words: [
+    start: 0, end: 3, text: numericWords ? numericWords.join(" ") : "We can make this much clearer today.", words: [
       { word: "We", start: 0, end: 0.3 }, { word: "can", start: 0.3, end: 0.6 },
       { word: "make", start: 0.6, end: 1 }, { word: "this", start: 1, end: 1.3 },
       { word: "much", start: 1.3, end: 1.7 }, { word: "clearer", start: 1.7, end: 2.3 },
       { word: "today.", start: 2.3, end: 3 },
-    ],
+    ].map((row, index) => ({ ...row, word: numericWords?.[index] ?? row.word })),
   }] }));
   const manifestPath = path.join(source, "asset_manifest.json");
   writeFileSync(manifestPath, JSON.stringify({ sources: [{ id: "raw-1", duration: 3,
@@ -63,8 +71,8 @@ function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false, 
 }
 
 /** Actual cut gates/review artifacts/projection; model calls and preview rendering are synthetic. */
-export function guidedFixture(root: string, workflowV2?: GuidedWorkflowV2, options: { reuseAuthored?: boolean; graphicsOff?: boolean; nativeShort?: boolean } = {}) {
-  const ctx = mediaFixture(root, options.reuseAuthored ?? false, options.graphicsOff ?? false, options.nativeShort ?? false);
+export function guidedFixture(root: string, workflowV2?: GuidedWorkflowV2, options: GuidedFixtureOptions = {}) {
+  const ctx = mediaFixture(root, options);
   if (workflowV2) ctx.workflowV2 = parseGuidedWorkflowV2(workflowV2);
   const job = startAutoEditJob({ ctx, token: "guided-job", snapshots: 0 });
   const jobPath = autoEditJobPath(ctx.dir);

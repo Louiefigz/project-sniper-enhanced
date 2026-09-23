@@ -65,7 +65,7 @@ async function captureReferences(context, receipt) {
   });
 }
 
-async function encodeSamples(context, receipt) {
+export async function encodeSamples(context, receipt, encode=encodeNativeBatchPicture) {
   const directory=path.join(context.work,'reel');fs.mkdirSync(directory);
   const forward=receipt.frames.filter(row=>!row.repeat);
   for(const [index,row] of forward.entries())fs.copyFileSync(row.path,
@@ -74,7 +74,7 @@ async function encodeSamples(context, receipt) {
   const args=nativeBatchEncoderArgs({fps:context.fps,framesDir:directory,output,totalFrames:forward.length,version:'0.8.31'});
   // Same metadata-only sRGB correction as the shared final delivery path.
   args.splice(-2,0,'-bsf:v','h264_metadata=colour_primaries=1:transfer_characteristics=13:matrix_coefficients=1:video_full_range_flag=0');
-  await encodeNativeBatchPicture(context.request.tools.ffmpeg,args);
+  await encode(context.request.tools.ffmpeg,args);
   receipt.sampleReel={path:output,sha256:nativeCaptureHash(output),frames:forward.map(row=>row.frame),
     scope:'Selected full-context frame neighborhoods; not a continuous full-program preview'};
 }

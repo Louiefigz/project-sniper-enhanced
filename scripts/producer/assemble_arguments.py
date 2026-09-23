@@ -44,7 +44,7 @@ def load_documents(args: argparse.Namespace) -> tuple[dict, str | None]:
     """Validate the canonical input and its existing execution/template authority."""
     from guided_presenter_base import require_unowned_presenter_absent
     from assemble import (delivery_authority_dir, require_template_usage_approval,
-                          template_approval_required, validate_render_documents,
+                          validate_render_documents,
                           verify_execution_media_authority)
     with open(args.plan_path) as handle:
         plan = json.load(handle)
@@ -55,17 +55,16 @@ def load_documents(args: argparse.Namespace) -> tuple[dict, str | None]:
             manifest = json.load(handle).get("manifestPath")
     if not args.allow_legacy_unadmitted and not manifest:
         raise RuntimeError("mandatory source-set admission requires a resolved manifest")
-    if manifest:
-        with open(manifest) as handle:
-            document = json.load(handle)
-        validate_render_documents(plan, document)
-        verify_execution_media_authority(plan, document, manifest)
-        require_template_usage_approval(args.plan_path, manifest,
-            delivery_authority_dir(args.plan_path), os.path.dirname(os.path.abspath(manifest)))
-    elif template_approval_required(delivery_authority_dir(args.plan_path)):
-        raise RuntimeError("produced/full assemble requires --manifest to verify template history")
-    else:
-        validate_render_documents(plan)
+    from render_readiness import ReadinessRequest, require_readiness
+    if not manifest:
+        raise RuntimeError("render readiness requires a resolved manifest")
+    with open(manifest) as handle:
+        document = json.load(handle)
+    validate_render_documents(plan, document)
+    verify_execution_media_authority(plan, document, manifest)
+    require_readiness(ReadinessRequest(args.plan_path, manifest, delivery_authority_dir(args.plan_path)))
+    require_template_usage_approval(args.plan_path, manifest,
+        delivery_authority_dir(args.plan_path), os.path.dirname(os.path.abspath(manifest)))
     return plan, manifest
 
 

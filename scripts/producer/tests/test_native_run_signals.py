@@ -178,8 +178,9 @@ class NativeRunSignalTests(unittest.TestCase):
         self.assertIn('SIGTERM', run.abort_reason)
         self.assert_caller_owns_signals()
 
-    def test_pipeline_cancellation_cannot_launch_capture_or_verification(self) -> None:
-        """The real coordinator stops when the render owner's baseline is canceled."""
+    def test_pipeline_cancellation_cannot_launch_render_or_verification(self) -> None:
+        """The coordinator stops when the early capture owner's baseline is canceled."""
+        self.request.update(captureMode='sdk-streaming', tools={'node': '/TEST/node'})
         pipeline = NativeShortPipeline(self.request, {})
         snapshot = self.read.return_value
         def canceled_read(*_args: object) -> object:
@@ -187,14 +188,15 @@ class NativeRunSignalTests(unittest.TestCase):
             signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)
             return snapshot
         self.read.side_effect = canceled_read
-        with patch.object(pipeline, 'capture') as capture, patch.object(pipeline, 'verify') as verify:
+        with patch.object(pipeline, 'render') as render, patch.object(pipeline, 'verify') as verify:
             self.assertFalse(pipeline.execute())
-        capture.assert_not_called()
+        render.assert_not_called()
         verify.assert_not_called()
         self.launch.assert_not_called()
         self.assert_caller_owns_signals()
         self.assertEqual(json.loads((self.output / 'delivery.json').read_text())['status'], 'failed')
-        self.assertIn('SIGTERM', json.loads((self.output / 'pipeline.render.json').read_text())['abortReason'])
+        self.assertIn('SIGTERM', json.loads((self.output / 'capture.render.json').read_text())['abortReason'])
+        self.assertEqual(json.loads((self.output / 'delivery.json').read_text())['failureCategory'], 'cancelled')
 
 
 if __name__ == '__main__':

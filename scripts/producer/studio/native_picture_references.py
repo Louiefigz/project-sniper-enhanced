@@ -8,10 +8,36 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from cut_preview_io import file_hash, file_identity, read_bytes
+from cut_preview_io import file_hash, file_identity, read_bytes, write_new
 from studio.native_runtime import digest
-from studio.native_selected_frames import MAX_FRAME_BYTES
-from studio.native_stage_evidence import MAX_NATIVE_FILE_BYTES
+from studio.native_selected_frames import MAX_FRAME_BYTES, SelectedFrames, compare_selected_frames
+from studio.native_stage_evidence import MAX_NATIVE_FILE_BYTES, read_native_capture_receipt
+
+
+def check_samples(request: dict, plan: dict) -> None:
+    """Decode early encoded samples with the same reference gates on Short and Long."""
+    root = Path(request['output'])
+    native = read_native_capture_receipt(root / 'native-frames.json')
+    if native['status'] != 'native-references-and-seek-states-pass':
+        raise RuntimeError('Native seam/reverse checks failed')
+    rows = [row for row in native['frames'] if not row['repeat']]
+    canvas = plan['canvas']
+    selection = SelectedFrames(tuple(range(len(rows))), canvas['width'], canvas['height'], len(rows))
+    qualify_reverse_frames(native, selection.shape)
+    reel = native['sampleReel']
+    if digest(Path(reel['path'])) != reel['sha256'] or reel['frames'] != [row['frame'] for row in rows]:
+        raise RuntimeError('Encoded sample reel changed')
+    directory = root / 'sample-qc'
+    directory.mkdir()
+    def compare(frame: int, pixels: np.ndarray) -> dict:
+        """Compare encoded samples to their original absolute-time references."""
+        row = rows[frame]
+        return {'frame': row['frame'], **picture_metrics(Path(row['path']), pixels, selection.shape, row['sha256'])}
+    comparisons, decoded = compare_selected_frames(Path(reel['path']), selection, compare, directory)
+    result = {'passed': all(row['passed'] for row in comparisons), 'comparisons': comparisons, 'decode': decoded}
+    write_new(directory / 'result.json', result)
+    if not result['passed']:
+        raise RuntimeError('Encoded seam sample failed before master render')
 
 
 def require_reference_dimensions(image: Image.Image, shape: tuple[int, int, int] | None,

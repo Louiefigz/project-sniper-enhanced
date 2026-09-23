@@ -93,14 +93,14 @@ class ReferenceIdentityTests(unittest.TestCase):
         errors = rpl.lint(value, profile(), EXPECTED)["errors"]
         self.assertTrue(any("target.style" in error for error in errors))
 
-    def test_extend_requires_exact_closed_style(self) -> None:
+    def test_extend_is_retired_even_with_exact_historical_style(self) -> None:
         value = plan()
         value["target"]["referenceStrategy"] = "extend"
         expected = rpl.Expected("ref-123", "short", "extend", "restrained")
-        self.assertTrue(any("target.style" in error for error in rpl.lint(value, profile(), expected)["errors"]))
+        self.assertTrue(any("retired" in error for error in rpl.lint(value, profile(), expected)["errors"]))
         value["target"]["style"] = "restrained"
         value["target"]["pace"] = "restrained"
-        self.assertTrue(rpl.lint(value, profile(), expected)["ok"])
+        self.assertFalse(rpl.lint(value, profile(), expected)["ok"])
 
     def test_extend_rejects_contradictory_pace(self) -> None:
         value = plan()
@@ -109,7 +109,7 @@ class ReferenceIdentityTests(unittest.TestCase):
         })
         expected = rpl.Expected("ref-123", "short", "extend", "restrained")
         errors = rpl.lint(value, profile(), expected)["errors"]
-        self.assertTrue(any("target.pace" in error for error in errors))
+        self.assertTrue(any("retired" in error for error in errors))
 
 
 class ReferenceRateTests(unittest.TestCase):

@@ -349,8 +349,11 @@ def _claim_spec(entry: dict, catalog: dict) -> dict:
     """Exclude only source-declared top-level timing controls from claims."""
     spec = entry.get("spec") or {}
     declared = catalog.get(str(entry.get("kind", "")), {}).get("variables", {})
-    return {key: value for key, value in spec.items()
-            if not is_timing_control(key, declared.get(key, {}))}
+    values = {key: value for key, value in spec.items()
+              if not is_timing_control(key, declared.get(key, {}))}
+    if entry.get("kind") == "chart-story" and isinstance(values.get("data"), str):
+        values["data"] = [token.strip() for token in values["data"].split(",")]
+    return values
 
 
 def check_claims_contract(plan: dict, words_out: list[dict], rep: Any) -> None:

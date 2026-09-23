@@ -1,3 +1,4 @@
+import { CATALOG_KINDS } from "@/lib/producer/visual-source-policy";
 import path from "node:path";
 import { packetCutSegments } from "@/app/api/producer/auto-edit/plan-review-packet-source";
 import { observeCutPreviewFile, readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
@@ -175,6 +176,7 @@ function storedCatalogEvidence(cut: AcceptedGuidedCut, version: number, target: 
 export function selectProposalCatalog(rows: Record<string, unknown>, target: Record<string, unknown>) {
   const destination = canvas(target), aspect = destination.width / destination.height;
   const catalog = Object.entries(rows).flatMap(([kind, value]) => {
+    if (!CATALOG_KINDS.includes(kind)) return [];
     const row = objectValue(value, "catalog row");
     if (!Array.isArray(row.canvas) || row.canvas.length !== 2
         || row.canvas.some((value) => !Number.isSafeInteger(value) || Number(value) <= 0 || Number(value) > 16384)) throw new Error("Catalog has a malformed measured canvas");

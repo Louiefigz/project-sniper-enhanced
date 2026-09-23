@@ -31,7 +31,7 @@ const profile = buildReferenceStyleProfile({
 
 assert.equal(profile.schemaVersion, 1);
 assert.equal(profile.suggestedMode, "short");
-assert.equal(profile.suggestedKnownStyle, "punch");
+assert.equal(profile.suggestedKnownStyle, null, "reference filenames must never select a global style");
 assert.equal(profile.source.sha256, "a".repeat(64));
 assert.equal(profile.mechanics.eventCounts.cut, 2);
 assert.equal(profile.mechanics.eventRatesPerMin.cut, 2);

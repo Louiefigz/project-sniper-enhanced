@@ -70,18 +70,7 @@ _CONFIG_CUES = ("model", "setting", "configured", "configuration", "active",
 _MECHANISM_CUES = ("how it works", "works by", "pipeline", "loop", "cycle",
                    "connects", "transcript", "word timed", "word-timed")
 _ASSET_FORMS = frozenset({"icon-badge-wide", "logo-card"})
-_TRIGGER_FORMS = {
-    "audience-list": ("glass-rail", "module-rail", "whiteboard-list",
-                      "canvas-pip-list", "list-build"),
-    "tool-list": ("glass-rail", "module-rail", "whiteboard-list",
-                  "canvas-pip-list", "list-build"),
-    "credibility": ("avatar-bio-card", "module-ledger-dark",
-                    "whiteboard-connector"),
-    "building-proof": ("slideware-receipt-cell", "module-ledger-dark",
-                       "whiteboard-connector"),
-    "exact-proof": ("slideware-receipt-cell", "module-ledger-dark",
-                    "whiteboard-connector"),
-}
+_TRIGGER_FORMS: dict[str, tuple[str, ...]] = {}
 
 
 def _text(words: list[dict], indices: list[int]) -> str:
@@ -165,23 +154,12 @@ def _dedupe(rows: list[dict]) -> list[dict]:
 
 
 def _wide_forms(row: dict, catalog: dict[str, dict]) -> list[str]:
-    trigger, shape = row["trigger"], row["shape"]
-    forms = list(_TRIGGER_FORMS.get(trigger,
-                 MOTION["card_form_map"].get(shape) or ()))
-    assets = row.get("resolvedAssets") or []
-    if trigger == "tool-list" and row.get("assetSelectorsComplete"):
-        forms.insert(0, "icon-badge-wide")
-    elif shape in ("evidence", "credibility") and assets:
-        forms.append("logo-card" if len(assets) == 1 else "icon-badge-wide")
-    forms = [kind for kind in forms if kind not in _ASSET_FORMS
-             or row.get("assetSelectorsComplete")]
-    # Declared catalog dims say "wide"; the measured matrix (when built) is
-    # authoritative — a comp whose real canvas probes 9:16 is not a 16:9 form
-    # however its data-* attributes read (LL-036/LL-037).
+    """Compatibility ports only; unrepresented anatomy requires native catalog authoring."""
+    forms = MOTION["card_form_map"].get(row["shape"], ())
     return [kind for kind in forms if kind in catalog
             and catalog[kind]["dimensions"][0] > catalog[kind]["dimensions"][1]
-            and is_gate_executable_kind(kind)
-            and is_aspect_legal_kind(kind, "16:9")]
+            and is_gate_executable_kind(kind) and is_aspect_legal_kind(kind, "16:9")]
+
 
 
 def _speakable_forms(forms: list[str], words: list[dict], row: dict) -> list[str]:
@@ -255,6 +233,7 @@ def semantic_beats(words: list[dict], out_dur: float,
         beats.append({**shaped, "beatId": _beat_id(shaped),
                       "compatibleKinds": forms, **fields,
                       "decisionRequired": True,
+                      "nativeCatalogRequired": not bool(forms),
                       "preferredKind": forms[0] if forms else None,
                       "minimumGraphicHoldS":
                           float(MOTION["hold_min_s"]["longform"])})
@@ -304,6 +283,8 @@ def check_intro_graphics(plan: dict, words: list[dict], out_dur: float,
         issue = decision_error(beat, decision, plan)
         if issue:
             rep.error(f"hook graphic beat {beat['beatId']}: {issue}")
+    if target.get("graphicsStyle") == "catalog-first":
+        return  # Source-specific decisions replace house-template count quotas.
     intro_end = min(float(out_dur), INTRO_WINDOW_S)
     issue = density_error(beats, decisions, plan,
                           (intro_end, FIRST_MINUTE_GRAPHICS, "first minute"))

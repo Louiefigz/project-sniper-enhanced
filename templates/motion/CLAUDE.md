@@ -1,6 +1,6 @@
 # templates/motion — PROJECT_SNIPER HyperFrames compositions
 
-This directory holds the **hand-authored HyperFrames compositions** the PRODUCER
+This directory holds the **seven verified upstream HyperFrames compatibility ports** the PRODUCER
 pipeline renders. It is NOT an upstream HeyGen `hyperframes init` project: there is
 no `npm run check`/`publish`, no `hyperframes.heygen.com/llms.txt`, no `meta.json`
 workflow here. Ignore any of that — the code below is the whole contract.
@@ -9,7 +9,7 @@ workflow here. Ignore any of that — the code below is the whole contract.
   `scripts/producer/CLAUDE.md` → Graphics before authoring). Each `graphicsTrack`
   entry (`docs/producer/PRODUCER_MOTION_GRAPHICS_PLAN.md` §3.1) selects a comp by `kind` →
   `compositions/<kind>.html`.
-- **Layout:** `compositions/*.html` (the comps, ~53 — incl. 7 catalog-ported 2026-08-28, see docs/producer/catalog-study/), `tokens.css`,
+- **Layout:** `compositions/*.html` (seven verified ports; all house templates are retired), `tokens.css`,
   `motion-tokens.js`, `icons/`, `renders/cache/` (content-hash render cache).
 
 ## The one render invocation (pinned)
@@ -64,3 +64,6 @@ A comp/entry is validated by `template_contract.validate_entry` (schema + declar
 variables) and the rendered file is proven by `asset_proof.prove_rendered_asset`
 (format/alpha/dimensions/duration). Run the producer selftest, not any `npm run`
 target: `cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`.
+
+Read `docs/producer/VISUAL_SOURCE_POLICY.md` from the repository root before selection.
+New catalog items use native projects; do not restore retired files or aliases.

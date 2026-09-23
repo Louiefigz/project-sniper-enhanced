@@ -17,11 +17,16 @@ from typing import Any, Iterator, Protocol, cast
 from native_render_processes import (
     MissingProcessFootprint, ProcessIdentity, ProcessRequest, ResourceMeasurementError,
 )
-from native_render_resources import ResourceCommandTimeout, ResourceSnapshot, read_snapshot
+from native_render_resources import ResourceCommandTimeout, ResourceSnapshot
+
+from native_render_sampling import read_compact_snapshot as read_snapshot
 
 MAX_SAMPLES = 4
 MAX_WINDOW_SECONDS = 18.0
-RETRY_DELAYS_SECONDS = (.1, .2, .4)
+# Preview packaging launches bursts of short FFmpeg probes lasting multiple seconds.
+# Spread the same four real samples across the existing 18-second window; never
+# turn a disappeared process or an old reading into a successful measurement.
+RETRY_DELAYS_SECONDS = (.5, 1.5, 4.0)
 
 
 class MeasurementRegistry(Protocol):

@@ -558,6 +558,8 @@ def assemble(job: AssembleJob) -> dict:
     for render.py (no cv2/hyperframes pulled in just to hash a plan).
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from graphics.visual_source_policy import require_plan_sources
+    require_plan_sources(job.plan)
     from graphics.owned_execution import require_held_assembly
     require_held_assembly(job)
     if job.graphic_frame_clock is not None and (job.held_program_selection is None

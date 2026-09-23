@@ -12,7 +12,7 @@ from live_p0_adversarial_ingress_acceptance import CASES, CLOSURE
 REPO = Path(__file__).parents[3]
 ARTIFACT = REPO / (
     "docs/producer/command-driven-editing/contracts/"
-    "p0-adversarial-ingress-v1.json")
+    "p0-adversarial-ingress-2026-09-23.json")
 ERROR_PATTERNS = {
     "malformed-codec": r"(Decoder .* not found|no decoder found)",
     "huge-dimensions": r"DIMENSION_LIMIT",

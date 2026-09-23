@@ -16,10 +16,10 @@ from graphics.scene_contract import SceneContractError
 def _request(canvas: tuple[int, int] = (3840, 2160)) -> CatalogSceneRequest:
     return CatalogSceneRequest(
         entry={
-            "kind": "color-wash", "anchor": "own-screen",
+            "kind": "chart-story", "anchor": "own-screen",
             "outStart": 45.0, "outEnd": 45.0 + 24 * 1001 / 30000,
             "spec": {
-                "accent": "#054BC9", "accent2": "#6D3BE0", "dir": "ltr",
+                "data": "12, 28", "labels": "Before,After", "type": "bars", "emphasize": 1, "unit": "%",
             },
         },
         scene_id="scene-catalog-wash",
@@ -36,9 +36,9 @@ def _request(canvas: tuple[int, int] = (3840, 2160)) -> CatalogSceneRequest:
 def _asset_request() -> CatalogSceneRequest:
     return CatalogSceneRequest(
         entry={
-            "kind": "logo-card", "anchor": "own-screen",
+            "kind": "ui-focus-zoom", "anchor": "own-screen",
             "outStart": 0.0, "outEnd": 0.8,
-            "spec": {"iconFile": "notion.svg", "accent": "#054BC9"},
+            "spec": {"image": "assets/sample-screen.png", "zoomAt": 0.2},
         },
         scene_id="scene-logo",
         timing={
@@ -94,10 +94,10 @@ class SceneCatalogTests(unittest.TestCase):
         contract = catalog_scene_contract(scene)
         self.assertEqual(len(contract["assetBindings"]), 1)
         binding = contract["assetBindings"][0]
-        self.assertEqual(binding["field"], "iconFile")
-        self.assertEqual(binding["selector"], "notion.svg")
+        self.assertEqual(binding["field"], "image")
+        self.assertEqual(binding["selector"], "assets/sample-screen.png")
         self.assertTrue(binding["sourcePath"].endswith(
-            "/templates/motion/icons/notion.svg"))
+            "/templates/motion/assets/sample-screen.png"))
         self.assertEqual(
             binding["sha256"], scene["dependencies"][0]["sha256"])
 

@@ -37,6 +37,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
 from _common import _HAVE_FFMPEG
@@ -58,22 +59,21 @@ from studio.view_manifest import unsynced_changes
 def _edge_plan() -> dict:
     return {
         "planVersion": 1,
-        "target": {"mode": "longform", "excerpt": True, "scope": "light",
-                   "graphicsStyle": "overlay-rich",
+        "target": {"mode": "short", "excerpt": True, "scope": "light",
+                   "graphicsStyle": "catalog-first",
                    "graphicsStyleRationale": "dense overlay pass for a "
                    "talking-head excerpt: every beat carries a card"},
         "cutTrack": [
             {"sourceId": "raw-1", "start": 0.0, "end": 6.0, "speed": 1.0},
             {"sourceId": "raw-1", "start": 10.0, "end": 16.0, "speed": 1.0}],
         "graphicsTrack": [
-            {"kind": "text-element-wide", "outStart": 2.0, "outEnd": 4.5,
+            {"kind": "marker-highlight", "outStart": 2.0, "outEnd": 4.5,
              "anchor": "free-band", "reason": "callout", "id": "callout-1",
-             "spec": {"text": "Callout copy", "fontSize": 72}},
-            {"kind": "glass-lower-third", "outStart": 8.2, "outEnd": 10.7,
+             "spec": {"text": "Callout copy", "drawAt": 1, "emphasisWord": "copy"}},
+            {"kind": "hw-callout-circle", "outStart": 8.2, "outEnd": 10.7,
              "anchor": "free-band", "reason": "credibility", "id": "lower-3",
-             "spec": {"eyebrow": "COACH", "titleBase": "Aaron ",
-                      "titleHighlight": "Figueroa", "accent": "#054BC9",
-                      "eyebrowDot": True}}],
+             "spec": {"x": 240, "y": 780, "w": 400, "h": 200,
+                      "label": "Review", "labelAt": "below", "scribble": True}}],
     }
 
 
@@ -186,7 +186,7 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         cls.base = os.path.join(cls.tmp, "base_master.mp4")
         subprocess.run(
             ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-             "-i", "color=c=gray:s=1920x1080:d=12:r=30",
+             "-i", "color=c=gray:s=1080x1920:d=12:r=30",
              "-c:v", "libx264", "-crf", "28", "-pix_fmt", "yuv420p",
              cls.base], check=True)
 
@@ -236,7 +236,7 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         self.assertEqual(after["planVersion"], 1)           # no write
 
     def test_bug2_bool_to_int_edit_reported_never_lost(self) -> None:
-        """BUG-2 regression: an eyebrowDot true -> 1 Studio edit produces
+        """BUG-2 regression: an scribble true -> 1 Studio edit produces
         a real diff (type-aware canon equality). The template contract
         then refuses the non-boolean loudly — nothing is written, the
         edit is never silently dropped even when a sibling timing edit
@@ -245,15 +245,15 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         index = os.path.join(studio, "index.html")
         _patch_slot_attr(
             index, "gfx-02", "data-variable-values",
-            '{"accent":"#054BC9","eyebrow":"COACH","eyebrowDot":1,'
-            '"titleBase":"Aaron ","titleHighlight":"Figueroa"}')
+            '{"x":240,"y":780,"w":400,"h":200,"label":"Review",'
+            '"labelAt":"below","scribble":1}')
         _patch_slot_attr(index, "gfx-01", "data-start", "1.8")
         before = _read(os.path.join(src, "edit_plan.json"))
         report = compute_report(load_state(studio))
         self.assertFalse(report.blockers)
         diff = next(d for d in report.entry_diffs if d.slot == "gfx-02")
         self.assertEqual([(c.key, c.old, c.new) for c in diff.value_changes],
-                         [("eyebrowDot", True, 1)])         # BUG-2: seen
+                         [("scribble", True, 1)])         # BUG-2: seen
         code, out = _run_sync([studio, "--apply"])
         self.assertEqual(code, 1, out)
         verdict = json.loads(out)
@@ -273,8 +273,8 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         _patch_slot_attr(
             os.path.join(studio, "index.html"), "gfx-02",
             "data-variable-values",
-            '{"accent":"#054BC9","eyebrow":"COACH","eyebrowDot":1,'
-            '"titleBase":"Aaron ","titleHighlight":"Figueroa"}')
+            '{"x":240,"y":780,"w":400,"h":200,"label":"Review",'
+            '"labelAt":"below","scribble":1}')
         report = compute_report(load_state(studio))
         self.assertFalse(report.blockers)                   # BUG-2: no wedge
         self.assertTrue([d for d in report.entry_diffs
@@ -386,9 +386,9 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         classify it preexisting so the deletion applies."""
         plan = _edge_plan()
         plan["graphicsTrack"].insert(1, {
-            "kind": "text-element-wide", "outStart": 5.0, "outEnd": 6.8,
+            "kind": "marker-highlight", "outStart": 5.0, "outEnd": 6.8,
             "anchor": "free-band", "reason": "beat to delete",
-            "id": "gone-2", "spec": {"text": "Delete me", "fontSize": 64}})
+            "id": "gone-2", "spec": {"text": "Delete me", "drawAt": 1, "emphasisWord": "Delete"}})
         del plan["graphicsTrack"][2]["reason"]      # preexisting lint ERROR
         src, studio = self._build(plan)
         _remove_slot(os.path.join(studio, "index.html"), "gfx-02")
@@ -412,14 +412,22 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         CAUSED — it must block with nothing written."""
         plan = _edge_plan()
         plan["target"]["scope"] = "produced"
+        plan["target"]["mode"] = "longform"
         plan["cutTrack"] = [{"sourceId": "raw-1", "start": 0.0, "end": 12.0,
                              "speed": 1.0}]
         plan["graphicsTrack"] = [
-            {"kind": "text-element-wide", "outStart": s, "outEnd": s + 2.0,
+            {"kind": "chart-story", "outStart": s, "outEnd": s + 2.0,
              "anchor": "free-band", "reason": f"beat {i}", "id": f"g-{i}",
-             "spec": {"text": f"Beat {i}", "fontSize": 64}}
+             "spec": {"type": "bars", "data": "12,28", "labels": "First,Next",
+                      "emphasize": 1, "unit": ""}}
             for i, s in enumerate((0.5, 3.5, 6.5, 9.5))]
-        src, studio = self._build(plan)
+        wide = os.path.join(self.tmp, "TEST-landscape-retention.mp4")
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+                        "-i", "color=c=gray:s=1920x1080:d=12:r=30",
+                        "-c:v", "libx264", "-preset", "ultrafast",
+                        "-pix_fmt", "yuv420p", wide], check=True)
+        with patch.object(self, "base", wide):
+            src, studio = self._build(plan)
         before = _read(os.path.join(src, "edit_plan.json"))
         _remove_slot(os.path.join(studio, "index.html"), "gfx-03")
         code, out = _run_sync([studio, "--apply"])
@@ -438,13 +446,13 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         _, studio = self._build()
         _patch_slot_attr(
             os.path.join(studio, "index.html"), "gfx-01",
-            "data-variable-values", '{"text":"Callout copy","fontSize":null}')
+            "data-variable-values", '{"text":"Callout copy","drawAt":null,"emphasisWord":"copy"}')
         report = compute_report(load_state(studio))
         diff = next(d for d in report.entry_diffs if d.slot == "gfx-01")
         self.assertEqual([(c.key, c.old, c.new) for c in diff.value_changes],
-                         [("fontSize", 72, None)])
+                         [("drawAt", 1, None)])
         self.assertEqual(diff.new_spec,
-                         {"text": "Callout copy", "fontSize": None})
+                         {"text": "Callout copy", "drawAt": None, "emphasisWord": "copy"})
 
     def test_preview_server_caches_are_runtime_ignored(self) -> None:
         """The preview server's .thumbnails/ and .waveform-cache/ dirs
@@ -476,7 +484,7 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         text = _serializer_rewrite(text)
         text = text.replace('data-start="2"', 'data-start="1.8"')
         tag = re.search(r'<div id="gfx-02"[^>]*>', text).group(0)
-        spaced = tag.replace("&#34;titleBase&#34;", "\n&#34;titleBase&#34;")
+        spaced = tag.replace("&#34;label&#34;", "\n&#34;label&#34;")
         self.assertNotEqual(spaced, tag)    # newline really lands in attr
         text = text.replace(tag + "</div>",
                             spaced[:-1] + "/>")     # self-closed slot div
@@ -499,7 +507,7 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         src, studio = self._build()
         _patch_slot_attr(os.path.join(studio, "index.html"), "gfx-01",
                          "data-variable-values",
-                         '{"fontSize":NaN,"text":"Callout copy"}')
+                         '{"drawAt":NaN,"emphasisWord":"copy","text":"Callout copy"}')
         code, out = _run_sync([studio, "--apply"])
         self.assertEqual(code, 1, out)
         self.assertIn("finite", out)
@@ -541,7 +549,7 @@ class StudioEdgeCaseE2ETests(unittest.TestCase):
         src, studio = self._build()
         _patch_slot_attr(os.path.join(studio, "index.html"), "gfx-01",
                          "data-variable-values",
-                         '{"fontSize":72,"text":"“Smart” • '
+                         '{"drawAt":1,"emphasisWord":"quotes","text":"“Smart” • '
                          'quotes \U0001f3ac"}')
         code, out = _run_sync([studio, "--apply"])
         self.assertEqual(code, 0, out)

@@ -28,9 +28,9 @@ _CONTENT = (200, 855, 880, 1055)
 
 
 def _entry(**over) -> dict:
-    base = {"outStart": 4.0, "outEnd": 6.0, "kind": "stat-card",
+    base = {"outStart": 4.0, "outEnd": 6.0, "kind": "line-swap",
             "anchor": "free-band",
-            "spec": {"value": "TEST", "label": "PLACEMENT"},
+            "spec": {"lineA": "TEST first", "lineB": "TEST second", "underlineWord": "second", "swapAt": 0.5},
             "reason": "test"}
     base.update(over)
     return base
@@ -164,7 +164,7 @@ class AbsentPlacementPathTests(unittest.TestCase):
 
     def test_render_all_wires_4k_free_band_scaling_into_clip(self) -> None:
         rendered = {"path": "comp.mov", "cached": True, "key": "k",
-                    "kind": "stat-card", "fmt": "mov"}
+                    "kind": "line-swap", "fmt": "mov"}
         dims = {"base.mp4": (3840, 2160), "comp.mov": (1920, 1080)}
         with mock.patch.object(gs, "render_entry", return_value=rendered), \
              mock.patch.object(gs, "_clip_fps", return_value=30.0), \

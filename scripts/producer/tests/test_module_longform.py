@@ -1,191 +1,44 @@
-#!/usr/bin/env python3
-"""MODULE longform lane tests (MODULE_STUDY.md §5 items 8-9).
+"""Retired module designs cannot execute; retained geometry stays readable."""
+from __future__ import annotations
 
-Item 8 — glass-rail 'rail-push' entrance (field width-grows 0->33%W in 0.33s
-power-out beside the live face; headline at 65% growth; rows +0.25/+0.40s
-container-first) + the cream/ink light skin. Item 9 — module-takeover
-(near-black canvas + grid, transparent face hole the renderer fills, dual
-semantic accents, in-card payoffs) + the pip_hole renderer wire. OPERATOR
-ADJUDICATION 2026-07-10: both moves are LEGAL FOR LONGFORM, BANNED FOR
-SHORTS — the lint matrix below pins that. Contract surface only — renders +
-frame timing verification run out-of-suite (same doctrine as the punch /
-module-pack tests). Every default keeps pre-item behavior (additive law).
-"""
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from _common import *  # noqa: F401,F403
+from graphics.template_contract import entry_errors
+from graphics.visual_source_policy import ROOT
 
-_REPO = Path(__file__).resolve().parents[3]           # PROJECT_SNIPER
-_MOTION = _REPO / "templates" / "motion"
-_COMPS = _MOTION / "compositions"
+class RetiredModuleDesignTests(unittest.TestCase):
+    """Both modes reject every prior module route before renderer work."""
 
+    KINDS = ("glass-rail", "module-takeover", "module-scoreboard",
+             "module-pipeline", "module-ledger-dark", "canvas-pip-list")
 
-class ModuleLaneTokensTests(unittest.TestCase):
-    """Item 8/9 tokens: semantic dual accent + cream skin + dark canvas."""
+    def test_sources_are_absent_and_reinjected_bytes_have_no_authority(self) -> None:
+        for kind in self.KINDS:
+            self.assertFalse((ROOT / "templates/motion/compositions" / (kind + ".html")).exists())
+            row = {"kind": kind, "outStart": 0, "outEnd": 6, "spec": {}}
+            self.assertTrue(any("retired" in error for error in entry_errors(row, "<html>TEST old source</html>")))
 
-    def test_tokens_css_carries_the_lane(self) -> None:
-        css = (_MOTION / "tokens.css").read_text(encoding="utf-8")
-        for tok in ("--accent-result: #CC7200",     # amber = hero/results
-                    "--accent-process: #447BE4",    # blue = process/status
-                    "--accent-compare: #7C8088",    # graphite = comparison
-                    "--rail-cream: #F1F4F6",        # light paper field
-                    "--rail-cream-ink: #131720",
-                    "--module-canvas: #121721"):  # dark takeover canvas
-            self.assertIn(tok, css)
-        self.assertIn("--pop-in-dur", css)          # punch twin untouched
+    def test_renderer_rejects_before_launch_with_presenter_and_style_flags(self) -> None:
+        for kind in self.KINDS:
+            for spec in ({}, {"presenterFrame": True}, {"entrance": "rail-push", "theme": "cream"}):
+                row = {"kind": kind, "outStart": 0, "outEnd": 6, "anchor": "own-screen", "spec": spec}
+                with mock.patch.object(gr, "_render_to") as launch:
+                    with self.assertRaisesRegex(ValueError, "retired"):
+                        gr.render_entry(row, "/private/tmp/TEST-unused-retired-output")
+                    launch.assert_not_called()
 
-
-class RailPushCompTests(unittest.TestCase):
-    """Item 8 — glass-rail entrance/theme contract; classic path intact."""
-
-    def setUp(self) -> None:
-        self.html = (_COMPS / "glass-rail.html").read_text(encoding="utf-8")
-
-    def test_new_variables_default_to_the_old_build(self) -> None:
-        self.assertIn('"id":"entrance","type":"enum","label":"Entrance",'
-                      '"default":"slide"', self.html)
-        self.assertIn('"id":"theme","type":"enum","label":"Skin",'
-                      '"default":"glass"', self.html)
-
-    def test_rail_push_carries_the_design_timings(self) -> None:
-        # MODULE_STUDY T-B (Sniper design parameters): grow 0->33%W (634px of
-        # 1920) in 0.33s power-out; headline at 65% of the grow; rows +0.25s
-        # container / +0.40s text after it.
-        for token in ("const RAIL_PUSH_S = 0.33",
-                      "const HEADLINE_AT_GROWTH = 0.65",
-                      "const ROW_CONTAINER_DELAY_S = 0.25",
-                      "const ROW_TEXT_DELAY_S = 0.4",
-                      'ease: "power2.out" }, 0)',
-                      "width: 634"):
-            self.assertIn(token, self.html)
-        self.assertIn("#rail-field", self.html)
-
-    def test_light_skin_uses_the_cream_tokens(self) -> None:
-        self.assertIn("var(--rail-cream, #F1F4F6)", self.html)
-        self.assertIn("var(--rail-cream-ink, #131720)", self.html)
-        self.assertIn("var(--accent-process, #447BE4)", self.html)
-
-    def test_classic_build_survives_verbatim(self) -> None:
-        self.assertIn("back.out(1.6)", self.html)      # stamp build
-        self.assertIn("back.out(2.6)", self.html)      # chip pop
-        self.assertIn("skeletonFirst", self.html)      # rank-2 opt-in
-        self.assertIn("blurRecede", self.html)         # T-D exit opt-in
-
-
-class ModuleTakeoverCompTests(unittest.TestCase):
-    """Item 9 — the dark takeover comp: canvas, hole, accents, payoffs."""
-
-    def setUp(self) -> None:
-        self.html = (_COMPS / "module-takeover.html").read_text(encoding="utf-8")
-
-    def test_canvas_and_grid(self) -> None:
-        self.assertIn("var(--module-canvas, #121721)", self.html)
-        self.assertIn("radial-gradient(circle at 1px 1px", self.html)  # dot field
-
-    def test_hole_geometry_matches_the_pip_hole_registry(self) -> None:
-        # The comp masks the canvas out of this rect + draws the ring at it;
-        # the renderer fills the SAME rect (graphics/pip_hole.py). A drift
-        # here means the footage and the hole disagree — pin both sides.
-        hole = phole.HOLE_BY_KIND["module-takeover"]
-        x, y, w, h = hole["rect"]
-        self.assertEqual((x, y, w, h), (1344, 60, 534, 960))
-        for css in (f"left: {x}px", f"top: {y}px",
-                    f"width: {w}px", f"height: {h}px",
-                    f"border-radius: {hole['radius']}px"):
-            self.assertIn(css, self.html)
-        # ~28%W x 89%H per the study (±1% band after even-quantisation).
-        self.assertAlmostEqual(w / 1920, 0.28, delta=0.01)
-        self.assertAlmostEqual(h / 1080, 0.89, delta=0.01)
-        # The evenodd mask actually cuts the hole out of the canvas.
-        self.assertIn("fill-rule='evenodd'", self.html)
-        self.assertIn("mask-image", self.html)
-
-    def test_dual_semantic_accents(self) -> None:
-        self.assertIn("var(--accent-result, #CC7200)", self.html)
-        self.assertIn("var(--accent-process, #447BE4)", self.html)
-        self.assertIn("var(--accent-compare, #7C8088)", self.html)
-
-    def test_in_card_payoff_constants(self) -> None:
-        # Rank 7-8: hero 0.4s power2.out / comparison 0.8s power1.out /
-        # chips 85ms sweep / delta only after both bars.
-        for token in ("const HERO_FILL_S = 0.4",
-                      "const COMPARE_FILL_S = 0.8",
-                      "const CHIP_SWEEP_S = 0.085",
-                      "const DELTA_BEAT_S = 0.1",
-                      "power1.out"):
-            self.assertIn(token, self.html)
-        self.assertIn("fillAt + COMPARE_FILL_S + DELTA_BEAT_S", self.html)
-
-    def test_skeleton_eyebrow_and_module_lands_vars(self) -> None:
-        for var in ('"id":"eyebrow"', '"id":"headlineLines"', '"id":"heroPct"',
-                    '"id":"comparePct"', '"id":"deltaChip"', '"id":"chips"',
-                    '"id":"evidenceSource"', '"id":"moduleLands"'):
-            self.assertIn(var, self.html)
-        self.assertIn('"id":"exit","type":"enum","label":"Exit","default":"hold"',
-                      self.html)
-        # Skeleton-first grammar: the bars shell ramps as one unit and the
-        # fills start +SKELETON_GAP_S later (the payoff is a width fill, so
-        # the comp uses textRamp + the gap token rather than skeletonFirst()).
-        for helper in ("textRamp", "blurRecede",
-                       "EYEBROW_LEAD_S", "M.SKELETON_GAP_S"):
-            self.assertIn(helper, self.html)
-        self.assertIn("const fillAt = tB + M.SKELETON_GAP_S", self.html)
-        self.assertIn('window.__timelines["module-takeover"]', self.html)
-
-
-class PresenterFrameCompTests(unittest.TestCase):
-    """The opt-in framed presenter-container on the 3 dark cards.
-
-    Backward-compat law: the flag is declared (template_contract accepts it) and
-    defaults false; the mask + ring are scoped to .has-presenter and copy the
-    takeover's geometry VERBATIM, matching the pip_hole registry rect exactly."""
-
-    # kind -> (id prefix, root id)
-    _COMPS = {
-        "module-scoreboard": "nsb",
-        "module-pipeline": "npl",
-        "module-ledger-dark": "nld",
-    }
-
-    def _html(self, kind: str) -> str:
-        return (_COMPS / f"{kind}.html").read_text(encoding="utf-8")
-
-    def test_presenter_frame_var_declared_and_defaults_false(self) -> None:
-        for kind in self._COMPS:
-            html = self._html(kind)
-            self.assertIn('"id":"presenterFrame","type":"boolean"', html, kind)
-            self.assertIn('"default":false', html, kind)
-            # It reads the flag onto the root class, mirroring exit/moduleLands.
-            self.assertIn("has-presenter", html, kind)
-
-    def test_ring_geometry_matches_the_registry_rect(self) -> None:
-        for kind, pre in self._COMPS.items():
-            html = self._html(kind)
-            hole = phole.HOLE_BY_KIND[kind]
-            x, y, w, h = hole["rect"]
-            self.assertEqual((x, y, w, h), (1344, 60, 534, 960), kind)
-            # The ring element + its geometry, scoped to .has-presenter.
-            self.assertIn(f"#{pre}-face-slot", html, kind)
-            for css in (f"left: {x}px", f"top: {y}px",
-                        f"width: {w}px", f"height: {h}px",
-                        f"border-radius: {hole['radius']}px"):
-                self.assertIn(css, html, f"{kind}: {css}")
-
-    def test_mask_cuts_the_hole_out_of_the_canvas(self) -> None:
-        for kind, pre in self._COMPS.items():
-            html = self._html(kind)
-            # The evenodd mask + the SAME rounded-rect path as the takeover.
-            self.assertIn("fill-rule='evenodd'", html, kind)
-            self.assertIn("mask-image", html, kind)
-            self.assertIn(
-                "M1368 60h486a24 24 0 0 1 24 24v912a24 24 0 0 1 -24 "
-                "24h-486a24 24 0 0 1 -24 -24V84a24 24 0 0 1 24 -24z", html, kind)
-            # Both the mask and the ring are gated behind the opt-in class.
-            self.assertIn(f"#{pre}-root.has-presenter #{pre}-canvas", html, kind)
-            self.assertIn(f"#{pre}-root.has-presenter #{pre}-face-slot", html, kind)
-
+    def test_plan_admission_rejects_in_both_modes_and_anchors(self) -> None:
+        for mode in ("short", "longform"):
+            for kind in self.KINDS:
+                plan = good_plan()
+                plan["target"].update(mode=mode, graphicsStyle="catalog-first", excerpt=True)
+                plan["graphicsTrack"] = [{"kind": kind, "outStart": 2, "outEnd": 8,
+                    "anchor": "own-screen", "spec": {"presenterFrame": True}, "needsPip": True}]
+                with self.subTest(mode=mode, kind=kind):
+                    self.assertTrue(any("retired" in error for error in pl.lint(plan, MANIFEST).errors))
 
 class PipHoleGeometryTests(unittest.TestCase):
     """graphics/pip_hole.py — pure geometry, fail-loud contracts."""
@@ -337,146 +190,5 @@ class PipHoleGraphTests(unittest.TestCase):
         self.assertAlmostEqual(cw / ch, 534 / 960, delta=0.01)
 
 
-def _longform_plan(graphics: list) -> dict:
-    return {
-        "planVersion": 1,
-        "target": {"mode": "longform", "durationTargetS": 60, "excerpt": True},
-        "cutTrack": [{"sourceId": "raw-1", "start": i * 3.0,
-                      "end": (i + 1) * 3.0, "speed": 1.0} for i in range(20)],
-        "reframe": {"strategy": "face"},
-        "captions": {"burn": False, "style": "line"},
-        "graphicsTrack": graphics,
-    }
-
-
-def _rail_entry(entrance: str | None, hold: float = 4.5) -> dict:
-    spec = {"eyebrow": "The pipeline", "title1": "Intake", "sub1": "raw in"}
-    if entrance is not None:
-        spec["entrance"] = entrance
-    return {"outStart": 4.0, "outEnd": 4.0 + hold, "kind": "glass-rail",
-            "anchor": "free-band", "reason": "system map", "spec": spec}
-
-
-def _takeover_entry(hold: float = 9.0, anchor: str = "own-screen") -> dict:
-    return {"outStart": 4.0, "outEnd": 4.0 + hold, "kind": "module-takeover",
-            "anchor": anchor, "reason": "benchmark beat",
-            "spec": {"eyebrow": "ULTRA", "headlineLines": "ONE RUN.|FOUR AGENTS.",
-                     "heroPct": 92, "comparePct": 86}}
-
-
-class ModuleLintMatrixTests(unittest.TestCase):
-    """The adjudication as lint: LONGFORM legal, shorts = ERROR (both moves)."""
-
-    def _short_plan(self, graphics: list) -> dict:
-        plan = good_plan()
-        plan["graphicsTrack"] = graphics
-        return plan
-
-    # -- item 8: rail-push entrance --------------------------------------
-    def test_rail_push_is_clean_on_longform(self) -> None:
-        rep = pl.lint(_longform_plan([_rail_entry("rail-push")]), MANIFEST)
-        self.assertFalse([e for e in rep.errors if "rail-push" in e], rep.errors)
-
-    def test_rail_push_is_an_error_on_shorts(self) -> None:
-        rep = pl.lint(self._short_plan([_rail_entry("rail-push", hold=4.0)]),
-                      MANIFEST)
-        self.assertTrue(any("rail-push" in e and "LONGFORM-ONLY" in e
-                            for e in rep.errors), rep.errors)
-
-    def test_default_slide_entrance_is_clean_on_shorts(self) -> None:
-        rep = pl.lint(self._short_plan([_rail_entry("slide", hold=4.0)]), MANIFEST)
-        self.assertFalse([e for e in rep.errors if "entrance" in e], rep.errors)
-
-    def test_unknown_entrance_fails_loud(self) -> None:
-        rep = pl.lint(_longform_plan([_rail_entry("teleport")]), MANIFEST)
-        self.assertTrue(any("spec.entrance 'teleport'" in e for e in rep.errors),
-                        rep.errors)
-
-    def test_entrance_on_a_non_rail_kind_fails_loud(self) -> None:
-        entry = _takeover_entry()
-        entry["spec"]["entrance"] = "rail-push"
-        rep = pl.lint(_longform_plan([entry]), MANIFEST)
-        self.assertTrue(any("glass-rail variable" in e for e in rep.errors),
-                        rep.errors)
-
-    # -- item 9: module-takeover hole-comp -----------------------------
-    def test_takeover_is_clean_on_longform(self) -> None:
-        rep = pl.lint(_longform_plan([_takeover_entry()]), MANIFEST)
-        self.assertFalse(
-            [e for e in rep.errors if "module-takeover" in e], rep.errors)
-
-    def test_takeover_is_an_error_on_shorts(self) -> None:
-        rep = pl.lint(self._short_plan([_takeover_entry(hold=2.0)]), MANIFEST)
-        self.assertTrue(any("module-takeover" in e and "LONGFORM-ONLY" in e
-                            for e in rep.errors), rep.errors)
-
-    def test_takeover_requires_own_screen(self) -> None:
-        rep = pl.lint(_longform_plan([_takeover_entry(anchor="free-band")]),
-                      MANIFEST)
-        self.assertTrue(any("own-screen" in e and "module-takeover" in e
-                            for e in rep.errors), rep.errors)
-
-    def test_takeover_rides_hold_max_not_the_takeover_ceiling(self) -> None:
-        # 11.0s hold: > takeover_max_s (10.5 longform) but <= hold_max_s
-        # (11.0) — the face stays visible, so no takeover-ceiling error.
-        rep = pl.lint(_longform_plan([_takeover_entry(hold=11.0)]), MANIFEST)
-        self.assertFalse([e for e in rep.errors if "exceeds" in e], rep.errors)
-
-    def test_needs_pip_on_a_hole_kind_is_not_the_unwired_error(self) -> None:
-        entry = _takeover_entry()
-        entry["needsPip"] = True
-        rep = pl.lint(_longform_plan([entry]), MANIFEST)
-        self.assertFalse([e for e in rep.errors if "unwired" in e], rep.errors)
-
-    # -- the old guardrail stays up for everything else -------------------
-    def test_canvas_pip_list_still_blocked_unwired(self) -> None:
-        entry = {"outStart": 4.0, "outEnd": 10.0, "kind": "canvas-pip-list",
-                 "anchor": "own-screen", "reason": "doors",
-                 "spec": {"item1": "Door one"}}
-        rep = pl.lint(_longform_plan([entry]), MANIFEST)
-        self.assertTrue(any("unwired" in e for e in rep.errors), rep.errors)
-
-    def test_needs_pip_on_other_kinds_still_blocked(self) -> None:
-        entry = {"outStart": 4.0, "outEnd": 10.0, "kind": "statement-card",
-                 "anchor": "own-screen", "reason": "beat",
-                 "spec": {"text": "x"}, "needsPip": True}
-        rep = pl.lint(_longform_plan([entry]), MANIFEST)
-        self.assertTrue(any("unwired" in e for e in rep.errors), rep.errors)
-
-
-class PresenterFrameLintGateTests(unittest.TestCase):
-    """plan_lint_module._check_hole_kind routes on entry_has_hole, so the
-    longform+own-screen gate fires ONLY for an active presenter frame — a plain
-    opt-out scoreboard is untouched (backward compat)."""
-
-    def _entry(self, presenter: bool, anchor: str = "own-screen") -> dict:
-        spec = {"heroValue": "97%"}
-        if presenter:
-            spec["presenterFrame"] = True
-        return {"outStart": 4.0, "outEnd": 12.0, "kind": "module-scoreboard",
-                "anchor": anchor, "reason": "scoreboard beat", "spec": spec}
-
-    def test_plain_scoreboard_has_no_hole_gate(self) -> None:
-        rep = pl.Report()
-        pln.check_module_entry("g0", self._entry(False), "shorts", rep)
-        self.assertEqual(rep.errors, [])
-
-    def test_presenter_frame_scoreboard_is_longform_only(self) -> None:
-        rep = pl.Report()
-        pln.check_module_entry("g0", self._entry(True), "shorts", rep)
-        self.assertTrue(any("LONGFORM-ONLY" in e for e in rep.errors), rep.errors)
-
-    def test_presenter_frame_scoreboard_requires_own_screen(self) -> None:
-        rep = pl.Report()
-        pln.check_module_entry(
-            "g0", self._entry(True, anchor="free-band"), "longform", rep)
-        self.assertTrue(any("own-screen" in e for e in rep.errors), rep.errors)
-
-    def test_presenter_frame_scoreboard_clean_on_longform_own_screen(self) -> None:
-        rep = pl.Report()
-        pln.check_module_entry("g0", self._entry(True), "longform", rep)
-        self.assertEqual(rep.errors, [])
-
-
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    unittest.main()

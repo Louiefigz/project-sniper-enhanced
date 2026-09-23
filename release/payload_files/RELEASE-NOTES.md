@@ -72,16 +72,28 @@
 - One optional feature bills your own key: Deepgram transcription (your Deepgram key and explicit
   approval for each run). Saving a key approves nothing.
 
-### Original material
-- The three saved styles and the editing doctrine are rewritten as Sniper's own
-  specifications:
-  - styles: Restrained, Punch and Slideware;
-  - doctrine: module cards, editcraft, short-form and reference-style rules.
-  Rule IDs and behaviour are unchanged.
+### Catalog-first graphics and revision previews
+- **Graphics start with the HyperFrames catalog.** Retired Sniper templates and
+  the Restrained, Punch and Slideware style presets cannot run. Older plans that
+  select them need a new catalog choice; they do not silently fall back.
+- A reference adaptation needs the current project's selected reference. A custom
+  visual needs a documented capability or quality gap found after inspecting the
+  catalog. Neither route permits reusing a retired template under a new name.
+- **Review before the final render.** Ordinary edits and native HyperFrames projects
+  prepare continuous context clips for review. Revisions can reuse unchanged work
+  when its source and render settings still match; shared changes invalidate the
+  affected clips. Final delivery still requires current reviews and full-output QC.
+- The ordinary renderer has seven verified catalog compatibility ports. Native
+  HyperFrames projects can use the broader catalog, subject to each item's assets
+  and runtime requirements; inclusion in the catalog is not a render qualification.
+- Preview reuse has been measured on small Short and long-timeline fixtures. These
+  checks do not establish conversation token savings or faster final full-video
+  encoding. Full release qualification remains open.
+
+### Libraries and attribution
 - The Director library (formats, anchors, openings, training pairs) and the reference
   library are original. Old saved Director records still read; a full cold check of
   them does not pass.
-- The motion templates use Sniper's own palette and type.
 - `THIRD-PARTY-NOTICES.md` lists what actually ships.
 - The HyperFrames catalog's fonts, textures and media are no longer shipped.
 

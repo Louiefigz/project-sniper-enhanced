@@ -60,7 +60,7 @@ export function validateReferenceSelection(
   );
 }
 
-function resolveReferenceContext(intent: AutoEditIntent | undefined): ResolvedReferenceStudy | undefined {
+export function resolveReferenceContext(intent: AutoEditIntent | undefined): ResolvedReferenceStudy | undefined {
   const reference = intent?.reference;
   if (!reference) return undefined;
   const study = resolveReferenceStudy(reference.id);

@@ -8,7 +8,7 @@ import re
 import stat
 from dataclasses import dataclass
 from typing import Any
-
+from graphics.template_contract import validate_entry
 from .overlay_seal import (
     OverlayPrepareRequest,
     OverlaySealBinding,
@@ -87,8 +87,8 @@ def prepare_overlay_launch(request: OverlayPreparationRequest,
         raise RuntimeError("overlay attempt is outside its request authority")
     selected = select_overlay(
         request.authority_root, request.request, request.overlay_id)
-    manifest = current_render_build_manifest(runtime)
-    build = store_render_build(request.attempt_root, manifest)
+    validate_entry(selected.entry)
+    build = store_render_build(request.attempt_root, current_render_build_manifest(runtime))
     prepared = OverlayPrepareRequest(
         request.attempt_root, request.attempt_id, selected.request_digest,
         build.build_digest, runtime.pipeline_root, selected.entry,

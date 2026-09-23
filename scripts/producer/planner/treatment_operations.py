@@ -7,6 +7,7 @@ import json
 
 from edit.exact_timing import PositiveRational
 from graphics.scene_contract import validate_scene
+from graphics.visual_source_receipt import carry_scene_source_choice
 from planner.treatment_contract import (
     TreatmentContractError,
     validate_treatment_operation,
@@ -124,6 +125,7 @@ def _scene_value(state: TreatmentState, operation: dict) -> TreatmentEffect:
     element["values"][variable] = operation[value_key]
     scene["composition"]["variables"][variable] = operation[value_key]
     scene["version"] += 1
+    carry_scene_source_choice(state.scenes[index], scene, 'variable')
     validate_scene(scene)
     unit = next((row["unitId"] for row in scene["renderUnits"]
                  if element["elementId"] in row["elementIds"]), None)
@@ -150,6 +152,7 @@ def _scene_move(state: TreatmentState, operation: dict) -> TreatmentEffect:
         "startFrame": new[0], "endFrameExclusive": new[1],
         "timelineMapHash": operation["timelineMapHash"]})
     scene["version"] += 1
+    carry_scene_source_choice(state.scenes[index], scene, 'timing')
     validate_scene(scene)
     target = scene["sceneId"]
     nodes = [f"composite:{target}", f"palmier-binding:{target}"]

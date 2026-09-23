@@ -91,9 +91,9 @@ class ScenePackageAssetTests(unittest.TestCase):
                           source_claim: str) -> ResolvedScenePackage:
         scene = wrap_catalog_scene(CatalogSceneRequest(
             entry={
-                "kind": "logo-card", "anchor": "own-screen",
+                "kind": "ui-focus-zoom", "anchor": "own-screen",
                 "outStart": 0.0, "outEnd": 0.8,
-                "spec": {"iconFile": "notion.svg", "accent": "#054BC9"},
+                "spec": {"image": "assets/sample-screen.png", "zoomAt": 0.2},
             },
             scene_id="scene-logo",
             timing={
@@ -109,7 +109,7 @@ class ScenePackageAssetTests(unittest.TestCase):
         record = {
             "schemaVersion": 1, "assetId": dependency["id"],
             "sha256": hashlib.sha256(data).hexdigest(),
-            "sizeBytes": len(data), "mime": "image/svg+xml",
+            "sizeBytes": len(data), "mime": "image/png",
             "origin": "approved-library",
             "acquiredAt": "2026-07-29T12:00:00Z",
             "rights": {
@@ -170,8 +170,8 @@ class ScenePackageAssetTests(unittest.TestCase):
 
     def test_catalog_asset_requires_the_exact_resolved_selector_source(self) -> None:
         source = Path(__file__).resolve().parents[3] \
-            / "templates/motion/icons/notion.svg"
-        blob = self.root / "notion-approved.svg"
+            / "templates/motion/assets/sample-screen.png"
+        blob = self.root / "screen-approved.png"
         blob.write_bytes(source.read_bytes())
         resolved = self._catalog_resolved(blob, str(source))
         digest = hashlib.sha256(blob.read_bytes()).hexdigest()
@@ -189,7 +189,7 @@ class ScenePackageAssetTests(unittest.TestCase):
                 resolved, str(self.snapshot_store))
         self.assertIsNone(admitted[0]["bundleMember"])
         mismatched = self._catalog_resolved(
-            blob, str(self.root / "unapproved-selector.svg"))
+            blob, str(self.root / "unapproved-selector.png"))
         with self.assertRaisesRegex(Exception, "resolved selector"):
             admit_package_assets(mismatched, str(self.snapshot_store))
 

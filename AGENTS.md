@@ -1,4 +1,13 @@
 # Project Sniper — working instructions
+## Current visual source rule
+
+Read `docs/producer/VISUAL_SOURCE_POLICY.md` before visual planning or execution.
+Use the complete HyperFrames catalog first. Retired house templates and global
+style presets cannot execute, including renamed release variants. Reference
+adaptations need this job’s selected reference; custom work needs an inspected
+capability or quality gap. Native Shorts stage `catalogFiles` and `catalogTitle`.
+This source rule replaces historical template/style recipes below.
+
 
 These are the instructions for whichever agent drives this editor. Codex reads this
 file; Claude Code reads `CLAUDE.md`, which imports this file, so both agents receive
@@ -100,8 +109,13 @@ then read the files it identifies. Discovery alone neither reads them nor comple
 - Save the operator's request as the project's stored intent before planning:
   `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent '<json>'`
   (render and delivery read it and refuse without it).
-- Before rendering an auto-graphics plan, mint its delivery approval from the deterministic
-  gates: `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
+- Before any ordinary final render or assembly, including trim and graphics-off, record
+  current independent reviews and preview evidence, then mint readiness with
+  `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
+  Follow `docs/producer/RENDER_READINESS.md`: first mint separate `--draft` admission,
+  then run `ordinary_previews.py` for continuous context clips. Pass its prior
+  `ordinary-previews.json` with `--previous` on revisions. Inspect/revise those clips
+  before final admission; the command never grants an editorial review.
 - Independent reviews (plan critics, the rendered review of still frames) are run by you as
   fresh subagents that did not author the plan, as the Producer skill describes.
 - At video handoff, give the operator both the encoded video and the matching editable

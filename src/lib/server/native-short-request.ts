@@ -1,3 +1,8 @@
+import { nativeReferenceInputs } from "./longform-reference-inputs";
+import { resolveReferenceContext } from "@/app/api/producer/auto-edit/saved-plan-request";
+import { parseAutoEditIntent } from "@/app/api/producer/auto-edit/stream";
+import { nativeCatalogInventory } from "./native-catalog-inventory";
+import { VISUAL_SOURCE_INSTRUCTIONS } from "@/lib/producer/visual-source-policy";
 /** Prepare a local brief for the edit brain without invoking a provider. */
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { SHORTS_LIBRARY } from "./reference-library-paths";
@@ -51,12 +56,23 @@ function referenceInventory(repo: string) {
 }
 
 function handoff(directory: string, intent: ReturnType<typeof validateIntent>, guided?: GuidedNativeRequestMarker) {
-  return `Make a native 9:16 Short from this local request: ${path.join(directory, "SHORT-REQUEST.json")}.
+  return `${VISUAL_SOURCE_INSTRUCTIONS}
+Make a native 9:16 Short from this local request: ${path.join(directory, "SHORT-REQUEST.json")}.
 ${shortDirectionInstructions(intent.shortDirection)}
-Read the transcript and inspect the supplied footage and linked reference frames before deciding the cut, title, geometry or supporting shots. Reuse current transcripts and the shared caption grouper. Preserve exact kept-word/source timing. Fill the canonical Director template and explain why the hook makes the viewer want the payoff. Write the source-bound strategy version 3 with its measured and editorial pacing record and NativeShortProjectInput plan before building.
-Scout actual assets before committing the complete scene plan. Check every retained beat, exact source/cue, crop/layout, text lifetime, transition and hold against the brief, available footage and execution feasibility. A separate reviewer must inspect the current full plan and actual source/reference images, resolve material issues, and save a NativePrebuildReview receipt using src/lib/server/native-short-prebuild-review.ts: scope native-short-full-plan, nativeShortPrebuildPlanHash(project), reviewer provenance, every coverage assessment (reasoned not-applicable is allowed), pinned evidence and a ProducerReview stage plan/pass with zero material issues. Bind its canonical local path and byte SHA-256 as project.prebuildReview. Local strategy.review findings and an opening-only Director critique do not satisfy this gate. Any authored asset, cue, crop, motion or transition revision needs a fresh review. Only generated preparedSources/guidedBinding and the receipt reference are excluded from the creative hash; their existing validators remain mandatory. Recorded independence is a reviewer declaration, not cryptographic proof or a finished-playback claim. Standalone prepare-media may establish source feasibility but cannot claim a completed edit.
+Read the complete CATALOG-INDEX.json and inspect candidate source files. Stage selected catalog adaptations using catalogFiles and mount them with data-composition-src; pin the upstream source hash and local implementation hash. Record current visualSources decisions for every canvas visual and extension. See docs/producer/VISUAL_SOURCE_POLICY.md for the receipt contract.
+Read the transcript and inspect the supplied footage and linked reference frames before deciding the cut, title, geometry or supporting shots. Reuse current transcripts and the shared caption grouper. Preserve exact kept-word/source timing. Select a catalog title using catalogTitle and its mounted catalogFiles component, fill the canonical Director copy template, and explain why the hook makes the viewer want the payoff. Write the source-bound strategy version 3 with its measured and editorial pacing record and NativeShortProjectInput plan before building.
+Scout actual assets before committing the complete scene plan. Check every retained beat, exact source/cue, crop/layout, text lifetime, transition and hold against the brief, available footage and execution feasibility. A separate reviewer must inspect the current full plan, actual catalog implementations and source/reference images; visualSourceSelection must assess authentic catalog reuse and whether each reference/custom exception is justified, resolve material issues, and save a NativePrebuildReview receipt using src/lib/server/native-short-prebuild-review.ts: scope native-short-full-plan, nativeShortPrebuildPlanHash(project), reviewer provenance, every coverage assessment (reasoned not-applicable is allowed), pinned evidence and a ProducerReview stage plan/pass with zero material issues. Bind its canonical local path and byte SHA-256 as project.prebuildReview. Local strategy.review findings and an opening-only Director critique do not satisfy this gate. Any authored asset, cue, crop, motion or transition revision needs a fresh review. Only generated preparedSources/guidedBinding and the receipt reference are excluded from the creative hash; their existing validators remain mandatory. Recorded independence is a reviewer declaration, not cryptographic proof or a finished-playback claim. Standalone prepare-media may establish source feasibility but cannot claim a completed edit.
 ${guided ? `Save the visual-plan JSON with candidateHash, project and explicit assetResolutions [{sceneId,assetId,decisionId}]. Use node --import tsx scripts/producer/native-short.ts build-guided ${guided.producerDir} <visual-plan.json> for leased assembly against this current proposal; every required image must resolve before project publication.` : "Use scripts/producer/native-short.ts build for assembly"}${guided ? " Use" : " and"} studio/native_short_export.py for the local render, shared audio delivery, native capture/seek and encoded-picture checks. Keep this request's hash/source pins bound to the plan. Retain all failures and report stage times, memory, actual coverage and remaining human review.
 This packet authorizes no new provider transmission. Apply the user's current model/media permissions. Automatic means the edit brain selects the treatment; it is not a fixed layout preset.`;
+}
+
+function writeRequestFile(directory: string, name: string, content: string) {
+  const file = path.join(directory, name);
+  if (!existsSync(file)) {
+    writeFileSync(file, content, { flag: "wx", mode: 0o600 });
+    return;
+  }
+  if (readFileSync(file, "utf8") !== content) throw new Error("Stored native Short request changed");
 }
 
 /** Write a content-addressed request packet. It does not claim strategy or media work is done. */
@@ -71,11 +87,14 @@ export function prepareNativeShortRequest(input: { producerDir: string; intent: 
   const receipt = observed(path.resolve(path.dirname(manifestPath), admission.receiptPath));
   if (receipt.sha256 !== admission.receiptSha256) throw new Error("Source-set admission receipt changed");
   const catalog = loadDirectorCatalog(), request = intent.shortDirection ?? AUTOMATIC_SHORT_DIRECTION;
-  const packet = { schemaVersion: 1, scope: "local-native-short-request-awaiting-editorial-strategy", intent: { ...intent, shortDirection: request },
+  const visualCatalog = nativeCatalogInventory();
+  const selected = nativeReferenceInputs(resolveReferenceContext(parseAutoEditIntent(intent as unknown as Record<string, unknown>)));
+  const packet = { catalog: { file: "CATALOG-INDEX.json", digest: canonicalJsonSha256(visualCatalog), total: visualCatalog.total }, schemaVersion: 1, scope: "local-native-short-request-awaiting-editorial-strategy", intent: { ...intent, shortDirection: request },
     ...(input.guidedProposal ? { guidedProposal: input.guidedProposal } : {}),
     manifest: observed(manifestPath), admission: { ...admission, receipt },
     sources: nativeShortSourceInventory(manifestPath, manifest), availableSupportingAssets: nativeShortSupportingInventory(manifestPath, manifest),
     editorialInstructions: shortDirectionInstructions(request),
+    selectedReference: selected.selected, selectedReferences: selected.pins.map(({ path, sha256 }) => ({ path, sha256 })),
     references: referenceInventory(input.repo), directorLibraryHash: directorCatalogHash(catalog),
     stages: ["inspect-source-and-references", "select-retained-passage", "inspect-retained-dialogue", "map-script-and-delivery-pacing",
       "choose-visual-representation", "scout-supporting-shots", "plan-scenes-and-treatment", "check-full-plan-feasibility",
@@ -84,13 +103,10 @@ export function prepareNativeShortRequest(input: { producerDir: string; intent: 
   const hash = canonicalJsonSha256(packet), parent = path.join(input.producerDir, "native-shorts/requests"), directory = path.join(parent, hash);
   mkdirSync(parent, { recursive: true, mode: 0o700 });
   if (realpathSync(parent) !== parent) throw new Error("Native request directory must be canonical");
-  const files = { "SHORT-REQUEST.json": canonicalJson(packet), "DIRECTOR-LIBRARY.json": canonicalJson(catalog), "AGENT-BRIEF.md": handoff(directory, intent, input.guidedProposal) };
+  const files = { ...selected.files, "CATALOG-INDEX.json": canonicalJson(visualCatalog), "SHORT-REQUEST.json": canonicalJson(packet), "DIRECTOR-LIBRARY.json": canonicalJson(catalog), "AGENT-BRIEF.md": handoff(directory, intent, input.guidedProposal) };
   if (!existsSync(directory)) mkdirSync(directory, { mode: 0o700 });
   for (const [name, content] of Object.entries(files)) {
-    const file = path.join(directory, name);
-    if (existsSync(file)) {
-      if (readFileSync(file, "utf8") !== content) throw new Error("Stored native Short request changed");
-    } else writeFileSync(file, content, { flag: "wx", mode: 0o600 });
+    writeRequestFile(directory, name, content);
   }
   return { status: "ready-for-local-strategy", directory, requestHash: hash, request,
     handoff: files["AGENT-BRIEF.md"], sourceCount: packet.sources.length, providerCalls: 0 };

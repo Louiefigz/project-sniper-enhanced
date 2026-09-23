@@ -75,6 +75,7 @@ class UnitEnrollmentValidationAdversarialTests(unittest.TestCase):
             )
         )
         case.setUp()
+        self.addCleanup(case.doCleanups)
         self.addCleanup(case.tearDown)
         return case
 

@@ -9,6 +9,7 @@ import sys
 import tempfile
 from dataclasses import dataclass
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
+from graphics.visual_source_policy import require_integrated
 from fingerprints import json_canon
 from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.comp_capabilities import measured_fade_class
@@ -100,6 +101,7 @@ def timeline_padded_entry(entry: dict, fps: float) -> dict:
 
 def comp_path(kind: str) -> str:
     """Absolute path to the ``kind`` composition; raise if it is not a template."""
+    require_integrated(kind)
     path = os.path.join(COMPOSITIONS_DIR, f"{kind}.html")
     if not os.path.isfile(path):
         raise ValueError(f"unknown graphic kind '{kind}': no compositions/{kind}.html")

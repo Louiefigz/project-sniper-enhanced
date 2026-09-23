@@ -1,3 +1,5 @@
+import { nativeCatalogFiles, type NativeCatalogFile } from "./native-catalog-files";
+import { assertNativeVisualSources, type VisualSourceReceipt } from "./visual-source-admission";
 /** Local native project assembly shared by CLI and stored-proposal adapters. */
 import { constants, copyFileSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -19,6 +21,10 @@ import { assertNativeShortPrebuildReview, assertNativePrebuildPublication, nativ
 
 export interface NativeSceneExtension { markup: string; css: string; motion: string }
 export interface NativeShortProjectInput {
+  reviewRegions?: { schemaVersion: 1; units: Array<{ id: string; file: string; startFrame: number; endFrame: number }> };
+  visualSources?: VisualSourceReceipt;
+  catalogFiles?: NativeCatalogFile[];
+  catalogTitle?: { file: string; copy: import("./native-hook-template").NativeTitleCopy };
   schemaVersion: 1; request: ShortDirectionRequest; strategy: NativeShortStrategy;
   canvas: NativeCanvasInput; assets: NativeAssetBinding[];
   requestPacket?: { path: string; sha256: string };
@@ -38,6 +44,7 @@ export interface NativeShortProjectInput {
 /** Mount editable scene mechanisms while keeping timing, source, title and captions shared. */
 export function assembleNativeShortHtml(input: NativeShortProjectInput): string {
   if (input.schemaVersion !== 1) throw new Error("Unsupported native Short project");
+
   parseShortDirection(input.request, "short");
   const [rateNum, rateDen] = input.canvas.frameRate.split("/").map(Number);
   assertNativeShortAudio(input.audioFinishing, input.canvas.totalFrames * rateDen / rateNum);
@@ -65,6 +72,11 @@ export function assembleNativeShortHtml(input: NativeShortProjectInput): string 
   assertNativeShortPacing(input, html);
   assertNativeShortAssetUse(input, html, assetUseOptions(input));
   assertNativeShortStory(input, html);
+  assertNativeVisualSources(input);
+  const catalogFiles = nativeCatalogFiles(input.catalogFiles);
+  for (const file of Object.keys(catalogFiles)) {
+    if (!html.includes(`data-composition-src="${file}"`)) throw new Error("Catalog file must be mounted in the authored scene");
+  }
   return html;
 }
 
@@ -151,8 +163,11 @@ function verifyRequest(input: NativeShortProjectInput): void {
 }
 
 function verifyTitle(input: NativeShortProjectInput, catalog: DirectorCatalog): void {
-  const title = input.canvas.titleCard;
-  if (!title) throw new Error("Native Short needs its selected backed title before assembly");
+  const title = input.canvas.titleCard ?? input.catalogTitle;
+  if (!title) throw new Error("Native Short needs a selected catalog title before assembly");
+  if (input.catalogTitle && (input.canvas.titleCard || !input.catalogFiles?.some(row => row.file === input.catalogTitle?.file))) {
+    throw new Error("Catalog title must select one mounted catalog file without a duplicate built-in title");
+  }
   if (title.copy?.scope === "user-supplied-title") {
     assertUserTitleCopy(title.copy);
     return;
@@ -165,9 +180,11 @@ function projectFiles(input: NativeShortProjectInput, html: string, catalog: Dir
   media: ReturnType<typeof preparedProjectMedia>): Record<string, string> {
   return {
     "index.html": media.html,
+    ...nativeCatalogFiles(input.catalogFiles),
     ...(media.report ? { "PREPARED-SOURCES.json": canonicalJson(media.report) } : {}),
     "hyperframes.json": canonicalJson({ paths: { blocks: "compositions", components: "compositions/components", assets: "assets" } }),
     "SHORT-PROJECT.json": canonicalJson(input),
+    ...(input.reviewRegions ? { "REVIEW-REGIONS.json": canonicalJson(input.reviewRegions) } : {}),
     ...(input.guidedBinding ? { "GUIDED-PROPOSAL.json": canonicalJson(input.guidedBinding) } : {}),
     "DIRECTOR-LIBRARY.json": canonicalJson(catalog),
     ...(input.strategy.schemaVersion >= 2 ? { "PACING-REPORT.json": canonicalJson(nativeShortPacingReport(input, html)) } : {}),
@@ -176,7 +193,7 @@ function projectFiles(input: NativeShortProjectInput, html: string, catalog: Dir
     "BRIEF.md": `# ${input.canvas.title}\n\n${shortDirectionInstructions(input.request)}\n\n`
       + `Selected treatment: ${input.strategy.selectedTreatment}\n\n${input.strategy.selectionReason}\n\n`
       + `Viewer benefit: ${input.strategy.viewerBenefit}\n\nReason to watch: ${input.strategy.hookReasonToWatch}\n\n`
-      + `Hook: ${input.canvas.titleCard!.copy.text}\n\nPayoff: ${input.strategy.payoff}\n`,
+      + `Hook: ${(input.canvas.titleCard ?? input.catalogTitle)!.copy.text}\n\nPayoff: ${input.strategy.payoff}\n`,
     "STORYBOARD.md": input.strategy.scenes.map((scene) => `## Frames ${scene.startFrame}–${scene.endFrame}\n\n`
       + `${scene.viewingNeed}\n\n${scene.before} → ${scene.action} → ${scene.result}\n\n`
       + `View: ${scene.paneJobs}\n\nHold: ${scene.holdFrames} frames. Exit: ${scene.exitReason}\n\n`
@@ -227,13 +244,14 @@ export function readNativeShortProject(directory: string, dependencies: NativeGu
     ...(input.guidedBinding ? ["GUIDED-PROPOSAL.json"] : []),
     ...(input.prebuildReview ? ["PREBUILD-REVIEW.json"] : []),
     ...(media.report ? ["PREPARED-SOURCES.json"] : []),
+    ...Object.keys(nativeCatalogFiles(input.catalogFiles)),
     ...media.assets.map((asset) => asset.file)].sort();
   if (manifest.schemaVersion !== 1 || manifest.scope !== "native-short-review-project" || !Array.isArray(manifest.files)
       || canonicalJsonSha256(manifest.files.map((row: { file: string }) => row.file).sort()) !== canonicalJsonSha256(expected)) {
     throw new Error("Native project manifest omits or duplicates required files");
   }
   for (const file of manifest.files) {
-    if (!/^(?:[A-Z-]+\.json|index\.html|hyperframes\.json|BRIEF\.md|STORYBOARD\.md|(?:assets|references)\/[\w.-]+)$/u.test(file.file)
+    if (!/^(?:[A-Z-]+\.json|index\.html|hyperframes\.json|BRIEF\.md|STORYBOARD\.md|(?:assets|references|compositions)\/[\w.-]+)$/u.test(file.file)
         || fileSha256(path.join(directory, file.file)) !== file.sha256) throw new Error("Native project changed since assembly");
   }
   if (canonicalJsonSha256(input) !== manifest.projectHash) throw new Error("Native project request/strategy changed");

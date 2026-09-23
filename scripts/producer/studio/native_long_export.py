@@ -37,6 +37,8 @@ def implementation_pins(project: Path, runtime: Path, tools: dict) -> dict:
     files += [Path(value).resolve(strict=True) for value in tools.values()]
     files += [Path(sys.executable).resolve(strict=True), producer / 'studio/native_localhost_only.sb']
     files += review_implementation_files()
+    from graphics.visual_source_project import source_implementation_files
+    files += source_implementation_files()
     return {str(file): digest(file) for file in set(files) if file.is_file()}
 
 
@@ -83,8 +85,10 @@ def select_and_publish(args: argparse.Namespace, request: dict) -> dict:
         request = resume_request(request, attempt)
     else:
         add_audio_reuse(args, request)
-        if not args.prepared_master and not args.audio_donor:
+        if not args.prepared_master and not args.audio_donor and not getattr(args, "preview_only", False) and getattr(args, "preview_reviews", None):
             request = recover_automatically(request)
+    from studio.native_motion_previews import bind_preview_options
+    request = bind_preview_options(request, args)
     output = Path(request['output'])
     output.mkdir(mode=0o700)
     write_new(output / 'export-request.json', request)
@@ -117,6 +121,8 @@ def main() -> None:
     reuse.add_argument('--audio-donor', type=Path, help='Reuse checked AAC; all final audio and picture checks still run')
     parser.add_argument('--audio-profile', choices=MASTERING_PROFILE_IDENTITIES,
                         default=NATIVE_SHORT_MASTERING_PROFILE.identity)
+    from studio.native_motion_previews import preview_options
+    preview_options(parser)
     args = parser.parse_args()
     began = time.monotonic(), utc()
     request, environment = prepare(args)

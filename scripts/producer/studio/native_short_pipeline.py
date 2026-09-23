@@ -23,6 +23,17 @@ RENDER_STATUS = 'native-short-rendered-awaiting-qc'
 FINAL_STATUS = 'native-short-checked-for-review'
 
 
+class NativeStageFailure(RuntimeError):
+    """Carry the original owner failure without conflating pressure and missing samples."""
+
+    def __init__(self, phase: str, result: dict) -> None:
+        """Preserve the failed owner's category and phase for the delivery receipt."""
+        self.category = result.get('failureCategory') or 'renderer-failure'
+        self.phase = phase
+        super().__init__(f"Native {phase} failed ({self.category}): {result.get('abortReason') or 'worker failed'}. "
+                         'Preserve this attempt; completed section seals are reusable on the next invocation.')
+
+
 @dataclass
 class NativeShortPipeline:
     """One invocation with immutable inputs and new per-phase owners on the main thread."""
@@ -50,7 +61,7 @@ class NativeShortPipeline:
         request_file = self.root / 'export-request.json'
         budget = self.request.get('budget', {}) if self.is_long else {}
         deadline = budget.get('ownerSeconds', 600) if label in {'pipeline', 'picture'} else budget.get(
-            'sampleSeconds' if label == 'capture' else 'verificationSeconds', 600)
+            'sampleSeconds' if label in {'capture', 'preview'} else 'verificationSeconds', 600)
         settings = NativeRunConfig(Path(self.request['project']), self.root, cli,
             ['/usr/bin/sandbox-exec', '-f', str(sandbox), *child], self.environment,
             {'output': str(self.root / output), 'sdkSha256': digest(cli),
@@ -59,9 +70,9 @@ class NativeShortPipeline:
             additional_pins={**self.request['pins'], **self.evidence,
                              str(request_file): digest(request_file)},
             unused_ram_advisory=self.unused_ram_advisory)
-        if self.is_long:
+        if self.is_long or label.startswith('preview-'):
             from dataclasses import replace
-            settings = replace(settings, deadline=deadline + 600, idle_deadline=budget['idleSeconds'],
+            settings = replace(settings, deadline=deadline + 600, idle_deadline=budget.get('idleSeconds', 120),
                                capacity_wait_seconds=600)
         owner = NativeRun(label, settings)
         with stage_span(str(self.root), f'native_owner_{label}'):
@@ -70,8 +81,7 @@ class NativeShortPipeline:
                             'sha256': digest(owner.path), 'status': owner.result['status'],
                             'elapsedSeconds': owner.result['elapsedSeconds']})
         if not passed:
-            raise RuntimeError(f'Native {label} failed; preserve this attempt. '
-                               'Verification can reuse a completed render-stage.json when available.')
+            raise NativeStageFailure(label, owner.result)
         self.evidence[str(owner.path)] = digest(owner.path)
 
     def worker(self, phase: str) -> list[str]:
@@ -127,7 +137,7 @@ class NativeShortPipeline:
         require(native.get('status') == 'native-references-and-seek-states-pass',
                 'native reference checks did not pass')
         self.evidence[str(file)] = sha
-        if self.is_long and not self.request.get('verifyStage'):
+        if not self.request.get('verifyStage'):
             self.evidence.update({str(path): digest(path) for path in capture_artifacts(self.root, self.request).values()})
             return  # This same checked full-context capture gates the master.
         render_stage = Path(self.request.get('verifyStage') or self.root / 'render-stage.json')
@@ -154,8 +164,15 @@ class NativeShortPipeline:
                   'preparationSeconds': phase_start - started,
                   'timingScope': 'This export invocation including preparation and all owners; editorial authoring is separate.'}
         try:
-            if self.is_long and not self.request.get('verifyStage'):
+            if not self.request.get('verifyStage'):
                 self.capture()
+                previews = self.preview()
+                if self.request.get('previewOnly'):
+                    result.update(status='native-motion-previews-complete',
+                                  output=str(self.root / 'motion-previews.json'),
+                                  previews=previews, editorialReview='pending',
+                                  nextStep='Inspect the moving previews, record independent region reviews, then rerun with --preview-reviews.')
+                    return self.complete(result, started)
             record, receipt = self.render()
             result['renderStage'] = str(receipt)
             expected = record['artifacts']['review']['sha256']
@@ -163,7 +180,7 @@ class NativeShortPipeline:
                 result.update(status=RENDER_STATUS, sha256=expected)
             else:
                 self.evidence[str(self.root / 'review.mp4')] = expected
-                if self.is_long and not self.request.get('verifyStage'):
+                if not self.request.get('verifyStage'):
                     _receipt, pins = complete_capture(self.root, receipt)
                     self.evidence.update(pins)
                 else:
@@ -171,8 +188,29 @@ class NativeShortPipeline:
                 result['captureStage'] = str(self.request.get('captureStage') or self.root / 'capture-stage.json')
                 result.update(self.verify(expected), status='native-long-checked-for-review' if self.is_long else FINAL_STATUS)
         except (Exception, KeyboardInterrupt) as error:
-            result.update(status='failed', errorType=type(error).__name__, error=str(error))
+            result.update(status='failed', errorType=type(error).__name__, error=str(error),
+                          failureCategory='cancelled' if isinstance(error, KeyboardInterrupt)
+                          else getattr(error, 'category', 'renderer-failure'),
+                          failedPhase=getattr(error, 'phase', None))
+        return self.complete(result, started)
+
+    def preview(self) -> dict:
+        """Retain continuous picture/audio checks before any full picture owner starts."""
+        from studio.native_motion_previews import STATUS
+        from studio.native_preview_sections import prepare_sections
+        prepare_sections(self)
+        self.supervise('preview', self.worker('preview'), 'motion-previews.json', STATUS)
+        file = self.root / 'motion-previews.json'
+        previews = bound_json(file)
+        require(previews.get('status') == STATUS, 'Continuous preview preparation failed')
+        self.evidence[str(file)] = digest(file)
+        self.evidence.update({row['path']: row['sha256'] for row in previews['clips']})
+        return previews
+
+    def complete(self, result: dict, started: float) -> bool:
+        """Publish exactly one terminal receipt for successful and failed invocations."""
         result.update(completedAt=utc(), elapsedSeconds=time.monotonic() - started, stages=self.stages)
         write_new(self.root / 'delivery.json', result)
         print(json.dumps(result), flush=True)
-        return result['status'] in {RENDER_STATUS, FINAL_STATUS, 'native-long-checked-for-review'}
+        return result['status'] in {RENDER_STATUS, FINAL_STATUS, 'native-long-checked-for-review',
+                                    'native-motion-previews-complete'}

@@ -165,11 +165,11 @@ def _memory_values(raw: Mapping[str, str], request: ProcessRequest) -> dict:
         'selection': select_processes(raw['ps'], raw['top'], request), 'sampler': 'macos-top-v1'}
 
 
-def _read_command(args: list[str]) -> str:
+def _read_command(args: list[str], input_text: str | None = None) -> str:
     """Run only a bounded read-only measurement, logging failures explicitly."""
     try:
         return subprocess.run(args, capture_output=True, text=True, check=True,
-                              timeout=3).stdout
+                              timeout=3, input=input_text).stdout
     except subprocess.TimeoutExpired as error:
         LOGGER.error("Native resource measurement timed out for %s: %s", args[0], error)
         raise ResourceCommandTimeout(args, error) from error

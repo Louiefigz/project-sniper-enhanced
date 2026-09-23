@@ -13,6 +13,15 @@ description: >
   too wordy", "let 0:31 breathe"). Do NOT trigger for building/modifying the
   SNIPER app itself, or for script WRITING (that is outside this product).
 ---
+## Current visual source rule
+
+Read `docs/producer/VISUAL_SOURCE_POLICY.md` before visual planning or execution.
+Use the complete HyperFrames catalog first. Retired house templates and global
+style presets cannot execute, including renamed release variants. Reference
+adaptations need this job’s selected reference; custom work needs an inspected
+capability or quality gap. Native Shorts stage `catalogFiles` and `catalogTitle`.
+Historical studies supply observations, never permission to select a retired design.
+
 
 # PRODUCER — Codex / Claude skill → deterministic video + HyperFrames Studio
 
@@ -25,6 +34,28 @@ in **Visual storytelling** below. Operator manual: `docs/producer/PRODUCER_READM
 
 The safe publishing paths are the exact audited MP4 and its approved one-clip
 flat mirror. The complete short/long product is not yet P7/P8-qualified.
+
+## Executable readiness before ordinary rendering
+
+Follow [render readiness](../../../docs/producer/RENDER_READINESS.md) on every
+ordinary render/assembly, including trim/light and graphics-off. Record current
+independent critics and decoded moving-preview evidence before minting final
+readiness. First mint `--draft` admission and run
+`./sniper python3 scripts/producer/ordinary_previews.py <project>/producer
+<project>/source/asset_manifest.json <new-preview-attempt>`. On a revision, pass
+`--previous <prior-attempt>/ordinary-previews.json`. The command verifies reuse,
+prepares missing continuous context clips, and registers their decoded bytes.
+It still prepares the full graphics-free base/audio master on a cold run. The
+engine validates review records; it does not run the critics.
+Use the existing review packet for shared context, reuse only dependency-current
+units, and revise before full rendering. Native Short/Long keep their current
+prebuild review contracts and both perform early encoded sample checks. Their default
+export stops after automatically generated continuous moving previews. Have the fresh
+independent critic inspect those clips, their neighboring context and actual mastered
+audio; record the region review bundle before resuming with `--preview-reviews`.
+Reuse only dependency-current detailed reviews; refresh the complete-plan assessment
+after editorial changes. A receipt alone is not evidence of playback or listening.
+Final encoded-output QC and editorial/listening review remain required.
 
 ## Establish editorial scope before selecting or reshaping footage
 
@@ -999,21 +1030,12 @@ that lane on); only the engaging lanes differ.
    generic heuristic, the lesson wins. Each round:
    - **a. Deterministic audit — both gates MUST exit 0** (machine-readable errors;
      never bypass a gate or hand-edit its verdict):
-     - LONGFORM: run `motion/recompose.py <plan> --video <source.mp4>` FIRST —
-       `--video` MEASURES the face (a single global median box over the take) and
-       stamps `faceBBoxNorm` plan-wide when the plan carries none, so this step
-       runs standalone instead of erroring on an un-measured plan (pass `--face
-       x,y,w,h` instead if you already have the box). It then auto-stamps every
-       registered occluding rail (`glass-rail`, `module-rail`, and
-       `module-bullet-bars`) with a face-anchored `recompose` and emits the
-       synced `role:"recompose"` punch windows that re-center the subject in
-       the non-panel space, eased WITH the rail growth (defect 1:
-       "bg sweeps WHILE face shrinks to its new slot"). It fails loud only when
-       the face is genuinely unmeasurable (no cv2 / no face on screen), on
-       transform drift, or on a punch colliding with a panel window (defect 4) —
-       resolve upstream, never skip recompose. (Prefer own-screen full-frame
-       cutaways over beside-face rails per the pro doctrine; recompose is the
-       fallback when a rail IS used.)
+     - LONGFORM: inspect the actual subject framing before placing an overlay.
+       Choose a fitting catalog component and configure its layout in the native
+       project. Verify any required reframe together with the component's moving
+       preview so the subject stays clear throughout entrances and exits. The
+       former automatic house-rail recompose recipe is retired; it is not a
+       prerequisite for a catalog-authored edit or a scoped copy revision.
      - `transcript_cut_contract.py <plan> <transcripts_dir> <manifest> [--previsual]` — the
        cut gate. It refuses a cut that lands inside a word, and weighs the SOURCE AUDIO: when
        a source's media is readable it measures the silence itself, and a boundary the audio
@@ -1038,13 +1060,11 @@ that lane on); only the engaging lanes differ.
        obligation — naming the exact beat. This is why zooms/graphics/transitions/
        credibility stopped getting missed: the system refuses the render; you don't
        rely on remembering. Honors `target.scope` + every `target.lanes` directive.
-       For produced/full longform with the transitions lane on AUTO, author at
-       least one real `transitions[]` event; a rationale never waives a checked
-       lane. Resolve every internal intro cut seam individually with either a
-       real transition within ±0.25s or a `transitionRationale` clean-hook row:
-       `{decision:"clean-hook",reason:<20+ chars>,seams:[{outTime,evidence}]}`.
-       Mixed transition + clean-hook decisions are valid. Stock xfade/wipe/
-       slide/dissolve vocabulary is operator-rejected (LL-014).
+       Resolve each internal intro cut seam deliberately. When a transition
+       serves the current brief, select and mount a catalog component in the
+       native project and inspect its adjacent picture/audio context. Otherwise
+       record the clean-cut reasoning. The legacy `transitions[]` preset lane
+       must remain empty; a historical recipe cannot authorize it.
      - `claims_contract.py <plan> <transcripts_dir> <manifest>` — the **Claims
        Contract** (truth gate, MODULE_STUDY §5.6): every NUMERIC token in a
        card's copy (`graphicsTrack[].spec` strings + `titleCards[].text`) must
@@ -1092,21 +1112,15 @@ that lane on); only the engaging lanes differ.
      rendered reference, and make it answer, out loud, for the hook AND the body:
      - **Content** — does every beat earn its place? What is MISSING that the
        content calls for?
-     - **Graphics** — "Do we have a graphic here? Should we?" Is every graphic the
-       right KIND and STYLE (chip vs card vs b-roll), not just present? Pick each
-       card's kind by the beat's INFORMATION SHAPE via `producer_config.MOTION
-       ["card_form_map"]` (comparison→bars/scoreboard, process→pipeline/rail,
-       evidence→receipts/ledger, thesis→statement-card) and never the same form
-       twice in a row — vary anatomy, reuse tokens (LESSON-029/030). NOTE: the
-       speaker-inset "PIP" takeover has two forms — the **animated** shrink
-       (`pip_takeover.py`) is NOT wired, but the **static face-in-hole** takeover
-       (`pip_hole` / `module-takeover`) IS wired for LONGFORM
-       (`graphics_stage.py`). So do not author an animated
-       `needsPip`/`canvas-pip-list` entry (plan_lint hard-rejects it); for a
-       static credibility beat use a full-frame statement-card or the wired
-       `module-takeover` hole comp. On LONGFORM
-       talking-head, a named tool gets a full-frame CUTAWAY card or b-roll, not a
-       corner chip (R14 drops chips over the face).
+     - **Graphics** — does this beat need a graphic, and does the selected
+       catalog component explain its information? Inspect the complete catalog
+       for comparisons, processes, evidence and text treatments. Configure the
+       chosen source for the actual canvas and footage; review its source
+       decision and full-context preview. Use the current job's selected
+       reference or an evidenced catalog capability/quality gap only when
+       applicable. Historical form maps and house PIP designs are retired.
+       A credibility beat needs accurate evidence and legible framing; it does
+       not mandate a house template or a graphic over the subject's face.
      - **Transitions** — "Do we cover this energy cut?" Are montage/energy beats
        covered; is the hook deliberately clean?
      - **Copy — "What should it say? Are you sure?"** Does every card/caption match
@@ -1133,31 +1147,18 @@ that lane on); only the engaging lanes differ.
 5. **Show the operator the plan** (default; skip only if they said "just
    render"): chosen moments + why, predicted duration, hook text, what got cut, plus
    any residual items the critic flagged that you chose not to resolve.
-5.5 **Draft mode (interactive jobs only) — offer a WATCHABLE draft after the
-   deterministic gates pass and BEFORE the review wall.** Nothing watchable
-   existing until the wall clears is the worst part of the operator's wait;
-   a draft fixes the experienced answer without touching governance. Run
-   `draft_render.py <edit_plan.json> <asset_manifest.json> <producer_dir>`
-   (through `./sniper python3`): it reuses `render.py` into
-   `<producer_dir>/draft/` with the SAME delivery-approval gate the final
-   render enforces. Produced/full plans need the LESSON-039 receipt for the
-   draft render to pass — mint it via `./sniper node --import tsx
-   scripts/infra/mint-delivery-approval.ts <producer_dir>` (deterministic
-   gates only) — but that pre-wall mint is **draft-scoped and single-use**:
-   `draft_render.py` CONSUMES it (it deletes
-   `.sniper-template-usage-approved.json` when it finishes, success or
-   failure, emitting `draft_receipt_revoked`), so no ship-unlock ever
-   persists for a plan the critic wall has not reviewed. The SHIP receipt is
-   a different event: mint it ONLY after step 4c critic convergence (the
-   GUI mints post-`planningCanConverge` — the two lanes must not diverge);
-   a final render attempted without that post-wall mint fails closed. The
-   draft itself burns an unmistakable DRAFT watermark (big translucent
-   center mark + solid "DRAFT - NOT FINAL" corner badge) into
-   `draft/draft.mp4` and deletes the unwatermarked intermediate. A draft is
-   NEVER a deliverable: it writes no `.sniper-qc-approved.json`, carries no
-   provenance sidecar, and delivery governance keys on `final.mp4` — never
-   present `draft.mp4` as final, and the review wall (steps 4c critic
-   convergence + 7/7.5) still runs before anything IS presented as final.
+5.5 **Draft mode (interactive jobs only).** After deterministic gates pass,
+   `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts
+   <producer_dir> --draft` grants separate draft admission. Then run
+   `./sniper python3 scripts/producer/draft_render.py <edit_plan.json>
+   <asset_manifest.json> <producer_dir>`. The renderer burns a DRAFT watermark
+   and removes the unwatermarked final/provenance. The wrapper consumes only
+   `.sniper-draft-ready.json`; it never removes independent review evidence.
+   This draft receipt cannot unlock a final. Full drafts can be expensive: use
+   small representative/changed-region previews for rapid iteration under
+   [render readiness](../../../docs/producer/RENDER_READINESS.md). After current
+   independent reviews and previews pass, mint again without `--draft` for the
+   final. Neither draft readiness nor early samples replace final QC/review.
 6. **Execute the selected destination.** For an isolated experimental
    Desktop-native Palmier candidate, run the
    `desktop_cli.py advance ... --stage visual` contract above, then execute its

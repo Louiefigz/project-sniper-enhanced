@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {test} from 'node:test';
-import {assertNativeRenderOwner,assertNativeCaptureOwner} from '../producer/studio/runtime/native-export-guard.mjs';
+import {assertNativeRenderOwner,assertNativeCaptureOwner,assertNativePreviewOwner} from '../producer/studio/runtime/native-export-guard.mjs';
 
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 function fixture(t) {
@@ -61,4 +61,20 @@ test('direct capture needs a capture owner; picture authority is insufficient',t
   assert.throws(()=>assertNativeCaptureOwner(f.file,f.environment),/shared worker/);
   f.owner.args[6]='capture';f.save();
   assert.doesNotThrow(()=>assertNativeCaptureOwner(f.file,f.environment));
+});
+
+
+test('preview picture section requires its exact phase and output owner',t=>{
+  const f=fixture(t);
+  f.owner.args[6]='preview-picture-0';
+  f.owner.output=path.join(path.dirname(f.file),'preview-picture-0.json');f.save();
+  assert.doesNotThrow(()=>assertNativePreviewOwner(f.file,f.environment));
+  f.owner.args[6]='preview-package-0';f.save();
+  assert.throws(()=>assertNativePreviewOwner(f.file,f.environment),/section worker/);
+  f.owner.args[6]='preview-picture-768';f.save();
+  assert.throws(()=>assertNativePreviewOwner(f.file,f.environment),/section worker/);
+  f.owner.args[6]='preview-picture-1';f.save();
+  assert.throws(()=>assertNativePreviewOwner(f.file,f.environment),/section worker/);
+  f.owner.args[6]='preview-picture-0';f.owner.completedAt='TEST completed';f.save();
+  assert.throws(()=>assertNativePreviewOwner(f.file,f.environment),/owner\/request/);
 });

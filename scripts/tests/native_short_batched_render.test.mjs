@@ -56,14 +56,14 @@ test('experimental entry requires opt-in and preserves any existing picture',()=
 
 test('QC default uses its original points/session while opt-in keeps all repeats and fresh render boundaries',async()=>{
   await withFixture(async f=>{
-    delete f.request.captureMode;const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk});
+    delete f.request.captureMode;const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
     assert.equal(receipt.status,'native-references-and-seek-states-pass',receipt.error);
     assert.deepEqual(f.calls.frames,capturePoints(f.plan));assert.equal(f.calls.sessions.length,1);
   });
   await withFixture(async f=>{
     f.plan.canvas.occurrences=Array.from({length:50},(_,frame)=>[frame,0,frame,frame*2,frame*2+1,'TEST',0]);
     fs.writeFileSync(path.join(f.request.project,'SHORT-PROJECT.json'),JSON.stringify(f.plan));
-    const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk});
+    const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
     assert.equal(receipt.status,'native-references-and-seek-states-pass',receipt.error);
     assert.deepEqual(f.calls.frames,nativeCaptureQcPoints(f.plan,true));assert.ok(f.calls.sessions.length>1);
     for(const frame of [47,48,95,96])assert.ok(receipt.frames.filter(row=>row.frame===frame).length>=2);
@@ -154,7 +154,7 @@ test('fixture transport enforces the actual single nonempty root configuration c
 }));
 
 test('graphics-only reverse QC keeps repeated indices and disposes each bounded session',()=>withFixture(async f=>{
-  graphicsOnly(f);const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk});
+  graphicsOnly(f);const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
   assert.equal(receipt.status,'native-references-and-seek-states-pass',receipt.error);
   assert.deepEqual(f.calls.frames,nativeCaptureQcPoints(f.plan,true,48));
   for(const frame of [47,48,95,96])assert.ok(receipt.frames.filter(row=>row.frame===frame).length>=2);
@@ -197,7 +197,7 @@ test('picture and reverse QC share the smaller bound and preserve both sides of 
     assert.equal(f.calls.encodes.length,1);assert.equal(f.calls.sessions[0].options.videoMetadataHints[0].width,3840);
   });
   await withFixture(async f=>{
-    multipleSourceViews(f);const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk});
+    multipleSourceViews(f);const receipt=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
     assert.equal(receipt.status,'native-references-and-seek-states-pass',receipt.error);assert.equal(receipt.batchPlan.maximumFrames,8);
     assert.ok(receipt.sessions.every(row=>row.frames.length<=8&&row.sessionClosed&&row.serverClosed&&row.browserPoolDrained));
     for(const frame of [7,8,15,16,95,96])assert.ok(receipt.frames.filter(row=>row.frame===frame).length>=2);

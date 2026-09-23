@@ -8,7 +8,7 @@ export const MIN_BEAT_REASON_CHARS = 20; // graphics/intro_semantic_binding.MIN_
 export const MIN_SELECTION_REASON_CHARS = 20; // graphics/intro_semantic_binding.MIN_SELECTION_REASON_CHARS
 export const MIN_SEAM_EVIDENCE_CHARS = 12; // intro_transition_contract.MIN_EVIDENCE_CHARS
 export const MIN_SEAM_REASON_CHARS = 20; // intro_transition_contract.MIN_REASON_CHARS
-export const PROPOSAL_GRAPHICS_STYLES = ["cutaway-only", "overlay-rich", "face-bridge"] as const;
+export const PROPOSAL_GRAPHICS_STYLES = ["catalog-first", "cutaway-only", "overlay-rich", "face-bridge"] as const;
 export type ProposalGraphicsStyle = (typeof PROPOSAL_GRAPHICS_STYLES)[number];
 
 export interface ProposalOperationV4 extends ProposalOperationV3 {

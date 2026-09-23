@@ -34,6 +34,11 @@ def _tools() -> dict:
     paths = {Path(__file__), RUNNER, Path(__file__).with_name('native_preflight_inputs.py'),
              Path(__file__).with_name('native_preflight_dependencies.mjs'),
              Path(__file__).with_name('native_reference_reuse.py'), *implementation_files()}
+    paths.update(ROOT / name for name in (
+        'schemas/producer/visual-source-policy-v1.json',
+        'scripts/producer/graphics/visual_source_policy.py',
+        'scripts/producer/graphics/visual_source_receipt.py',
+        'scripts/producer/graphics/visual_source_project.py'))
     value['files'].update(lint._files(paths))
     value['parents'].update(lint._parents(paths))
     value['bindingScope'] = 'SDK lint/parser bundles, lockfile, Node and adapters; not full transitive dependency attestation'
@@ -130,6 +135,8 @@ def preflight(project: Path, output: Path, reference_map: Path | None = None) ->
     """
     began = time.monotonic()
     real_directory(project)
+    from graphics.visual_source_project import admit_project_sources
+    admit_project_sources(project)
     real_directory(output.parent)
     if output.is_relative_to(project):
         raise ValueError('Native preflight output must be outside the project')

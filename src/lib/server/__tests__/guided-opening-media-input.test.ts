@@ -15,6 +15,10 @@ test("actual own-screen input closes exact14 documents under a lease without ren
   const built = await createOpeningMediaFixture(), { fixture, invocation } = built;
   try {
     const observed = observeGuidedOpeningMediaInput(invocation.inputPath, invocation.inputSha256);
+    const transcript = JSON.parse(readFileSync(path.join(fixture.ctx.transcriptsDir, "raw.transcript.json"), "utf8"));
+    assert.equal(transcript.transcript[0].text, "Compare 12 versus 28 in this test.");
+    const candidate = observed.documents.candidatePlan.value.graphicsTrack as Array<{ kind: string; spec: { data: string } }>;
+    assert.equal(candidate[0].kind, "chart-story"); assert.equal(candidate[0].spec.data, "12,28");
     assert.equal(Object.keys(observed.documents).length, 14);
     assert.equal(observed.authority.frameRate, "30000/1001");
     assert.equal(observed.authority.profile, "unity-source-float-own-screen-v1");
@@ -24,6 +28,12 @@ test("actual own-screen input closes exact14 documents under a lease without ren
     assert.deepEqual(probe.streams.map((row: unknown) => row), [{ width: 1920, height: 1080, r_frame_rate: "30000/1001" }]);
     assert.equal(observed.documents.frameBindings.value.graphics instanceof Array, true);
     const graphic = (observed.documents.frameBindings.value.graphics as Record<string, unknown>[])[0];
+    const numericWords = transcript.transcript[0].words.filter((word: { word: string }) => ["12", "28"].includes(word.word));
+    assert.equal(numericWords.length, 2);
+    for (const word of numericWords) {
+      assert.ok(Math.floor(word.start * 30000 / 1001) >= Number(graphic.startFrame));
+      assert.ok(Math.ceil(word.end * 30000 / 1001) <= Number(graphic.endFrameExclusive));
+    }
     assert.ok(Number(graphic.startFrame) > 0); assert.ok(Number(graphic.endFrameExclusive) < observed.authority.totalFrames);
     assert.deepEqual((graphic.presentation as Record<string, unknown>).anchor, "own-screen");
     assert.equal(observed.authority.occurrenceEvidenceHash, observed.documents.occurrences.sha256);

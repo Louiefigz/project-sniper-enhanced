@@ -208,7 +208,7 @@ export interface EditPlan {
     scope?: string;
     excerpt?: boolean;
     /** Explicit produced/full longform grammar authority. */
-    graphicsStyle?: "cutaway-only" | "overlay-rich" | "face-bridge";
+    graphicsStyle?: "catalog-first" | "cutaway-only" | "overlay-rich" | "face-bridge";
     graphicsStyleRationale?: string;
     /** Executable grammar contract used by planner, renderer, Palmier, and QC. */
     visualProfile?: "module-editorial-v1";

@@ -1,10 +1,13 @@
 # Requesting and producing native Shorts
 
 Ask the editing agent in normal language. Supply footage or an existing project
-and the outcome you want the viewer to understand. Either name a reference or
-let the agent choose after inspecting the message, footage and reference library.
+and the outcome you want the viewer to understand. Visuals come from the
+HyperFrames catalog by default. A reference adaptation needs the current job's
+selected reference video; custom work needs an inspected catalog gap. Read
+[visual source policy](VISUAL_SOURCE_POLICY.md) before choosing a design.
+Historical house templates and style recipes below cannot authorize execution.
 
-- “Make a module-card Short from this recording. Show one offer improving
+- “Make a catalog-based Short from this recording. Show one offer improving
   step by step. Find useful supporting shots in my footage.”
 - “Choose the best Short treatment from this recording automatically. Find a
   standalone lesson and show the example wherever possible.”
@@ -644,10 +647,29 @@ as well as after it settles. The offer qualification caught future formula terms
 appearing before their spoken cue despite a technically valid export.
 
 ```sh
-node --import tsx scripts/producer/native-short.ts build /absolute/plan.json /absolute/new-project
-node --import tsx scripts/producer/native-short.ts check /absolute/new-project
-.venv/bin/python scripts/producer/studio/native_short_export.py /absolute/new-project /absolute/new-export
+./sniper node --import tsx scripts/producer/native-short.ts build /absolute/plan.json /absolute/new-project
+./sniper node --import tsx scripts/producer/native-short.ts check /absolute/new-project
+./sniper python3 scripts/producer/studio/native_export.py /absolute/new-project /absolute/new-preview --preview-only
 ```
+
+The default export stops after continuous moving previews. Inspect those clips
+with sound, revise affected content, and obtain current independent reviews
+before full picture rendering. Follow [render readiness](RENDER_READINESS.md)
+for the review bundle, coverage and conservative reuse rules. A generated clip
+or a matching hash is not a viewing or listening review.
+
+```sh
+./sniper python3 scripts/producer/studio/native_export.py /absolute/new-project /absolute/new-export --preview-reviews /absolute/motion-reviews.json
+```
+
+Native Shorts stage catalog HTML through `catalogFiles` and mount their title
+through `catalogTitle`; a legacy built-in title is not a fallback. The source
+receipt binds the current request and every visual choice. Explicit independent
+regions may be declared in `REVIEW-REGIONS.json`. Unchanged regions reuse their
+previous clips and detailed reviews; current whole-plan assessment remains
+required. Changes to shared scripts, layout, timing, media or source decisions
+invalidate broader coverage. Arbitrarily coupled component code must not be
+declared independent. Final picture export and full encoded-output QC remain.
 
 The export directory must be new and its parent must exist. An optional
 `--audio-donor /absolute/prior-export/audio/receipt.json` reuses qualified audio
@@ -698,8 +720,9 @@ Long-form supervisors retain their recorded policies; this change updates curren
 shared Shorts and web-capture owners. See the
 [memory policy finding](../findings/RENDER_MEMORY_CAPACITY_AND_PRESSURE.md).
 
-The exporter runs three sequential supervised owners: media generation, native
-reference capture, and encoded-picture/full-decode verification. Each retains
+The exporter runs sequential supervised owners: native reference capture,
+continuous moving previews, media generation after preview review, and
+encoded-picture/full-decode verification. Each retains
 the existing 600-second owner budget, shared heavy-work lease, continuous
 resource controls and mandatory cleanup. Only one owner runs at a time. The
 streaming capture CLI runs directly under its capture owner, preserving the
@@ -751,8 +774,9 @@ survive a later signal, audio-quality or metadata failure, but only with the
 original complete SDK trace, packet/clock proof, input hashes and owner cleanup.
 Partial unproved frames cannot be promoted. Final encoded QC still runs.
 
-The default command completes all remaining stages. To explicitly stop after media
-generation, use `--render-only`. A successful media owner publishes an immutable
+For a new project the default command stops at moving previews. With current
+`--preview-reviews`, it completes the remaining stages. To explicitly stop after
+reviewed media generation, also use `--render-only`. A successful media owner publishes an immutable
 `render-stage.json` binding the original request, project/source/tool/code pins,
 owner completion/cleanup, picture, final MP4, audio receipt and media result.
 After a later verification failure, start a fresh verification attempt:

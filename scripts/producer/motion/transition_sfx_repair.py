@@ -98,6 +98,8 @@ def _validate(request: TransitionSfxRepairRequest) -> tuple[list, list, int]:
 
 def repair_transition_sfx(request: TransitionSfxRepairRequest) -> dict:
     """Rebuild only transition audio and stream-copy approved picture."""
+    parse_events(request.before_events, 0)
+    parse_events(request.after_events, 0)
     before, after, in_frames = _validate(request)
     before_packet_hash = _packet_hash(request.visual_source)
     program_hash = _source_hash(request.program_source)

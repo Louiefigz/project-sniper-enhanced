@@ -271,10 +271,19 @@ def inspect_durable_admitted_quality_pass_composition(
 def inspect_admitted_quality_pass_composition(
     value: object,
 ) -> NonAuthorizingAdmittedQualityPassCompositionV1:
-    """Persist/replay exact admission, then inspect without capabilities."""
+    """Check current sources before persistence, then reobserve diagnostics."""
     request = _checked_request(value)
     operation = _operation(request)
+    require_current_composition(request)
     return _inspect_durable(request, operation, _persist(request, operation))
+
+
+def require_current_composition(request: AdmittedQualityPassCompositionRequestV1) -> None:
+    """Refuse invalid or retired parent sources before durable admission writes."""
+    try:
+        inspect_quality_pass_composition(request.inspection)
+    except (RuntimeError, ValueError) as exc:
+        raise AdmittedQualityPassCompositionError(str(exc)) from exc
 
 
 def require_admitted_render_start_authorized(value: object) -> None:

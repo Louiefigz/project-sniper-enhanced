@@ -61,7 +61,7 @@ async function advice(cut: AcceptedGuidedCut, directory: string, transcripts: st
     if (name === "graphics_planner.py") {
       const prior = objectValue(results["graphics_style_advisor.py"], "style advice");
       const style = objectValue(prior.recommendedTargetFields, "recommended style").graphicsStyle;
-      if (!["cutaway-only", "overlay-rich", "face-bridge"].includes(String(style))) throw new Error("Style advisor did not return a supported proposal grammar");
+      if (style !== "catalog-first") throw new Error("Style advisor must return catalog-first; retired proposal grammars cannot execute");
       args[1] = plannerAdvicePlan(cut, directory, prior, "stage");
       args.push("--json", "--style", String(style)); // Recommendation input only; accepted target remains unchanged.
     }
@@ -75,10 +75,11 @@ async function advice(cut: AcceptedGuidedCut, directory: string, transcripts: st
   return results;
 }
 
-function plannerAdvicePlan(cut: AcceptedGuidedCut, directory: string, advice: Record<string, unknown>, mode: "stage" | "observe") {
+/** Persist isolated advisor input; only retired style/profile fields may be removed. */
+export function plannerAdvicePlan(cut: AcceptedGuidedCut, directory: string, advice: Record<string, unknown>, mode: "stage" | "observe") {
   const fields = objectValue(advice.recommendedTargetFields, "recommended target fields");
   const plan = structuredClone(cut.plan.value), target = { ...objectValue(plan.target, "target"), ...fields };
-  if (!Array.isArray(advice.removeTargetFields) || advice.removeTargetFields.some((key) => key !== "visualProfile")) throw new Error("Invalid style-advice removals");
+  if (!Array.isArray(advice.removeTargetFields) || advice.removeTargetFields.some((key) => key !== "style" && key !== "visualProfile")) throw new Error("Invalid style-advice removals");
   for (const key of advice.removeTargetFields as string[]) delete target[key];
   const file = path.join(directory, "advice-plan.json"); boundInput(file, { ...plan, target }, mode); return file;
 }

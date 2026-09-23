@@ -18,7 +18,7 @@ def plan() -> dict:
         "_selection": {"graphicId": "g-1"},
         "target": {"mode": "longform"},
         "cutTrack": [{"sourceId": "raw", "start": 0.0, "end": 2.0}],
-        "graphicsTrack": [{"id": "g-1", "kind": "card",
+        "graphicsTrack": [{"id": "g-1", "kind": "line-swap",
                            "outStart": 0.0, "outEnd": 1.0}],
         "audioEnhance": {"preset": "voice"},
         "music": {"enabled": False},

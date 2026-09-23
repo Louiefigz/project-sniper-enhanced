@@ -16,6 +16,9 @@ from graphics.template_text_contrast import effective_text_roles, text_plate_con
 from plan_lint_contrast import check_contrast
 
 
+# Inert retained role metadata for isolated parser/pixel checks; never render input.
+TEST_PLATE = {'schemaVersion': 1, 'treatment': 'plates', 'roles': [{'id': 'eyebrow', 'selector': '#marker-eyebrow', 'copyVariable': 'num', 'foreground': '#FFFFFF', 'background': '#0a1123', 'fullOpacityAt': 0.34}, {'id': 'title', 'selector': '#marker-title', 'copyVariable': 'line1', 'foregroundVariable': 'accent', 'background': '#f6eac6', 'fullOpacityAt': 0.58}, {'id': 'qualifier', 'selector': '#marker-qualifier', 'copyVariable': 'line2', 'foreground': '#FFFFFF', 'background': '#0a1123', 'fullOpacityAt': 0.66}], 'exit': {'maximumSeconds': 0.42, 'durationFraction': 0.18, 'frameReserveSeconds': 0.05}, 'declared': {'num': {'id': 'num', 'type': 'string', 'label': 'Eyebrow / section label — appears FIRST (e.g. 1 or Part 2)', 'default': 'Part 1'}, 'line1': {'id': 'line1', 'type': 'string', 'label': 'Title — serif-accent, wipes in (<= 2 words)', 'default': 'The Setup'}, 'line2': {'id': 'line2', 'type': 'string', 'label': 'Qualifier — white sans, optional (<= 2 words)', 'default': 'Basics'}, 'side': {'id': 'side', 'type': 'enum', 'label': 'Anchor side (the emptier side, opposite the subject)', 'default': 'left', 'options': [{'value': 'left', 'label': 'Top-left'}, {'value': 'right', 'label': 'Top-right'}]}, 'accent': {'id': 'accent', 'type': 'color', 'label': 'Accent color (serif title)', 'default': '#054BC9'}, 'readability': {'id': 'readability', 'type': 'enum', 'label': 'Text backing (new recipes use local plates)', 'default': 'scrim', 'options': [{'value': 'scrim', 'label': 'Legacy translucent scrim'}, {'value': 'plates', 'label': 'Opaque local text plates'}]}}, 'templateSha256': '0000000000000000000000000000000000000000000000000000000000000000'}
+
 class Report:
     def __init__(self) -> None:
         self.errors, self.warnings = [], []
@@ -56,12 +59,24 @@ def checks_for(graphic: dict, samples: list) -> list:
     row = {"kind": "section-marker", "anchor": graphic["anchor"],
         "outStart": 0, "outEnd": 2.5, "canvas": [480, 853], "placedBBox": [12, 40, 150, 208]}
     evidence = PlateContext(rows=[row], graphics=[graphic], samples=samples, error="")
-    return text_plate_results(0, graphic, evidence, composite._contrast)
+    with patch("audit.audit_text_plates.text_plate_contract", return_value=TEST_PLATE):
+        return text_plate_results(0, graphic, evidence, composite._contrast)
 
 
 class SectionMarkerContractTests(unittest.TestCase):
-    def test_declared_default_and_roles_are_exact_source_bound(self) -> None:
-        contract = text_plate_contract("section-marker")
+    def setUp(self) -> None:
+        for name in ("plan_lint_contrast.text_plate_contract", "audit.audit_text_plates.text_plate_contract"):
+            context = patch(name, return_value=TEST_PLATE)
+            context.start()
+            self.addCleanup(context.stop)
+
+    def test_current_renderer_rejects_retired_marker(self) -> None:
+        from graphics.template_contract import validate_entry
+        with self.assertRaisesRegex(ValueError, "retired"):
+            validate_entry(entry())
+
+    def test_retained_role_defaults_remain_readable(self) -> None:
+        contract = TEST_PLATE
         roles = effective_text_roles(entry(), contract)
         self.assertEqual([row["id"] for row in roles], ["eyebrow", "title", "qualifier"])
         self.assertEqual(roles[1]["foreground"], "#054BC9")
@@ -70,7 +85,7 @@ class SectionMarkerContractTests(unittest.TestCase):
     def test_changed_source_cannot_self_declare_qualified_roles(self) -> None:
         from graphics import template_text_contrast as contracts
         with tempfile.TemporaryDirectory() as directory:
-            source = Path(contracts.COMPOSITIONS_DIR, "section-marker.html").read_text()
+            source = "<meta name=TEST content=inert-unqualified-role-metadata>"
             Path(directory, "section-marker.html").write_text(source + "\n<!-- changed -->")
             with patch.object(contracts, "COMPOSITIONS_DIR", directory):
                 with self.assertRaisesRegex(ValueError, "hash is not qualified"):
@@ -104,6 +119,11 @@ class SectionMarkerContractTests(unittest.TestCase):
 
 
 class SectionMarkerDecodedTests(unittest.TestCase):
+    def setUp(self) -> None:
+        context = patch("audit.audit_text_plates.text_plate_contract", return_value=TEST_PLATE)
+        context.start()
+        self.addCleanup(context.stop)
+
     def test_local_backings_not_footage_are_measured(self) -> None:
         for background in ("#000000", "#0a1123", "#ffffff"):
             checks = checks_for(entry(), [("mid", 1.25, images(background))])

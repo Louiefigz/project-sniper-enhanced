@@ -151,6 +151,9 @@ def parse_prebound_clips(document_json: bytes) -> tuple[PreboundClipV1, ...]:
 
 
 def _plan_row_values(row: object) -> tuple:
+    from graphics.visual_source_policy import require_integrated
+    if isinstance(row, dict):
+        require_integrated(str(row.get("kind", "")))
     if type(row) is not dict or any(key in row for key in _GRAPH_EFFECT_KEYS):
         raise PreboundClipContractError("R0 plan graphic effects are unsupported")
     placement = row.get("placement")

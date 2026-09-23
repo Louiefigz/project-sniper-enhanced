@@ -241,7 +241,7 @@ def main() -> int:
     parser.add_argument(
         "--inventory",
         default="docs/producer/command-driven-editing/contracts/"
-        "current-system-inventory-v1.json",
+        "current-system-inventory-2026-09-22.json",
     )
     args = parser.parse_args()
     repo = Path(args.repo_root).resolve()

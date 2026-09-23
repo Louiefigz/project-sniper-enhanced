@@ -121,9 +121,6 @@ const PRODUCER_CONFIG = readFileSync(
       "light-short",
       "longform-produced",
       "produced-short",
-      "punch-produced",
-      "restrained-light",
-      "slideware-involved",
       "trim-only",
     ],
   );
@@ -142,32 +139,10 @@ const PRODUCER_CONFIG = readFileSync(
   assert.deepEqual(activeSet("trim", byId["trim-only"].lanes), []);
   assert.equal(byId["trim-only"].mode, null, "trim-only follows the Short|Long toggle");
 
-  // STYLE presets — pace/style pair up; music remains operator-opt-in.
-  // Restrained light: captions carry the pace; motion waived (RESTRAINED_STYLE §3 Z1);
-  // no bed (§6 M1); no dialogue cleanup (§6 M3: natural pauses stay).
-  assert.deepEqual(activeSet("light", byId["restrained-light"].lanes), ["captions"]);
-  assert.equal(byId["restrained-light"].pace, "restrained");
-  assert.equal(byId["restrained-light"].style, "restrained");
-  assert.equal(byId["restrained-light"].music, false);
-  assert.equal(byId["restrained-light"].audioEnhance, undefined);
-  // Punch recommends a bed (PUNCH_STYLE §6 M1), but selecting the style must not enable one.
-  assert.deepEqual(activeSet("produced", byId["punch-produced"].lanes),
-    LANES.filter((lane) => lane !== "transitions"));
-  assert.equal(byId["punch-produced"].pace, "punch");
-  assert.equal(byId["punch-produced"].style, "punch");
-  assert.equal(byId["punch-produced"].music, false);
-  // Slideware has the same explicit-checkbox safety contract.
-  assert.equal(byId["slideware-involved"].scope, "full");
-  assert.deepEqual(activeSet("full", byId["slideware-involved"].lanes),
-    LANES.filter((lane) => lane !== "motion" && lane !== "transitions"));
-  assert.equal(byId["slideware-involved"].pace, "slideware");
-  assert.equal(byId["slideware-involved"].style, "slideware");
-  assert.equal(byId["slideware-involved"].music, false);
-  for (const s of STYLES) {
-    const p = INTENT_PRESETS.find((x) => x.style === s);
-    assert.ok(p, `no preset carries style "${s}"`);
-    assert.equal(p!.mode, "short", `${p!.id}: built-in styles are short-form only`);
-    assert.equal(p!.pace, s, `${p!.id}: pace must name the pacing_${s} profile`);
+  // Historical style identifiers remain readable, but cannot select a design.
+  for (const style of STYLES) {
+    assert.ok(!INTENT_PRESETS.some(p => p.style === style));
+    assert.throws(() => validateIntent({ mode: "short", scope: "produced", style }), /retired/);
   }
 
   for (const p of INTENT_PRESETS) {
@@ -221,7 +196,7 @@ const PRODUCER_CONFIG = readFileSync(
   assert.throws(() => validateIntent({ ...good, lanes: { broll: ["b1"] } }), /asset lists/);
   assert.throws(() => validateIntent({ ...good, pace: "fast" }), /pace/);
   assert.throws(() => validateIntent({ ...good, style: "cinematic" }), /style/);
-  assert.deepEqual(validateIntent({ ...good, style: "restrained", pace: "restrained" }).style, "restrained");
+  assert.throws(() => validateIntent({ ...good, style: "restrained", pace: "restrained" }), /retired/);
   assert.throws(() => validateIntent({ ...good, audioEnhance: { preset: "loud" } }), /audioEnhance/);
   assert.throws(() => validateIntent({ ...good, music: "yes" }), /music/);
   assert.throws(() => validateIntent({ mode: "vertical", scope: "light", lanes: {} }), /mode/);

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import ast
+import json
+from unittest.mock import patch
 import dataclasses
 import unittest
 from pathlib import Path
@@ -13,6 +15,7 @@ from _quality_pass_fixture import _Harness, _artifact, _media
 from headless.quality_pass import (
     QualityPassError,
     run_quality_pass,
+    _check_gate, _render_request, _replace_target, _check_candidate, _check_qc,
 )
 from headless.quality_pass_contract import (
     GraphicAssetRefV1,
@@ -20,33 +23,34 @@ from headless.quality_pass_contract import (
 )
 from headless.quality_pass_outputs import (
     GateReceiptV1,
+    validate_critic_receipts, QualityPassOutputError,
 )
 
 
+from headless.quality_pass_types import CandidatePlanV1, CompositeRequestV1, QcRequestV1, CriticRequestV1
+from headless.repair_intent import RepairApplication, approved_plan_digest
+
+
+def _historical_candidate(harness: _Harness) -> CandidatePlanV1:
+    """Inert TEST receipt for private output-binding units; never admission evidence."""
+    plan = harness.parent.decoded_plan()
+    before = approved_plan_digest(plan)
+    plan['graphicsTrack'][0]['spec']['accent'] = '#FFD400'
+    raw = json.dumps(plan, separators=(',', ':'), sort_keys=True).encode()
+    receipt = RepairApplication(raw, before, approved_plan_digest(plan),
+        ('/graphicsTrack/0/spec/accent',), 'g-00000001', harness.request.repair_policy_id)
+    return CandidatePlanV1(harness.parent, receipt)
+
+
 class QualityPassTests(unittest.TestCase):
-    def test_happy_path_reports_only_observed_controller_dispatches(self) -> None:
+    def test_retired_execution_refuses_before_gate_media_or_seal(self) -> None:
         harness = _Harness()
-        result = run_quality_pass(harness.request, harness.ports())
-        self.assertEqual(result.status, "CANDIDATE_CONTRACT_VALIDATED")
-        self.assertFalse(result.controller_writer_port_exposed)
-        self.assertFalse(result.controller_base_render_port_exposed)
-        self.assertEqual(result.controller_overlay_dispatches, 1)
-        self.assertEqual(result.controller_composite_dispatches, 1)
-        self.assertEqual(
-            harness.events,
-            [
-                "resolve",
-                "gate",
-                "wait",
-                "render",
-                "composite",
-                "qc",
-                "queue",
-                "critics",
-                "seal",
-            ],
-        )
-        self.assertEqual(len(result.timing.spans), 11)
+        with patch('subprocess.Popen') as process, \
+                self.assertRaisesRegex(ValueError, 'section-marker.*retired'):
+            run_quality_pass(harness.request, harness.ports())
+        process.assert_not_called()
+        self.assertEqual(harness.events, ['resolve'])
+        self.assertEqual(harness.parent.decoded_plan()['graphicsTrack'][0]['spec']['accent'], '#054BC9')
 
     def test_render_callback_cannot_mutate_controller_target(self) -> None:
         harness = _Harness()
@@ -64,9 +68,9 @@ class QualityPassTests(unittest.TestCase):
                 "2" * 64,
             )
 
-        harness.render = malicious
+        request = _render_request(_historical_candidate(harness))
         with self.assertRaisesRegex(QualityPassError, "repair target"):
-            run_quality_pass(harness.request, harness.ports())
+            _replace_target(request, malicious(request))
         self.assertNotIn("composite", harness.events)
 
     def test_stale_policy_or_parent_never_reaches_deterministic_gates(self) -> None:
@@ -87,75 +91,45 @@ class QualityPassTests(unittest.TestCase):
                 run_quality_pass(harness.request, harness.ports())
             self.assertNotIn("gate", harness.events)
 
-    def test_wrong_gate_or_unchanged_overlay_stops_before_composite(self) -> None:
-        cases = []
-        gate_harness = _Harness()
-        gate_harness.override["gate"] = GateReceiptV1(
-            "0" * 64,
-            gate_harness.parent.base_projection_digest,
-            "SECTION_MARKER_ACCENT_V1",
-            _artifact("gate.json", "bad-gate"),
-        )
-        cases.append(gate_harness)
-        render_harness = _Harness()
-        render_harness.override["render"] = render_harness.parent.graphics_assets[0]
-        cases.append(render_harness)
-        for harness in cases:
-            with self.subTest(events=harness.events), self.assertRaises(
-                QualityPassError
-            ):
-                run_quality_pass(harness.request, harness.ports())
-            self.assertNotIn("composite", harness.events)
+    def test_historical_wrong_gate_or_unchanged_overlay_is_not_bound(self) -> None:
+        harness = _Harness()
+        candidate = _historical_candidate(harness)
+        gate = GateReceiptV1("0" * 64, harness.parent.base_projection_digest,
+                            "SECTION_MARKER_ACCENT_V1", _artifact("gate.json", "bad-gate"))
+        with self.assertRaises(QualityPassError):
+            _check_gate(candidate, gate)
+        with self.assertRaises(QualityPassError):
+            _replace_target(_render_request(candidate), harness.parent.graphics_assets[0])
+        self.assertEqual(harness.events, [])
 
-    def test_wrong_composite_or_qc_never_reaches_critics(self) -> None:
-        composite_harness = _Harness()
-        base = composite_harness.composite
+    def test_historical_wrong_composite_or_qc_cannot_bind_receipts(self) -> None:
+        harness = _Harness()
+        candidate = _historical_candidate(harness)
+        assets = _replace_target(_render_request(candidate), harness.render(_render_request(candidate)))
+        request = CompositeRequestV1(harness.request.request_digest, candidate, assets)
+        media = harness.composite(request)
+        for changed in (dataclasses.replace(media, base_sha256="0" * 64),
+                        dataclasses.replace(media, final=candidate.parent.base)):
+            with self.subTest(media=changed), self.assertRaises(QualityPassError):
+                _check_candidate(request, changed)
+        qc_request = QcRequestV1(candidate, media, assets)
+        qc = dataclasses.replace(harness.qc(qc_request), verdict="fail")
+        with self.assertRaises((QualityPassError, QualityPassOutputError)):
+            _check_qc(qc_request, qc)
+        self.assertNotIn("critics", harness.events)
 
-        def wrong_composite(request: Any) -> object:
-            value = base(request)
-            return dataclasses.replace(value, base_sha256="0" * 64)
-
-        composite_harness.composite = wrong_composite
-        alias_harness = _Harness()
-        alias_composite = alias_harness.composite
-
-        def base_as_final(request: Any) -> object:
-            value = alias_composite(request)
-            return dataclasses.replace(value, final=request.candidate.parent.base)
-
-        alias_harness.composite = base_as_final
-        qc_harness = _Harness()
-        original_qc = qc_harness.qc
-
-        def wrong_qc(request: Any) -> object:
-            return dataclasses.replace(original_qc(request), verdict="fail")
-
-        qc_harness.qc = wrong_qc
-        for harness in (composite_harness, alias_harness, qc_harness):
-            with self.subTest(events=harness.events), self.assertRaises(
-                QualityPassError
-            ):
-                run_quality_pass(harness.request, harness.ports())
-            self.assertNotIn("critics", harness.events)
-
-    def test_duplicate_or_wrong_candidate_critics_never_seal(self) -> None:
-        for mutation in ("duplicate", "wrong-candidate"):
-            harness = _Harness()
-            original = harness.critics
-
-            def bad(request: Any, kind: str = mutation) -> object:
-                values = original(request)
-                if kind == "duplicate":
-                    return (values[0], values[0])
-                return (
-                    dataclasses.replace(values[0], candidate_sha256="0" * 64),
-                    values[1],
-                )
-
-            harness.critics = bad
-            with self.subTest(mutation=mutation), self.assertRaises(QualityPassError):
-                run_quality_pass(harness.request, harness.ports())
-            self.assertNotIn("seal", harness.events)
+    def test_historical_duplicate_or_wrong_candidate_critics_are_rejected(self) -> None:
+        harness = _Harness()
+        candidate = _historical_candidate(harness)
+        assets = (harness.render(_render_request(candidate)),)
+        media = harness.composite(CompositeRequestV1(harness.request.request_digest, candidate, assets))
+        qc = harness.qc(QcRequestV1(candidate, media, assets))
+        values = harness.critics(CriticRequestV1(candidate, media, qc))
+        for changed in ((values[0], values[0]),
+                        (dataclasses.replace(values[0], candidate_sha256="0" * 64), values[1])):
+            with self.subTest(critics=changed), self.assertRaises(QualityPassOutputError):
+                validate_critic_receipts(changed, media.final.artifact.sha256, qc.receipt.sha256)
+        self.assertNotIn("seal", harness.events)
 
     def test_controller_imports_exclude_legacy_render_gui_and_palmier(self) -> None:
         root = Path(__file__).resolve().parents[1] / "headless"

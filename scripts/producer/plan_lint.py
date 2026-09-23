@@ -205,6 +205,8 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     semantic, and word-lock contracts cannot be bypassed.
     """
     rep = Report()
+    from graphics.visual_source_policy import plan_source_errors
+    rep.errors.extend(plan_source_errors(plan))
     try:
         validate_render_documents(plan, manifest)
         validate_picture_plan_authority_for_plan(plan)

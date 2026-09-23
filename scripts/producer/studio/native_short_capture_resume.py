@@ -54,6 +54,8 @@ def capture_artifacts(root: Path, request: dict) -> dict[str, Path]:
                 'audio-preparation': root / 'audio-preparation/receipt.json'})
             if not request.get('audioDonor'):
                 artifacts['prepared-master'] = root / 'audio-preparation/program-master.wav'
+    elif not request.get('verifyStage'):
+        artifacts['sample-reel'] = root / 'seam-samples.mp4'
     return artifacts
 
 

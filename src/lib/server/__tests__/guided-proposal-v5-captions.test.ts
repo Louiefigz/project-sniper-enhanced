@@ -15,42 +15,57 @@ import type { AcceptedGuidedCut } from "../guided-raw-treatment-store";
 import { appendTestCaptionProposal, TEST_CAPTION_INTENT } from "./_guided-longform-proposal";
 import { assertProposalClauseCoverage } from "@/lib/producer/contracts/treatment-proposal-v2";
 
+/** TEST ONLY scalar catalog configuration; no rendered or source observation claim. */
+const GRAPHIC_SPEC = { type: "bars", data: "1,2", labels: "TEST A,TEST B", emphasize: 1, unit: "", accent: "#054BC9", exit: "hold" };
+
 type Row = Record<string, unknown>;
-const RAW = "Add the Producer line captions and illustrate the two spoken steps.";
+const RAW = "Add the Producer line captions and compare the two spoken values.";
 const TARGET = { mode: "longform", scope: "produced", width: 1920, height: 1080 };
 const PLAN = { target: TARGET, cutTrack: [{ sourceId: "raw-1", start: 0, end: 2 }], captions: { burn: false } };
 const cut = { plan: { value: PLAN } } as unknown as AcceptedGuidedCut;
 
 /** TEST ONLY minimal full-program clause/beat fixture, not admitted-source or rendered evidence. */
 function proposal(patch: Row = {}): Row {
-  return { schemaVersion: 5, summary: "TEST ONLY caption and graphic operation indices.", graphicsStyle: "cutaway-only",
-    graphicsStyleRationale: "TEST ONLY one spoken two-step comparison earns the brief graphic.",
+  return { schemaVersion: 5, summary: "TEST ONLY caption and graphic operation indices.", graphicsStyle: "catalog-first",
+    graphicsStyleRationale: "TEST ONLY one declared numeric comparison earns the brief graphic.",
     clauses: [{ start: 0, end: RAW.length, quote: RAW, disposition: "supported", rationale: "Both named operations preserve the accepted words.", operationIndices: [0, 1] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: 3, purpose: "opening", summary: "TEST ONLY complete short program.", supportsBeatIndices: [] }],
     operations: [{ type: "captions-full-program", clauseIndex: 0, beatIndex: null, catalogKind: null, variables: null, grade: null,
       startAnchor: null, endAnchorExclusive: null, presentation: null, reason: "Use the named preset for every kept spoken word.",
       captions: { schemaVersion: 1, preset: "producer-config-line-v1", coverage: "all-kept-transcript-words", suppression: "none" } },
-    { type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "title-card", variables: [{ name: "title", value: "Two steps" }],
-      grade: null, startAnchor: 1, endAnchorExclusive: 2, captions: null, reason: "Illustrate the two spoken steps.",
+    { type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "chart-story", variables: Object.entries(GRAPHIC_SPEC).map(([name, value]) => ({ name, value })),
+      grade: null, startAnchor: 1, endAnchorExclusive: 2, captions: null, reason: "Compare the two declared TEST values.",
       presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal", baseTreatment: "preserve",
         rationale: "TEST ONLY exact native canvas graphic." } }],
-    beatDecisions: [{ beatId: "intro-aaaaaaaaaaaa", decision: "graphic", kind: "title-card", reason: "The two spoken steps need a clear label.",
-      alternativesConsidered: [], selectionReason: "The only compatible TEST form is a title card.", operationIndex: 1 }],
+    beatDecisions: [{ beatId: "intro-aaaaaaaaaaaa", decision: "graphic", kind: "chart-story", reason: "The two declared values need a comparison.",
+      alternativesConsidered: [], selectionReason: "The TEST chart carries the declared comparison values.", operationIndex: 1 }],
     hookSeamDecisions: [], openingEndAnchor: 3, continuityEndAnchor: 3, audioPolicy: "preserve-full-program", colorPolicy: "preserve", ...patch };
 }
 function evidence(patch: Partial<ProposalEvidence> = {}): ProposalEvidence {
   return { schemaVersion: 5, frameRate: "30/1", totalFrames: 60, target: TARGET, anchors: [0, 15, 30, 60], cleanEnds: [60],
-    segments: [{ index: 0, sourceId: "raw-1", startFrame: 0, endFrameExclusive: 60, text: "Two steps" }], occurrences: [],
-    catalog: [{ kind: "title-card", canvas: [1920, 1080], defaults: { title: "TEST" }, fields: ["title"] }],
+    segments: [{ index: 0, sourceId: "raw-1", startFrame: 0, endFrameExclusive: 60, text: "One two" }], occurrences: [],
+    catalog: [{ kind: "chart-story", canvas: [1920, 1080], defaults: GRAPHIC_SPEC, fields: Object.keys(GRAPHIC_SPEC) }],
     introSeams: [], hookWindowS: 60, timelineMapHash: "a".repeat(64),
-    graphicsAdvice: { "graphics_planner.py": { introSemanticBeats: [{ beatId: "intro-aaaaaaaaaaaa", shape: "statement", outStart: 0.5,
-      evidence: "Two steps", compatibleKinds: ["title-card"], minimumGraphicHoldS: 0.2, decisionRequired: true }] } },
+    graphicsAdvice: { "graphics_planner.py": { introSemanticBeats: [{ beatId: "intro-aaaaaaaaaaaa", shape: "number", outStart: 0.5,
+      evidence: "One two", compatibleKinds: ["chart-story"], minimumGraphicHoldS: 0.2, decisionRequired: true }] } },
     captionPolicy: guidedCaptionPolicy(GUIDED_CAPTION_CONFIG_FILES.map((name) => ({ name, sha256: "b".repeat(64) }))),
     ...patch } as unknown as ProposalEvidence;
 }
 function build(output: Row = proposal(), supplied: ProposalEvidence = evidence(), plan: Row = PLAN) {
   return buildTreatmentCandidate({ cut: { ...cut, plan: { value: plan } } as unknown as AcceptedGuidedCut, rawIntent: RAW, evidence: supplied, output });
 }
+
+test("current compiler rejects retired styles and kinds even with declared catalog metadata", () => {
+  assert.throws(() => build(proposal({ graphicsStyle: "cutaway-only" })), /styles are retired/);
+  const output = proposal(), supplied = evidence();
+  (output.operations as Row[])[1].catalogKind = "title-card";
+  (output.beatDecisions as Row[])[0].kind = "title-card";
+  supplied.catalog[0].kind = "title-card";
+  const result = build(output, supplied);
+  assert.equal(result.candidate, null);
+  assert.equal(result.executionBindings, undefined);
+  assert.ok(result.blockers.some(row => /title-card.*retired or unregistered/.test(row.reason)));
+});
 
 test("V5 candidate keeps actual caption operation, graphic indices and all accepted cut fields", () => {
   const before = structuredClone(PLAN), result = build();
@@ -114,13 +129,13 @@ from captions.caption_compile import compile_caption_track,CaptionCompileContext
 from captions.caption_words import CaptionFrameRate
 from _caption_fixtures import resolved_words,DESTINATION
 plan=json.load(sys.stdin); track,ledger=validate_plan_caption_authority(plan)
-words=resolved_words(['Two','steps']); styles=caption_styles(plan,track)
+words=resolved_words(['One','two']); styles=caption_styles(plan,track)
 compiled=compile_caption_track(CaptionCompileContext(track,ledger,words,CaptionFrameRate(30,1),'a'*64,style_inputs=styles,destination=DESTINATION))
 print(json.dumps({'coverage':compiled['coverage'],'tokens':[row['text'] for cue in compiled['cues'] for row in cue['tokens']],'modes':[cue['mode'] for cue in compiled['cues']]}))`;
   const result = JSON.parse(execFileSync(pythonInterpreter(), ["-c", code], { cwd: path.join(process.cwd(), "scripts/producer"),
     input: JSON.stringify(candidate), encoding: "utf8", timeout: 10000,
     env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONPATH: ".:tests" } }));
-  assert.deepEqual(result.tokens, ["Two", "steps"]);
+  assert.deepEqual(result.tokens, ["One", "two"]);
   assert.ok(result.modes.every((mode: string) => mode === "line"));
   assert.deepEqual(result.coverage.suppressedWordIds, []);
   assert.deepEqual(result.coverage.omittedWordIds, []);

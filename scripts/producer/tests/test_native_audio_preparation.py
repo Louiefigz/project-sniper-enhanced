@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
 import tempfile
 import unittest
 from dataclasses import replace
@@ -16,6 +19,7 @@ from cut_preview_io import file_hash
 from producer_config import MASTERING_POLICY_VERSION
 from studio import native_short_worker as worker
 from studio.native_short_delivery import prepare_dialogue
+from _native_current_source_fixture import bind_test_motion_previews, write_test_json
 
 
 class EarlyMasterTests(unittest.TestCase):
@@ -122,17 +126,40 @@ class EarlyAudioOrderTests(unittest.TestCase):
     def setUp(self) -> None:
         """Create private inert fixtures for policy checks without launching media tools."""
         self.root = Path(self.enterContext(tempfile.TemporaryDirectory())).resolve()
-        self.request = {'output': str(self.root), 'project': str(self.root), 'pins': {},
-            'tools': {'node': 'node'}, 'runtime': str(self.root), 'cache': str(self.root)}
-        self.plan = {'canvas': {'frameRate': '25/1'}}
+        project, output = self.root / 'project', self.root / 'output'
+        project.mkdir(); output.mkdir()
+        self.plan = {'canvas': {'frameRate': '25/1', 'totalFrames': 25}}
+        write_test_json(project / 'SHORT-PROJECT.json', self.plan)
+        (project / 'index.html').write_text('<p>TEST inert source</p>')
+        node = os.environ.get('SNIPER_NODE_PATH') or shutil.which('node')
+        self.assertIsNotNone(node, 'Installed Node is required for the real review validator')
+        self.request = {'output': str(output), 'project': str(project), 'pins': {},
+            'tools': {'node': str(Path(node).resolve())},
+            'runtime': str(self.root / 'runtime'), 'cache': str(self.root / 'cache')}
+        bind_test_motion_previews(self.request)
         self.enterContext(patch.object(worker, 'preflight', return_value={'status': 'static-checks-pass'}))
+        self.enterContext(patch('studio.native_stage_evidence.read_native_capture_receipt',
+            return_value={'status': 'native-references-and-seek-states-pass'}))
+        self.enterContext(patch('studio.native_picture_references.check_samples'))
 
     def test_failed_audio_prevents_picture_and_final_mux(self) -> None:
         """Stop on early audio failure before any expensive picture or final assembly."""
-        with patch.object(worker, 'prepare_dialogue', side_effect=RuntimeError('hum')), \
-                patch('subprocess.run') as render, patch.object(worker, 'finish_dialogue') as finish, \
+        with patch('studio.native_short_delivery.prepare_dialogue', side_effect=RuntimeError('hum')), \
+                patch('subprocess.run', wraps=subprocess.run) as render, patch.object(worker, 'finish_dialogue') as finish, \
                 self.assertRaisesRegex(RuntimeError, 'hum'):
             worker.render_media(self.request, self.plan)
+        self.assertFalse(any('render' in call.args[0] for call in render.call_args_list))
+        finish.assert_not_called()
+
+    def test_missing_motion_review_blocks_audio_and_picture(self) -> None:
+        """Structurally prepared previews never bypass the independent-review gate."""
+        self.request.pop('previewReviews')
+        with patch('studio.native_short_delivery.prepare_dialogue') as prepare, \
+                patch('subprocess.run', wraps=subprocess.run) as render, \
+                patch.object(worker, 'finish_dialogue') as finish, \
+                self.assertRaisesRegex(ValueError, 'independent moving-preview reviews'):
+            worker.render_media(self.request, self.plan)
+        prepare.assert_not_called()
         render.assert_not_called()
         finish.assert_not_called()
 
@@ -140,13 +167,24 @@ class EarlyAudioOrderTests(unittest.TestCase):
         """Retain the same prepared master and final gates around unchanged render quality."""
         order, prepared = [], {'TEST': 'prepared audio'}
         audio = {'audioReviewRequired': False, 'audioQuality': []}
-        with patch.object(worker, 'prepare_dialogue', side_effect=lambda *a: order.append('prepare') or prepared), \
-                patch('subprocess.run', side_effect=lambda *a, **k: order.append('picture')) as render, \
+        actual = subprocess.run
+        def execute(command: list[str], **kwargs: object) -> object:
+            """Run the real review validator; stub only the expensive picture command."""
+            if 'render' not in command:
+                return actual(command, **kwargs)
+            order.append('picture')
+            return subprocess.CompletedProcess(command, 0)
+        with patch('studio.native_short_delivery.prepare_dialogue', side_effect=lambda *a: order.append('prepare') or prepared) as prepare, \
+                patch('subprocess.run', side_effect=execute) as render, \
                 patch.object(worker, 'finish_dialogue', side_effect=lambda *a: order.append('final-audio') or audio) as finish, \
                 patch.object(worker, 'native_srgb_delivery', return_value={'output': 'TEST', 'sha256': 'TEST'}):
             worker.render_media(self.request, self.plan)
+            from studio.native_motion_previews import prepare_audio
+            self.assertEqual(prepare_audio(self.request, self.plan), prepared)
+        prepare.assert_called_once()
         self.assertEqual(order, ['prepare', 'picture', 'final-audio'])
-        self.assertIs(finish.call_args.args[3], prepared)
+        self.assertEqual(finish.call_args.args[3], prepared)
+        self.assertEqual(json.loads((Path(self.request['output']) / 'prepared-audio.json').read_text()), prepared)
         command = render.call_args.args[0]
         self.assertEqual(command[command.index('--quality') + 1], 'high')
         self.assertEqual(command[command.index('--crf') + 1], '15')

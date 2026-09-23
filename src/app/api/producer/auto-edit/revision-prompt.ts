@@ -1,3 +1,4 @@
+import { VISUAL_SOURCE_INSTRUCTIONS } from "@/lib/producer/visual-source-policy";
 import type { ProducerReview } from "./review-contract";
 import type { AutoEditCtx } from "./stream";
 import { doctrinePromptPath, doctrinePromptRoot } from "@/lib/server/auto-edit-doctrine";
@@ -6,7 +7,7 @@ import { visualStorytellingInstructions } from "@/lib/producer/visual-storytelli
 
 function receiptContract(review: ProducerReview): string[] {
   const materialCodes = review.materialIssues.map((issue) => issue.code);
-  return [
+  return [VISUAL_SOURCE_INSTRUCTIONS,
     `The complete material-issue code set is exactly ${JSON.stringify(materialCodes)}. Copy each code verbatim into exactly one receipt array. Minor/info finding codes are observations only: never include them in either receipt array. Do not rename, summarize, or invent a code.`,
     `Return exactly one JSON receipt and no Markdown:`,
     `{"schemaVersion":1,"changedPlan":true,"addressedIssueCodes":["CODE"],"deferredIssueCodes":[],"summary":"..."}`,

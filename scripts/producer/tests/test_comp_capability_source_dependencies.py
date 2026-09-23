@@ -27,6 +27,7 @@ class CapabilitySourceDependenciesTests(unittest.TestCase):
         self.addCleanup(patch.stopall)
         patch.object(artifact, "MOTION_DIR", str(self.root)).start()
         patch.object(artifact, "COMPOSITIONS_DIR", str(self.root / "compositions")).start()
+        patch.object(artifact, "integrated_kinds", return_value={"TEST"}).start()
 
     def test_declared_css_nested_css_and_js_changes_invalidate_digest(self) -> None:
         for relative in ("layout.css", "nested.css", "local.js"):

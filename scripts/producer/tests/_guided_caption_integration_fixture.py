@@ -49,14 +49,16 @@ def plan_for_profile(short: bool) -> dict:
         "captionsTrack": {"schemaVersion": 1, "source": "kept-transcript",
                           "defaultPolicy": "karaoke" if short else "line", "groups": []},
         "cutTrack": [{"sourceId": "TEST", "start": 0, "end": 4.004}],
-        "graphicsTrack": [{"id": "TEST-card", "kind": "statement-card", "anchor": "own-screen",
+        "graphicsTrack": [{"id": "TEST-card", "kind": "chart-story", "anchor": "own-screen",
             "outStart": .1001, "outEnd": 2.6026, "exitOnCut": False,
             "reason": "TEST ONLY compositor/layer geometry, not actual template or creator review.",
-            "spec": {"text": "TEST ONLY", "variant": "classic"}}]}
+            "spec": {"type": "bars", "data": "1,2", "labels": "TEST A,TEST B",
+                     "emphasize": 1, "unit": ""}}]}
     if short:
         plan["reframe"] = {"layout": "fill", "crop": [0.25, 0, 0.5, 1], "track": False}
-        plan["graphicsTrack"][0].update(kind="kinetic-quote", outEnd=float(Fraction(77 * 1001, 30000)),
-                                      spec={"quote": "TEST ONLY", "bg": "dark", "highlight": ""})
+        plan["graphicsTrack"][0].update(kind="line-swap", outEnd=float(Fraction(77 * 1001, 30000)),
+                                      spec={"lineA": "SYNTHETIC", "lineB": "TEST ONLY",
+                                            "swapAt": 1, "underlineWord": ""})
     seam = plan["graphicsTrack"][0]["outEnd"]
     plan["cutTrack"] = [{"sourceId": "TEST", "start": 0, "end": seam},
         {"sourceId": "TEST", "start": seam + .1001, "end": 4.1041}]

@@ -43,7 +43,7 @@ from tests.p5_review_evidence import (
     resource_snapshot,
 )
 from tests._build_manifest_import_closure import local_import_closure
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 REPO = Path(__file__).parents[3]
 _ENTRYPOINTS = (
@@ -146,6 +146,7 @@ def _forced_scene(
         "zIndex": 10, "entry": "compositions/full.html",
         "compositeMode": "normal", "palmierGranularity": "unit",
     }]
+    bind_test_scene_source(control)  # Author this separate TEST oracle's unit layout.
     bindings = {
         "sceneId": scene["sceneId"],
         "entries": [{

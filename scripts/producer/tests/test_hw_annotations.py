@@ -161,11 +161,11 @@ class HwFamilyRegistrationTests(unittest.TestCase):
             with self.subTest(kind=kind):
                 self.assertEqual(catalog[kind]["dimensions"], [1080, 1920])
 
-    def test_planner_canvas_fallback_registers_the_family(self) -> None:
+    def test_planner_measured_canvas_registers_the_family(self) -> None:
         for kind in HW_KINDS:
             with self.subTest(kind=kind):
                 self.assertEqual(
-                    longform.KIND_CANVAS_FALLBACK.get(kind), "9:16")
+                    longform.kind_canvas().get(kind), "9:16")
 
     def test_content_contract_requires_the_planned_copy(self) -> None:
         catalog = tc.template_catalog()

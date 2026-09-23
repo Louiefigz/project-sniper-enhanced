@@ -8,11 +8,14 @@ import json
 from graphics.composition_transform import set_root_duration
 from graphics.template_assets import icon_keys
 from graphics.template_contract import (
+    _value_errors,
     composition_dimensions,
     declared_variables,
     planned_copy,
-    validate_entry,
 )
+from graphics.template_content import content_value_errors, default_copy_errors
+from graphics.template_assets import selector_errors
+from graphics.template_visual_contract import visual_entry_errors
 
 from .artifact_contract import MediaRefV1
 from .overlay_source_seal import (
@@ -84,6 +87,22 @@ def _media_semantics(source: dict, intent: dict, media: MediaRefV1) -> None:
         raise RuntimeError("graphic source media expectations are stale")
 
 
+def _validate_retained_entry(entry: dict, html: str) -> None:
+    """Read V1 section-marker metadata without authorizing its retired renderer."""
+    if entry.get("kind") != "section-marker":
+        raise ValueError("retained V1 source kind is invalid")
+    variables = declared_variables(html)
+    spec = entry.get("spec")
+    if type(spec) is not dict or set(spec) - set(variables):
+        raise ValueError("retained source variables are invalid")
+    errors = (_value_errors(spec, variables) + content_value_errors(spec, variables)
+              + default_copy_errors("section-marker", spec, variables)
+              + selector_errors("section-marker", spec, variables)
+              + visual_entry_errors(entry))
+    if errors:
+        raise ValueError("; ".join(errors))
+
+
 def validate_graphic_source_semantics(
     source: dict, plan_row: dict, media: MediaRefV1
 ) -> None:
@@ -94,7 +113,7 @@ def validate_graphic_source_semantics(
         raise RuntimeError("graphic source intent or composition is invalid")
     entry = entry_from_intent(intent)
     expected_intent = effective_render_intent(plan_row)
-    validate_entry(entry, html)
+    _validate_retained_entry(entry, html)
     variables = declared_variables(html)
     assets = source["expectedAssetBindings"]
     expected = (

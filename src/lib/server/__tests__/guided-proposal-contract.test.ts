@@ -21,10 +21,12 @@ function proposal(raw = request.rawIntent) {
   operations: [{ type: "preserve-cut", clauseIndex: 0, beatIndex: null, catalogKind: null, variables: null, grade: null, startAnchor: null, endAnchorExclusive: null }],
   openingEndAnchor: 3, continuityEndAnchor: 4, audioPolicy: "preserve-full-program", colorPolicy: "preserve" };
 }
+const CHART_SPEC = { type: "bars", data: "12,28", labels: "First,Second", emphasize: 1, unit: "", accent: "#054BC9", exit: "fade" };
+// Catalog DTOs exercise selection/compilation only; no measured capability or media claim.
 const evidence = { schemaVersion: 2, segments: [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: 1800, text: "Promise" },
   { index: 1, sourceId: "s", startFrame: 1800, endFrameExclusive: 18000, text: "Payoff" }], frameRate: "30/1", totalFrames: 18000,
   target: { mode: "longform", width: 1920, height: 1080 },
-  timelineMapHash: "e".repeat(64), catalog: [{ kind: "title-card", canvas: [1920, 1080], defaults: { title: "Example" }, fields: ["title"] }],
+  timelineMapHash: "e".repeat(64), catalog: [{ kind: "chart-story", canvas: [1920, 1080], defaults: CHART_SPEC, fields: Object.keys(CHART_SPEC) }],
   anchors: [0, 30, 60, 1800, 1950, 2100, 18000], cleanEnds: [1800],
 } as unknown as ProposalEvidence;
 const cut = { plan: { value: { cutTrack: [{ sourceId: "s", start: 0, end: 600 }], cutDecisions: {} } } } as unknown as AcceptedGuidedCut;
@@ -48,13 +50,16 @@ test("one available transcript cannot mask another used source's missing or empt
 });
 
 test("mode-only destinations and malformed catalog canvases cannot admit both portrait and landscape", () => {
-  const row = { canvas: [1920, 1080], specFields: ["title"], specDefaults: { title: "sample" } };
-  const rows = { landscape: row, portrait: { ...row, canvas: [1080, 1920] } };
+  const row = { canvas: [1920, 1080], specFields: Object.keys(CHART_SPEC), specDefaults: CHART_SPEC };
+  const marker = { text: "Exact cue", emphasisWord: "cue", style: "highlight", drawAt: 0.25, accent: "#054BC9", exit: "fade" };
+  const rows = { "chart-story": row, "marker-highlight": { canvas: [1080, 1920], specFields: Object.keys(marker), specDefaults: marker } };
   assert.throws(() => selectProposalCatalog(rows, { mode: "longform" }), /exact bounded destination/);
-  assert.deepEqual(selectProposalCatalog(rows, { width: 1920, height: 1080 }).map((item) => item.kind), ["landscape"]);
-  assert.deepEqual(selectProposalCatalog(rows, { width: 1080, height: 1920 }).map((item) => item.kind), ["portrait"]);
+  assert.deepEqual(selectProposalCatalog(rows, { width: 1920, height: 1080 }).map((item) => item.kind), ["chart-story"]);
+  assert.deepEqual(selectProposalCatalog(rows, { width: 1080, height: 1920 }).map((item) => item.kind), ["marker-highlight"]);
+  assert.throws(() => selectProposalCatalog({ "statement-card": { ...row, canvas: [1080, 1920] } },
+    { width: 1080, height: 1920 }), /No measured catalog matches/);
   for (const dimensions of [[0, 1080], ["1920", 1080], [NaN, 1080], [1920], [1920, 1080, 30]]) {
-    assert.throws(() => selectProposalCatalog({ malformed: { ...row, canvas: dimensions } }, { width: 1920, height: 1080 }), /malformed measured/);
+    assert.throws(() => selectProposalCatalog({ "chart-story": { ...row, canvas: dimensions } }, { width: 1920, height: 1080 }), /malformed measured/);
   }
 });
 
@@ -91,7 +96,7 @@ test("proposal covers all speech and derives opening plus actual body context wi
   const graphics = proposal() as unknown as Record<string, unknown>;
   graphics.operations = [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "invented", variables: [{ name: "title", value: "Claim" }], grade: null, startAnchor: 1, endAnchorExclusive: 2 }];
   const blocked = buildTreatmentCandidate({ cut, evidence, rawIntent: request.rawIntent, output: graphics });
-  assert.equal(blocked.candidate, null); assert.match(blocked.blockers[0].reason, /unavailable/);
+  assert.equal(blocked.candidate, null); assert.match(blocked.blockers[0].reason, /Visual source "invented" is retired or unregistered/);
 });
 
 test("configured compiler remains sessionless/read-only/tools-none with unchanged effort and strict response bounds", async () => {

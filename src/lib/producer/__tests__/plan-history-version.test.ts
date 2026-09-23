@@ -10,7 +10,7 @@ import { savePlanTransaction } from "@/app/api/producer/save-plan/transaction";
 function plan(text: string, version: number): EditPlan {
   return { planVersion: version, target: { mode: "longform", scope: "produced", width: 1920, height: 1080, fps: 30 },
     cutTrack: [{ sourceId: "raw-1", start: 0, end: 12, speed: 1 }],
-    graphicsTrack: [{ id: "g-00000001", kind: "statement-card", outStart: 1, outEnd: 3.5,
+    graphicsTrack: [{ id: "g-00000001", kind: "line-swap", outStart: 1, outEnd: 3.5,
       anchor: "own-screen", spec: { text } }] } as EditPlan;
 }
 

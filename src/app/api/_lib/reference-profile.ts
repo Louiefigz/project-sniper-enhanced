@@ -1,4 +1,3 @@
-import path from "path";
 import type {
   ReferenceMode,
   ReferenceStyleProfile,
@@ -34,14 +33,6 @@ export function aspectLabel(width: number | null, height: number | null): string
 function suggestedMode(width: number | null, height: number | null): ReferenceMode | null {
   if (!width || !height) return null;
   return width > height ? "longform" : "short";
-}
-
-export function inferKnownStyle(video: string): ReferenceStyleProfile["suggestedKnownStyle"] {
-  const parts = video.toLowerCase().split(path.sep);
-  if (parts.some((part) => part === "restrained" || part.startsWith("restrained-"))) return "restrained";
-  if (parts.some((part) => part.includes("the punch reference") || part === "punch")) return "punch";
-  if (parts.some((part) => part === "slideware" || part.startsWith("slideware-"))) return "slideware";
-  return null;
 }
 
 function counts(values: unknown[]): Record<string, number> {
@@ -151,7 +142,7 @@ export function buildReferenceStyleProfile(args: {
       aspect: aspectLabel(width, height),
     },
     suggestedMode: suggestedMode(width, height),
-    suggestedKnownStyle: inferKnownStyle(video),
+    suggestedKnownStyle: null,
     mechanics: mechanics(deep, fingerprint, durationS),
     quality: quality(deep),
     representativeFrames: representativeFrames(fingerprint, deep),

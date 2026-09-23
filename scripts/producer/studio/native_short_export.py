@@ -90,12 +90,15 @@ def input_pins(project: Path, runtime: Path, tools: dict) -> dict[str, str]:
     paths += list((REPO / 'scripts/producer/audio').glob('*.py'))
     paths += list((REPO / 'scripts/producer/audit').glob('*.py'))
     paths += implementation_files()
+    from graphics.visual_source_project import source_implementation_files
+    paths += source_implementation_files()
     samples = clock(plan['canvas']).sample_at_frame(plan['canvas']['totalFrames'])
     finishing = native_finishing_request(plan.get('audioFinishing'), samples)
     model = cleanup_model_binding(finishing.enhance_chain) if finishing else None
     if model:
         paths.append(Path(model['path']))
     paths += [REPO / 'scripts/producer' / name for name in (
+        'guided_opening_picture.py', 'guided_opening_mux.py', 'guided_picture_decode.py',
         'producer_config.py', 'fingerprints.py', 'cut_preview_io.py', 'native_work_lease.py',
         'headless/durable_files.py', 'headless/process_runner.py', 'graphics/render_tools.py',
         'edit/exact_timing.py', 'stage_timing.py', 'palmier/process_deadline.py')]
@@ -147,8 +150,10 @@ def select_and_publish(args: argparse.Namespace, request: dict, reference_map: P
     else:
         add_donors(args, request)
         request = bind_reference_map(request, reference_map)
-        if not args.audio_donor and not args.picture_donor:
+        if not args.audio_donor and not args.picture_donor and not getattr(args, "preview_only", False) and getattr(args, "preview_reviews", None):
             request = recover_automatically(request)
+    from studio.native_motion_previews import bind_preview_options
+    request = bind_preview_options(request, args)
     output = Path(request['output'])
     output.mkdir(mode=0o700)
     write_new(output / 'export-request.json', request)
@@ -192,7 +197,7 @@ def add_donors(args: argparse.Namespace, request: dict) -> None:
 def source_cache_mode(args: argparse.Namespace) -> str:
     """Cold extraction is opt-in and cannot silently change the selected picture route."""
     if not getattr(args, 'acquire_source_cache', False):
-        return 'existing-only'
+        return 'acquire-sdk-preflight'
     if not args.cached_native_batches:
         raise ValueError('Source cache acquisition requires --cached-native-batches')
     return 'acquire-sequential-sdr'
@@ -232,6 +237,8 @@ def main() -> None:
                         help='With cached batches, acquire exact original-size SDR source PNGs sequentially through the pinned SDK')
     parser.add_argument('--unused-ram-advisory', action='store_true',
                         help='Compatibility flag for explicit fixed policies; adaptive defaults already treat unused RAM as advisory')
+    from studio.native_motion_previews import preview_options
+    preview_options(parser)
     args = parser.parse_args()
     raise SystemExit(0 if execute(args) else 1)
 

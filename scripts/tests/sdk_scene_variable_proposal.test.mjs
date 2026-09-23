@@ -129,6 +129,10 @@ test("project-installed default SDK → actual validated Python treatment handle
   const expected = structuredClone(result.original); expected.scenes[0].version = 2;
   expected.scenes[0].composition.variables.rightTitle = input.value;
   expected.scenes[0].elements.find(row => row.elementId === "right-copy").values.rightTitle = input.value;
+  const source = result.state.scenes[0].visualSources;
+  assert.notEqual(source.subjectSha256, expected.scenes[0].visualSources.subjectSha256);
+  assert.deepEqual({ ...source, subjectSha256: null }, { ...expected.scenes[0].visualSources, subjectSha256: null });
+  expected.scenes[0].visualSources.subjectSha256 = source.subjectSha256;
   assert.deepEqual(result.state, expected);
   assert.deepEqual(result.receipt.invalidatedNodes.sort(), ["composite:scene-045", "palmier-binding:scene-045:unit-right", "scene-unit-media:scene-045:unit-right"]);
   assert.deepEqual(result.receipt.dirtyWindows, [{ startFrame: 1350, endFrameExclusive: 1530 }]);

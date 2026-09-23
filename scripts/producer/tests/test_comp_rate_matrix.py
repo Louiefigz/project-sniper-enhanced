@@ -29,7 +29,7 @@ from graphics.comp_rate_artifact import (
 ROOT = Path(__file__).resolve().parents[3]
 ARTIFACT = ROOT / (
     "docs/producer/command-driven-editing/contracts/"
-    "hyperframes-rate-matrix-v1.json"
+    "hyperframes-native-catalog-rate-matrix-v1.json"
 )
 
 
@@ -78,11 +78,11 @@ class CompRateMatrixTests(unittest.TestCase):
         ARTIFACT.stat()  # absent retained evidence fails as FileNotFoundError, not a later assertion
         value, issue = load_rate_matrix(str(ARTIFACT))
         self.assertEqual(issue, "")
-        validate_document("hyperframes-rate-matrix-v1.schema.json", value)
-        self.assertEqual(len(value["probes"]), 46 * 8)
+        validate_document("hyperframes-native-catalog-rate-matrix-v1.schema.json", value)
+        self.assertEqual(len(value["probes"]), 7 * 8)
         self.assertEqual(
             value["receiptHash"],
-            "8d2143163c3c2c45666e72a73af61f56f6ccb21b94fc297b57d2e5cdadf8f77b",
+            "cf4f509636a96f20a244fefc7dc76d657a8c45aa61cbadc347e67ca76b83ddc7",
         )
 
     def test_stale_source_tool_and_tampered_row_fail_closed(self) -> None:
@@ -105,7 +105,7 @@ class CompRateMatrixTests(unittest.TestCase):
                 self.assertNotEqual(validate_rate_matrix(value, tools), "")
         with self.assertRaises(SchemaValidationError):
             validate_document(
-                "hyperframes-rate-matrix-v1.schema.json",
+                "hyperframes-native-catalog-rate-matrix-v1.schema.json",
                 {**original, "unsupported": True},
             )
 

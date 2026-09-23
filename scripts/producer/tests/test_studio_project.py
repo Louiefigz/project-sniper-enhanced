@@ -23,6 +23,7 @@ from studio.comp_transform import (
     InstancePlan,
     build_instance,
     parse_source_comp,
+    seed_declarations,
 )
 from studio.lane_layout import assign_lanes
 from studio.studio_project import GenerateRequest, generate_project, main
@@ -46,28 +47,29 @@ def _comp_html(kind: str) -> str:
 
 
 def _studio_plan() -> dict:
-    """3 real kinds; entries 1+2 overlap (lane split), entry 3 exit-clamps."""
+    """3 real catalog entries; entries 1+2 overlap (lane split), entry 3 exit-clamps."""
     return {
         "planVersion": 1,
-        "target": {"mode": "longform"},
+        "target": {"mode": "short"},
         "cutTrack": [
             {"sourceId": "raw-1", "start": 0.0, "end": 6.0, "speed": 1.0},
             {"sourceId": "raw-1", "start": 10.0, "end": 16.0, "speed": 1.0},
         ],
         "graphicsTrack": [
-            {"kind": "statement-card", "outStart": 1.0, "outEnd": 3.5,
+            {"kind": "line-swap", "outStart": 1.0, "outEnd": 3.5,
              "anchor": "own-screen", "reason": "thesis takeover",
-             "spec": {"variant": "classic",
-                      "text": "Ship the *system* not the tactic"}},
-            {"kind": "text-element-wide", "outStart": 2.0, "outEnd": 4.5,
+             "spec": {"lineA": "More tactics", "lineB": "One system",
+                      "swapAt": 1.2, "underlineWord": ""}},
+            {"kind": "marker-highlight", "outStart": 2.0, "outEnd": 4.5,
              "anchor": "free-band", "reason": "callout over the card",
              "id": "callout-1",
-             "spec": {"text": "Callout copy", "fontSize": 72}},
-            {"kind": "kinetic-quote-wide", "outStart": 4.0, "outEnd": 9.0,
+             "spec": {"text": "Callout copy", "emphasisWord": "copy",
+                      "drawAt": 1, "style": "highlight"}},
+            {"kind": "marker-highlight", "outStart": 4.0, "outEnd": 9.0,
              "anchor": "own-screen", "reason": "quote dies on the cut",
              "exitOnCut": True,
-             "spec": {"words": "More tactics was never the answer",
-                      "emphasisWords": "never"}},
+             "spec": {"text": "More tactics was never the answer",
+                      "emphasisWord": "never", "drawAt": 1}},
         ],
     }
 
@@ -75,7 +77,7 @@ def _studio_plan() -> dict:
 def _make_base(path: str) -> None:
     subprocess.run(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-         "-i", "color=c=gray:s=1920x1080:d=12:r=30",
+         "-i", "color=c=gray:s=1080x1920:d=12:r=30",
          "-c:v", "libx264", "-crf", "28", "-pix_fmt", "yuv420p", path],
         check=True)
 
@@ -108,18 +110,19 @@ class CompTransformTests(unittest.TestCase):
         return source, build_instance(source, InstancePlan(
             instance_id=f"gfx-01-{kind}", spec=spec, duration=duration))
 
-    def test_statement_card_instance_contract(self) -> None:
-        spec = {"variant": "classic", "text": "Planned *copy*"}
-        _, built = self._build("statement-card", spec)
+    def test_line_swap_instance_contract(self) -> None:
+        spec = {"lineA": "More tactics", "lineB": "One system",
+                "swapAt": 1.2, "underlineWord": ""}
+        _, built = self._build("line-swap", spec)
         inner = _TEMPLATE_RE.search(built.html)
         self.assertIsNotNone(inner, "instance must be template-wrapped")
         body = inner.group("inner")
         # id consistency: root id == __timelines key == instance id
-        self.assertIn('data-composition-id="gfx-01-statement-card"', body)
-        self.assertIn('__timelines["gfx-01-statement-card"]', body)
-        self.assertNotIn('__timelines["statement-card"]', body)
+        self.assertIn('data-composition-id="gfx-01-line-swap"', body)
+        self.assertIn('__timelines["gfx-01-line-swap"]', body)
+        self.assertNotIn('__timelines["line-swap"]', body)
         # root gains data-start + the window duration
-        root = re.search(r'<[^>]*data-composition-id="gfx-01-statement-card"'
+        root = re.search(r'<[^>]*data-composition-id="gfx-01-line-swap"'
                          r'[^>]*>', body).group(0)
         self.assertIn('data-start="0"', root)
         self.assertIn('data-duration="2.5"', root)
@@ -128,35 +131,38 @@ class CompTransformTests(unittest.TestCase):
         self.assertIn("<script>", body)
         # html/body page rules are retargeted onto the comp root
         self.assertNotRegex(body, r"[};>]\s*html,\s*body\s*\{")
-        self.assertIn("#sc-root {", body)
+        self.assertIn("#ls-root {", body)
 
     def test_declarations_seeded_from_spec(self) -> None:
-        spec = {"variant": "classic", "text": "Planned *copy*"}
-        _, built = self._build("statement-card", spec)
+        spec = {"lineA": "More tactics", "lineB": "One system",
+                "swapAt": 1.2, "underlineWord": ""}
+        _, built = self._build("line-swap", spec)
         decls_raw = _DECLS_RE.search(built.html).group("body")
         # Studio lint JSON.parses the RAW attribute text — it must carry no
         # HTML entities (verified live: &quot; escaping is a lint ERROR).
         self.assertNotIn("&quot;", decls_raw)
         rows = json.loads(decls_raw)
         by_id = {row["id"]: row for row in rows}
-        self.assertEqual(by_id["text"]["default"], "Planned *copy*")
-        self.assertEqual(by_id["variant"]["default"], "classic")
+        self.assertEqual(by_id["lineA"]["default"], "More tactics")
+        self.assertEqual(by_id["swapAt"]["default"], 1.2)
         self.assertEqual(built.non_panel_keys, ())
 
     def test_non_scalar_spec_value_is_non_panel(self) -> None:
-        spec = {"variant": "classic", "text": "Planned",
-                "statementLands": [1.0, 2.0]}
-        _, built = self._build("statement-card", spec)
-        self.assertEqual(built.non_panel_keys, ("statementLands",))
+        # Pure declaration behavior, not an invalid executable catalog spec.
+        variables = {"cues": {"id": "cues", "type": "string", "default": ""}}
+        declarations, non_panel = seed_declarations(variables, {"cues": [1.0, 2.0]})
+        self.assertEqual(non_panel, ("cues",))
+        self.assertEqual(json.loads(declarations)[0]["default"], "")
 
     def test_unrewritable_timeline_registration_fails(self) -> None:
-        fake = _comp_html("text-element-wide").replace(
-            '__timelines["text-element-wide"]', "__timelines[key]")
-        source = parse_source_comp("text-element-wide", fake)
-        with self.assertRaises(StudioProjectError):
+        fake = _comp_html("marker-highlight").replace(
+            '__timelines["marker-highlight"]', "__timelines[key]")
+        source = parse_source_comp("marker-highlight", fake)
+        with self.assertRaisesRegex(StudioProjectError, "cannot rewrite"):
             build_instance(source, InstancePlan(
-                instance_id="gfx-01-text-element-wide",
-                spec={"text": "x"}, duration=2.0))
+                instance_id="gfx-01-marker-highlight",
+                spec={"text": "Callout copy", "emphasisWord": "copy",
+                      "drawAt": 1}, duration=2.0))
 
 
 @unittest.skipUnless(_HAVE_FFMPEG, "ffmpeg/ffprobe not on PATH")
@@ -186,11 +192,10 @@ class StudioProjectE2ETests(unittest.TestCase):
     def test_project_structure(self) -> None:
         for rel in ("index.html", "hyperframes.json", "STORYBOARD.md",
                     FINGERPRINT_NAME, MANIFEST_NAME,
-                    "compositions/gfx-01-statement-card.html",
-                    "compositions/gfx-02-text-element-wide.html",
-                    "compositions/gfx-03-kinetic-quote-wide.html",
-                    "assets/tokens.css", "assets/vendor/gsap.min.js",
-                    "assets/vendor/motion-tokens.js"):
+                    "compositions/gfx-01-line-swap.html",
+                    "compositions/gfx-02-marker-highlight.html",
+                    "compositions/gfx-03-marker-highlight.html",
+                    "assets/tokens.css", "assets/vendor/gsap.min.js"):
             self.assertTrue(
                 os.path.isfile(os.path.join(self.out, rel)), rel)
         # Studio's file server refuses symlinks (verified live) — the base
@@ -201,8 +206,8 @@ class StudioProjectE2ETests(unittest.TestCase):
 
     def test_root_matches_probed_video(self) -> None:
         root = re.search(r'<div id="review-root"[^>]*>', self.index).group(0)
-        self.assertIn('data-width="1920"', root)
-        self.assertIn('data-height="1080"', root)
+        self.assertIn('data-width="1080"', root)
+        self.assertIn('data-height="1920"', root)
         self.assertIn('data-duration="12"', root)
         self.assertIn('data-start="0"', root)
         video = re.search(r"<video[^>]*>", self.index).group(0)
@@ -213,19 +218,19 @@ class StudioProjectE2ETests(unittest.TestCase):
 
     def test_slot_attributes_and_values(self) -> None:
         slot = re.search(r'<div id="gfx-01"[^>]*>', self.index).group(0)
-        self.assertIn('data-composition-id="gfx-01-statement-card"', slot)
+        self.assertIn('data-composition-id="gfx-01-line-swap"', slot)
         self.assertIn(
-            'data-composition-src="compositions/gfx-01-statement-card.html"',
+            'data-composition-src="compositions/gfx-01-line-swap.html"',
             slot)
         self.assertIn('data-start="1"', slot)
         self.assertIn('data-duration="2.5"', slot)
-        self.assertIn('data-width="1920"', slot)
-        self.assertIn('data-height="1080"', slot)
+        self.assertIn('data-width="1080"', slot)
+        self.assertIn('data-height="1920"', slot)
         values = re.search(r"data-variable-values='([^']*)'", slot).group(1)
         self.assertNotIn("&quot;", values)  # raw JSON, lint-parseable
         decoded = json.loads(values)
-        self.assertEqual(decoded, {"variant": "classic",
-                                   "text": "Ship the *system* not the tactic"})
+        self.assertEqual(decoded, {"lineA": "More tactics", "lineB": "One system",
+                                   "swapAt": 1.2, "underlineWord": ""})
 
     def test_id_consistency_host_root_timeline(self) -> None:
         for slot_id in ("gfx-01", "gfx-02", "gfx-03"):
@@ -257,11 +262,11 @@ class StudioProjectE2ETests(unittest.TestCase):
         self.assertEqual(entry["authoredOutEnd"], 9.0)
         self.assertEqual(self.manifest["exitClampedCount"], 1)
         with open(os.path.join(
-                self.out, "compositions/gfx-03-kinetic-quote-wide.html"),
+                self.out, "compositions/gfx-03-marker-highlight.html"),
                 encoding="utf-8") as handle:
             instance = handle.read()
         root = re.search(
-            r'<[^>]*data-composition-id="gfx-03-kinetic-quote-wide"[^>]*>',
+            r'<[^>]*data-composition-id="gfx-03-marker-highlight"[^>]*>',
             instance).group(0)
         self.assertIn('data-duration="2"', root)
 
@@ -269,10 +274,10 @@ class StudioProjectE2ETests(unittest.TestCase):
         with open(os.path.join(self.out, "STORYBOARD.md"),
                   encoding="utf-8") as handle:
             board = handle.read()
-        self.assertIn("## Frame 1 — statement-card", board)
-        self.assertIn("- src: compositions/gfx-01-statement-card.html", board)
+        self.assertIn("## Frame 1 — line-swap", board)
+        self.assertIn("- src: compositions/gfx-01-line-swap.html", board)
         self.assertIn("- scene: thesis takeover", board)
-        self.assertIn("## Frame 3 — kinetic-quote-wide", board)
+        self.assertIn("## Frame 3 — marker-highlight", board)
 
     def test_manifest_round_trip_and_plan_binding(self) -> None:
         """New views bind both sidecars to the exact V2 normalizer identity."""

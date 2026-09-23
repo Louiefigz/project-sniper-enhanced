@@ -26,6 +26,8 @@ class LaunchEnforcementTests(unittest.TestCase):
 
     def setUp(self) -> None:
         """Construct only the request/owner metadata needed for admission decisions."""
+        self.enterContext(patch('graphics.visual_source_project.admit_project_sources'))
+        self.enterContext(patch('studio.native_motion_previews.require_motion_previews'))
         self.root = Path(self.enterContext(tempfile.TemporaryDirectory())).resolve()
         self.project = self.root / 'project'; self.project.mkdir()
         (self.project / 'index.html').write_text('TEST authored project, not rendered')
@@ -208,7 +210,8 @@ class PrebuildEnforcementTests(unittest.TestCase):
                 media.write_bytes(b'TEST changed during validation')
                 return SimpleNamespace(stdout=json.dumps({'planHash': snapshot['planHash'],
                     'evidence': [{'path': str(media), 'sha256': digest(media)}]}))
-            with patch('studio.native_long_prebuild.subprocess.run', side_effect=changed_validator), \
+            with patch('graphics.visual_source_project.admit_project_sources'), \
+                    patch('studio.native_long_prebuild.subprocess.run', side_effect=changed_validator), \
                     self.assertRaisesRegex(ValueError, 'evidence conflicts'):
                 require_long_prebuild(project, {'node': 'TEST node'}, {})
 

@@ -15,13 +15,16 @@ function speech(words: Array<{ word: string; start: number; end: number }>): Pac
     keptWords: words.map((word) => ({ word: word.word, sourceId: "s", segmentIndex: 0, sourceStart: word.start,
       sourceEnd: word.end, sourceOriginalEnd: word.end, outputStart: word.start, outputEnd: word.end })) };
 }
+const MARKER_SPEC = { text: "A meaningful cue", emphasisWord: "meaningful", style: "highlight", drawAt: 0.25, accent: "#054BC9", exit: "fade" };
+
+// TEST-only timing evidence with the actual portrait port variables; no measured/rendered capability claim.
 function program(words: Array<{ word: string; start: number; end: number }>, frameRate = "30/1") {
   const end = words.at(-1)!.end, totalFrames = proposalRelativeFrame({ time: end, origin: 0, frameRate, edge: "end" });
   const plan = { cutTrack: [{ sourceId: "s", start: 0, end }], cutDecisions: {} }, segments = packetCutSegments(plan);
   const partitions = [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: totalFrames, text: "TEST whole program" }];
   const mapped = mapProposalOccurrences({ segments, partitions, frameRate, totalFrames }, speech(words));
   const evidence = { schemaVersion: 2, frameRate, totalFrames, segments: partitions, ...mapped,
-    catalog: [{ kind: "title-card", canvas: [1920, 1080], fields: ["title"], defaults: { title: "Example" } }], timelineMapHash: "c".repeat(64) } as unknown as ProposalEvidence;
+    catalog: [{ kind: "marker-highlight", canvas: [1080, 1920], fields: Object.keys(MARKER_SPEC), defaults: MARKER_SPEC }], timelineMapHash: "c".repeat(64) } as unknown as ProposalEvidence;
   return { evidence, cut: { plan: { value: plan } } as unknown as AcceptedGuidedCut };
 }
 function fullProposal(evidence: ProposalEvidence) {
@@ -30,7 +33,7 @@ function fullProposal(evidence: ProposalEvidence) {
     clauses: [{ start: 0, end: 9, quote: "Add title", disposition: "supported", rationale: "Exact title cue", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: at(10), purpose: "opening", summary: "Intro", supportsBeatIndices: [1] },
       { startAnchor: at(10), endAnchorExclusive: evidence.anchors.length - 1, purpose: "body", summary: "Payoff", supportsBeatIndices: [] }],
-    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "title-card", variables: [{ name: "title", value: "A meaningful cue" }],
+    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "marker-highlight", variables: Object.entries(MARKER_SPEC).map(([name, value]) => ({ name, value })),
       grade: null, startAnchor: at(1), endAnchorExclusive: at(2.5) }],
     openingEndAnchor: at(60), continuityEndAnchor: at(70), audioPolicy: "preserve-full-program", colorPolicy: "preserve" };
 }

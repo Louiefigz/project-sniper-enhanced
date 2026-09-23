@@ -96,10 +96,10 @@ function palmierOwnershipFiltering(): void {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-template-palmier-history-"));
   try {
     const current = project(root, "current", "longform", []);
-    const sniperOnly = project(root, "sniper-only", "longform", ["statement-card"]);
-    const inSync = project(root, "in-sync", "longform", ["whiteboard-list"]);
-    const humanOwned = project(root, "human-owned", "longform", ["fragment-payoff"]);
-    const diverged = project(root, "diverged", "longform", ["kinetic-quote-wide"]);
+    const sniperOnly = project(root, "sniper-only", "longform", ["line-swap"]);
+    const inSync = project(root, "in-sync", "longform", ["chart-story"]);
+    const humanOwned = project(root, "human-owned", "longform", ["hw-callout-circle"]);
+    const diverged = project(root, "diverged", "longform", ["marker-highlight"]);
     const hashes = new Map([sniperOnly, inSync, humanOwned, diverged].map((dir) =>
       [dir, fileSha256(path.join(dir, "edit_plan.json"))]));
     verifiedMirror(inSync, hashes.get(inSync)!, "sniper");
@@ -115,8 +115,8 @@ function palmierOwnershipFiltering(): void {
     assert.deepEqual(history.projects.map((row) => row.projectId).sort(),
       ["in-sync", "sniper-only"],
       "verified current mirrors and Sniper-only projects teach; human or stale mirrors do not");
-    assert.equal(history.counts["fragment-payoff"], undefined);
-    assert.equal(history.counts["kinetic-quote-wide"], undefined);
+    assert.equal(history.counts["hw-callout-circle"], undefined);
+    assert.equal(history.counts["marker-highlight"], undefined);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -127,12 +127,12 @@ function main(): void {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-template-history-"));
   try {
     const current = project(root, "current", "longform", []);
-    project(root, "one", "longform", ["statement-card", "whiteboard-list"]);
-    project(root, "two", "longform", ["statement-card", "statement-card"]);
-    project(root, "three", "longform", ["statement-card"]);
-    project(root, "four", "longform", ["fragment-payoff", "unknown-kind"]);
-    project(root, "vertical", "short", ["statement-card"]);
-    project(root, "drifted", "longform", ["statement-card"]);
+    project(root, "one", "longform", ["line-swap", "chart-story"]);
+    project(root, "two", "longform", ["line-swap", "line-swap"]);
+    project(root, "three", "longform", ["line-swap"]);
+    project(root, "four", "longform", ["hw-callout-circle", "unknown-kind"]);
+    project(root, "vertical", "short", ["line-swap"]);
+    project(root, "drifted", "longform", ["line-swap"]);
     const approvals = new Map([
       ["one", "2026-07-01T00:00:00.000Z"],
       ["two", "2026-07-02T00:00:00.000Z"],
@@ -162,13 +162,13 @@ function main(): void {
     }), /no longer matches/);
     assert.equal(history.projectCount, 4,
       "current, other-mode, and post-approval plan drift are excluded");
-    assert.equal(history.counts["statement-card"].uses, 4);
-    assert.equal(history.counts["statement-card"].projects, 3);
-    assert.deepEqual(history.overusedKinds, ["statement-card"]);
+    assert.equal(history.counts["line-swap"].uses, 4);
+    assert.equal(history.counts["line-swap"].projects, 3);
+    assert.deepEqual(history.overusedKinds, ["line-swap"]);
     assert.equal(history.counts["unknown-kind"], undefined);
     assert.equal(history.projects[0].projectId, "four", "approval time owns recency");
 
-    project(root, "later", "longform", ["whiteboard-list"]);
+    project(root, "later", "longform", ["chart-story"]);
     const reused = prepareTemplateUsageHistory(ctx, root, {
       approved: () => ({ approvedAt: "2026-08-01T00:00:00.000Z", planHash: "f".repeat(64) }),
     });

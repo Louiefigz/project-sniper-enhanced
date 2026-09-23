@@ -19,13 +19,13 @@ from studio.native_runtime import digest
 from studio.native_owned_processes import OwnedRegistry
 from studio.native_measurement_retry import MeasurementWindow
 from studio.native_run_config import NativeRunConfig, policy_for_baseline, source_hashes
-from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt
+from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt, failure_category
 from studio.native_workload import ProgressWatch
 from studio.native_run_admission import acquire_capacity
 from studio.native_export import validate_export_launch, worker_environment
 
 from native_render_processes import ProcessIdentity, ProcessRequest, ResourceMeasurementError
-from native_render_resources import admission_reasons, resource_warnings, stop_reasons
+from native_render_resources import ResourceSnapshot, admission_reasons, resource_warnings, stop_reasons
 from native_render_policy import AdaptiveMemoryGuard, MODE, adaptive_admission_reasons, capacity_derivation
 from native_work_lease import NativeWorkLease
 
@@ -169,7 +169,7 @@ class NativeRun:
                           'warnings': measured['warnings'],
                           'abortReason': self.abort_reason}), flush=True)
 
-    def measure_resources(self, request: ProcessRequest):
+    def measure_resources(self, request: ProcessRequest) -> ResourceSnapshot:
         """Keep bounded retries and fail on missing live telemetry."""
         try:
             return MeasurementWindow(self, request).run()
@@ -267,6 +267,7 @@ class NativeRun:
                    and self.result['additionalFilesStable'])
         success = success and self.result.get('leaseCleanupVerified', False) and self.result['additionalFilesStable']
         self.result['status'] = self.success_status if success else 'failed'
+        self.result['failureCategory'] = failure_category(self.result)
         if output.is_file():
             self.result['outputBytes'] = output.stat().st_size
         try:
@@ -284,6 +285,8 @@ class NativeRun:
             self.launch()
             self.monitor()
         except Exception as error:
+            if isinstance(error, ResourceMeasurementError):
+                self.result['failureCategory'] = 'measurement-unavailable'
             if getattr(error, 'evidence', None):
                 self.result.setdefault('measurementFailureEvidence', []).append(error.evidence)
             self.abort_reason = self.abort_reason or f'{type(error).__name__}: {error}'

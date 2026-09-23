@@ -1,11 +1,7 @@
-"""Punch implementation-item tests (G1-G5, G17 + music assets — PUNCH_STYLE.md §10).
+"""Caption/seam/math/token/music regressions and current catalog source policy.
 
-Covers: the WHISPER caption preset (G2), exit-on-cut clamp math + lint (G4),
-the blur+desat takeover base vocabulary + filter graph (G5), the style-aware
-punch ceiling (G17), and the builtin starter-bed registration (assets/music).
-The shout-lockup comp (G1/G3) is exercised by a real hyperframes render in the
-verification pass; here we assert its contract surface (template exists, comps
-conventions present).
+Historical shared tokens remain inert checks. Retired shout-lockup execution
+must refuse; current marker-highlight entries exercise real source/lint gates.
 """
 import copy
 import os
@@ -13,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from _common import *  # noqa: F401,F403
@@ -101,9 +98,10 @@ def _two_cut_plan(graphics: list[dict]) -> dict:
 
 
 def _gfx(**over) -> dict:
-    entry = {"outStart": 8.0, "outEnd": 12.0, "kind": "punch-shout-lockup",
-             "anchor": "free-band", "reason": "keyword lockup",
-             "spec": {"payload": "Creating"}}
+    entry = {"outStart": 8.0, "outEnd": 12.0, "kind": "marker-highlight",
+             "anchor": "free-band", "reason": "keyword emphasis",
+             "spec": {"text": "Creating a system", "emphasisWord": "Creating",
+                      "style": "highlight", "drawAt": 0.2}}
     entry.update(over)
     return entry
 
@@ -159,7 +157,7 @@ class ExitOnCutTests(unittest.TestCase):
     def test_lint_clean_flagged_entry(self) -> None:
         plan = _two_cut_plan([_gfx(exitOnCut=True)])
         errors = pl.lint(plan, MANIFEST).errors
-        self.assertFalse([e for e in errors if "exitOnCut" in e], errors)
+        self.assertEqual(errors, [])
 
 
 # --------------------------------------------------------------------------- #
@@ -285,20 +283,23 @@ class BuiltinMusicTests(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------- #
-# G1/G3 — shout-lockup comp contract surface (render exercised out-of-suite)
+# G1/G3 — retired source refusal and retained inert shared token checks
 # --------------------------------------------------------------------------- #
 class ShoutLockupTemplateTests(unittest.TestCase):
     COMP = _REPO / "templates" / "motion" / "compositions" / "punch-shout-lockup.html"
     TOKENS = _REPO / "templates" / "motion" / "tokens.css"
     HELPER = _REPO / "templates" / "motion" / "motion-tokens.js"
 
-    def test_comp_exists_with_house_conventions(self) -> None:
-        html = self.COMP.read_text(encoding="utf-8")
-        self.assertIn('data-composition-id="punch-shout-lockup"', html)
-        self.assertIn("window.__timelines", html)
-        self.assertIn("data-composition-variables", html)
-        self.assertIn('gsap.timeline({ paused: true })', html)
-        self.assertIn("/motion-tokens.js", html)        # consumes G4 tokens
+    def test_retired_shout_lockup_refuses_before_media_or_cache(self) -> None:
+        """A shared token file cannot restore admission to a removed design."""
+        from graphics.graphics_render import render_entry
+        entry = _gfx(kind="punch-shout-lockup", spec={"payload": "Creating"})
+        with tempfile.TemporaryDirectory() as temporary, mock.patch("subprocess.run") as run:
+            with self.assertRaisesRegex(ValueError, "punch-shout-lockup.*retired"):
+                render_entry(entry, temporary)
+            self.assertEqual(list(Path(temporary).iterdir()), [])
+        run.assert_not_called()
+        self.assertFalse(self.COMP.exists())
 
     def test_tokens_css_carries_lemon_and_serif_display(self) -> None:
         css = self.TOKENS.read_text(encoding="utf-8")

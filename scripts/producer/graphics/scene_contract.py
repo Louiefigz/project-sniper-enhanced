@@ -276,7 +276,7 @@ def _provenance(value: object) -> None:
 
 def validate_scene(scene: object) -> dict:
     """Validate all non-template-specific SceneSpecV1 invariants."""
-    row = _object(scene, "scene", _ROOT_KEYS)
+    row = _object(scene, "scene", _ROOT_KEYS | {"visualSources"})
     _required(row, "scene", _ROOT_KEYS)
     if row["schemaVersion"] != SCHEMA_VERSION:
         raise SceneContractError("scene.schemaVersion must be 1")
@@ -288,6 +288,8 @@ def validate_scene(scene: object) -> dict:
             "overlay-alpha", "takeover-opaque", "presenter-hole"}:
         raise SceneContractError("scene.renderMode is unsupported")
     _composition(row["composition"])
+    from graphics.visual_source_policy import require_scene_sources
+    require_scene_sources(row)
     element_ids = _elements(row["elements"])
     _render_units(row["renderUnits"], element_ids)
     if row["captionPolicy"] not in {"preserve", "suppress-overlap"}:

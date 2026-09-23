@@ -165,7 +165,7 @@ class SourceTimeBoundaryTests(unittest.TestCase):
         self.assertEqual(mapped[0]["trigger"], "topic-boundary")
         self.assertAlmostEqual(mapped[0]["outSpan"][0], 11.0, places=2)  # 30->10, +1
 
-    def test_source_boundaries_replace_output_time_hits(self) -> None:
+    def test_source_boundaries_do_not_automatically_select_retired_section_marker(self) -> None:
         # The output words carry an 'Okay. So' that WOULD fire a boundary; when
         # source boundaries are supplied it is discarded for the mapped one, so
         # the topic boundary lands at 5.0s (source-mapped), not 0.0s (output hit).
@@ -176,8 +176,7 @@ class SourceTimeBoundaryTests(unittest.TestCase):
         cands, _ = gp.assemble(words, "longform", 10.0, {},
                                lambda t: (None, None), 1.5, src_b)
         tb = [c for c in cands if c["trigger"] == "topic-boundary"]
-        self.assertEqual(len(tb), 1)                         # not doubled
-        self.assertAlmostEqual(tb[0]["outStart"], 5.0, places=1)
+        self.assertEqual(tb, [])  # Planning hints cannot select a retired visual.
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

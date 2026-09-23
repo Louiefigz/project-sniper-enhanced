@@ -7,7 +7,7 @@
       "roots": ["scripts/producer"],
       "suffixes": [".py"],
       "token": "admit_external_media(",
-      "expectedOccurrenceCount": 4
+      "expectedOccurrenceCount": 5
     },
     {
       "ruleId": "external-media-sandbox-alias",
@@ -493,6 +493,33 @@
       ],
       "ownership": [],
       "notes": "Vendored source/runtime assets are trusted build closure, not operator external ingress; their bytes remain toolchain/source-closure authority."
+    },
+    {
+      "id": "render-readiness-preview",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "scripts/infra/plan-readiness.ts",
+        "scripts/producer/readiness_preview.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/headless/admission_receipt.py",
+        "src/lib/server/plan-readiness.ts"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "scripts/producer/tests/test_readiness_preview.py",
+        "src/lib/server/__tests__/plan-readiness.test.ts"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox",
+          "path": "scripts/producer/readiness_preview.py",
+          "sourceToken": "admit_external_media(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Bounded pre-render preview admission uses the native media jail. Retained evidence is validated by the shared admission reader. Preview decoding alone does not grant editorial or final render approval."
     }
   ],
   "invariants": [

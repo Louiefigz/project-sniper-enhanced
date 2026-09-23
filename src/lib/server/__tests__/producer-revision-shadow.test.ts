@@ -6,6 +6,10 @@ import path from "node:path";
 import type { EditPlan } from "@/lib/producer/edit-plan";
 import { compileTypedCompatibilityEdit } from
   "@/app/api/producer/ai-edit/typed-compatibility-edit";
+import type { TypedCompatibilityEdit } from
+  "@/app/api/producer/ai-edit/typed-compatibility-edit";
+import { applySetGraphicTextV1, parseSetGraphicTextV1 } from
+  "@/lib/producer/set-graphic-text-v1";
 import { compatibilityPlanHash } from
   "@/app/api/producer/auto-edit/compatibility-picture-identity";
 import { canonicalJsonSha256 } from "../auto-edit-hash";
@@ -84,21 +88,31 @@ try {
       requiredCleanReviews: 2,
     },
   );
-  const typed = compileTypedCompatibilityEdit(parent, {
+  assert.throws(() => compileTypedCompatibilityEdit(parent, {
     ...child,
     planVersion: 1,
+  }), /retired/);
+  // Historical TEST DTO exercises shadow storage only; no new visual edit is admitted.
+  const operation = parseSetGraphicTextV1({
+    schemaVersion: 1, operation: "SetGraphicTextV1",
+    target: { lane: "graphicsTrack", id: "g-00000001" },
+    text: "New copy", expectedCurrentText: "Old copy",
   });
-  assert.ok(typed);
+  assert.throws(() => applySetGraphicTextV1(parent, operation), /retired/);
+  const typed: TypedCompatibilityEdit = {
+    adapterVersion: 1, kind: "set-graphic-text", operation,
+    operationHash: canonicalJsonSha256(operation),
+  };
   assert.equal(typed?.operation.target.id, "g-00000001");
   assert.equal(
     child.graphicsTrack?.[0].outStart,
     parent.graphicsTrack?.[0].outStart,
-    "typed text edit has zero start-frame drift",
+    "historical TEST plans retain the authored start time",
   );
   assert.equal(
     child.graphicsTrack?.[0].outEnd,
     parent.graphicsTrack?.[0].outEnd,
-    "typed text edit has zero end-frame drift",
+    "historical TEST plans retain the authored end time",
   );
   assert.deepEqual(child.cutTrack, parent.cutTrack);
   assert.deepEqual(child.target, parent.target);

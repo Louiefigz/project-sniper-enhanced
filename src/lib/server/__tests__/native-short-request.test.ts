@@ -11,6 +11,8 @@ import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
 import { nativeShortFixture, refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
 import { readNativeShortProject, writeNativeShortProject } from "../native-short-project";
 import { POST } from "../../../app/api/producer/native-short/route";
+import { refreshVisualSourceFixture } from "./_visual-source-fixture";
+import { assertNativeVisualSources } from "../visual-source-admission";
 import { shortDirectionInstructions } from "@/lib/producer/short-direction";
 
 function fixture() {
@@ -72,6 +74,7 @@ test("requested cleanup reaches the saved project and cold reader without substi
     const result = prepareNativeShortRequest({ ...f.input, intent });
     const packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    refreshVisualSourceFixture(f.plan);
     refreshNativeAssetUseFixture(f.plan);
     refreshNativePrebuildReviewFixture(f.plan);
     const destination = path.join(f.directory, "assembled-with-cleanup");
@@ -92,6 +95,9 @@ test("prepared request binds the real writer and cold reader to style and transc
   try {
     const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    assert.throws(() => assertNativeVisualSources(f.plan), /current request packet/);
+    refreshVisualSourceFixture(f.plan);
+    assert.deepEqual(f.plan.visualSources!.request, f.plan.requestPacket);
     refreshNativeAssetUseFixture(f.plan);
     refreshNativePrebuildReviewFixture(f.plan);
     const project = writeNativeShortProject(f.plan, path.join(f.directory, "assembled"));
@@ -130,6 +136,7 @@ test("native assembly cannot silently discard requested audio work or override d
       const result = prepareNativeShortRequest({ ...f.input, intent: { ...f.intent, ...extra } });
       const packet = path.join(result.directory, "SHORT-REQUEST.json");
       f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+      refreshVisualSourceFixture(f.plan);
       refreshNativeAssetUseFixture(f.plan);
       refreshNativePrebuildReviewFixture(f.plan);
       assert.throws(() => writeNativeShortProject(f.plan, path.join(f.directory, "blocked")), /requested music|lane ownership/);
@@ -157,6 +164,7 @@ function suppliedPicture(f: ReturnType<typeof fixture>, include = true) {
 function bindPrepared(f: ReturnType<typeof fixture>) {
   const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
   f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+  refreshVisualSourceFixture(f.plan);
   refreshNativeAssetUseFixture(f.plan);
   refreshNativePrebuildReviewFixture(f.plan);
   return JSON.parse(readFileSync(packet, "utf8"));

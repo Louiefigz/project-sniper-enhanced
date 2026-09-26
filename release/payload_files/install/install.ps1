@@ -32,17 +32,25 @@ function Record-Tree([string]$Python, [string]$Root, [string]$Record, [string[]]
 }
 
 function Install-NpmTree([string]$Label, [string]$Root, [string]$Receipt, $Runtime) {
-    $key = "node:$(& $Runtime.Tools.Node --version)|lock:$(Get-FileSha256 (Join-Path $Root 'package-lock.json'))"
+    $packageLock = Join-Path $Root 'package-lock.json'
+    $modules = Join-Path $Root 'node_modules'
+    $treeArgs = [string[]]@('--exclude', '.cache')
+    $key = "node:$(& $Runtime.Tools.Node --version)|lock:$(Get-FileSha256 $packageLock)"
     $record = Join-Path $script:Receipts "$Receipt.tree.json"
-    if ((Test-Receipt $Receipt $key) -and (Test-Tree $Runtime.Tools.Python (Join-Path $Root 'node_modules') $record @('--exclude','.cache'))) {
+    $receiptMatches = Test-Receipt $Receipt $key
+    $treeMatches = $false
+    if ($receiptMatches) {
+        $treeMatches = Test-Tree $Runtime.Tools.Python $modules $record $treeArgs
+    }
+    if ($receiptMatches -and $treeMatches) {
         Write-Host "$Label — up to date (verified)"
         return
     }
-    Remove-Item -LiteralPath (Join-Path $Root 'node_modules') -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $modules -Recurse -Force -ErrorAction SilentlyContinue
     Push-Location $Root
     try { & $Runtime.Tools.Npm ci --no-audit --no-fund } finally { Pop-Location }
     if ($LASTEXITCODE -ne 0) { throw "Installing $Label failed." }
-    Record-Tree $Runtime.Tools.Python (Join-Path $Root 'node_modules') $record @('--exclude','.cache')
+    Record-Tree $Runtime.Tools.Python $modules $record $treeArgs
     Write-Receipt $Receipt $key
 }
 
@@ -74,7 +82,12 @@ function Receive-Browser([string]$Python) {
     $folder = Join-Path $cache "chrome-headless-shell-win64-$version"
     $binary = Join-Path $folder 'chrome-headless-shell-win64\chrome-headless-shell.exe'
     $record = Join-Path $script:Receipts 'browser.tree.json'
-    if ((Test-Receipt 'browser' "$version|$sha") -and (Test-Tree $Python $folder $record @())) {
+    $receiptMatches = Test-Receipt 'browser' "$version|$sha"
+    $treeMatches = $false
+    if ($receiptMatches) {
+        $treeMatches = Test-Tree $Python $folder $record ([string[]]@())
+    }
+    if ($receiptMatches -and $treeMatches) {
         & $binary --version *> $null
         if ($LASTEXITCODE -eq 0) { return $binary }
     }
@@ -85,7 +98,7 @@ function Receive-Browser([string]$Python) {
     Expand-Archive -LiteralPath $archive -DestinationPath $folder -Force
     & $binary --version *> $null
     if ($LASTEXITCODE -ne 0) { throw 'The pinned rendering browser does not start.' }
-    Record-Tree $Python $folder $record @()
+    Record-Tree $Python $folder $record ([string[]]@())
     Write-Receipt 'browser' "$version|$sha"
     $binary
 }

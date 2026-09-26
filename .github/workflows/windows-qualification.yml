@@ -17,6 +17,18 @@ jobs:
       - name: Assemble qualification package
         shell: pwsh
         run: python -m release.prepare_windows_qualification "$env:RUNNER_TEMP\Project Sniper Windows"
+      - name: Parse Windows PowerShell sources
+        shell: powershell
+        run: |
+          Get-ChildItem "$env:RUNNER_TEMP\Project Sniper Windows" -Filter *.ps1 -Recurse | ForEach-Object {
+            $tokens = $null
+            $parseErrors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($_.FullName, [ref]$tokens, [ref]$parseErrors) | Out-Null
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error "$($_.Extent.File):$($_.Extent.StartLineNumber): $($_.Message)" }
+              throw "PowerShell parsing failed for $($_.FullName)."
+            }
+          }
       - name: Run the buyer installer
         shell: powershell
         run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'

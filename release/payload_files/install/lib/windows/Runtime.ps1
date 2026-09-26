@@ -107,7 +107,7 @@ function Ensure-WindowsRuntime {
     $rows = @(Read-RuntimeLock)
     $paths = Get-RuntimePaths
     $marker = Join-Path $paths.Prefix '.sniper-runtime-complete'
-    if (Test-Path $marker -and (Get-Content -LiteralPath $marker -Raw).Trim() -eq $paths.Id) {
+    if ((Test-Path $marker) -and (Get-Content -LiteralPath $marker -Raw).Trim() -eq $paths.Id) {
         $tools = Get-RuntimeTools $paths.Prefix
         Test-RuntimeTools $tools
         return [pscustomobject]@{ Paths=$paths; Tools=$tools }

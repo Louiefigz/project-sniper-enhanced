@@ -26,6 +26,10 @@ class WindowsRelease(unittest.TestCase):
                  for name in approval["approved"]}
         self.assertEqual(found, approval["approved"])
 
+    def test_windows_jail_approval_bytes_keep_lf_on_windows(self) -> None:
+        attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+        self.assertIn("scripts/producer/headless/windows_media_*.cs text eol=lf", attributes)
+
     def test_windows_buyer_entry_points_exist(self) -> None:
         required = ("sniper.cmd", "sniper.ps1", "install/install.ps1", "install/doctor.ps1",
                     "install/uninstall.ps1", "install/studio.cmd", "install/studio.ps1")

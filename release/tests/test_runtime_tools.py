@@ -155,6 +155,13 @@ class InstallWorker(unittest.TestCase):
         self.assertIn("Another Sniper installer is setting up the same tools; waiting", done.stdout)
         self.assertIn("ENSURED", done.stdout)
 
+    def test_relocated_macho_files_are_adhoc_signed_then_verified(self) -> None:
+        worker = (self.pkg / "install/lib/runtime_tools_install.sh").read_text()
+        self.assertIn('/usr/bin/codesign --force --sign - "$file"', worker)
+        repair = worker.index('/usr/bin/codesign --force --sign - "$file"')
+        verify = worker.index('/usr/bin/codesign -v "$file"', repair)
+        self.assertGreater(verify, repair)
+
 
 class Preconditions(unittest.TestCase):
     """What is refused before anything is downloaded."""

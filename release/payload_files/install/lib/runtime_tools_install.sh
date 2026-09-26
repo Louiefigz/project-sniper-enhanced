@@ -72,15 +72,24 @@ add_ffmpeg() {
     || fail "Unpacking Sniper's ffmpeg failed. Run the installer again."
 }
 
-# macOS runs nothing whose signature a relocation broke; catch that here, not mid-edit.
+# Relocation leaves some Intel packages unsigned and can invalidate existing ad-hoc
+# signatures. The archives were hash checked above; seal relocated Mach-O files with
+# a local ad-hoc signature, then verify every one before any tool starts.
 check_signatures() {
-  local file bad=0
+  local file bad=0 repaired=0
   while IFS= read -r file; do
     case "$(head -c 4 "$file" | od -An -tx1 | tr -d ' \n')" in
-      cffaedfe|cafebabe) codesign -v "$file" 2>/dev/null || bad=$((bad + 1)) ;;
+      cffaedfe|cafebabe)
+        if ! /usr/bin/codesign -v "$file" 2>/dev/null; then
+          /usr/bin/codesign --force --sign - "$file" >/dev/null 2>&1 || { bad=$((bad + 1)); continue; }
+          repaired=$((repaired + 1))
+        fi
+        /usr/bin/codesign -v "$file" 2>/dev/null || bad=$((bad + 1))
+        ;;
     esac
   done < <(find "$DEPS_PREFIX/bin" "$DEPS_PREFIX/lib" -type f \( -perm +111 -o -name '*.dylib' -o -name '*.so' \))
   [ "$bad" = 0 ] || fail "$bad of Sniper's tool files have a broken code signature; run the installer again."
+  [ "$repaired" = 0 ] || say "Applied and verified local ad-hoc signatures on $repaired relocated tool files."
 }
 
 deps_paths

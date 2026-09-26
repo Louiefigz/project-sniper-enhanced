@@ -72,13 +72,13 @@ zimg but not rubberband (osxexperts also re-uses one download URL, so a pin woul
 5. `micromamba create --offline --platform "$SNIPER_RUNTIME_PLATFORM" --always-copy` from `file://` URLs with
    `#sha256:` — into `~/.project-sniper/runtimes/<first 16 hex of the lock's SHA-256>/`, with
    micromamba's HOME and root prefix inside `~/.project-sniper` (never `~/.conda`/`~/.mamba`).
-   `--platform` matters: without it micromamba does not re-sign the binaries it relocates, and Apple
-   silicon kills them (seen while qualifying; now tested).
+   `--platform` matters for selecting and relocating the matching architecture.
 6. Unpacks Sniper's ffmpeg archive after checking its SHA-256, **through a pipe**, so it does not
    inherit the download quarantine of a browser-downloaded ZIP (owner decision 2026-09-18; it is not
    notarized — PENDING-OWNER-DECISIONS item 7).
-7. Checks every Mach-O signature, runs each tool (ffmpeg's required features, tesseract's English data,
-   Python's ssl/sqlite3), writes a SHA-256 record of every file, then the completion marker.
+7. Applies a local ad-hoc signature to any Mach-O file left unsigned or invalid after relocation,
+   verifies every Mach-O signature, runs each tool (ffmpeg's required features, tesseract's English
+   data, Python's ssl/sqlite3), writes a SHA-256 record of every file, then the completion marker.
 8. Under the maintenance lock, every run re-verifies the whole folder (about 16,600 files in ~1.5 s) and
    reinstalls it from the checked downloads if anything changed. The doctor does the same check and
    confirms each tool PATH finds is inside the folder.
@@ -104,7 +104,5 @@ CONDA_*/MAMBA_*, FONTCONFIG_* and TESSDATA_PREFIX (a certificate bundle set for 
   release with a re-solved lock.
 - **Size.** About 300 MB downloaded and 1.2 GB on disk for the tools (tesseract's language data is most
   of it).
-- **Tested boundary.** The Apple-silicon runtime has run on this developer Mac on macOS 26. The Intel
-  runtime, custom ffmpeg and required feature checks pass under Rosetta on that Mac; a native Intel
-  clean-Mac installation is still required. Windows is not implemented: the mandatory media-admission
-  sandbox must first gain a native Windows no-network/file-isolation adapter and be qualified there.
+- **Tested boundary.** The Apple-silicon runtime has run on this developer Mac on macOS 26. Native
+  Intel and Windows qualification status is recorded in the release notes and qualification evidence.

@@ -79,6 +79,14 @@ function Enter-SniperEnvironment([hashtable]$Settings) {
     }
     $env:PKG_ROOT = $script:PackageRoot
     $env:APP_DIR = $script:PackageRoot
+    $connection = Join-Path $script:RuntimeDir 'deepgram.env'
+    if (Test-Path $connection) {
+        foreach ($line in Get-Content -LiteralPath $connection) {
+            if (-not $line -or $line.StartsWith('#')) { continue }
+            $at = $line.IndexOf('=')
+            if ($at -gt 0) { [Environment]::SetEnvironmentVariable($line.Substring(0,$at),$line.Substring($at+1),'Process') }
+        }
+    }
     foreach ($name in @('PYTHONHOME','PYTHONPATH','PYTHONSTARTUP','PYTHONUSERBASE','NODE_OPTIONS','NODE_PATH',
             'CONDA_PREFIX','CONDA_DEFAULT_ENV','MAMBA_ROOT_PREFIX','OPENAI_API_KEY','ANTHROPIC_API_KEY')) {
         Remove-Item "Env:$name" -ErrorAction SilentlyContinue

@@ -34,6 +34,13 @@ if (-not (Test-Path $python)) {
 }
 $lock = Join-Path $root 'scripts\infra\sniper_lock.py'
 $state = Join-Path $root 'runtime\state'
+if ($Command[0] -eq 'connections') {
+    $setup = Join-Path $root 'install\lib\deepgram_setup.py'
+    & $python $lock exec --state-dir $state --mode exclusive --label 'connection setup' `
+        --busy-message 'A Sniper command is running. Let it finish, then try again.' -- `
+        $python $setup @($Command | Select-Object -Skip 1)
+    exit $LASTEXITCODE
+}
 & $python $lock exec --state-dir $state --mode shared --label "sniper $($Command[0])" `
     --busy-message 'Sniper is being installed, repaired, cleaned or removed.' -- @Command
 exit $LASTEXITCODE

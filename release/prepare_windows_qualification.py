@@ -26,7 +26,7 @@ def assemble(destination: Path) -> None:
     stage_tree(ROOT, destination, StageReport())
     shutil.copytree(payload.PAYLOAD, destination, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"))
-    chrome = payload.chrome_version(ROOT)
+    chrome = json.loads(pins.BROWSER_PIN.read_text(encoding="utf-8"))["version"]
     node = node_requirements(ROOT)
     windows = runtime_tools.check("win-64")
     components = {

@@ -100,7 +100,7 @@ def connect(path: Path) -> None:
         return
     verify_key(key)
     save_connection(path, key)
-    print("Deepgram key accepted and saved privately on this Mac.")
+    print("Deepgram key accepted and saved privately on this computer.")
     print("This checks the key, not your balance or permission for every model.")
 
 
@@ -139,7 +139,7 @@ def main() -> int:
     if args.if_needed and path.exists():
         return 0
     if not sys.stdin.isatty() or not sys.stdout.isatty():
-        print("Deepgram setup needs a Terminal window. Double-click install/setup.command.")
+        print("Deepgram setup needs an interactive Terminal or PowerShell window.")
         return 1
     try:
         configure(path)

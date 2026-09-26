@@ -7,11 +7,11 @@
   no web page, no copy of Codex or Claude installed by Sniper and nothing to sign in to: your
   own agent, on your own subscription and whatever version you have, reads Sniper's
   instructions and skills from the folder and does the editorial thinking.
-- **`./sniper`** runs every Sniper command with Sniper's own tools and settings, whatever else
-  is on your Mac. `./sniper setup` installs or repairs; `./sniper doctor` checks.
+- **One launcher per shell:** `./sniper` on macOS and `sniper.cmd` on Windows run every
+  Sniper command with Sniper's own tools and settings. `setup` installs or repairs; `doctor` checks.
 - **Set up from the conversation.** Say “Set up Sniper”; your agent runs the installer. Double-
-  clicking `install/setup.command` still works, and is where the optional Deepgram key is
-  entered (a hidden prompt, never a chat).
+  clicking `install/setup.command` still works on macOS. On Windows, use `sniper.cmd setup` and
+  `sniper.cmd connections`; the optional Deepgram key uses a hidden prompt, never a chat.
 - **Projects live in the Sniper folder** (`projects/`) by default, where Codex's own sandbox lets
   it write. Codex asks you to approve running Sniper's video check outside its sandbox (macOS
   does not nest sandboxes); the check itself stays sandboxed.
@@ -23,33 +23,39 @@
 ### Sniper installs its own tools
 - **Nothing to install first.** Setup downloads Sniper's own Python 3.14.4, Node 24.21.0,
   whisper.cpp 1.9.3, tesseract 5.5.3, yt-dlp 2026.08.19 and git 2.55.0 from conda-forge (about
-  300 MB), checks every file against the SHA-256 recorded for this release, and installs them
-  into `~/.project-sniper`. Homebrew, Xcode, Python and Node are no longer needed, and your own
+  platform-specific download), checks every file against the SHA-256 recorded for this release,
+  and installs them into `~/.project-sniper` on macOS or `%LOCALAPPDATA%\ProjectSniper` on Windows.
+  Homebrew, Xcode, Python and Node are no longer needed, and your own
   copies are never used or changed — even when they come first on your PATH.
-- **Sniper's own ffmpeg 8.0.3.** The renderer needs the zscale and rubberband filters, which no
+- **Pinned ffmpeg with the required filters.** On macOS, the renderer uses Sniper's FFmpeg 8.0.3
+  build because it needs zscale and rubberband, which no
   ready-made Mac build carries, so Sniper builds ffmpeg from the unmodified FFmpeg and Rubber Band
   sources. It ships in `install/deps/` with its complete source in `third-party/sources/` (GPL).
-  It is not yet signed with an Apple Developer ID.
+  It is not yet signed with an Apple Developer ID. Windows setup downloads the pinned BtbN
+  FFmpeg 8.1.3 GPL build and verifies its size, SHA-256 and required features.
 - **Checked on every run.** The installer and the doctor re-check every file of the tools
   against what was installed and that each tool runs; a changed file is reinstalled from the
   checked downloads. An interrupted download resumes.
-- **One package for Apple silicon and Intel Macs.** Setup detects the processor and selects the
-  matching hash-locked runtime, custom ffmpeg and rendering browser: macOS 13.5 or newer on Apple
-  silicon, or macOS 14 or newer on Intel. The Intel build and feature checks pass through Rosetta
-  on the developer Mac; a native Intel installation remains unqualified. Windows is not in rc4.
+- **One dynamic package for Apple silicon, Intel Mac and Windows x64.** Setup detects the target
+  and selects its hash-locked runtime, ffmpeg and rendering browser: macOS 13.5+ on Apple silicon,
+  macOS 14+ on Intel, or 64-bit Windows 10 22H2 (build 19045)+. Intel build and feature checks pass
+  through Rosetta; a native Intel installation remains unqualified. The Windows setup lane parses
+  on Windows PowerShell 5, performs a clean install, reruns for idempotence, runs the full doctor
+  and proves the launcher on Windows Server 2025.
 - Folders of the same release share one copy of the tools; uninstalling the last one removes it.
 - git is still in the tool set but nothing uses it any more; it goes at the next tool update.
 
 ### Footage admission without Docker
-- **Every video Producer edits is checked on your Mac, in a macOS sandbox.** Before a
+- **Every video Producer edits is checked in a native OS sandbox.** Before a
   Producer edit (or a deep reference study) reads a file, Sniper copies it into the project and
   fully decodes it with Sniper's own ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
   start other programs, reads only that one file and the decoder's own libraries,
   and cannot see other processes. A memory and CPU watchdog stops a runaway decode.
-  Docker is no longer needed.
+  Docker is no longer needed. macOS uses Seatbelt; Windows uses a disposable AppContainer with
+  no network capabilities, a one-process Job Object and bounded memory, CPU, output and wall time.
 - Not covered: Segmenter, Clipper and the quick measurements of a reference video read the
   file directly with Sniper's own ffmpeg and Whisper, outside that sandbox.
-- `./sniper doctor` admits a generated sample on your Mac and confirms the
+- `./sniper doctor` or `sniper.cmd doctor` admits a generated sample and confirms the
   sandbox refuses a network connection and another file's contents, and stops a
   decode above its memory limit.
 
@@ -64,7 +70,7 @@
 - If the measurement cannot run, or its result would fail the transcript timing checks, the
   unrefined transcript is kept and the result says so (`provenance.speechEdges`).
 
-### What leaves your Mac
+### What leaves your computer
 - What your agent reads and sends in your conversation (transcripts, plans, still frames of the
   rendered edit that it or a reviewer looks at) goes to its provider under your account. Sniper's
   own commands call no provider and upload no video.
@@ -78,6 +84,14 @@
 - A reference adaptation needs the current project's selected reference. A custom
   visual needs a documented capability or quality gap found after inspecting the
   catalog. Neither route permits reusing a retired template under a new name.
+- **Analyzed references can carry a style vocabulary.** After the agent inspects
+  the reference evidence and actual catalog sources, it can save purpose-based
+  families of compatible treatments. Short, Long and ordinary Producer plans
+  record the chosen family, contender, configuration, information development,
+  alternatives and repeat reason. Related Shorts use an explicit frozen shared
+  allocation or exact completed predecessor records, so a series can stay
+  coherent without reusing one formula. These records are planning/review
+  evidence; they do not qualify verified mimicry or visual quality by themselves.
 - **Review before the final render.** Ordinary edits and native HyperFrames projects
   prepare continuous context clips for review. Revisions can reuse unchanged work
   when its source and render settings still match; shared changes invalidate the
@@ -113,7 +127,8 @@
   `./sniper` command, the doctor or a render is running, and say what is in use (a real lock).
 - **Truthful uninstall.** A failed removal stops and says so; your settings, projects and
   export-recovery history are kept.
-- **Studio through `install/studio.command`**, with this install's settings.
+- **Studio through `install/studio.command` on macOS or `install\studio.cmd` on Windows**,
+  with this install's settings.
 - The doctor checks tesseract and yt-dlp (reference features) and runs a real media
   admission sample instead of checking for Docker.
 
@@ -134,7 +149,7 @@
 ### Installer
 - Builds the app during install, so `start.command` has something to start.
 - Each step records what it finished with and is redone when its inputs change or it
-  never finished. The speech model is reused from an identical copy on the Mac, resumes
+  never finished. The speech model is reused from an identical local copy, resumes
   an interrupted download, and fails the install on a checksum mismatch.
 - The chosen subscription is recorded and used consistently by sign-in, the checker and
   the app. `sign-in.command`, `editor.command` and `use-provider.command` run the pinned

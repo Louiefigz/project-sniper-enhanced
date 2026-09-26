@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What leaves your Mac</title>
+<title>What leaves your computer</title>
 <link rel="stylesheet" href="manual.css">
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <p class="kicker">Manual · 9 of 10</p>
-  <h1>What leaves your Mac, and what does not</h1>
+  <h1>What leaves your computer, and what does not</h1>
   <p class="lede">Checked against the code in this package, feature by feature. Read this before you edit anything confidential.</p>
 </header>
 
 <div class="ok">
 <p><strong>Sniper's own commands never upload a video file, and audio leaves only if you
 explicitly authorize the optional paid Deepgram transcription.</strong> Rendering, speech-to-text
-and the media work run on this Mac. You edit by talking to your own Codex or Claude Code: what it
+and the media work run on this computer. You edit by talking to your own Codex or Claude Code: what it
 reads and sends in that conversation — transcripts, plans, still frames it looks at — goes to its
 provider under your account, as any conversation with it does.</p>
 </div>
@@ -34,8 +34,8 @@ upload video or audio, but that is an instruction, not something Sniper's code c
 
 <h2>Feature by feature</h2>
 <table>
-<tr><th>Feature</th><th>What leaves your Mac, and to whom</th><th>How it is enforced</th></tr>
-<tr><td>Speech-to-text</td><td><strong>Nothing.</strong> whisper.cpp runs on this Mac with a
+<tr><th>Feature</th><th>What leaves your computer, and to whom</th><th>How it is enforced</th></tr>
+<tr><td>Speech-to-text</td><td><strong>Nothing.</strong> whisper.cpp runs on this computer with a
 model the installer put there. It never downloads a model during a job and never falls back
 to a paid service.</td><td><code>scripts/asr_policy.py</code>,
 <code>scripts/local_whisper.py</code></td></tr>
@@ -52,11 +52,13 @@ sandbox</td></tr>
 instructions — to your agent's provider. No API key is involved.</td>
 <td>Your agent's own permissions</td></tr>
 <tr><td>Every video Producer edits</td><td><strong>Nothing.</strong> Before any edit reads it,
-Sniper copies it into the project and decodes it inside a macOS sandbox with no network, no
-writes and access to that one file only.</td><td><code>scripts/producer/headless/native_media_jail.py</code>;
-<code>./sniper doctor</code> checks it</td></tr>
+Sniper copies it into the project and decodes it in an OS sandbox with no network, no writes and
+access to that one file only: macOS Seatbelt on Mac or a disposable AppContainer on Windows.</td>
+<td><code>scripts/producer/headless/native_media_jail.py</code> and
+<code>windows_media_jail.cs</code>; <code>./sniper doctor</code> or
+<code>sniper.cmd doctor</code> checks it</td></tr>
 <tr><td>Adding a reference from a link</td><td><strong>A download.</strong> The video is
-fetched to this Mac from the YouTube, Instagram or TikTok link you give (HTTPS only, up to
+fetched to this computer from the YouTube, Instagram or TikTok link you give (HTTPS only, up to
 1080p and 2 GB) with <code>yt-dlp</code>, which contacts that site and its media servers.
 Studying it happens locally.</td><td><code>scripts/producer/study/fetch_reference.py</code></td></tr>
 <tr><td>Chrome cookies for a reference link</td><td><strong>Your browser session, to that
@@ -68,10 +70,8 @@ default.</td><td>A per-fetch switch, off by default (<code>--allow-cookies</code
 <tr><td>Capturing a public website for b-roll</td><td><strong>Page requests.</strong> Used when
 a Short's media sources are set to public web (the default is local only): a fresh headless
 browser with no cookies or sign-in loads the pages the plan names and records the scroll on
-this Mac. It sends ordinary page requests to those sites, nothing of yours.</td><td>A macOS
-sandbox profile that allows only secure web connections
-(<code>scripts/producer/studio/web_capture.sb</code>); the list of allowed sites is checked by
-the capture script, not by the sandbox</td></tr>
+this computer. It sends ordinary page requests to those sites, nothing of yours.</td><td>On macOS,
+a sandbox profile allows only secure web connections. This capture route is not yet qualified on Windows.</td></tr>
 <tr><td>A brand icon for a graphic</td><td><strong>The icon's name, to Simple Icons.</strong>
 When a plan uses a brand logo (for example a product the video mentions) that is not among the
 icons shipped with Sniper, your agent fetches that one icon by name from
@@ -79,23 +79,23 @@ icons shipped with Sniper, your agent fetches that one icon by name from
 yours is sent. (The generic Lucide icons all ship with Sniper; only re-downloading them on
 purpose with <code>icon_lucide.py vendor</code> contacts <code>unpkg.com</code>.)</td><td>Only that
 command downloads, one named icon at a time (<code>scripts/producer/planner/icon_library.py</code>:
-<code>resolve</code> only for a brand not yet on this Mac, <code>fetch</code> every time it is run);
-plan checks and renders read icons already on this Mac and never download</td></tr>
+<code>resolve</code> only for a brand not yet on this computer, <code>fetch</code> every time it is run);
+plan checks and renders read icons already on this computer and never download</td></tr>
 <tr><td>Deepgram transcription <span class="tag">optional, paid</span></td><td><strong>Uploads
 your audio</strong> to Deepgram, billed by Deepgram on your own key — only when you
 explicitly authorize Deepgram for a transcription. Local transcription is the default, and a
 saved key or setting alone never authorizes it. You connect, replace or remove the key privately
-with <code>install/setup.command</code>, in Terminal.</td>
+with <code>install/setup.command</code> on macOS or <code>sniper.cmd connections</code> on Windows.</td>
 <td>A transcription run needs the paired paid-transcription switches for that one run
 (<code>scripts/asr_policy.py</code>); nothing falls back to it</td></tr>
 <tr><td>Installing and setup</td><td><strong>Downloads, and one optional key check.</strong>
 Sniper's own tools (Python, Node, whisper.cpp, tesseract, yt-dlp, git and the libraries its ffmpeg
 uses) from conda-forge's server <code>conda.anaconda.org</code>, packages from the npm and Python
 registries, the rendering browser from Google's Chrome for Testing and the speech model from
-Hugging Face. Like any download, each request shows those servers this Mac's address and which
+Hugging Face. Like any download, each request shows those servers this computer's address and which
 file it wants. If you connect Deepgram, the key is checked once against Deepgram's HTTPS
 authentication endpoint; no audio or other media is sent. None of your files or text is
-sent.</td><td><code>install/install.command</code></td></tr>
+sent.</td><td><code>install/install.command</code> on macOS or <code>install\install.ps1</code> on Windows</td></tr>
 <tr><td>Framework usage statistics</td><td><strong>Switched off</strong> for the HyperFrames
 command-line tools that render and for the HyperFrames Studio page.</td>
 <td><code>HYPERFRAMES_NO_TELEMETRY</code> in <code>runtime/sniper.env</code>; for Studio, Sniper's
@@ -124,12 +124,13 @@ transcript, the rules and the project, and runs Sniper's commands. What that mea
   and asks you before running a command you have not allowed.</li>
   <li><strong>Codex</strong> runs commands in its own sandbox, which limits where it can write
   (normally the Sniper folder, where your projects are), not what it can read. Sniper's video
-  check starts its own macOS sandbox, which cannot start inside Codex's, so Codex asks you to
+  check starts its own macOS sandbox on Mac, which cannot start inside Codex's, so Codex asks you to
   approve running that step outside its sandbox; the check itself still runs sandboxed. A full
   edit through Codex has not yet been run for this release.</li>
 </ul>
-<p>Sniper's macOS video/audio sandbox cannot wrap your agent: macOS does not allow a sandbox inside
-a sandbox. If a still frame of a recording must never leave your Mac, do not edit that recording
+<p>Sniper's video/audio sandbox wraps the media decoder, not your agent. On macOS, the OS does not
+allow that sandbox inside another one; on Windows the decoder uses a disposable AppContainer.
+If a still frame of a recording must never leave your computer, do not edit that recording
 with Sniper; the rendered review sends frames every time.</p>
 
 <h2>What that means in practice</h2>

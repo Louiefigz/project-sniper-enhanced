@@ -10,7 +10,7 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     sharing or giving away Sniper; no reuse of its code in another paid product.
   - Base update rights: N1, the purchased release only.
   - Refunds: 14 days, unconditional.
-  - Media admission runs natively on macOS with no mandatory Docker (route B of the
+  - Media admission runs natively on macOS and Windows with no mandatory Docker (route B of the
     maintainer's sandbox-runtime decision record, not shipped).
   - The saved styles and the editing doctrine are re-authored as original material.
   - HyperFrames Studio's analytics are switched off by default (decided 2026-09-18);
@@ -33,7 +33,8 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     retired app).
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
-  - Footage admission: a native macOS sandbox, checked by install/doctor.command.
+  - Footage admission: native macOS Seatbelt and Windows AppContainer sandboxes, checked by
+    the platform doctor.
     Two independent security reviews found nothing blocking.
   - Creator/teacher-derived doctrine: the Restrained, Punch and Slideware
     specifications and the module, editcraft, short-form and reference-style
@@ -47,12 +48,13 @@ STILL OPEN — each blocks release
      also distributes a GPL-3.0-or-later program (Sniper's ffmpeg build, with its complete
      source in third-party/sources/); the reviewed licence must not appear to restrict it.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
-  3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
-     silicon has run a complete install. The package now contains independent Apple-silicon
-     (macOS 13.5+) and Intel (macOS 14+) locks, custom ffmpeg builds and browser selections;
-     the Intel executables pass under Rosetta, but still need a native Intel clean-Mac run.
-     Windows needs a native no-network media-admission adapter and Windows qualification before
-     it can be advertised. Buyers' Codex or Claude Code also have requirements Sniper cannot control.
+  3. SUPPORTED PLATFORM BOUNDARY (input R): Apple silicon remains the developer platform.
+     The package contains independent Apple-silicon (macOS 13.5+), Intel (macOS 14+) and
+     Windows x64 (Windows 10 build 19045+) locks, ffmpeg selections and browsers. Intel executables
+     pass under Rosetta but still need a native Intel clean-Mac run. Windows setup, rerun, doctor,
+     launcher and native media AppContainer are qualified on Windows Server 2025; complete Short
+     and long-form production edits on Windows remain acceptance work. Buyers' Codex or Claude Code
+     also have requirements Sniper cannot control.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
      under Studio's timeline editor. A clarification request to the publisher is
@@ -77,6 +79,6 @@ NOT OWNER DECISIONS — acceptance still outstanding
     long-form, with a revision), accepted in the qualification record kept outside this
     package.
   - Human playback, listening and Studio checks of those edits.
-  - Clean-Mac install and an outside operator following the manual.
+  - Clean-Mac install (including native Intel) and an outside operator following the manual.
   - Authenticated delivery of the exact bytes.
   - Listen to assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.

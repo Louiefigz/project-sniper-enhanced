@@ -15,15 +15,18 @@
 </header>
 <h2>Step 0 — check the download is the file it should be</h2>
 <p>Beside the download there is a checksum file. Compare it with the archive you received:</p>
-<pre><code>shasum -a 256 project-sniper-&lt;version&gt;-mac.zip</code></pre>
+<pre><code>macOS:   shasum -a 256 project-sniper-&lt;version&gt;.zip
+Windows: Get-FileHash project-sniper-&lt;version&gt;.zip -Algorithm SHA256</code></pre>
 <p>The value must match the one in <code>SHA256SUMS</code>. If it does not, the file is
 incomplete or altered — download it again and do not install it. The real checksum is
 only ever published outside the archive; a hash inside a file cannot verify that file.</p>
 
 <h2>Step 1 — unzip somewhere sensible</h2>
-<p>Your home folder or <code>~/Applications</code> is fine. Two constraints:</p>
+<p>Your home folder or <code>~/Applications</code> is fine on macOS. On Windows, use a normal local
+folder such as <code>C:\Users\you\Project Sniper</code>. Two constraints:</p>
 <ul>
-  <li><strong>No comma, apostrophe, colon or backslash in the folder path.</strong> The
+  <li><strong>No comma or apostrophe in the folder path. On macOS, also avoid a colon or
+  backslash.</strong> The
   audio-cleanup filter embeds this folder's path and cannot handle those characters. Any other
   character — spaces, accents, <code>$</code>, quotes — is fine: Sniper stores its settings
   literally. The installer checks and tells you if the path is unusable; this is a known limit,
@@ -38,56 +41,60 @@ only ever published outside the archive; a hash inside a file cannot verify that
 <p>Sniper brings its own tools. The first setup downloads them from
 <a href="https://conda-forge.org">conda-forge</a> (the open-source package collection), checks every
 file against the SHA-256 recorded for this release before using it, and installs them into
-<code>~/.project-sniper</code>. You do not need Homebrew, Xcode, Python, Node or any of these:</p>
+<code>~/.project-sniper</code> on macOS or <code>%LOCALAPPDATA%\ProjectSniper</code> on Windows.
+You do not need Homebrew, Xcode, Python, Node or any of these:</p>
 <table>
 <tr><th>Tool</th><th>Version</th><th>Needed for</th></tr>
 <tr><td>Python</td><td>3.14.4</td><td>the editing engine</td></tr>
 <tr><td>Node</td><td>24.21.0 (LTS)</td><td>rendering and Sniper's own scripts</td></tr>
-<tr><td>ffmpeg and ffprobe</td><td>8.0.3, Sniper's own build</td><td>every render</td></tr>
+<tr><td>ffmpeg and ffprobe</td><td>8.0.3 Sniper build on macOS; 8.1.3 BtbN GPL build on Windows</td><td>every render</td></tr>
 <tr><td>whisper.cpp</td><td>1.9.3</td><td>local transcription</td></tr>
 <tr><td>tesseract</td><td>5.5.3</td><td>studying a reference video (reading its on-screen text)</td></tr>
 <tr><td>yt-dlp</td><td>2026.08.19</td><td>adding a reference from a YouTube, Instagram or TikTok link</td></tr>
 <tr><td>git</td><td>2.55.0</td><td>nothing any more (left in this release's tool set; removed in a later update)</td></tr>
 </table>
-<p>About 300 MB is downloaded once; the tools take about 1.2 GB on disk. Your own Homebrew,
+<p>The platform runtime is downloaded once (the Windows lock is about 0.57 GiB before the browser,
+model and JavaScript packages; totals vary by platform). Your own Homebrew,
 Python, Node or conda are not used or changed, even when they come first on your PATH. Sniper
 folders of the same release share one copy of the tools; uninstalling the last of them removes it.
 If the download stops, run setup again: it resumes and checks what arrived.</p>
-<p><strong>Which Macs.</strong> Setup detects the processor and installs the matching locked tools:
-macOS 13.5 or newer on Apple silicon, or macOS 14 or newer on Intel. Apple silicon has run on the
-developer Mac with macOS 26. The Intel tools were built and exercised there through Rosetta, but a
-native Intel Mac installation is still a required qualification run. On an older macOS or another
-operating system, setup stops before downloading anything and says why.</p>
-<p><strong>Your home folder path must not contain a space</strong> (macOS account names never do):
-the tools live there because Studio needs a Node path without spaces, and this folder may have them.</p>
-<p><strong>Sniper's ffmpeg.</strong> The renderer needs two ffmpeg filters (zscale and rubberband)
-that no ready-made Mac build carries, so Sniper builds ffmpeg itself from the unmodified FFmpeg 8.0.3
-and Rubber Band 4.0.0 sources. It ships in this download (<code>install/deps/</code>), with those
-sources in <code>third-party/sources/</code> (GPL) and the build recipe inside the ffmpeg archive
-(<code>share/sniper-ffmpeg/</code>). Setup checks its SHA-256 and
-installs it the same way as the downloaded tools. It is not yet signed with an Apple Developer ID.</p>
+<p><strong>Which computers.</strong> Setup selects one of three locked targets: macOS 13.5 or newer
+on Apple silicon, macOS 14 or newer on Intel, or 64-bit Windows 10 22H2 (build 19045) or newer.
+Apple silicon is the developer platform. The Intel tools are built and exercised through Rosetta,
+but a native Intel Mac installation is still a required qualification run. Windows x64 is installed
+and checked on a clean Windows Server 2025 runner. Unsupported systems stop before downloads.</p>
+<p><strong>On macOS, your home folder path must not contain a space</strong>: the shared tools live
+there because Studio needs a whitespace-free Node path. Windows uses explicit executable paths and
+does not have that restriction.</p>
+<p><strong>Sniper's ffmpeg.</strong> On macOS, Sniper ships its own FFmpeg 8.0.3 and Rubber Band
+4.0.0 build because the renderer requires zscale and rubberband. The matching source and recipe ship
+under <code>third-party/sources/</code> and inside the archive. On Windows, setup downloads the pinned
+BtbN FFmpeg 8.1.3 GPL build with those features. Every artifact is checked by size and SHA-256.
+The macOS executable is not yet signed with an Apple Developer ID.</p>
 
 <h2>Step 3 — open the folder in Codex or Claude Code and say “Set up Sniper”</h2>
 <p>You need your own Codex (a ChatGPT plan) or Claude Code (a Claude plan), desktop app or command
 line, signed in as usual. Sniper installs no copy of either and never asks you to sign in to
 anything: it runs on the subscription you already use. Open this folder there and ask:</p>
 <pre><code>Set up Sniper.</code></pre>
-<p>Your agent runs <code>./sniper setup</code> (the same as <code>install/install.command</code>),
+<p>Your agent runs <code>./sniper setup</code> on macOS or <code>sniper.cmd setup</code> on Windows,
 which takes several minutes, mostly downloads. It asks your permission before running commands, as
 it always does. <strong>With Codex</strong>, it may also ask to run a step outside its own sandbox:
-setup downloads into <code>~/.project-sniper</code>, and Sniper's video check starts its own macOS
-sandbox, which cannot start inside Codex's. Approve those; Sniper's check still runs in its own
-sandbox.</p>
+setup downloads outside the package folder. On macOS, Sniper's video check starts its own sandbox,
+which cannot start inside Codex's; approve that step outside Codex's sandbox. On Windows, untrusted
+media runs in a disposable, networkless AppContainer with bounded CPU and memory.</p>
 <p>If you prefer not to let your agent install, double-click <code>install/setup.command</code> in
 Finder instead: it does the same in a Terminal window. It is not yet signed, so the first time
 macOS stops it. On macOS 13.5–14, right-click it and choose <em>Open</em>. On macOS 15 or later that
 no longer works: after the warning, open System Settings › Privacy &amp; Security and click
 <em>Open Anyway</em> next to the message about the script. Neither route has yet been seen on a
-clean Mac.</p>
+clean Mac. On Windows, open Command Prompt or PowerShell in this folder and run
+<code>sniper.cmd setup</code>.</p>
 <p>Your projects go in this folder's <code>projects</code> folder, where Codex can work without extra
 approvals. To keep them somewhere else, run setup once with
-<code>install/install.command --workspace /path/to/folder</code> (Codex will then ask before it
-writes there).</p>
+<code>install/install.command --workspace /path/to/folder</code> on macOS or
+<code>sniper.cmd setup -Workspace C:\path\to\folder</code> on Windows (Codex may ask before it
+writes outside the open folder).</p>
 <p>What setup does, in order:</p>
 <ol>
   <li>Installs Sniper's own tools (above) — or, when they are already there, checks every one of
@@ -102,13 +109,14 @@ writes there).</p>
   <li>Downloads the exact rendering browser into <code>runtime/browser</code> and checks its
   SHA-256 against the one recorded for this release.</li>
   <li>Puts the speech model in <code>runtime/whisper</code>. If an identical copy is already on
-  your Mac it reuses it; otherwise it downloads about 465 MB. The file must match its recorded
+  your computer it reuses it; otherwise it downloads about 465 MB. The file must match its recorded
   checksum.</li>
   <li>Writes this install's settings to <code>runtime/sniper.env</code>.</li>
   <li>Builds the rendering runtime.</li>
 </ol>
-<p>Then it runs the checker (<code>./sniper doctor</code>). In a Terminal window it first offers the
-optional Deepgram connection (Step 4).</p>
+<p>Then it runs the checker (<code>./sniper doctor</code> on macOS or
+<code>sniper.cmd doctor</code> on Windows). The macOS setup window also offers the optional Deepgram
+connection; on Windows use <code>sniper.cmd connections</code> (Step 4).</p>
 <div class="ok">
 <p><strong>If it stops, run it again.</strong> Each step records what it finished with and the
 checksum of every file it produced. A step that did not finish, whose inputs changed, or
@@ -122,7 +130,8 @@ first. If something is still using this folder, setup says what and changes noth
 
 <h2>Step 4 — connect Deepgram (optional)</h2>
 <p>Local transcription is included and needs no key. If you also want Deepgram, double-click
-<code>install/setup.command</code> in Finder (or run it in Terminal) and choose
+<code>install/setup.command</code> in Finder on macOS (or run it in Terminal), or run
+<code>sniper.cmd connections</code> on Windows, and choose
 <em>Connect/replace key</em>. Create a key at <a href="https://console.deepgram.com/">Deepgram
 Console</a> and paste it at the hidden prompt — in that Terminal window, never into a conversation
 with your agent. Setup checks the key with Deepgram before saving it. A failed check keeps any
@@ -131,25 +140,27 @@ previous key. You can retry or skip.</p>
 sends no audio and does not prove your balance or every model permission. Connecting does not
 authorize paid transcription: approve it for the specific edit when you ask your agent to use
 Deepgram.</p>
-<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account, and
+<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your computer account, and
 loaded by Sniper's commands. It is not part of the diagnostic bundle. Reopen
-<code>install/setup.command</code> to replace or remove it without editing files. Removal
+the same connection command to replace or remove it without editing files. Removal
 disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
 <h3>Which model</h3>
 <p>Whatever you use in your Codex or Claude Code. Sniper does not choose or send a model; its
 instructions and skills work with either app. Your own settings for Sniper's commands (for
 example a different video folder, <code>SNIPER_WORKSPACE_ROOT='/Volumes/Work/Client $97'</code>) go
-in <code>runtime/sniper.local.env</code>, which is read as shell: put a value that contains
-<code>$</code>, a backtick, a backslash, quotes or spaces in single quotes.</p>
+in <code>runtime/sniper.local.env</code>. On macOS it is read as shell, so quote special values.
+On Windows use one literal <code>KEY=value</code> per line without shell quoting; spaces,
+<code>$</code> and backslashes are preserved as written.</p>
 
 <h2>Step 5 — make your first edit</h2>
 <p>With the Sniper folder open in Codex or Claude Code, say “Help me make my first edit from my own
 video.” Your agent reads Sniper's instructions and skills from this folder and runs Sniper's
-commands through <code>./sniper</code>, which uses Sniper's own tools whatever else is on your Mac.</p>
-<p>To check the install at any time, ask your agent to run <code>./sniper doctor</code> (or
-double-click <code>install/doctor.command</code>). The checker asks the product's own code what it
+commands through <code>./sniper</code> on macOS or <code>sniper.cmd</code> on Windows, which uses
+Sniper's own tools whatever else is on your computer.</p>
+<p>To check the install at any time, ask your agent to run <code>./sniper doctor</code> on macOS or
+<code>sniper.cmd doctor</code> on Windows. The checker asks the product's own code what it
 would use, admits a generated video sample through Sniper's own sandbox and runs a short real
-transcription of speech it generates on your Mac, without running an edit.</p>
+transcription of speech it generates on your computer, without running an edit.</p>
 
 <p class="next"><strong>Next:</strong> <a href="first-edits.html">Your first three edits &rarr;</a></p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>

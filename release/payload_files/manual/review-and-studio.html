@@ -33,12 +33,16 @@ playback.</p>
 <h2>2. Open the editable project</h2>
 <p>The graphics layer is a real editable project, not a flattened picture. This is the
 manual-control surface:</p>
-<pre><code>install/studio.command open projects/&lt;project&gt;/producer</code></pre>
+<pre><code># macOS
+install/studio.command open projects/&lt;project&gt;/producer
+
+# Windows
+install\studio.cmd open projects\&lt;project&gt;\producer</code></pre>
 <p>That builds the review project from the edit plan plus the graphics-free video, serves it
-in HyperFrames Studio on this Mac and prints its local address (<code>studio: http://localhost:&lt;port&gt;/#project/studio</code>; the server listens
-on this Mac only):
+in HyperFrames Studio on this computer and prints its local address (<code>studio: http://localhost:&lt;port&gt;/#project/studio</code>; the server listens
+on this computer only):
 open that address in your browser, or ask your agent to open it. You move panels, change timing, adjust
-what a card says. Always go through <code>install/studio.command</code>: it runs Studio with
+what a card says. Always go through the platform's <code>install/studio</code> launcher: it runs Studio with
 this install's own settings (its Node, browser and ffmpeg, and none of the API keys in your
 shell), which running the Python environment directly would skip.</p>
 <div class="note">
@@ -47,16 +51,20 @@ render your deliverable. Your footage is never re-encoded in a browser.</p>
 </div>
 
 <h3>Folding your Studio edits back in</h3>
-<pre><code>install/studio.command sync projects/&lt;project&gt;/producer --apply</code></pre>
+<pre><code># macOS: install/studio.command sync projects/&lt;project&gt;/producer --apply
+# Windows: install\studio.cmd sync projects\&lt;project&gt;\producer --apply</code></pre>
 <p>This writes your changes into the edit plan, after checking them and taking a backup.
 It then <strong>prints the exact rebuild command</strong> to run, which is:</p>
-<pre><code>install/studio.command rebuild projects/&lt;project&gt;/producer</code></pre>
+<pre><code># macOS: install/studio.command rebuild projects/&lt;project&gt;/producer
+# Windows: install\studio.cmd rebuild projects\&lt;project&gt;\producer</code></pre>
 <p>Run it to rebuild the video; only the stages your change invalidated are redone.</p>
 <pre><code># see where the lane currently is and what to do next
 install/studio.command status projects/&lt;project&gt;/producer
 
 # shut the preview server down when you are finished
 install/studio.command stop projects/&lt;project&gt;/producer</code></pre>
+<p>On Windows, replace <code>install/studio.command</code> with <code>install\studio.cmd</code>
+and use Windows path separators.</p>
 <div class="warn">
 <p><strong>Two things to know.</strong> First, syncing is not approval — after your
 graphics change, the checks and reviews run again before the result counts as finished.
@@ -77,7 +85,9 @@ one. Rebuild, then watch it again.</p>
 <tr><td><code>producer/edit_plan.json</code></td><td>The edit itself, as data</td><td><strong>Yes</strong> — this is the edit; it can rebuild the video</td></tr>
 <tr><td><code>producer/final.mp4</code></td><td>The approved video</td><td><strong>Yes</strong></td></tr>
 <tr><td><code>producer/base_final.mp4</code></td><td>The video without graphics</td><td>Optional; speeds up rebuilds</td></tr>
-<tr><td>Render caches</td><td>Regenerable working files</td><td>No — <code>install/clean-caches.command</code> lists and removes only these, and the kept downloads of Sniper's own tools (about 300 MB; without them, repairing the tools downloads them again)</td></tr>
+<tr><td>Render caches</td><td>Regenerable working files</td><td>No — on macOS,
+<code>install/clean-caches.command</code> lists and removes only these and the kept downloads of
+Sniper's own tools. Windows cache cleanup is not yet scripted.</td></tr>
 </table>
 <p>Back up your <code>projects</code> folder (or the folder you chose at setup). That is the whole
 of your work; everything else in the Sniper folder is replaceable.</p>

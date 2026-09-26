@@ -69,8 +69,11 @@ function Install-CondaRuntime($Paths, [object[]]$Rows) {
     Set-Content -LiteralPath $explicit -Value $lines -Encoding ASCII
     Remove-Item -LiteralPath $Paths.Prefix -Recurse -Force -ErrorAction SilentlyContinue
     $env:MAMBA_ROOT_PREFIX = Join-Path $Paths.Home 'mamba-root'
-    & $mamba create --no-rc -y -q -p $Paths.Prefix --offline --platform win-64 --always-copy --file $explicit | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw 'Installing the checked Windows runtime packages failed.' }
+    $arguments = @('create','--no-rc','-y','-q','-p',$Paths.Prefix,'--offline','--platform','win-64',
+        '--always-copy','--file',$explicit)
+    if ((Invoke-SniperNative $mamba $arguments) -ne 0) {
+        throw 'Installing the checked Windows runtime packages failed.'
+    }
 }
 
 function Install-WindowsFfmpeg($Paths, [object[]]$Rows) {

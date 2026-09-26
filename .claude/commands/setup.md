@@ -1,5 +1,5 @@
 ---
-description: Set up or check this Mac's Sniper install and explain the next step in plain words.
+description: Set up or check this computer's Sniper install and explain the next step in plain words.
 argument-hint: (no arguments)
 ---
 
@@ -7,6 +7,9 @@ You are helping someone set up or check Project Sniper. They may not be technica
 this folder in their own Codex or Claude Code; there is nothing else to sign in to. Sniper
 installs and repairs its own tools with `./sniper setup`. Be calm and plain-spoken; run the
 commands yourself and report back instead of pasting commands at them.
+
+Use `./sniper` on macOS and `sniper.cmd` on Windows for every command below. On Windows,
+also use `sniper.cmd connections` instead of the Finder-only connection setup.
 
 If there is no `install/` folder here, this is a developer checkout, not the packaged app:
 point them to `CLAUDE.md` § Engineering reference instead and stop.
@@ -33,15 +36,16 @@ For each line that did not pass, say in one sentence what it is and what fixes i
   `ffmpeg`, `whisper-cli`, `tesseract`, `yt-dlp`, `node`, `python3`) → `./sniper setup`; it
   redoes only what is unfinished, from checked downloads. Never install these with Homebrew or
   any other system installer instead.
-- `media admission` fails while your own sandbox is on → run `./sniper doctor` again outside
-  your sandbox, with their approval (macOS does not nest sandboxes).
+- On macOS, `media admission` fails while your own sandbox is on → run `./sniper doctor`
+  again outside your sandbox, with their approval (macOS does not nest sandboxes). Windows
+  uses the installed AppContainer jail and does not use this workaround.
 - `install in use` → a Sniper command is still running; let it finish.
 
 Do not run `npm install` or `pip install` in this folder, do not change `runtime/sniper.env`,
 and do not add or copy API keys: editing runs on their own subscription. Deepgram
 transcription is the one optional paid add-on; if they ask for it, tell them to double-click
-`install/setup.command` in Finder to enter their Deepgram key privately. Never ask for a key
-in this conversation.
+`install/setup.command` in Finder on macOS or run `sniper.cmd connections` on Windows to enter
+their Deepgram key privately. Never ask for a key in this conversation.
 
 ## Step 3 — When everything passes
 
@@ -50,6 +54,6 @@ Confirm it in one or two sentences, then tell them how to use it:
 > You're all set. Just tell me what to make — for example "cut a 45-second vertical short
 > from ~/Desktop/raw.mp4" or "clean up this long recording: <path>". The finished
 > `final.mp4` and its editable Studio project land in your video projects folder
-> (`$(./sniper workspace)`: the `projects` folder inside Sniper unless you chose another).
+> (the path printed by `./sniper workspace` on macOS or `sniper.cmd workspace` on Windows).
 
 Keep the closing short. The full manual is `manual/index.html`.

@@ -64,18 +64,21 @@ frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
 <h2>What you need</h2>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
-<tr><td>A Mac</td><td>macOS 13.5 or newer on Apple silicon, or macOS 14 or newer on Intel.
-Setup detects the processor and selects the matching pinned runtime and browser. Sniper has run on
-the developer Apple-silicon Mac with macOS 26. Its Intel runtime and ffmpeg have passed their checks
-through Rosetta there, but installation on native Intel hardware is not yet qualified.</td><td>—</td></tr>
-<tr><td>Memory</td><td>No minimum has been tested: Sniper has only run on a 64 GB Mac. Rendering
-does not start while macOS reports the Mac is short of memory, so on a Mac with less memory, close
-other large apps before a render.</td><td>—</td></tr>
-<tr><td>Disk space</td><td>About 4 GB for the install and its tools (about 1.2 GB of that in
-<code>~/.project-sniper</code>), plus room for your projects. Leave at least 20 GB free; a
+<tr><td>A supported computer</td><td>macOS 13.5 or newer on Apple silicon; macOS 14 or newer
+on Intel; or 64-bit Windows 10 22H2 (build 19045) or newer. Setup detects the platform and selects
+its matching pinned runtime and browser. Apple silicon is the developer platform. The Intel runtime
+and ffmpeg pass through Rosetta, but installation on native Intel hardware is not yet qualified.
+The Windows x64 installer is exercised on a clean Windows Server 2025 runner.</td><td>—</td></tr>
+<tr><td>Memory</td><td>No minimum has been established. The developer Mac has 64 GB. On macOS,
+rendering refuses to start when the operating system reports memory pressure; on any computer,
+close other large apps before a render.</td><td>—</td></tr>
+<tr><td>Disk space</td><td>About 4 GB for the install and its tools (stored in
+<code>~/.project-sniper</code> on macOS or <code>%LOCALAPPDATA%\ProjectSniper</code> on Windows),
+plus room for your projects. Leave at least 20 GB free; a
 full-length render uses a lot of temporary space.</td><td>—</td></tr>
 <tr><td>An internet connection for setup</td><td>Setup downloads Sniper's own tools (Python, Node,
-whisper.cpp, tesseract, yt-dlp, git — about 300 MB, each file checked against its recorded SHA-256),
+whisper.cpp, tesseract, yt-dlp and git; the Windows lock is about 0.57 GiB and platform totals vary,
+with each file checked against its recorded SHA-256),
 the rendering browser, the speech model and the JavaScript packages Sniper's scripts use; Sniper's own ffmpeg comes in this
 download. Nothing needs to be
 installed beforehand: no Homebrew, Xcode, Python or Node.</td><td>Free</td></tr>
@@ -100,8 +103,9 @@ includes every model. Both routes are supported and documented.</p>
 <div class="note">
 <p><strong>Your agent, your version.</strong> Sniper does not install or pin Codex or Claude
 Code: it works through whichever version you have. Its instructions and skills live in this folder,
-and every tool they run goes through <code>./sniper</code>, which uses Sniper's own tools
-whatever else is on your Mac. Full qualification edits through each are tracked outside this package;
+and every tool they run goes through <code>./sniper</code> on macOS or <code>sniper.cmd</code> on
+Windows, which uses Sniper's own tools whatever else is on your computer. Full qualification edits
+through each are tracked outside this package;
 <code>PENDING-OWNER-DECISIONS.txt</code> lists what is still open.</p>
 </div>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>

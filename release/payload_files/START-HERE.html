@@ -12,14 +12,15 @@
 <header class="top">
   <p class="kicker">Project Sniper</p>
   <h1>Start here</h1>
-  <p class="lede">A video editor that runs on your Mac. You describe the result in
+  <p class="lede">A video editor with one setup package for Apple silicon, Intel Mac and Windows x64.
+  You describe the result in
   plain language; it cuts, captions, adds graphics and renders a finished video —
   and gives you the editable project behind it.</p>
 </header>
 
 <div class="warn">
 <p><strong>This copy is a release candidate, not a finished product.</strong> It has not
-passed its installation test on a clean Mac, its full-length and Short output tests,
+passed every release qualification test, its full-length and Short output tests,
 or its delivery test. The licence terms in this package are a draft and are not in
 force. Read <code>RELEASE.json</code> for this build's exact status, and
 <code>PENDING-OWNER-DECISIONS.txt</code> for what is still unsettled.</p>
@@ -27,20 +28,25 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 
 <h2>Three steps</h2>
 <ol>
-  <li><strong>Check what you have.</strong> Any Mac with Apple silicon (M1 or later) that has had its
-  free macOS updates (macOS 13.5 or newer), an internet connection for the first setup, about 4 GB
+  <li><strong>Check what you have.</strong> A Mac with Apple silicon and macOS 13.5 or newer, an
+  Intel Mac with macOS 14 or newer, or a 64-bit Windows PC on Windows 10 22H2 (build 19045) or
+  newer; an internet connection for the first setup; about 4 GB
   for Sniper and its tools plus at least 20 GB free while rendering (the checks refuse less), and
   your own <strong>Codex</strong> (ChatGPT plan) <em>or</em> <strong>Claude Code</strong> (Claude
   plan), signed in as you already use it. You do not install Node, Python, ffmpeg or anything else
-  yourself: Sniper downloads and checks its own. The full list, with what costs money, is in
+  yourself: Sniper downloads and checks its own. Native Intel installation is not yet qualified;
+  the Windows x64 installer is exercised on a clean Windows Server 2025 runner. The full list,
+  with what costs money, is in
   <a href="manual/index.html">What Sniper is</a>.</li>
   <li><strong>Open this folder in Codex or Claude Code and say “Set up Sniper”.</strong> Your agent
   installs Sniper's tools (several minutes, mostly downloads), asking your permission as it goes, and
   checks the result. There is nothing to sign in to and no app to open: you talk to Sniper through
   your own agent, on your own subscription. Sniper keeps its tools in <code>~/.project-sniper</code>
+  on macOS or <code>%LOCALAPPDATA%\ProjectSniper</code> on Windows
   and everything else, including your video projects (in <code>projects</code>), inside this folder;
   your own Node, Python, Homebrew, Codex or Claude setup and login are not used or changed. You can
-  also double-click <code>install/setup.command</code> instead. Step-by-step:
+  also double-click <code>install/setup.command</code> on macOS or run
+  <code>sniper.cmd setup</code> on Windows. Step-by-step:
   <a href="manual/install.html">Install and first use</a>.</li>
   <li><strong>Make your first edit.</strong> Ask your agent. <a href="manual/first-edits.html">Your
   first three edits</a> walks a short test clip you record yourself, then a full-length video, then a
@@ -57,22 +63,20 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
   <li><a href="manual/review-and-studio.html">Reviewing the video and opening the editable project</a></li>
   <li><a href="manual/finishing.html">Finishing somewhere else (optional)</a></li>
   <li><a href="manual/troubleshooting.html">When something goes wrong</a></li>
-  <li><a href="manual/privacy.html">What leaves your Mac, and what never does</a></li>
+  <li><a href="manual/privacy.html">What leaves your computer, and what never does</a></li>
   <li><a href="manual/license-and-updates.html">Licence, updates, backup and uninstall</a></li>
 </ol>
 
 <h2>The commands, in one place</h2>
-<p>You rarely need these: your agent runs them. You can also run them in Terminal from the
-Sniper folder; setup, diagnostics, cache cleaning and uninstall can be double-clicked in Finder.</p>
+<p>You rarely need these: your agent runs them. Run the macOS form in Terminal or the Windows form
+in Command Prompt/PowerShell from the Sniper folder.</p>
 <table>
-  <tr><th>Do this</th><th>Ask your agent, or run</th></tr>
-  <tr><td>Set up, or resume an interrupted setup</td><td><code>./sniper setup</code> (or double-click <code>install/setup.command</code>)</td></tr>
-  <tr><td>Check the install and see exactly what is wrong</td><td><code>./sniper doctor</code></td></tr>
-  <tr><td>Connect, change or remove a Deepgram key (in Terminal, never in a chat)</td><td><code>install/setup.command</code></td></tr>
-  <tr><td>Review and adjust a finished edit in Studio</td><td><code>install/studio.command open &lt;project&gt;/producer</code></td></tr>
-  <tr><td>Make a support bundle to send</td><td><code>install/diagnostics.command</code></td></tr>
-  <tr><td>Free up render cache space</td><td><code>install/clean-caches.command</code></td></tr>
-  <tr><td>Remove the install (keeps your videos)</td><td><code>install/uninstall.command</code></td></tr>
+  <tr><th>Do this</th><th>macOS</th><th>Windows</th></tr>
+  <tr><td>Set up or resume setup</td><td><code>./sniper setup</code></td><td><code>sniper.cmd setup</code></td></tr>
+  <tr><td>Check the install</td><td><code>./sniper doctor</code></td><td><code>sniper.cmd doctor</code></td></tr>
+  <tr><td>Manage a Deepgram key (never paste it in chat)</td><td><code>install/setup.command</code></td><td><code>sniper.cmd connections</code></td></tr>
+  <tr><td>Open Studio</td><td><code>install/studio.command open &lt;project&gt;/producer</code></td><td><code>install\studio.cmd open &lt;project&gt;\producer</code></td></tr>
+  <tr><td>Remove the install (keeps videos)</td><td><code>install/uninstall.command</code></td><td><code>powershell -File install\uninstall.ps1</code></td></tr>
 </table>
 
 <footer class="foot">

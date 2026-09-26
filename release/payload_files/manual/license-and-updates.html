@@ -53,21 +53,23 @@ and checked against hashes recorded for this release (npm's lockfile integrity, 
 set this release was tested with or stops.</td></tr>
 <tr><td>Your provider retires a model</td><td><strong>Yours to choose.</strong> Sniper does not
 pick the model; use whatever your Codex or Claude Code offers.</td></tr>
-<tr><td>A major macOS upgrade breaks a dependency</td><td><strong>Not handled.</strong>
+<tr><td>A major macOS or Windows upgrade breaks a dependency</td><td><strong>Not handled.</strong>
 Same reason.</td></tr>
 </table>
 
 <h2>Refunds</h2>
 <p><strong>14 days, no conditions.</strong> Ask within 14 days of purchase and you get
 your money back. You do not have to prove anything or contact support first.</p>
-<p>What a refund means for the copy already on your Mac has not been settled yet; it is
+<p>What a refund means for the copy already on your computer has not been settled yet; it is
 one of the open items in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 
 <h2>Which version you have</h2>
-<pre><code>cat RELEASE.json</code></pre>
+<pre><code>macOS:   cat RELEASE.json
+Windows: Get-Content RELEASE.json</code></pre>
 <p>It records the version, the exact source it was built from (a commit and a source-tree
 id), the platform, the component versions, the rendering browser's checksums and the checksum of
-Sniper's tools lists (<code>install/deps/osx-arm64.lock</code> and <code>install/deps/osx-64.lock</code>), and — plainly — that this
+Sniper's tools lists (<code>install/deps/osx-arm64.lock</code>, <code>install/deps/osx-64.lock</code>
+and <code>install/deps/win-64.lock</code>), and — plainly — that this
 build is not approved for sale (<code>"sellable": false</code>; the open items are in
 <code>PENDING-OWNER-DECISIONS.txt</code>). Quote the <code>version</code> field whenever you
 report a problem.</p>
@@ -83,7 +85,9 @@ folder with its own <code>runtime/</code>:</p>
   <li>Before setting up the new one, decide where your projects live: either move the old
   folder's <code>projects</code> folder somewhere outside both (for example
   <code>~/SniperProjects</code>) and set up each release with
-  <code>install/install.command --workspace ~/SniperProjects</code>, or copy the projects you need
+  <code>install/install.command --workspace ~/SniperProjects</code> on macOS or
+  <code>powershell -File install\install.ps1 -Workspace C:\SniperProjects</code> on Windows,
+  or copy the projects you need
   into the new folder's <code>projects</code>. If you created <code>runtime/sniper.local.env</code>
   in the old folder, copy it into the new one first.</li>
   <li>Set up the new one beside the old one and open it in your agent. If it misbehaves, open the
@@ -95,11 +99,13 @@ understand — if you plan to go back, copy the project folder first.</p>
 
 <h2>Backup</h2>
 <p>Back up your <strong>projects folder</strong>: <code>projects</code> inside the Sniper folder,
-or the folder you chose at setup (<code>./sniper workspace</code> prints it). That is all of your
+or the folder you chose at setup (<code>./sniper workspace</code> on macOS or
+<code>sniper.cmd workspace</code> on Windows prints it). That is all of your
 work: your footage, your transcripts, your edit plans and your finished videos. The rest of the
 Sniper folder is replaceable — you can always unzip it again.</p>
 <h3>Keeping your videos somewhere else</h3>
-<p>Run setup once with <code>install/install.command --workspace /Volumes/Work/SniperVideos</code>,
+<p>Run setup once with <code>install/install.command --workspace /Volumes/Work/SniperVideos</code>
+on macOS or <code>powershell -File install\install.ps1 -Workspace D:\SniperVideos</code> on Windows,
 or put this one line in <code>runtime/sniper.local.env</code> (create the file if it does not
 exist):</p>
 <pre><code>SNIPER_WORKSPACE_ROOT=/Volumes/Work/SniperVideos</code></pre>
@@ -107,11 +113,13 @@ exist):</p>
 approval.</p>
 <h3>Moving the Sniper folder</h3>
 <p>If you move or copy the Sniper folder after installing, its scripts refuse to start
-until you run <code>install/install.command</code> once in the new place. It redoes only
+until you run <code>install/install.command</code> on macOS or <code>sniper.cmd setup</code> on
+Windows once in the new place. It redoes only
 the steps that record the folder's location, and keeps your settings.</p>
 
 <h2>Uninstall</h2>
-<pre><code>install/uninstall.command</code></pre>
+<pre><code># macOS: install/uninstall.command
+# Windows: powershell -File install\uninstall.ps1</code></pre>
 <p>Let running edits finish first; while a Sniper command still uses the folder, uninstall
 changes nothing and names what is using it. It asks you to type <code>REMOVE</code>, then removes
 what the installer created: <code>runtime/</code> (browser, speech model, the Deepgram connection,
@@ -129,8 +137,10 @@ in this folder uses the same one.</td></tr>
 <tr><td><code>templates/motion/.sniper-native-runtime/native-export-history</code></td><td>What
 an interrupted export needs to resume. A reinstall in this folder picks it up.</td></tr>
 </table>
-<p>Uninstall also removes Sniper's own tools from <code>~/.project-sniper</code>, unless another
-Sniper folder of the same release still uses them (it then says which one).</p>
+<p>On macOS, uninstall also removes Sniper's own tools from <code>~/.project-sniper</code>, unless
+another Sniper folder of the same release still uses them (it then says which one). Windows
+keeps the checked shared download/runtime cache under <code>%LOCALAPPDATA%\ProjectSniper</code>
+so another release can reuse it.</p>
 <p>To finish, delete the folder — that also deletes the kept files <strong>including your
 projects if they are in its <code>projects</code> folder</strong>, so move them first. Uninstall does
 <strong>not</strong> touch your videos, your own Node, Python, Homebrew, conda, ffmpeg, whisper,

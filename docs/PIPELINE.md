@@ -23,8 +23,10 @@ routes. Where this document or another describes them, the agent route below gov
 
 The agent route, which every Short and long-form edit now takes:
 
-1. Every engine command runs through `./sniper` from the Sniper folder (its own tools,
-   settings and maintenance lock). Setup is `./sniper setup`; `./sniper doctor` checks it.
+1. Every engine command runs through the platform launcher from the Sniper folder: `./sniper`
+   on macOS or `sniper.cmd` on Windows (its own tools, settings and maintenance lock). The
+   examples below use `./sniper`; substitute `sniper.cmd` on Windows. Setup is `setup` through
+   that launcher and `doctor` checks it.
 2. Ingest into the project's `source/` folder
    (`./sniper python3 scripts/producer/ingest.py <footage> --out <project>/source/asset_manifest.json`),
    then save the operator's request as the stored intent:
@@ -45,7 +47,8 @@ The agent route, which every Short and long-form edit now takes:
    record independent region reviews, revise, and rerun with `--preview-reviews`.
    Render/assemble or complete the native export, then Audit B on the exact output and the Audit C
    rendered review by a fresh subagent (Producer skill steps 7–7.5).
-6. Hand off the encoded video and the matching Studio project (`install/studio.command`).
+6. Hand off the encoded video and the matching Studio project (`install/studio.command` on
+   macOS or `install\studio.cmd` on Windows).
 
 On this route, **final** means the output of step 5 whose Audit B passed and whose Audit C
 review found no unresolved material issue, recorded in the conversation's handoff with the

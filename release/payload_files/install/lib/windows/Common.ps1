@@ -61,6 +61,20 @@ function Receive-VerifiedFile([string]$Url, [string]$Target, [string]$Sha, [long
     Move-Item -LiteralPath $part -Destination $Target
 }
 
+function Invoke-SniperNative([string]$Path, [object[]]$Arguments) {
+    $previous = $ErrorActionPreference
+    try {
+        # Windows PowerShell 5 surfaces native stderr as error records. Healthy
+        # npm, pip and media tools use stderr for progress and warnings.
+        $ErrorActionPreference = 'Continue'
+        & $Path @Arguments 2>&1 | Out-Host
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+    $code
+}
+
 function Add-SniperSettings([hashtable]$Values, [string]$File, [bool]$Required) {
     if (-not (Test-Path $File)) {
         if ($Required) { throw 'Sniper is not set up. Run sniper.cmd setup.' }

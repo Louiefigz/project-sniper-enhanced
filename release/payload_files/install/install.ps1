@@ -48,8 +48,8 @@ function Install-NpmTree([string]$Label, [string]$Root, [string]$Receipt, $Runti
     }
     Remove-Item -LiteralPath $modules -Recurse -Force -ErrorAction SilentlyContinue
     Push-Location $Root
-    try { & $Runtime.Tools.Npm ci --no-audit --no-fund } finally { Pop-Location }
-    if ($LASTEXITCODE -ne 0) { throw "Installing $Label failed." }
+    try { $code = Invoke-SniperNative $Runtime.Tools.Npm @('ci','--no-audit','--no-fund') } finally { Pop-Location }
+    if ($code -ne 0) { throw "Installing $Label failed." }
     Record-Tree $Runtime.Tools.Python $modules $record $treeArgs
     Write-Receipt $Receipt $key
 }
@@ -63,12 +63,16 @@ function Install-PythonEnvironment($Runtime) {
         if ($LASTEXITCODE -eq 0) { Write-Host 'Python environment - up to date (verified)'; return $venv }
     }
     Remove-Item -LiteralPath (Join-Path $script:PackageRoot '.venv') -Recurse -Force -ErrorAction SilentlyContinue
-    & $Runtime.Tools.Python -m venv (Join-Path $script:PackageRoot '.venv')
-    if ($LASTEXITCODE -ne 0) { throw 'Could not create the Python environment.' }
-    & $venv -m pip install --disable-pip-version-check --no-input --require-hashes --only-binary=:all: -r $lock | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw 'Installing the pinned Python packages failed.' }
-    & $venv -I $script:InstallTools venv-check $lock | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw 'The new Python environment does not verify.' }
+    $venvRoot = Join-Path $script:PackageRoot '.venv'
+    if ((Invoke-SniperNative $Runtime.Tools.Python @('-m','venv',$venvRoot)) -ne 0) {
+        throw 'Could not create the Python environment.'
+    }
+    $pipArgs = @('-m','pip','install','--disable-pip-version-check','--no-input','--require-hashes',
+        '--only-binary=:all:','-r',$lock)
+    if ((Invoke-SniperNative $venv $pipArgs) -ne 0) { throw 'Installing the pinned Python packages failed.' }
+    if ((Invoke-SniperNative $venv @('-I',$script:InstallTools,'venv-check',$lock)) -ne 0) {
+        throw 'The new Python environment does not verify.'
+    }
     Write-Receipt 'venv' $key
     $venv
 }
@@ -163,8 +167,7 @@ if (-not $Locked) {
         '--wait','0','--busy-message','Sniper cannot be installed while one of its commands is running.','--',
         'powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath,'-Locked')
     if ($Workspace) { $arguments += @('-Workspace',$Workspace) }
-    & $bootstrapRuntime.Tools.Python @arguments
-    exit $LASTEXITCODE
+    exit (Invoke-SniperNative $bootstrapRuntime.Tools.Python $arguments)
 }
 $mutex = [Threading.Mutex]::new($false, 'Local\ProjectSniperInstaller')
 if (-not $mutex.WaitOne([TimeSpan]::FromHours(1))) { throw 'Another Project Sniper installer did not finish within one hour.' }
@@ -187,8 +190,10 @@ try {
     $workspacePath = Write-WindowsSettings $runtime $venv $browser $model $jail
     Enter-SniperEnvironment (Read-SniperSettings)
     Write-Step '8/8  Rendering runtime'
-    & $venv (Join-Path $script:PackageRoot 'scripts\producer\studio\native_runtime.py') --repair
-    if ($LASTEXITCODE -ne 0) { throw 'The rendering runtime did not build from the shipped patch set.' }
+    $repair = Join-Path $script:PackageRoot 'scripts\producer\studio\native_runtime.py'
+    if ((Invoke-SniperNative $venv @($repair,'--repair')) -ne 0) {
+        throw 'The rendering runtime did not build from the shipped patch set.'
+    }
     Write-Receipt 'installed' $script:PackageRoot
     Write-Host "`nProject Sniper is installed. Video projects: $workspacePath"
     & (Join-Path $script:PackageRoot 'install\doctor.ps1')

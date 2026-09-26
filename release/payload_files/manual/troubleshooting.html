@@ -14,8 +14,8 @@
   <p class="lede">What to expect, what the checker tells you, and how to send something useful if you get stuck.</p>
 </header>
 <h2>First move, always</h2>
-<p>Ask your agent to run <code>./sniper doctor</code> (or double-click
-<code>install/doctor.command</code>).</p>
+<p>Ask your agent to run <code>./sniper doctor</code> on macOS or
+<code>sniper.cmd doctor</code> on Windows.</p>
 <p>It asks the product's own code which browser, ffmpeg and speech model a render would actually
 use, and prints each one. It marks a line <code>FAIL</code> only
 for something that has to work, <code>GATED</code> for an optional feature that is not
@@ -29,14 +29,15 @@ and the line says why. What this candidate does and does not do yet is listed in
 <h2>The errors you are most likely to hit</h2>
 <table>
 <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
-<tr><td><code>Sniper is not set up yet (or this folder moved). Run: ./sniper setup</code></td><td>Setup has
+<tr><td><code>Sniper is not set up yet (or this folder moved).</code></td><td>Setup has
 not finished in this folder, or the folder was moved or copied since.</td><td>Ask your agent to run
-<code>./sniper setup</code>; it redoes only what is unfinished. A <code>projects</code> folder inside
+<code>./sniper setup</code> on macOS or <code>sniper.cmd setup</code> on Windows; it redoes only
+what is unfinished. A <code>projects</code> folder inside
 Sniper moves with it: the moved or copied folder uses its own.</td></tr>
 <tr><td><code>Another Sniper command (setup, a repair, the doctor or a removal) is using this install right now.</code></td>
 <td>Setup has not finished and something is working on the install: usually setup itself, still
 running.</td><td>Let it finish, then run your command again. If it then says Sniper is not set up,
-run <code>./sniper setup</code>.</td></tr>
+run the platform's setup command.</td></tr>
 <tr><td><code>sandbox initialization failed</code> or <code>Operation not permitted</code> (Codex)</td><td>Codex
 ran a Sniper step inside its own sandbox; Sniper's video check starts its own macOS sandbox, which cannot
 start inside another one.</td><td>Approve running that step outside Codex's sandbox when Codex asks. The
@@ -46,11 +47,14 @@ followed by <code>In use by: …</code></td><td>A Sniper command (an edit or ren
 installer) is using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
 changed.</td></tr>
 <tr><td><code>Project Sniper supports Apple-silicon and Intel Macs; this platform is not recognized.</code></td>
-<td>Setup could not identify a supported native Mac processor.</td><td>Use macOS on an Apple-silicon
-or Intel Mac. Windows support is not in this release. Nothing was downloaded or changed.</td></tr>
+<td>The macOS setup command could not identify a supported Mac processor.</td><td>Use macOS on Apple
+silicon or Intel. On Windows, run <code>sniper.cmd setup</code> instead. Nothing was downloaded or changed.</td></tr>
 <tr><td><code>This Mac runs macOS … ; Sniper's tools need macOS … or later.</code></td><td>The selected
 runtime needs macOS 13.5 or newer on Apple silicon, or macOS 14 or newer on Intel.</td><td>Update macOS (Software Update, in System Settings &gt;
 General, or in System Preferences on macOS 12 and earlier), then run setup again. Nothing was downloaded.</td></tr>
+<tr><td><code>Project Sniper requires Windows 10 22H2 (build 19045) or newer</code></td>
+<td>The PC is not on the minimum supported Windows build.</td><td>Run Windows Update, then run
+<code>sniper.cmd setup</code> again. Nothing was downloaded.</td></tr>
 <tr><td><code>Your home folder path contains a space …</code></td><td>Sniper keeps its tools in your home
 folder, and Studio cannot use a Node whose path has a space. macOS account folders never have one,
 so this means the home folder was renamed.</td><td>Use a Mac account whose home folder has no space
@@ -64,22 +68,24 @@ connection is stable; it resumes where it stopped and checks every file.</td></t
 <tr><td><code>… produced the wrong file (checksum mismatch); it was deleted.</code></td><td>A downloaded
 file did not match the SHA-256 recorded for this release — usually a network filter or proxy that
 changed it on the way.</td><td>Run setup again. If it happens again on the same file, try another
-network and run <code>install/diagnostics.command</code>.</td></tr>
+network. On macOS run <code>install/diagnostics.command</code>; on Windows keep the setup output
+and the files under <code>runtime\logs</code>.</td></tr>
 <tr><td><code>Sniper's own tools — changed since they were installed …; reinstalling them.</code></td>
 <td>A file in <code>~/.project-sniper</code> was changed or removed.</td><td>Nothing to do: the
 installer puts the tools back from the checked downloads.</td></tr>
 <tr><td><code>Sniper's own tools are not installed yet.</code> or <code>Sniper's own Node cannot be used: …</code></td>
-<td><code>~/.project-sniper</code> was removed or damaged.</td><td>Ask your agent to run
-<code>./sniper setup</code> (or double-click <code>install/install.command</code>); it checks every
+<td>The shared runtime folder was removed or damaged.</td><td>Ask your agent to run
+<code>./sniper setup</code> on macOS or <code>sniper.cmd setup</code> on Windows; it checks every
 tool file and reinstalls what is missing or changed.</td></tr>
 <tr><td><code>Another Sniper installer is setting up the same tools; waiting …</code></td><td>Two
 Sniper folders are being set up at once; they share the same tools.</td><td>Nothing to do: the
 second one continues when the first has finished.</td></tr>
 <tr><td><code>no cached chrome-headless-shell found</code></td><td>The rendering browser is missing.
 Sniper never downloads one mid-render on purpose.</td><td>Run <code>./sniper setup</code> again; step
-5/8 downloads it and checks its SHA-256.</td></tr>
+5/8 downloads it and checks its SHA-256. On Windows use <code>sniper.cmd setup</code>.</td></tr>
 <tr><td><code>WHISPER_CPP_MODEL does not exist: …</code></td><td>The speech model is missing or was moved.</td>
-<td>Run <code>./sniper setup</code> again; step 6/8 re-downloads it and checks its checksum.</td></tr>
+<td>Run <code>./sniper setup</code> again on macOS or <code>sniper.cmd setup</code> on Windows;
+step 6/8 re-downloads it and checks its checksum.</td></tr>
 <tr><td><code>kernel memory pressure is warning</code> (or <code>critical</code>), <code>system memory
 headroom is below policy</code>, <code>physical memory occupied by the compressor exceeds policy</code></td>
 <td>macOS reports the Mac is short of memory, so Sniper does not start a render rather than
@@ -92,8 +98,9 @@ without them. Spaces, accents, <code>$</code> and quotes are fine.</td></tr>
 rather than shipping something it could not check.</td><td>Read the message: it names
 the lane and the reason. Most are a request to pick a style or confirm a choice.</td></tr>
 <tr><td>Not enough disk space</td><td>A long render needs tens of GB of temporary space.</td>
-<td>Let running edits finish, then <code>install/clean-caches.command</code> shows what can be freed and how
-big it is, and never touches your footage, plans, finals or unsynced edits.</td></tr>
+<td>Let running edits finish. On macOS, <code>install/clean-caches.command</code> shows what can be
+freed and how big it is without touching footage, plans, finals or unsynced edits. Windows cache
+cleanup is not yet scripted; do not delete install folders while a command is running.</td></tr>
 </table>
 
 <h2>What to realistically expect</h2>
@@ -102,7 +109,7 @@ big it is, and never touches your footage, plans, finals or unsynced edits.</td>
 graphics, cuts, trims, audio correction, b-roll — in under three hours, and estimates
 Sniper saves him about 85% of the effort versus editing it by hand. <strong>That is one
 person's report about his own work on his own machine. It is not a promise about your
-recording, your Mac or your provider plan, and no typical buyer runtime has been
+recording, your computer or your provider plan, and no typical buyer runtime has been
 measured.</strong> Your first edit will take longer than your tenth, because you are
 learning what to ask for.</p>
 </div>
@@ -117,9 +124,13 @@ learning what to ask for.</p>
 </ul>
 
 <h2>Sending something useful</h2>
-<pre><code>install/diagnostics.command</code></pre>
+<pre><code># macOS
+install/diagnostics.command
+
+# Windows
+# keep the command output and runtime\logs</code></pre>
 <p>This writes a folder to your Desktop containing structured facts only: this build's
-<code>RELEASE.json</code>, your macOS, Node and Python versions, the checker's report and the
+<code>RELEASE.json</code>, your operating system, Node and Python versions, the checker's report and the
 installer's own step log. It does <strong>not</strong> copy footage, transcripts, edit plans, keys
 or logins, and your conversation with your agent stays in your agent. Read it before you send
 it.</p>

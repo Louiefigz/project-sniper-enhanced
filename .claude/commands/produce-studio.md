@@ -10,8 +10,9 @@ manual-control path after render/assemble. Full reference:
 The operator's request is: $ARGUMENTS
 
 In the packaged app, run every step below as `install/studio.command <subcommand>
-<producer_dir> [options]` (open, status, sync, rebuild, stop, context): the same tool with this
-install's settings, and its `sync` prints the matching `install/studio.command rebuild` step.
+<producer_dir> [options]` on macOS or `install\studio.cmd <subcommand> <producer_dir> [options]`
+on Windows (open, status, sync, rebuild, stop, context): the same tool with this
+install's settings, and its `sync` prints the matching rebuild step.
 In a developer checkout (no `install/`), call `scripts/producer/studio/studio_review.py`
 directly.
 

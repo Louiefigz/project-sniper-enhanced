@@ -106,7 +106,7 @@ def _write_set(version: str, work: Path, allow_pending: bool, source: dict[str, 
     payload.check_buyer_pages(stage_dir)
     payload.write_release_json(stage_dir, version, components, {"source": source, **_release_status(pending)})
     manifest = archive.file_manifest(stage_dir)
-    target = target_dir / f"{top}-mac.zip"
+    target = target_dir / f"{top}.zip"
     archive.write_archive(stage_dir, top, target)
     extra: dict[str, object] = {"components": components, "built_at_utc": _now(), "source": source,
                                 **_release_status(pending)}

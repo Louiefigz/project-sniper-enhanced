@@ -42,9 +42,18 @@ class WindowsRelease(unittest.TestCase):
 
     def test_windows_native_probes_use_process_exit_codes(self) -> None:
         runtime = (payload.PAYLOAD / "install/lib/windows/Runtime.ps1").read_text(encoding="ascii")
+        common = (payload.PAYLOAD / "install/lib/windows/Common.ps1").read_text(encoding="ascii")
         self.assertIn("$ErrorActionPreference = 'Continue'", runtime)
         self.assertIn("$code = $LASTEXITCODE", runtime)
         self.assertIn("Assert-ToolStarts $entry.Value $arg $entry.Key", runtime)
+        self.assertIn("function Invoke-SniperNative", common)
+        self.assertIn("& $Path @Arguments 2>&1 | Out-Host", common)
+
+    def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
+        contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("`sniper.cmd` on Windows", contract)
+        self.assertIn("as shorthand; on Windows replace it with `sniper.cmd`", contract)
+        self.assertNotIn("supported route runs natively on macOS.", contract)
 
 
 if __name__ == "__main__":

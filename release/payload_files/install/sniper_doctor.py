@@ -35,6 +35,7 @@ MODEL_SHA = "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn", "loudnorm", "ebur128",
            "afftdn", "acompressor", "alimiter", "sidechaincompress", "aresample", "amix", "overlay", "crop")
 SPOKEN = f"Sniper checks that local transcription works on this {'PC' if os.name == 'nt' else 'Mac'}."
+SETUP_COMMAND = "sniper.cmd setup" if os.name == "nt" else "install/install.command"
 _RESULTS: list[dict] = []
 
 
@@ -52,15 +53,15 @@ def _product_paths() -> None:
 def _tree_intact(root: Path, receipt: str, exclude: set[str]) -> str | None:
     """None when a finished step's folder still matches its record, else what changed."""
     if not (RECEIPTS / receipt).exists():
-        return "not installed — run install.command"
+        return f"not installed — run {SETUP_COMMAND}"
     want = RECEIPTS / f"{receipt}.tree.json"
     try:
         files = json.loads(want.read_text(encoding="utf-8"))["files"]
     except (OSError, ValueError, KeyError):
-        return "no record of the finished step — run install.command"
+        return f"no record of the finished step — run {SETUP_COMMAND}"
     have = install_tools.tree_digests(root, exclude) if root.is_dir() else {}
     changed = sum(1 for k, v in files.items() if have.get(k) != v) + sum(1 for k in have if k not in files)
-    return f"{changed} file(s) differ from what was installed — run install.command" if changed else None
+    return f"{changed} file(s) differ from what was installed — run {SETUP_COMMAND}" if changed else None
 
 
 def check_foundations() -> None:
@@ -78,12 +79,12 @@ def check_foundations() -> None:
            "Sniper's TypeScript commands need it")
     venv = APP / (".venv/Scripts/python.exe" if os.name == "nt" else ".venv/bin/python3")
     if not venv.exists():
-        record("FAIL", "python packages", "no environment — run install.command")
+        record("FAIL", "python packages", f"no environment — run {SETUP_COMMAND}")
         return
     code, out, _ = setup.run([str(venv), "-I", str(Path(install_tools.__file__)), "venv-check",
                               str(PKG_ROOT / "install/requirements.lock.txt")], 180)
     record("PASS" if code == 0 else "FAIL", "python packages",
-           out.strip() if code == 0 else f"{out.strip()} — run install.command")
+           out.strip() if code == 0 else f"{out.strip()} — run {SETUP_COMMAND}")
 
 
 def check_media() -> None:
@@ -138,7 +139,7 @@ def check_transcription(skip: bool) -> None:
     except Exception as error:
         record("FAIL", "speech model", str(error)); return
     if install_tools.file_digest(model) != MODEL_SHA:
-        record("FAIL", "speech model", f"{model} does not match the expected checksum — run install.command"); return
+        record("FAIL", "speech model", f"{model} does not match the expected checksum — run {SETUP_COMMAND}"); return
     record("PASS", "speech model", f"{model.name} checksum verified")
     if skip:
         record("INFO", "transcription", "skipped by request"); return

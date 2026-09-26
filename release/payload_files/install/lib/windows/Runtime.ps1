@@ -89,6 +89,20 @@ function Install-WindowsFfmpeg($Paths, [object[]]$Rows) {
     Remove-Item -LiteralPath $extract -Recurse -Force
 }
 
+function Assert-ToolStarts([string]$Path, [string]$Argument, [string]$Name) {
+    $previous = $ErrorActionPreference
+    try {
+        # Windows PowerShell 5 turns native stderr into error records. Several
+        # healthy tools print version/help text there, so trust the exit code.
+        $ErrorActionPreference = 'Continue'
+        & $Path $Argument *> $null
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+    if ($code -ne 0) { throw "$Name does not start from the locked runtime." }
+}
+
 function Test-RuntimeTools([hashtable]$Tools) {
     foreach ($entry in $Tools.GetEnumerator()) {
         $arg = if ($entry.Key -in @('Python','Node','YtDlp')) { '--version' } else { '-version' }
@@ -96,8 +110,7 @@ function Test-RuntimeTools([hashtable]$Tools) {
         if ($entry.Key -eq 'Git') { $arg = '--version' }
         if ($entry.Key -eq 'Whisper') { $arg = '--help' }
         if ($entry.Key -eq 'Tesseract') { $arg = '--version' }
-        & $entry.Value $arg *> $null
-        if ($LASTEXITCODE -ne 0) { throw "$($entry.Key) does not start from the locked runtime." }
+        Assert-ToolStarts $entry.Value $arg $entry.Key
     }
     $filters = & $Tools.Ffmpeg -hide_banner -filters 2>&1 | Out-String
     foreach ($name in @('rubberband','zscale','subtitles','arnndn','loudnorm')) {

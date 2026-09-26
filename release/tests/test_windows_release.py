@@ -40,6 +40,12 @@ class WindowsRelease(unittest.TestCase):
                     if "$home =" in script.read_text(encoding="ascii").lower()]
         self.assertEqual(reserved, [], "PowerShell's HOME variable is read-only")
 
+    def test_windows_native_probes_use_process_exit_codes(self) -> None:
+        runtime = (payload.PAYLOAD / "install/lib/windows/Runtime.ps1").read_text(encoding="ascii")
+        self.assertIn("$ErrorActionPreference = 'Continue'", runtime)
+        self.assertIn("$code = $LASTEXITCODE", runtime)
+        self.assertIn("Assert-ToolStarts $entry.Value $arg $entry.Key", runtime)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -61,15 +61,28 @@ function Receive-VerifiedFile([string]$Url, [string]$Target, [string]$Sha, [long
     Move-Item -LiteralPath $part -Destination $Target
 }
 
-function Read-SniperSettings {
-    if (-not (Test-Path $script:SettingsFile)) { throw 'Sniper is not set up. Run sniper.cmd setup.' }
-    $values = @{}
-    foreach ($line in Get-Content -LiteralPath $script:SettingsFile) {
+function Add-SniperSettings([hashtable]$Values, [string]$File, [bool]$Required) {
+    if (-not (Test-Path $File)) {
+        if ($Required) { throw 'Sniper is not set up. Run sniper.cmd setup.' }
+        return
+    }
+    foreach ($line in Get-Content -LiteralPath $File) {
         if (-not $line -or $line.StartsWith('#')) { continue }
         $at = $line.IndexOf('=')
-        if ($at -lt 1) { throw 'runtime\sniper.env contains an invalid line.' }
-        $values[$line.Substring(0, $at)] = $line.Substring($at + 1)
+        if ($at -lt 1) { throw "$File contains an invalid line." }
+        $key = $line.Substring(0, $at)
+        $value = $line.Substring($at + 1)
+        if ($key -notmatch '^[A-Za-z_][A-Za-z0-9_]*$' -or $value -match '[\x00-\x1f\x7f]') {
+            throw "$File contains an invalid setting."
+        }
+        $Values[$key] = $value
     }
+}
+
+function Read-SniperSettings {
+    $values = @{}
+    Add-SniperSettings $values $script:SettingsFile $true
+    Add-SniperSettings $values (Join-Path $script:RuntimeDir 'sniper.local.env') $false
     $values
 }
 

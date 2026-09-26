@@ -41,6 +41,14 @@ jobs:
       - name: Prove the command launcher
         shell: cmd
         run: '"%RUNNER_TEMP%\Project Sniper Windows\sniper.cmd" workspace'
+      - name: Prove literal local settings override
+        shell: powershell
+        run: |
+          $override = "$env:RUNNER_TEMP\Local Project `$97"
+          Set-Content "$env:RUNNER_TEMP\Project Sniper Windows\runtime\sniper.local.env" `
+            -Value "SNIPER_WORKSPACE_ROOT=$override" -Encoding ASCII
+          $found = & "$env:RUNNER_TEMP\Project Sniper Windows\sniper.cmd" workspace
+          if ($found -ne $override) { throw "Local settings override was not read literally: $found" }
       - name: Preserve diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4

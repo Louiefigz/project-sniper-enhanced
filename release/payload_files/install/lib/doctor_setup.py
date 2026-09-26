@@ -29,6 +29,7 @@ RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
 # What the tools write after installation; must match deps_tree_excludes in runtime_tools.sh.
 RUNTIME_EXCLUDES = {"var/cache/fontconfig", ".sniper-users", "name:__pycache__", "file:.sniper-runtime-complete"}
 Record = Callable[[str, str, str], None]
+SETUP_COMMAND = "sniper.cmd setup" if os.name == "nt" else "install/install.command"
 
 
 def release() -> dict:
@@ -75,17 +76,17 @@ def check_node(record: Record) -> None:
     pinned = os.environ.get("SNIPER_NODE_PATH", "")
     problem = node_problem(pinned, floor)
     if problem:
-        record("FAIL", "node", f"{problem} — run install/install.command")
+        record("FAIL", "node", f"{problem} — run {SETUP_COMMAND}")
         return
     found = shutil.which("node") or ""
     if os.path.realpath(found) != os.path.realpath(pinned):
         record("FAIL", "node", f"PATH finds {found or 'no node'}, not the installed {pinned}; "
-               "Sniper's commands and renders would run a different Node — run ./sniper setup")
+               f"Sniper's commands and renders would run a different Node — run {SETUP_COMMAND}")
         return
     _, out, _ = run([pinned, "--version"], 30)
     prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
     if not prefix or os.path.commonpath((os.path.realpath(pinned), os.path.realpath(prefix))) != os.path.realpath(prefix):
-        record("FAIL", "node", f"{pinned} is not Sniper's own Node — run install/install.command")
+        record("FAIL", "node", f"{pinned} is not Sniper's own Node — run {SETUP_COMMAND}")
         return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); Sniper's commands and renders use it")
 
@@ -94,7 +95,7 @@ def check_runtime_tools(record: Record) -> None:
     """Sniper's own tools: exactly as installed, found first on the app's PATH, and each runs."""
     import install_tools  # noqa: PLC0415  (same folder; stdlib only)
     prefix = Path(os.environ.get("SNIPER_DEPS_PREFIX", "/nonexistent"))
-    fix = "run install/install.command (it reinstalls Sniper's tools)"
+    fix = f"run {SETUP_COMMAND} (it reinstalls Sniper's tools)"
     try:
         want = json.loads((prefix.parent / f"{prefix.name}.tree.json").read_text(encoding="utf-8"))["files"]
     except (OSError, ValueError, KeyError):

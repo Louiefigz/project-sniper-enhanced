@@ -65,6 +65,14 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn("function Invoke-SniperNative", common)
         self.assertIn("& $Path @Arguments 2>&1 | Out-Host", common)
 
+    def test_windows_pid_probe_never_uses_a_signal(self) -> None:
+        """Windows os.kill(pid, 0) terminates the process instead of probing it."""
+        source = (ROOT / "scripts/infra/sniper_lock.py").read_text()
+        windows_probe = source.split("def _windows_pid_alive", 1)[1].split("\n\ndef ", 1)[0]
+        self.assertIn('OpenProcess(0x1000, False, pid)', windows_probe)
+        self.assertIn('GetExitCodeProcess', windows_probe)
+        self.assertNotIn('os.kill', windows_probe)
+
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("`sniper.cmd` on Windows", contract)

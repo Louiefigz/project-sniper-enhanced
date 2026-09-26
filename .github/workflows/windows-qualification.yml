@@ -46,6 +46,30 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or $sid -notmatch '^S-1-15-2-') {
             throw "The Windows media jail preflight did not create an AppContainer SID: $sid"
           }
+      - name: Build the Windows rendering runtime preflight
+        shell: powershell
+        run: |
+          $package = "$env:RUNNER_TEMP\Project Sniper Windows"
+          $motion = Join-Path $package 'templates\motion'
+          $runtime = Join-Path $motion '.sniper-native-runtime'
+          $state = Join-Path $package 'runtime\state'
+          try {
+            Push-Location $motion
+            try {
+              npm.cmd ci --no-audit --no-fund
+              if ($LASTEXITCODE -ne 0) { throw 'Installing the rendering preflight dependencies failed.' }
+            } finally { Pop-Location }
+            New-Item -ItemType Directory -Path $state -Force | Out-Null
+            $lock = Join-Path $package 'scripts\infra\sniper_lock.py'
+            $builder = Join-Path $package 'scripts\producer\studio\native_runtime.py'
+            python $lock exec --state-dir $state --mode exclusive --label runtime-preflight `
+              --wait 0 --busy-message runtime-preflight-busy -- python $builder --repair
+            if ($LASTEXITCODE -ne 0) { throw 'The Windows rendering runtime preflight failed.' }
+          } finally {
+            Remove-Item -LiteralPath (Join-Path $motion 'node_modules') -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $runtime -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath $state -Recurse -Force -ErrorAction SilentlyContinue
+          }
       - name: Ensure qualification workspace capacity
         shell: powershell
         run: |

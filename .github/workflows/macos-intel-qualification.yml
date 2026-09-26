@@ -109,7 +109,10 @@ jobs:
         if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
-        run: ./sniper doctor --json
+        run: |
+          set -o pipefail
+          mkdir -p runtime/logs
+          ./sniper doctor --json | tee runtime/logs/qualification-doctor.json
       - name: Prove the command launcher
         if: steps.artifact.outputs.active == 'true'
         shell: bash

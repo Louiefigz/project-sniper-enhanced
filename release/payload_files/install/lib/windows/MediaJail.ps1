@@ -9,6 +9,8 @@ function Compile-JailProgram([string]$Source, [string]$Target) {
     $compiler.CompilerOptions = '/optimize+'
     $compiler.GenerateExecutable = $true
     $compiler.OutputAssembly = $temporary
+    [void]$compiler.ReferencedAssemblies.Add('System.dll')
+    [void]$compiler.ReferencedAssemblies.Add('System.Core.dll')
     Add-Type -TypeDefinition $text -Language CSharp -CompilerParameters $compiler | Out-Null
     if (-not (Test-Path $temporary)) { throw "The Windows C# compiler did not create $Target." }
     Move-Item -LiteralPath $temporary -Destination $Target -Force

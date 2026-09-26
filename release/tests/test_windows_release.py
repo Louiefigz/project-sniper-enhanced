@@ -50,6 +50,7 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn("-CompilerParameters $compiler", script)
         self.assertIn("$compiler.GenerateExecutable = $true", script)
         self.assertIn("$compiler.OutputAssembly = $temporary", script)
+        self.assertIn("ReferencedAssemblies.Add('System.dll')", script)
         self.assertNotIn("-CompilerOptions", script)
         self.assertNotIn("-OutputAssembly $temporary", script)
 

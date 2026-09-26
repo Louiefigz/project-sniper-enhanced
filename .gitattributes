@@ -1,1 +1,3 @@
 scripts/producer/headless/windows_media_*.cs text eol=lf
+scripts/producer/studio/runtime/*.json text eol=lf
+scripts/producer/studio/runtime/*.mjs text eol=lf

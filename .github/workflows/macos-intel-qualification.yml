@@ -7,6 +7,10 @@ on:
         description: HTTPS URL for the exact pinned Intel FFmpeg artifact
         required: true
         type: string
+  push:
+    branches: [codex/cross-platform-installer]
+    paths:
+      - release/macos-intel-qualification.url
 
 permissions:
   contents: read
@@ -21,10 +25,32 @@ jobs:
       FFMPEG_FILE: sniper-ffmpeg-8.0.3-1-osx-64.tar.xz
     steps:
       - uses: actions/checkout@v4
+      - name: Resolve the qualification artifact URL
+        id: artifact
+        shell: bash
+        env:
+          DISPATCH_URL: ${{ inputs.ffmpeg_url }}
+        run: |
+          set -euo pipefail
+          url="$DISPATCH_URL"
+          trigger=release/macos-intel-qualification.url
+          if [ -z "$url" ] && [ -f "$trigger" ]; then
+            test "$(wc -l < "$trigger" | tr -d ' ')" = 1
+            url="$(cat "$trigger")"
+          fi
+          if [ -z "$url" ]; then
+            echo 'active=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          case "$url" in *[[:space:]]*) exit 2 ;; https://*) ;; *) exit 2 ;; esac
+          echo 'active=true' >> "$GITHUB_OUTPUT"
+          printf 'url=%s\n' "$url" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v5
+        if: steps.artifact.outputs.active == 'true'
         with:
           python-version: '3.12'
       - name: Prove the native Intel runner
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         run: |
           test "$(uname -s)" = Darwin
@@ -33,36 +59,42 @@ jobs:
           test "$SNIPER_RUNTIME_PLATFORM" = osx-64
           test "$SNIPER_BROWSER_PLATFORM" = mac-x64
       - name: Receive the pinned Intel media runtime
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p release/runtime_deps/dist
           target="release/runtime_deps/dist/$FFMPEG_FILE"
-          case "${{ inputs.ffmpeg_url }}" in https://*) ;; *) exit 2 ;; esac
           curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
-            --output "$target" "${{ inputs.ffmpeg_url }}"
+            --output "$target" "${{ steps.artifact.outputs.url }}"
           test "$(stat -f %z "$target")" = "$FFMPEG_BYTES"
           test "$(shasum -a 256 "$target" | awk '{print $1}')" = "$FFMPEG_SHA256"
       - name: Assemble qualification package
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         run: python -m release.prepare_macos_qualification "$RUNNER_TEMP/Project Sniper Intel"
       - name: Run the buyer installer
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
       - name: Re-run to prove idempotence
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
       - name: Run the full installed doctor
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: ./sniper doctor --json
       - name: Prove the command launcher
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: test "$(./sniper workspace)" = "$RUNNER_TEMP/Sniper Projects"
       - name: Prove literal local settings override
+        if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: |

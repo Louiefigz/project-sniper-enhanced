@@ -30,6 +30,7 @@ class MacosIntelQualification(unittest.TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         pin = runtime_tools.runtime_target("osx-64").ffmpeg_pin.read_text(encoding="utf-8")
         self.assertIn("runs-on: macos-15-intel", text)
+        self.assertIn("release/macos-intel-qualification.url", text)
         self.assertIn("test \"$(uname -m)\" = x86_64", text)
         self.assertIn("cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd", text)
         self.assertIn("17918488", text)

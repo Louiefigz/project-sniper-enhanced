@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [codex/cross-platform-installer]
+    paths-ignore:
+      - release/macos-intel-qualification.url
 
 jobs:
   install-and-admit:

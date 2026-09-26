@@ -62,6 +62,10 @@ jobs:
             New-Item -ItemType Directory -Path $state -Force | Out-Null
             $lock = Join-Path $package 'scripts\infra\sniper_lock.py'
             $builder = Join-Path $package 'scripts\producer\studio\native_runtime.py'
+            $doctorLib = Join-Path $package 'install\lib'
+            python -c "import sys; sys.path.insert(0, sys.argv[1]); import doctor_setup as d; assert not d.path_within(sys.argv[2], sys.argv[3]); assert d.path_within(sys.argv[2], sys.argv[4])" `
+              $doctorLib 'D:\package\.venv\Scripts\python.exe' 'C:\runtime' 'D:\package\.venv'
+            if ($LASTEXITCODE -ne 0) { throw 'The Windows doctor path preflight failed.' }
             python $lock exec --state-dir $state --mode exclusive --label runtime-preflight `
               --wait 0 --busy-message runtime-preflight-busy -- python $builder --repair
             if ($LASTEXITCODE -ne 0) { throw 'The Windows rendering runtime preflight failed.' }

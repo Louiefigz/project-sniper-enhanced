@@ -81,6 +81,13 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn("write_bytes(WRAPPER.encode())", source)
         self.assertNotIn("write_text(WRAPPER)", source)
 
+    def test_windows_doctor_accepts_venv_python_across_drives(self) -> None:
+        """The package venv and the locked base runtime may live on different drives."""
+        source = (payload.PAYLOAD / "install/lib/doctor_setup.py").read_text()
+        self.assertIn("except ValueError:", source)
+        self.assertIn('APP / ".venv" if os.name == "nt" and tool == "python.exe"', source)
+        self.assertNotIn("os.path.commonpath((real, os.path.realpath(prefix)))", source)
+
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("`sniper.cmd` on Windows", contract)

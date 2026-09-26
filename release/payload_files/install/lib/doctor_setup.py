@@ -43,6 +43,15 @@ def version_tuple(text: str) -> tuple[int, ...]:
     return tuple(int(p) for p in parts) if all(p.isdigit() for p in parts) and len(parts) == 3 else ()
 
 
+def path_within(path: str | Path, root: str | Path) -> bool:
+    """Whether path resolves inside root, including a safe false across Windows drives."""
+    real_path, real_root = os.path.realpath(path), os.path.realpath(root)
+    try:
+        return os.path.commonpath((real_path, real_root)) == real_root
+    except ValueError:
+        return False
+
+
 def run(argv: list[str], timeout: int = 60, cwd: Path | None = None) -> tuple[int, str, str]:
     """Run a command; (exit code, stdout, stderr). Never raises for a missing tool or a timeout."""
     try:
@@ -85,7 +94,7 @@ def check_node(record: Record) -> None:
         return
     _, out, _ = run([pinned, "--version"], 30)
     prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
-    if not prefix or os.path.commonpath((os.path.realpath(pinned), os.path.realpath(prefix))) != os.path.realpath(prefix):
+    if not prefix or not path_within(pinned, prefix):
         record("FAIL", "node", f"{pinned} is not Sniper's own Node — run {SETUP_COMMAND}")
         return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); Sniper's commands and renders use it")
@@ -109,7 +118,8 @@ def check_runtime_tools(record: Record) -> None:
     for tool, args, feature in RUNTIME_TOOLS:
         found = shutil.which(tool) or ""
         real = os.path.realpath(found) if found else ""
-        if not real or os.path.commonpath((real, os.path.realpath(prefix))) != os.path.realpath(prefix):
+        expected_root = APP / ".venv" if os.name == "nt" and tool == "python.exe" else prefix
+        if not real or not path_within(real, expected_root):
             record("FAIL", tool, f"PATH finds {found or 'nothing'}, not Sniper's own — needed for {feature}: {fix}")
             continue
         code, out, err = run([found, *args], 60)

@@ -95,6 +95,7 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('if os.name == "nt":', sync)
         self.assertLess(sync.index('if os.name == "nt":'), sync.index("os.open(path"))
         self.assertIn('if hasattr(os, "fchmod"):', source)
+        self.assertEqual(source.count('getattr(os, "O_BINARY", 0)'), 2)
         identity = (HEADLESS / "external_media_verification.py").read_text()
         self.assertIn('return fields if os.name == "nt"', identity)
 
@@ -110,12 +111,18 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn("TerminateJobObject", windows)
         self.assertIn("child process exceeded its output byte bound", windows)
         self.assertIn('getattr(os, "O_NONBLOCK", 0)', whisper_io)
+        doctor = (ROOT / "release/payload_files/install/sniper_doctor.py").read_text()
+        self.assertIn('"-EncodedCommand", encoded', doctor)
+        self.assertNotIn('$voice.Speak($args[1])', doctor)
 
     def test_workflow_runs_windows_python_failures_before_installing(self) -> None:
         workflow = (ROOT / ".github/workflows/windows-qualification.yml").read_text()
         preflight = workflow.index("release.windows_runtime_preflight")
         installer = workflow.index("Run the buyer installer")
         self.assertLess(preflight, installer)
+        source = (ROOT / "release/windows_runtime_preflight.py").read_text()
+        self.assertIn("module._make_speech_sample", source)
+        self.assertIn("project-sniper\\nwindows-media\\x1a-preflight", source)
 
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")

@@ -17,6 +17,7 @@ available / gated and never change the exit code.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
 import shutil
@@ -124,10 +125,13 @@ def _make_speech_sample(path: Path) -> int:
     """Create a deterministic local TTS sample with the operating system voice."""
     if os.name != "nt":
         return setup.run(["say", "-o", str(path), SPOKEN], 60)[0]
-    script = ("Add-Type -AssemblyName System.Speech; "
+    output = "'" + str(path).replace("'", "''") + "'"
+    text = "'" + SPOKEN.replace("'", "''") + "'"
+    script = (f"$OutputPath={output}; $Text={text}; Add-Type -AssemblyName System.Speech; "
               "$voice=New-Object System.Speech.Synthesis.SpeechSynthesizer; "
-              "$voice.SetOutputToWaveFile($args[0]); $voice.Speak($args[1]); $voice.Dispose()")
-    return setup.run(["powershell.exe", "-NoProfile", "-Command", script, str(path), SPOKEN], 60)[0]
+              "$voice.SetOutputToWaveFile($OutputPath); $voice.Speak($Text); $voice.Dispose()")
+    encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
+    return setup.run(["powershell.exe", "-NoProfile", "-EncodedCommand", encoded], 60)[0]
 
 
 def check_transcription(skip: bool) -> None:

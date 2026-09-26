@@ -35,7 +35,7 @@ class ExternalMediaSnapshot:
 def _source_fd(path: str) -> int:
     """Open one safe source leaf and close on every failed acquisition path."""
     flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-             | getattr(os, "O_NONBLOCK", 0))
+             | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0))
     fd = os.open(path, flags)
     try:
         info = os.fstat(fd)
@@ -51,7 +51,7 @@ def _source_fd(path: str) -> int:
 def _destination_fd(path: str) -> int:
     """Create only a new private snapshot stage with the historical file mode."""
     flags = (os.O_WRONLY | os.O_CREAT | os.O_EXCL
-             | getattr(os, "O_NOFOLLOW", 0))
+             | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0))
     fd = os.open(path, flags, 0o600)
     if hasattr(os, "fchmod"):
         os.fchmod(fd, 0o600)

@@ -36,6 +36,7 @@ class MacosIntelQualification(unittest.TestCase):
         self.assertIn("test \"$(uname -m)\" = x86_64", text)
         self.assertIn("cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd", text)
         self.assertIn("17918488", text)
+        self.assertIn("RUNNER_TOOL_CACHE", text)
         self.assertIn("6136812ea6d4e68bdba27e33c2a94382711cdf4f8602ffef056ff792bd6f9818", text)
         self.assertIn("af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9", text)
         self.assertIn('"sha256": "cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd"', pin)

@@ -84,6 +84,17 @@ jobs:
         if: steps.artifact.outputs.active == 'true'
         shell: bash
         run: python -m release.prepare_macos_qualification "$RUNNER_TEMP/Project Sniper Intel"
+      - name: Ensure qualification workspace capacity
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          free_kib="$(df -Pk "$RUNNER_TEMP" | awk 'NR == 2 {print $4}')"
+          if [ "$free_kib" -lt 22000000 ]; then
+            case "$RUNNER_TOOL_CACHE" in /Users/runner/hostedtoolcache) ;; *) exit 2 ;; esac
+            rm -rf -- "$RUNNER_TOOL_CACHE"
+          fi
+          test "$(df -Pk "$RUNNER_TEMP" | awk 'NR == 2 {print $4}')" -ge 20000000
       - name: Run the buyer installer
         if: steps.artifact.outputs.active == 'true'
         shell: bash

@@ -34,6 +34,17 @@ jobs:
               throw "PowerShell parsing failed for $($_.FullName)."
             }
           }
+      - name: Ensure qualification workspace capacity
+        shell: powershell
+        run: |
+          $free = (Get-PSDrive -Name C).Free
+          if ($free -lt 22GB) {
+            $cache = [IO.Path]::GetFullPath($env:RUNNER_TOOL_CACHE).TrimEnd('\')
+            if ($cache -ne 'C:\hostedtoolcache\windows') { throw "Unexpected runner tool cache: $cache" }
+            Remove-Item -LiteralPath $cache -Recurse -Force
+          }
+          $free = (Get-PSDrive -Name C).Free
+          if ($free -lt 20GB) { throw "Windows qualification needs 20 GB free; found $free bytes." }
       - name: Run the buyer installer
         shell: powershell
         run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'

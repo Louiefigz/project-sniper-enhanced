@@ -95,6 +95,8 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('if os.name == "nt":', sync)
         self.assertLess(sync.index('if os.name == "nt":'), sync.index("os.open(path"))
         self.assertIn('if hasattr(os, "fchmod"):', source)
+        identity = (HEADLESS / "external_media_verification.py").read_text()
+        self.assertIn('return fields if os.name == "nt"', identity)
 
     def test_windows_transcription_has_a_native_process_owner(self) -> None:
         """Local Whisper must import and run without Unix fcntl or selectors."""

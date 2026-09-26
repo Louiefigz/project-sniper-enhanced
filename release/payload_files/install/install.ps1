@@ -116,30 +116,33 @@ function Write-WindowsSettings($Runtime, [string]$Venv, [string]$Browser, [strin
     New-Item -ItemType Directory -Path $workspacePath -Force | Out-Null
     $venvBin = Split-Path $Venv -Parent
     $prefix = $Runtime.Paths.Prefix
-    $path = @($venvBin,$prefix,(Join-Path $prefix 'Scripts'),(Join-Path $prefix 'Library\bin'),
-        (Join-Path $prefix 'Library\usr\bin'),$env:SystemRoot,(Join-Path $env:SystemRoot 'System32')) -join ';'
-    $values = @{
-        'PKG_ROOT' = $script:PackageRoot
-        'APP_DIR' = $script:PackageRoot
-        'PATH' = $path
-        'SNIPER_DEPS_PREFIX' = $prefix
-        'SNIPER_EXECUTION_MODE' = 'local'
-        'SNIPER_WORKSPACE_ROOT' = $workspacePath
-        'SNIPER_NODE_PATH' = $Runtime.Tools.Node
-        'HYPERFRAMES_BROWSER_PATH' = $Browser
-        'HYPERFRAMES_FFMPEG_PATH' = $Runtime.Tools.Ffmpeg
-        'HYPERFRAMES_FFPROBE_PATH' = $Runtime.Tools.Ffprobe
-        'HYPERFRAMES_NO_TELEMETRY' = '1'
-        'NEXT_TELEMETRY_DISABLED' = '1'
-        'HYPERFRAMES_NO_UPDATE_CHECK' = '1'
-        'HYPERFRAMES_NO_AUTO_INSTALL' = '1'
-        'WHISPER_CPP_BIN' = $Runtime.Tools.Whisper
-        'WHISPER_CPP_MODEL' = $Model
-        'SNIPER_TRANSCRIBE_PROVIDER' = 'local-whisper'
-        'SNIPER_STUDIO_COMMAND' = (Join-Path $script:PackageRoot 'install\studio.cmd')
-        'SNIPER_WINDOWS_MEDIA_JAIL' = $Jail.Jail
-        'SNIPER_WINDOWS_MEDIA_INSPECT' = $Jail.Inspect
-    }
+    $prefixScripts = Join-Path $prefix 'Scripts'
+    $prefixBin = Join-Path $prefix 'Library\bin'
+    $prefixUsrBin = Join-Path $prefix 'Library\usr\bin'
+    $systemBin = Join-Path $env:SystemRoot 'System32'
+    $path = @($venvBin, $prefix, $prefixScripts, $prefixBin, $prefixUsrBin,
+        $env:SystemRoot, $systemBin) -join ';'
+    $values = @{}
+    $values['PKG_ROOT'] = $script:PackageRoot
+    $values['APP_DIR'] = $script:PackageRoot
+    $values['PATH'] = $path
+    $values['SNIPER_DEPS_PREFIX'] = $prefix
+    $values['SNIPER_EXECUTION_MODE'] = 'local'
+    $values['SNIPER_WORKSPACE_ROOT'] = $workspacePath
+    $values['SNIPER_NODE_PATH'] = $Runtime.Tools.Node
+    $values['HYPERFRAMES_BROWSER_PATH'] = $Browser
+    $values['HYPERFRAMES_FFMPEG_PATH'] = $Runtime.Tools.Ffmpeg
+    $values['HYPERFRAMES_FFPROBE_PATH'] = $Runtime.Tools.Ffprobe
+    $values['HYPERFRAMES_NO_TELEMETRY'] = '1'
+    $values['NEXT_TELEMETRY_DISABLED'] = '1'
+    $values['HYPERFRAMES_NO_UPDATE_CHECK'] = '1'
+    $values['HYPERFRAMES_NO_AUTO_INSTALL'] = '1'
+    $values['WHISPER_CPP_BIN'] = $Runtime.Tools.Whisper
+    $values['WHISPER_CPP_MODEL'] = $Model
+    $values['SNIPER_TRANSCRIBE_PROVIDER'] = 'local-whisper'
+    $values['SNIPER_STUDIO_COMMAND'] = Join-Path $script:PackageRoot 'install\studio.cmd'
+    $values['SNIPER_WINDOWS_MEDIA_JAIL'] = $Jail.Jail
+    $values['SNIPER_WINDOWS_MEDIA_INSPECT'] = $Jail.Inspect
     Write-SniperSettings $values
     $workspacePath
 }

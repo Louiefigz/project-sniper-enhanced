@@ -3,10 +3,11 @@ $ErrorActionPreference = 'Stop'
 
 function Get-RuntimePaths {
     $id = (Get-FileSha256 $script:LockFile).Substring(0, 16)
-    $home = Join-Path $env:LOCALAPPDATA 'ProjectSniper'
+    $runtimeHome = Join-Path $env:LOCALAPPDATA 'ProjectSniper'
     [pscustomobject]@{
-        Id=$id; Home=$home; Cache=(Join-Path $home 'packages'); Prefix=(Join-Path $home "runtimes\$id")
-        Record=(Join-Path $home "runtimes\$id.tree.json"); Tools=(Join-Path $home 'tools')
+        Id=$id; Home=$runtimeHome; Cache=(Join-Path $runtimeHome 'packages')
+        Prefix=(Join-Path $runtimeHome "runtimes\$id")
+        Record=(Join-Path $runtimeHome "runtimes\$id.tree.json"); Tools=(Join-Path $runtimeHome 'tools')
     }
 }
 

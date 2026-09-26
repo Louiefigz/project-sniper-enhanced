@@ -73,6 +73,12 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('GetExitCodeProcess', windows_probe)
         self.assertNotIn('os.kill', windows_probe)
 
+    def test_generated_runtime_wrapper_uses_byte_exact_newlines(self) -> None:
+        """Text-mode writes silently translate the qualified LF wrapper on Windows."""
+        source = (ROOT / "scripts/producer/studio/native_runtime.py").read_text()
+        self.assertIn("write_bytes(WRAPPER.encode())", source)
+        self.assertNotIn("write_text(WRAPPER)", source)
+
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("`sniper.cmd` on Windows", contract)

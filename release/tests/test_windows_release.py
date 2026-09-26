@@ -88,6 +88,33 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('APP / ".venv" if os.name == "nt" and tool == "python.exe"', source)
         self.assertNotIn("os.path.commonpath((real, os.path.realpath(prefix)))", source)
 
+    def test_windows_media_publish_does_not_open_a_directory_as_a_file(self) -> None:
+        """Windows rejects os.open(directory), unlike the POSIX durability path."""
+        source = (HEADLESS / "external_media_snapshot.py").read_text()
+        sync = source.split("def _sync_directory", 1)[1].split("\n\ndef ", 1)[0]
+        self.assertIn('if os.name == "nt":', sync)
+        self.assertLess(sync.index('if os.name == "nt":'), sync.index("os.open(path"))
+        self.assertIn('if hasattr(os, "fchmod"):', source)
+
+    def test_windows_transcription_has_a_native_process_owner(self) -> None:
+        """Local Whisper must import and run without Unix fcntl or selectors."""
+        common = (HEADLESS / "process_runner.py").read_text()
+        windows = (HEADLESS / "windows_process_runner.py").read_text()
+        whisper_io = (ROOT / "scripts/local_whisper_io.py").read_text()
+        self.assertIn("except ImportError", common)
+        self.assertIn("run_text_windows(request", common)
+        self.assertIn("CreateJobObjectW", windows)
+        self.assertIn("AssignProcessToJobObject", windows)
+        self.assertIn("TerminateJobObject", windows)
+        self.assertIn("child process exceeded its output byte bound", windows)
+        self.assertIn('getattr(os, "O_NONBLOCK", 0)', whisper_io)
+
+    def test_workflow_runs_windows_python_failures_before_installing(self) -> None:
+        workflow = (ROOT / ".github/workflows/windows-qualification.yml").read_text()
+        preflight = workflow.index("release.windows_runtime_preflight")
+        installer = workflow.index("Run the buyer installer")
+        self.assertLess(preflight, installer)
+
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("`sniper.cmd` on Windows", contract)

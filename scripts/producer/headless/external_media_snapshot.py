@@ -53,7 +53,8 @@ def _destination_fd(path: str) -> int:
     flags = (os.O_WRONLY | os.O_CREAT | os.O_EXCL
              | getattr(os, "O_NOFOLLOW", 0))
     fd = os.open(path, flags, 0o600)
-    os.fchmod(fd, 0o600)
+    if hasattr(os, "fchmod"):
+        os.fchmod(fd, 0o600)
     return fd
 
 
@@ -144,14 +145,26 @@ def _publish(stage: str, store: str, digest: str, size: int) -> str:
     try:
         os.link(stage, destination, follow_symlinks=False)
         os.unlink(stage)
-        directory_fd = os.open(store, os.O_RDONLY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+        _sync_directory(store)
     except FileExistsError:
         _verify_snapshot(destination, digest, size)
     return destination
+
+
+def _sync_directory(path: str) -> None:
+    """Flush published directory metadata where directory descriptors exist.
+
+    Windows refuses ``os.open`` on a directory. Its link/unlink operations are
+    already journaled by the filesystem, so the portable contract is to verify
+    the final file after publication rather than fail before that verification.
+    """
+    if os.name == "nt":
+        return
+    directory_fd = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
 
 
 def capture_external_media_snapshot(

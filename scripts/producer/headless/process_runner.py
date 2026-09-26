@@ -1,7 +1,6 @@
 """Bounded text subprocesses with owned process-group cancellation and reap."""
 from __future__ import annotations
 
-import fcntl
 import json
 import os
 import runpy
@@ -15,6 +14,11 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, Iterator
+
+try:
+    import fcntl
+except ImportError:  # Windows has no fcntl; passed descriptors are POSIX-only.
+    fcntl = None
 
 # When the owning controller names a ledger file, every child this runner starts in its
 # own session is recorded there (spawned/reaped rows). Those sessions are outside the
@@ -84,6 +88,10 @@ def _validate_pass_fds(descriptors: tuple[int, ...]) -> None:
             or any(type(value) is not int or value <= 2 for value in descriptors) \
             or len(set(descriptors)) != len(descriptors):
         raise RuntimeError("passed output descriptors must be at most four unique integers above stdio")
+    if os.name == "nt":
+        if descriptors:
+            raise RuntimeError("passed output descriptors are not supported on Windows")
+        return
     for descriptor in descriptors:
         try:
             info = os.fstat(descriptor)
@@ -215,6 +223,9 @@ def _capture_events(selector: selectors.BaseSelector, proc: subprocess.Popen,
 
 def run_text(request: ProcessRequest) -> subprocess.CompletedProcess:
     """Run one child in a new session and reap its group on every interruption."""
+    if os.name == "nt":
+        from .windows_process_runner import run_text_windows
+        return run_text_windows(request, _validate, _ledger_note)
     _validate(request)
     _ledger_note("intent", None, request.command)
     proc = subprocess.Popen(

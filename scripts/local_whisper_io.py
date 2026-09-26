@@ -93,7 +93,8 @@ def _json_bytes(stream: BinaryIO, deadline: LocalAsrDeadline) -> bytes:
 def read_whisper_json(path: Path) -> dict:
     """Read a complete bounded regular-file result and reject late parsing success."""
     deadline = current_local_asr_deadline()
-    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | os.O_NONBLOCK)
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+    descriptor = os.open(path, flags)
     with os.fdopen(descriptor, "rb") as stream:
         before = os.fstat(stream.fileno())
         if not stat.S_ISREG(before.st_mode) or not 0 < before.st_size <= MAX_WHISPER_JSON_BYTES:

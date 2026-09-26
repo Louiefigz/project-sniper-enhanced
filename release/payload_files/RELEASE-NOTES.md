@@ -38,10 +38,10 @@
   checked downloads. An interrupted download resumes.
 - **One dynamic package for Apple silicon, Intel Mac and Windows x64.** Setup detects the target
   and selects its hash-locked runtime, ffmpeg and rendering browser: macOS 13.5+ on Apple silicon,
-  macOS 14+ on Intel, or 64-bit Windows 10 22H2 (build 19045)+. Intel build and feature checks pass
-  through Rosetta; a native Intel installation remains unqualified. The Windows setup lane parses
-  on Windows PowerShell 5, performs a clean install, reruns for idempotence, runs the full doctor
-  and proves the launcher on Windows Server 2025.
+  macOS 14+ on Intel, or 64-bit Windows 10 22H2 (build 19045)+. Native Intel setup, repeat setup,
+  the full doctor and the launcher are qualified on a macOS 15 Intel runner. The Windows setup lane
+  parses on Windows PowerShell 5, performs a clean install, reruns for idempotence, runs the full
+  doctor and proves the launcher on Windows Server 2025.
 - Folders of the same release share one copy of the tools; uninstalling the last one removes it.
 - git is still in the tool set but nothing uses it any more; it goes at the next tool update.
 

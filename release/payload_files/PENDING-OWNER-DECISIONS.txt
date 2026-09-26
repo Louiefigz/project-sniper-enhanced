@@ -50,10 +50,11 @@ STILL OPEN — each blocks release
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
   3. SUPPORTED PLATFORM BOUNDARY (input R): Apple silicon remains the developer platform.
      The package contains independent Apple-silicon (macOS 13.5+), Intel (macOS 14+) and
-     Windows x64 (Windows 10 build 19045+) locks, ffmpeg selections and browsers. Intel executables
-     pass under Rosetta but still need a native Intel clean-Mac run. Windows setup, rerun, doctor,
-     launcher and native media AppContainer are qualified on Windows Server 2025; complete Short
-     and long-form production edits on Windows remain acceptance work. Buyers' Codex or Claude Code
+     Windows x64 (Windows 10 build 19045+) locks, ffmpeg selections and browsers. Native Intel
+     setup, rerun, doctor and launcher are qualified on a macOS 15 Intel runner. Windows setup,
+     rerun, doctor, launcher and native media AppContainer are qualified on Windows Server 2025;
+     complete Short and long-form production edits on Intel and Windows remain acceptance work.
+     Buyers' Codex or Claude Code
      also have requirements Sniper cannot control.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
@@ -79,6 +80,6 @@ NOT OWNER DECISIONS — acceptance still outstanding
     long-form, with a revision), accepted in the qualification record kept outside this
     package.
   - Human playback, listening and Studio checks of those edits.
-  - Clean-Mac install (including native Intel) and an outside operator following the manual.
+  - An outside operator following the manual, including the macOS Gatekeeper click-through route.
   - Authenticated delivery of the exact bytes.
   - Listen to assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.

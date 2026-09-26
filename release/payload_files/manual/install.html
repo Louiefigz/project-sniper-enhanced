@@ -60,9 +60,9 @@ folders of the same release share one copy of the tools; uninstalling the last o
 If the download stops, run setup again: it resumes and checks what arrived.</p>
 <p><strong>Which computers.</strong> Setup selects one of three locked targets: macOS 13.5 or newer
 on Apple silicon, macOS 14 or newer on Intel, or 64-bit Windows 10 22H2 (build 19045) or newer.
-Apple silicon is the developer platform. The Intel tools are built and exercised through Rosetta,
-but a native Intel Mac installation is still a required qualification run. Windows x64 is installed
-and checked on a clean Windows Server 2025 runner. Unsupported systems stop before downloads.</p>
+Apple silicon is the developer platform. Native Intel setup, repeat setup, the full doctor and the
+launcher are exercised on a macOS 15 Intel runner. Windows x64 is installed and checked on a clean
+Windows Server 2025 runner. Unsupported systems stop before downloads.</p>
 <p><strong>On macOS, your home folder path must not contain a space</strong>: the shared tools live
 there because Studio needs a whitespace-free Node path. Windows uses explicit executable paths and
 does not have that restriction.</p>
@@ -87,8 +87,8 @@ media runs in a disposable, networkless AppContainer with bounded CPU and memory
 Finder instead: it does the same in a Terminal window. It is not yet signed, so the first time
 macOS stops it. On macOS 13.5–14, right-click it and choose <em>Open</em>. On macOS 15 or later that
 no longer works: after the warning, open System Settings › Privacy &amp; Security and click
-<em>Open Anyway</em> next to the message about the script. Neither route has yet been seen on a
-clean Mac. On Windows, open Command Prompt or PowerShell in this folder and run
+<em>Open Anyway</em> next to the message about the script. The Gatekeeper click-through route still
+needs an outside-operator check on a clean Mac. On Windows, open Command Prompt or PowerShell in this folder and run
 <code>sniper.cmd setup</code>.</p>
 <p>Your projects go in this folder's <code>projects</code> folder, where Codex can work without extra
 approvals. To keep them somewhere else, run setup once with

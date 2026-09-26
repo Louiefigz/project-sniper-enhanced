@@ -16,24 +16,24 @@ jobs:
           python-version: '3.12'
       - name: Assemble qualification package
         shell: pwsh
-        run: python -m release.prepare_windows_qualification "$env:RUNNER_TEMP\Project Sniper ü"
+        run: python -m release.prepare_windows_qualification "$env:RUNNER_TEMP\Project Sniper Windows"
       - name: Run the buyer installer
         shell: powershell
-        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
       - name: Re-run to prove idempotence
         shell: powershell
-        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
       - name: Run the full installed doctor
         shell: powershell
-        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\doctor.ps1" --json'
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\doctor.ps1" --json'
       - name: Prove the command launcher
         shell: cmd
-        run: '"%RUNNER_TEMP%\Project Sniper ü\sniper.cmd" workspace'
+        run: '"%RUNNER_TEMP%\Project Sniper Windows\sniper.cmd" workspace'
       - name: Preserve diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: windows-qualification-diagnostics
           path: |
-            ${{ runner.temp }}\Project Sniper ü\runtime\logs
-            ${{ runner.temp }}\Project Sniper ü\runtime\state
+            ${{ runner.temp }}\Project Sniper Windows\runtime\logs
+            ${{ runner.temp }}\Project Sniper Windows\runtime\state

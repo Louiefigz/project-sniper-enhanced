@@ -31,6 +31,12 @@ class WindowsRelease(unittest.TestCase):
                     "install/uninstall.ps1", "install/studio.cmd", "install/studio.ps1")
         self.assertFalse([name for name in required if not (payload.PAYLOAD / name).is_file()])
 
+    def test_windows_powershell_sources_are_ascii(self) -> None:
+        scripts = (payload.PAYLOAD / "install").rglob("*.ps1")
+        non_ascii = [str(script.relative_to(payload.PAYLOAD)) for script in scripts
+                     if not script.read_bytes().isascii()]
+        self.assertEqual(non_ascii, [], "Windows PowerShell 5 misreads BOM-less UTF-8")
+
 
 if __name__ == "__main__":
     unittest.main()

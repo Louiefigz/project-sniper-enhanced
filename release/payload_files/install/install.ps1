@@ -43,7 +43,7 @@ function Install-NpmTree([string]$Label, [string]$Root, [string]$Receipt, $Runti
         $treeMatches = Test-Tree $Runtime.Tools.Python $modules $record $treeArgs
     }
     if ($receiptMatches -and $treeMatches) {
-        Write-Host "$Label — up to date (verified)"
+        Write-Host "$Label - up to date (verified)"
         return
     }
     Remove-Item -LiteralPath $modules -Recurse -Force -ErrorAction SilentlyContinue
@@ -60,7 +60,7 @@ function Install-PythonEnvironment($Runtime) {
     $key = "python:$(& $Runtime.Tools.Python --version)|lock:$(Get-FileSha256 $lock)"
     if ((Test-Receipt 'venv' $key) -and (Test-Path $venv)) {
         & $venv -I $script:InstallTools venv-check $lock *> $null
-        if ($LASTEXITCODE -eq 0) { Write-Host 'Python environment — up to date (verified)'; return $venv }
+        if ($LASTEXITCODE -eq 0) { Write-Host 'Python environment - up to date (verified)'; return $venv }
     }
     Remove-Item -LiteralPath (Join-Path $script:PackageRoot '.venv') -Recurse -Force -ErrorAction SilentlyContinue
     & $Runtime.Tools.Python -m venv (Join-Path $script:PackageRoot '.venv')

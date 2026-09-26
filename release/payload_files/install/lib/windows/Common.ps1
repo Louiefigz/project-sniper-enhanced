@@ -95,7 +95,7 @@ function Enter-SniperEnvironment([hashtable]$Settings) {
 
 function Write-SniperSettings([hashtable]$Values) {
     New-Item -ItemType Directory -Path $script:RuntimeDir -Force | Out-Null
-    $lines = @('# sniper-settings-v1 — written by install\install.ps1; values are literal')
+    $lines = @('# sniper-settings-v1 - written by install\install.ps1; values are literal')
     foreach ($key in ($Values.Keys | Sort-Object)) {
         if ($key -notmatch '^[A-Za-z_][A-Za-z0-9_]*$' -or $Values[$key] -match '[\x00-\x1f\x7f]') {
             throw "Cannot store invalid setting $key."

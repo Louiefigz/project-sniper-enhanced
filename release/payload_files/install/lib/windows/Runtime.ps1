@@ -58,7 +58,9 @@ function Install-CondaRuntime($Paths, [object[]]$Rows) {
         & tar.exe -xjf $archive -C $mambaDir 'Library/bin/micromamba.exe'
         if ($LASTEXITCODE -ne 0 -or (Get-FileSha256 $mamba) -ne $binRow.Sha) { throw 'Pinned micromamba did not extract correctly.' }
     }
-    $explicit = Join-Path $Paths.Home "runtimes\$($Paths.Id).explicit.txt"
+    $runtimes = Join-Path $Paths.Home 'runtimes'
+    New-Item -ItemType Directory -Path $runtimes -Force | Out-Null
+    $explicit = Join-Path $runtimes "$($Paths.Id).explicit.txt"
     $lines = @('@EXPLICIT')
     foreach ($row in ($Rows | Where-Object Kind -eq 'conda')) {
         $file = Join-Path $Paths.Cache ($row.Path -replace '/', '\')
@@ -66,7 +68,6 @@ function Install-CondaRuntime($Paths, [object[]]$Rows) {
     }
     Set-Content -LiteralPath $explicit -Value $lines -Encoding ASCII
     Remove-Item -LiteralPath $Paths.Prefix -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path (Split-Path $Paths.Prefix -Parent) -Force | Out-Null
     $env:MAMBA_ROOT_PREFIX = Join-Path $Paths.Home 'mamba-root'
     & $mamba create --no-rc -y -q -p $Paths.Prefix --offline --platform win-64 --always-copy --file $explicit | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Installing the checked Windows runtime packages failed.' }

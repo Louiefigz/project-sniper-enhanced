@@ -34,6 +34,14 @@ jobs:
               throw "PowerShell parsing failed for $($_.FullName)."
             }
           }
+      - name: Compile the Windows media jail preflight
+        shell: powershell
+        run: |
+          . "$env:RUNNER_TEMP\Project Sniper Windows\install\lib\windows\MediaJail.ps1"
+          $source = "$env:RUNNER_TEMP\Project Sniper Windows\scripts\producer\headless\windows_media_inspect.cs"
+          $target = "$env:RUNNER_TEMP\windows_media_inspect_preflight.exe"
+          Compile-JailProgram $source $target
+          if (-not (Test-Path $target)) { throw 'The Windows media jail preflight did not compile.' }
       - name: Ensure qualification workspace capacity
         shell: powershell
         run: |

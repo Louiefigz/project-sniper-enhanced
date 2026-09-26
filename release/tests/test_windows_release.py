@@ -48,7 +48,10 @@ class WindowsRelease(unittest.TestCase):
         script = (payload.PAYLOAD / "install/lib/windows/MediaJail.ps1").read_text()
         self.assertIn("System.CodeDom.Compiler.CompilerParameters", script)
         self.assertIn("-CompilerParameters $compiler", script)
+        self.assertIn("$compiler.GenerateExecutable = $true", script)
+        self.assertIn("$compiler.OutputAssembly = $temporary", script)
         self.assertNotIn("-CompilerOptions", script)
+        self.assertNotIn("-OutputAssembly $temporary", script)
 
     def test_windows_native_probes_use_process_exit_codes(self) -> None:
         runtime = (payload.PAYLOAD / "install/lib/windows/Runtime.ps1").read_text(encoding="ascii")

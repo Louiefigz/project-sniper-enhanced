@@ -1,0 +1,79 @@
+name: macOS Intel qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      ffmpeg_url:
+        description: HTTPS URL for the exact pinned Intel FFmpeg artifact
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  install-and-admit:
+    runs-on: macos-15-intel
+    timeout-minutes: 120
+    env:
+      FFMPEG_SHA256: cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd
+      FFMPEG_BYTES: 17918488
+      FFMPEG_FILE: sniper-ffmpeg-8.0.3-1-osx-64.tar.xz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Prove the native Intel runner
+        shell: bash
+        run: |
+          test "$(uname -s)" = Darwin
+          test "$(uname -m)" = x86_64
+          source release/payload_files/install/lib/platform.sh
+          test "$SNIPER_RUNTIME_PLATFORM" = osx-64
+          test "$SNIPER_BROWSER_PLATFORM" = mac-x64
+      - name: Receive the pinned Intel media runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release/runtime_deps/dist
+          target="release/runtime_deps/dist/$FFMPEG_FILE"
+          case "${{ inputs.ffmpeg_url }}" in https://*) ;; *) exit 2 ;; esac
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$target" "${{ inputs.ffmpeg_url }}"
+          test "$(stat -f %z "$target")" = "$FFMPEG_BYTES"
+          test "$(shasum -a 256 "$target" | awk '{print $1}')" = "$FFMPEG_SHA256"
+      - name: Assemble qualification package
+        shell: bash
+        run: python -m release.prepare_macos_qualification "$RUNNER_TEMP/Project Sniper Intel"
+      - name: Run the buyer installer
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
+      - name: Re-run to prove idempotence
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
+      - name: Run the full installed doctor
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: ./sniper doctor --json
+      - name: Prove the command launcher
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: test "$(./sniper workspace)" = "$RUNNER_TEMP/Sniper Projects"
+      - name: Prove literal local settings override
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: |
+          override="$RUNNER_TEMP/Local Project \$97"
+          printf 'SNIPER_WORKSPACE_ROOT=%s\n' "$override" > runtime/sniper.local.env
+          test "$(./sniper workspace)" = "$override"
+      - name: Preserve diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel-qualification-diagnostics
+          path: |
+            ${{ runner.temp }}/Project Sniper Intel/runtime/logs
+            ${{ runner.temp }}/Project Sniper Intel/runtime/state

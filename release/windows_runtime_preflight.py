@@ -36,8 +36,10 @@ def _process(request_type: object, run: object) -> None:
             (sys.executable, "-c", "print('windows-runner-ok')"), "", root,
             dict(os.environ), 30, max_output_bytes=128)
         result = run(request)
-    if result.returncode != 0 or result.stdout != "windows-runner-ok\n":
-        raise RuntimeError("Windows bounded process runner returned the wrong result")
+    if result.returncode != 0 or result.stdout.strip() != "windows-runner-ok":
+        raise RuntimeError(
+            "Windows bounded process runner returned the wrong result: "
+            f"code={result.returncode}; stdout={result.stdout!r}; stderr={result.stderr!r}")
 
 
 def main() -> int:

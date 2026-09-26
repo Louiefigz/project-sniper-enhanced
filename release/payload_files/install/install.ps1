@@ -105,16 +105,29 @@ function Write-WindowsSettings($Runtime, [string]$Venv, [string]$Browser, [strin
     $prefix = $Runtime.Paths.Prefix
     $path = @($venvBin,$prefix,(Join-Path $prefix 'Scripts'),(Join-Path $prefix 'Library\bin'),
         (Join-Path $prefix 'Library\usr\bin'),$env:SystemRoot,(Join-Path $env:SystemRoot 'System32')) -join ';'
-    Write-SniperSettings @{
-        PKG_ROOT=$script:PackageRoot; APP_DIR=$script:PackageRoot; PATH=$path
-        SNIPER_DEPS_PREFIX=$prefix; SNIPER_EXECUTION_MODE='local'; SNIPER_WORKSPACE_ROOT=$workspacePath
-        SNIPER_NODE_PATH=$Runtime.Tools.Node; HYPERFRAMES_BROWSER_PATH=$Browser
-        HYPERFRAMES_FFMPEG_PATH=$Runtime.Tools.Ffmpeg; HYPERFRAMES_FFPROBE_PATH=$Runtime.Tools.Ffprobe
-        HYPERFRAMES_NO_TELEMETRY='1'; NEXT_TELEMETRY_DISABLED='1'; HYPERFRAMES_NO_UPDATE_CHECK='1'
-        HYPERFRAMES_NO_AUTO_INSTALL='1'; WHISPER_CPP_BIN=$Runtime.Tools.Whisper; WHISPER_CPP_MODEL=$Model
-        SNIPER_TRANSCRIBE_PROVIDER='local-whisper'; SNIPER_STUDIO_COMMAND=(Join-Path $script:PackageRoot 'install\studio.cmd')
-        SNIPER_WINDOWS_MEDIA_JAIL=$Jail.Jail; SNIPER_WINDOWS_MEDIA_INSPECT=$Jail.Inspect
+    $values = @{
+        'PKG_ROOT' = $script:PackageRoot
+        'APP_DIR' = $script:PackageRoot
+        'PATH' = $path
+        'SNIPER_DEPS_PREFIX' = $prefix
+        'SNIPER_EXECUTION_MODE' = 'local'
+        'SNIPER_WORKSPACE_ROOT' = $workspacePath
+        'SNIPER_NODE_PATH' = $Runtime.Tools.Node
+        'HYPERFRAMES_BROWSER_PATH' = $Browser
+        'HYPERFRAMES_FFMPEG_PATH' = $Runtime.Tools.Ffmpeg
+        'HYPERFRAMES_FFPROBE_PATH' = $Runtime.Tools.Ffprobe
+        'HYPERFRAMES_NO_TELEMETRY' = '1'
+        'NEXT_TELEMETRY_DISABLED' = '1'
+        'HYPERFRAMES_NO_UPDATE_CHECK' = '1'
+        'HYPERFRAMES_NO_AUTO_INSTALL' = '1'
+        'WHISPER_CPP_BIN' = $Runtime.Tools.Whisper
+        'WHISPER_CPP_MODEL' = $Model
+        'SNIPER_TRANSCRIBE_PROVIDER' = 'local-whisper'
+        'SNIPER_STUDIO_COMMAND' = (Join-Path $script:PackageRoot 'install\studio.cmd')
+        'SNIPER_WINDOWS_MEDIA_JAIL' = $Jail.Jail
+        'SNIPER_WINDOWS_MEDIA_INSPECT' = $Jail.Inspect
     }
+    Write-SniperSettings $values
     $workspacePath
 }
 

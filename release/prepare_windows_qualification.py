@@ -12,7 +12,6 @@ import shutil
 from pathlib import Path
 
 from release import payload, pins, runtime_tools
-from release.node_floor import node_requirements
 from release.stage import StageReport, stage_tree
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,7 +26,10 @@ def assemble(destination: Path) -> None:
     shutil.copytree(payload.PAYLOAD, destination, dirs_exist_ok=True,
                     ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"))
     chrome = json.loads(pins.BROWSER_PIN.read_text(encoding="utf-8"))["version"]
-    node = node_requirements(ROOT)
+    # The distributable build derives this from both lockfiles through semver.
+    # Qualification runs before npm exists, so it uses the last derived value;
+    # release.build_package remains the authority and refuses drift.
+    node = {"floor": "22.13.0", "set_by": ["qualification mirror of release node floor"]}
     windows = runtime_tools.check("win-64")
     components = {
         "app_version": json.loads((ROOT / "package.json").read_text())["version"],

@@ -57,9 +57,9 @@ function Install-PythonEnvironment($Runtime) {
     Remove-Item -LiteralPath (Join-Path $script:PackageRoot '.venv') -Recurse -Force -ErrorAction SilentlyContinue
     & $Runtime.Tools.Python -m venv (Join-Path $script:PackageRoot '.venv')
     if ($LASTEXITCODE -ne 0) { throw 'Could not create the Python environment.' }
-    & $venv -m pip install --disable-pip-version-check --no-input --require-hashes --only-binary=:all: -r $lock
+    & $venv -m pip install --disable-pip-version-check --no-input --require-hashes --only-binary=:all: -r $lock | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Installing the pinned Python packages failed.' }
-    & $venv -I $script:InstallTools venv-check $lock
+    & $venv -I $script:InstallTools venv-check $lock | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'The new Python environment does not verify.' }
     Write-Receipt 'venv' $key
     $venv

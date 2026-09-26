@@ -67,7 +67,7 @@ function Install-CondaRuntime($Paths, [object[]]$Rows) {
     Remove-Item -LiteralPath $Paths.Prefix -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path (Split-Path $Paths.Prefix -Parent) -Force | Out-Null
     $env:MAMBA_ROOT_PREFIX = Join-Path $Paths.Home 'mamba-root'
-    & $mamba create --no-rc -y -q -p $Paths.Prefix --offline --platform win-64 --always-copy --file $explicit
+    & $mamba create --no-rc -y -q -p $Paths.Prefix --offline --platform win-64 --always-copy --file $explicit | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Installing the checked Windows runtime packages failed.' }
 }
 
@@ -117,7 +117,7 @@ function Ensure-WindowsRuntime {
     Install-WindowsFfmpeg $paths $rows
     $tools = Get-RuntimeTools $paths.Prefix
     Test-RuntimeTools $tools
-    & $tools.Python -I -B $script:InstallTools tree-record $paths.Prefix $paths.Record --exclude var/cache/fontconfig --exclude-name __pycache__ --exclude-file .sniper-runtime-complete
+    & $tools.Python -I -B $script:InstallTools tree-record $paths.Prefix $paths.Record --exclude var/cache/fontconfig --exclude-name __pycache__ --exclude-file .sniper-runtime-complete | Out-Host
     if ($LASTEXITCODE -ne 0) { throw 'Could not record the installed runtime.' }
     Set-Content -LiteralPath $marker -Value $paths.Id -NoNewline -Encoding ASCII
     [pscustomobject]@{ Paths=$paths; Tools=$tools }

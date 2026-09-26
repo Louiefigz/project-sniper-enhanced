@@ -38,10 +38,14 @@ jobs:
         shell: powershell
         run: |
           . "$env:RUNNER_TEMP\Project Sniper Windows\install\lib\windows\MediaJail.ps1"
-          $source = "$env:RUNNER_TEMP\Project Sniper Windows\scripts\producer\headless\windows_media_inspect.cs"
-          $target = "$env:RUNNER_TEMP\windows_media_inspect_preflight.exe"
+          $source = "$env:RUNNER_TEMP\Project Sniper Windows\scripts\producer\headless\windows_media_jail.cs"
+          $target = "$env:RUNNER_TEMP\windows_media_jail_preflight.exe"
           Compile-JailProgram $source $target
           if (-not (Test-Path $target)) { throw 'The Windows media jail preflight did not compile.' }
+          $sid = (& $target sid | Select-Object -Last 1).Trim()
+          if ($LASTEXITCODE -ne 0 -or $sid -notmatch '^S-1-15-2-') {
+            throw "The Windows media jail preflight did not create an AppContainer SID: $sid"
+          }
       - name: Ensure qualification workspace capacity
         shell: powershell
         run: |

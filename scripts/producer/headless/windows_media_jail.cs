@@ -49,7 +49,8 @@ internal static class WindowsMediaJail {
         string name, out IntPtr sid);
     [DllImport("userenv.dll", CharSet=CharSet.Unicode)] static extern int DeleteAppContainerProfile(string name);
     [DllImport("advapi32.dll", SetLastError=true)] static extern IntPtr FreeSid(IntPtr sid);
-    [DllImport("advapi32.dll", SetLastError=true)] static extern bool ConvertSidToStringSid(IntPtr sid, out IntPtr text);
+    [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+    static extern bool ConvertSidToStringSid(IntPtr sid, out IntPtr text);
     [DllImport("kernel32.dll")] static extern IntPtr LocalFree(IntPtr value);
     [DllImport("kernel32.dll", SetLastError=true)] static extern bool InitializeProcThreadAttributeList(
         IntPtr list, int count, int flags, ref IntPtr size);

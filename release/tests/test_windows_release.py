@@ -25,6 +25,8 @@ class WindowsRelease(unittest.TestCase):
         found = {name: hashlib.sha256((HEADLESS / name).read_bytes()).hexdigest()
                  for name in approval["approved"]}
         self.assertEqual(found, approval["approved"])
+        jail = (HEADLESS / "windows_media_jail.cs").read_text()
+        self.assertIn('CharSet=CharSet.Unicode, SetLastError=true', jail)
 
     def test_windows_jail_approval_bytes_keep_lf_on_windows(self) -> None:
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")

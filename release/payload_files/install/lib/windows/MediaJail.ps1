@@ -36,7 +36,11 @@ function Install-WindowsMediaJail($Runtime) {
         Compile-JailProgram $inspectSource $inspect
         Write-Receipt 'windows-media-jail' $key
     }
-    $sid = (& $jail sid | Select-Object -Last 1).Trim()
-    if ($LASTEXITCODE -ne 0 -or $sid -notmatch '^S-1-15-2-') { throw 'Could not create the media AppContainer profile.' }
+    $sidOutput = @(& $jail sid 2>&1)
+    $code = $LASTEXITCODE
+    $sid = if ($sidOutput.Count) { $sidOutput[-1].ToString().Trim() } else { '' }
+    if ($code -ne 0 -or $sid -notmatch '^S-1-15-2-') {
+        throw "Could not create the media AppContainer profile (exit $code): $($sidOutput -join ' ')"
+    }
     [pscustomobject]@{ Jail=$jail; Inspect=$inspect; Sid=$sid }
 }

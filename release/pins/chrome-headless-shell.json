@@ -9,6 +9,11 @@
       "bytes": 102653759,
       "sha256": "48bf06f34412f9df5c7d3f3306d61a54a050789f395dd0129bae2234adb0033a",
       "url": "https://storage.googleapis.com/chrome-for-testing-public/152.0.7977.30/mac-x64/chrome-headless-shell-mac-x64.zip"
+    },
+    "win64": {
+      "bytes": 119527247,
+      "sha256": "5d7df999a6e4a65a1b16b25b61064f7337b8aa8ee2ed1b4e07bfdd24f6e4275e",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/152.0.7977.30/win64/chrome-headless-shell-win64.zip"
     }
   },
   "version": "152.0.7977.30"

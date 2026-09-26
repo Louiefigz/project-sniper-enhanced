@@ -27,7 +27,7 @@ class DownloadPins(unittest.TestCase):
     def test_shipped_pins_are_complete(self) -> None:
         pins.check_python_lock(PAYLOAD / "requirements.lock.txt")
         self.assertEqual(set(pins.browser_hashes(json.loads(pins.BROWSER_PIN.read_text())["version"])),
-                         {"mac-arm64", "mac-x64"})
+                         {"mac-arm64", "mac-x64", "win64"})
 
     def test_a_python_requirement_without_a_hash_is_refused(self) -> None:
         lock = self.base / "lock.txt"

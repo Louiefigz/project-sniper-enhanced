@@ -1,0 +1,33 @@
+{
+  "name": "sniper-ffmpeg",
+  "version": "8.1.3",
+  "build": "BtbN-20260925",
+  "platform": "win-64",
+  "min_windows": "10.0.19045",
+  "why": "The renderer requires zscale and rubberband. This pinned static GPL build contains both without installing a compiler or shared runtime on the buyer's PC.",
+  "publisher": "BtbN/FFmpeg-Builds",
+  "build_system_commit": "58cc05f33c20e3ead0ce876b72531ab482d0f981",
+  "release": "autobuild-2026-09-25-15-37",
+  "source_code": "https://github.com/BtbN/FFmpeg-Builds/tree/58cc05f33c20e3ead0ce876b72531ab482d0f981",
+  "license": "GPL-3.0-or-later as configured",
+  "sources": {},
+  "required_filters": [
+    "rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn",
+    "loudnorm", "ebur128", "afftdn", "acompressor", "alimiter",
+    "sidechaincompress", "aresample", "amix", "overlay", "crop"
+  ],
+  "required_encoders": [
+    "libx264", "aac", "prores_ks", "qtrle", "png", "flac", "alac",
+    "pcm_f32le", "libmp3lame"
+  ],
+  "required_decoders": [
+    "h264", "hevc", "prores", "vp9", "libdav1d", "opus", "aac", "mp3", "png"
+  ],
+  "artifact": {
+    "file": "ffmpeg-n8.1.3-win64-gpl-8.1.zip",
+    "archive_root": "ffmpeg-n8.1.3-win64-gpl-8.1",
+    "source_url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-25-15-37/ffmpeg-n8.1.3-win64-gpl-8.1.zip",
+    "sha256": "8efaa4e62db01a71580dc5a7ec0625dea7a4dfc5fac2d680f94804503d18a34c",
+    "bytes": 193111726
+  }
+}

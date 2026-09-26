@@ -64,7 +64,9 @@ def component_versions(root: Path) -> dict[str, object]:
     chrome = chrome_version(root)
     node = node_requirements(root)
     pins.check_python_lock(PAYLOAD / "install/requirements.lock.txt")
-    runtime = _checked_runtime(node)
+    platforms = ("osx-arm64", "osx-64", "win-64")
+    runtimes = {platform: _checked_runtime(node, platform) for platform in platforms}
+    runtime = runtimes["osx-arm64"]
     return {
         "app_version": root_pkg["version"],
         "next": root_pkg["dependencies"]["next"],
@@ -73,19 +75,24 @@ def component_versions(root: Path) -> dict[str, object]:
         "hyperframes_cli": motion_pkg["dependencies"]["hyperframes"],
         "chrome_headless_shell": chrome,
         "chrome_headless_shell_sha256": pins.browser_hashes(chrome),
+        "chrome_headless_shell_bytes": pins.browser_sizes(chrome),
         "node_floor": node["floor"],
         "node_floor_set_by": node["set_by"],
         **runtime,
+        "runtime_targets": runtimes,
         "whisper_model": "ggml-small.en.bin",
-        "supported_platform": f"macOS {runtime['runtime_min_macos']} or later on Apple silicon (arm64), "
-                              "the floor Sniper's own tools declare; only a developer Mac on macOS 26 has run it",
+        "supported_platform": (
+            f"macOS {runtimes['osx-arm64']['runtime_min_macos']}+ on Apple silicon; "
+            f"macOS {runtimes['osx-64']['runtime_min_macos']}+ on Intel; "
+            f"Windows {runtimes['win-64']['runtime_min_windows']}+ on x64"
+        ),
     }
 
 
-def _checked_runtime(node: dict) -> dict[str, object]:
+def _checked_runtime(node: dict, platform: str = "osx-arm64") -> dict[str, object]:
     """Sniper's own tools (release/runtime_tools.py); their Node must satisfy every dependency."""
     try:
-        runtime = runtime_tools.check()
+        runtime = runtime_tools.check(platform)
     except runtime_tools.LockError as error:
         raise StagingError(f"Sniper's tool runtime does not verify: {error}") from error
     version = tuple(int(part) for part in str(runtime["runtime_tools"]["nodejs"]).split("."))
@@ -172,11 +179,13 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
         shutil.copyfile(path, target)
         target.chmod(0o755 if target.suffix in {".sh", ".command"} else 0o644)
         report.files.append(relative)
+    platforms = ("osx-arm64", "osx-64", "win-64")
     try:
-        runtime_tools.check()
+        for platform in platforms:
+            runtime_tools.check(platform)
     except runtime_tools.LockError as error:
         raise StagingError(f"Sniper's tool runtime does not verify: {error}") from error
-    for relative, (source, _) in sorted(runtime_tools.shipped_files().items()):
+    for relative, (source, _) in sorted(runtime_tools.shipped_files(platforms).items()):
         target = stage / relative   # Sniper's ffmpeg build and its complete corresponding source
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, target)

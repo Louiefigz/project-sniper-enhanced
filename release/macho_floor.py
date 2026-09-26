@@ -1,4 +1,4 @@
-"""The oldest macOS a folder of Apple-silicon binaries runs on, read from the files themselves.
+"""The oldest macOS a folder of native binaries runs on, read from the files themselves.
 
 Every Mach-O file names the minimum macOS it was built for (``LC_BUILD_VERSION`` minos, or the
 older ``LC_VERSION_MIN_MACOSX``). Package metadata can understate it, so the release measures it.
@@ -13,6 +13,7 @@ from pathlib import Path
 _THIN_64 = b"\xcf\xfa\xed\xfe"          # MH_MAGIC_64, little endian
 _FAT = (b"\xca\xfe\xba\xbe", b"\xca\xfe\xba\xbf")   # FAT_MAGIC / FAT_MAGIC_64, big endian
 _ARM64 = 0x0100000C
+_X86_64 = 0x01000007
 _LC_BUILD_VERSION = 0x32
 _LC_VERSION_MIN_MACOSX = 0x24
 _PLATFORM_MACOS = 1
@@ -27,12 +28,12 @@ def version_key(version: str) -> tuple[int, ...]:
     return tuple(int(part) for part in version.split("."))
 
 
-def _slice_floor(data: bytes, offset: int) -> str | None:
-    """The macOS floor of the arm64 thin Mach-O at ``offset``, or None (another CPU, or none named)."""
+def _slice_floor(data: bytes, offset: int, cpu: int) -> str | None:
+    """The macOS floor of the selected thin Mach-O at ``offset``."""
     if data[offset:offset + 4] != _THIN_64:
         return None
     cputype, _, _, ncmds = struct.unpack_from("<iiII", data, offset + 4)
-    if cputype != _ARM64:
+    if cputype != cpu:
         return None
     at = offset + 32
     for _ in range(ncmds):
@@ -45,8 +46,9 @@ def _slice_floor(data: bytes, offset: int) -> str | None:
     return None
 
 
-def file_floor(path: Path) -> str | None:
-    """The macOS floor of one file's arm64 code, or None when it is not an arm64 Mach-O file."""
+def file_floor(path: Path, platform: str = "osx-arm64") -> str | None:
+    """The macOS floor of one file's selected native slice, if present."""
+    cpu = _ARM64 if platform == "osx-arm64" else _X86_64
     with path.open("rb") as handle:
         magic = handle.read(4)
         if magic != _THIN_64 and magic not in _FAT:
@@ -54,7 +56,7 @@ def file_floor(path: Path) -> str | None:
         data = magic + handle.read()
     try:
         if magic == _THIN_64:
-            return _slice_floor(data, 0)
+            return _slice_floor(data, 0, cpu)
         count = struct.unpack_from(">I", data, 4)[0]
         if count > 30:          # a Java class file shares the fat magic; its "count" is a version
             return None
@@ -64,14 +66,14 @@ def file_floor(path: Path) -> str | None:
                 cputype, _, offset = struct.unpack_from(">iiQ", data, 8 + index * 32)
             else:
                 cputype, _, offset = struct.unpack_from(">iiI", data, 8 + index * 20)
-            if cputype == _ARM64:
-                return _slice_floor(data, offset)
+            if cputype == cpu:
+                return _slice_floor(data, offset, cpu)
     except struct.error:        # truncated: not a usable Mach-O file
         return None
     return None
 
 
-def folder_floor(root: Path) -> tuple[str, list[str], int]:
+def folder_floor(root: Path, platform: str = "osx-arm64") -> tuple[str, list[str], int]:
     """(highest floor, files that set it relative to ``root``, Mach-O files read) for a folder."""
     highest, setters, count = "0.0", [], 0
     for folder, _, names in os.walk(root):
@@ -79,7 +81,7 @@ def folder_floor(root: Path) -> tuple[str, list[str], int]:
             path = Path(folder) / name
             if path.is_symlink() or not path.is_file():
                 continue
-            floor = file_floor(path)
+            floor = file_floor(path, platform)
             if floor is None:
                 continue
             count += 1

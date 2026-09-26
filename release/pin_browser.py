@@ -4,8 +4,8 @@
     python -m release.pin_browser [--keep-dir DIR]
 
 Downloads the exact ``chrome-headless-shell`` build the shipped HyperFrames CLI
-requires (``payload.chrome_version``) from Chrome for Testing, for mac-arm64 and
-mac-x64, and records each archive's URL, size and SHA-256 in
+requires (``payload.chrome_version``) from Chrome for Testing, for both Mac
+architectures and Windows x64, and records each archive's URL, size and SHA-256 in
 ``release/pins/chrome-headless-shell.json``. The build copies these into
 ``RELEASE.json`` and refuses a pin whose version differs from the one the
 installed HyperFrames requires; the installer downloads the same URL and refuses
@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PIN_FILE = Path(__file__).resolve().parent / "pins/chrome-headless-shell.json"
 BASE_URL = "https://storage.googleapis.com/chrome-for-testing-public"
-PLATFORMS = ("mac-arm64", "mac-x64")
+PLATFORMS = ("mac-arm64", "mac-x64", "win64")
 
 
 def archive_url(version: str, platform: str) -> str:

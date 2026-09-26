@@ -45,11 +45,11 @@ check still runs in Sniper's own sandbox.</td></tr>
 followed by <code>In use by: …</code></td><td>A Sniper command (an edit or render, the doctor, or another
 installer) is using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
 changed.</td></tr>
-<tr><td><code>This Mac has an Intel processor. …</code></td><td>Sniper's own tools are built for
-Apple silicon only.</td><td>Sniper needs a Mac with an M1 or later chip. Nothing was downloaded or
-changed.</td></tr>
-<tr><td><code>This Mac runs macOS … ; Sniper's tools need macOS 13.5 or later.</code></td><td>The tools
-Sniper installs need macOS 13.5 or newer (its Node is built for 13.5).</td><td>Update macOS (Software Update, in System Settings &gt;
+<tr><td><code>Project Sniper supports Apple-silicon and Intel Macs; this platform is not recognized.</code></td>
+<td>Setup could not identify a supported native Mac processor.</td><td>Use macOS on an Apple-silicon
+or Intel Mac. Windows support is not in this release. Nothing was downloaded or changed.</td></tr>
+<tr><td><code>This Mac runs macOS … ; Sniper's tools need macOS … or later.</code></td><td>The selected
+runtime needs macOS 13.5 or newer on Apple silicon, or macOS 14 or newer on Intel.</td><td>Update macOS (Software Update, in System Settings &gt;
 General, or in System Preferences on macOS 12 and earlier), then run setup again. Nothing was downloaded.</td></tr>
 <tr><td><code>Your home folder path contains a space …</code></td><td>Sniper keeps its tools in your home
 folder, and Studio cannot use a Node whose path has a space. macOS account folders never have one,

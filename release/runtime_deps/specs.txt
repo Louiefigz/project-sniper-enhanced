@@ -1,7 +1,7 @@
-# Sniper's private tool runtime: macOS on Apple silicon (osx-arm64), from conda-forge.
+# Sniper's private tool runtime for both macOS architectures, from conda-forge.
 # The tools are pinned exactly; their libraries are resolved once by
 #   python -m release.runtime_tools solve
-# and frozen, with every package's SHA-256, in release/payload_files/install/deps/osx-arm64.lock.
+# and frozen, with every package's SHA-256, in the selected install/deps/<platform>.lock.
 # The installer installs exactly that lock; nothing is resolved on a buyer's Mac.
 python=3.14.4
 nodejs=24.21.0

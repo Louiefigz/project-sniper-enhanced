@@ -34,7 +34,7 @@ RECEIPTS = PKG_ROOT / "runtime" / "state" / "receipts"
 MODEL_SHA = "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn", "loudnorm", "ebur128",
            "afftdn", "acompressor", "alimiter", "sidechaincompress", "aresample", "amix", "overlay", "crop")
-SPOKEN = "Sniper checks that local transcription works on this Mac."
+SPOKEN = f"Sniper checks that local transcription works on this {'PC' if os.name == 'nt' else 'Mac'}."
 _RESULTS: list[dict] = []
 
 
@@ -65,7 +65,8 @@ def _tree_intact(root: Path, receipt: str, exclude: set[str]) -> str | None:
 
 def check_foundations() -> None:
     """Install path, Node, both dependency roots, tsx and the pinned Python set."""
-    bad = [ch for ch in (",", "'", ":", "\\") if ch in str(PKG_ROOT)]
+    refused = (",", "'") if os.name == "nt" else (",", "'", ":", "\\")
+    bad = [ch for ch in refused if ch in str(PKG_ROOT)]
     record("FAIL" if bad else "PASS", "install path",
            f"contains {' '.join(bad)}: voice-rnn cleanup cannot run" if bad else str(PKG_ROOT))
     setup.check_node(record)
@@ -75,7 +76,7 @@ def check_foundations() -> None:
         record("FAIL" if problem else "PASS", label, problem or "installed and verified")
     record("PASS" if (APP / "node_modules/tsx/dist/cli.mjs").exists() else "FAIL", "tsx runtime",
            "Sniper's TypeScript commands need it")
-    venv = APP / ".venv/bin/python3"
+    venv = APP / (".venv/Scripts/python.exe" if os.name == "nt" else ".venv/bin/python3")
     if not venv.exists():
         record("FAIL", "python packages", "no environment — run install.command")
         return
@@ -118,6 +119,16 @@ def check_runtime() -> None:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
 
 
+def _make_speech_sample(path: Path) -> int:
+    """Create a deterministic local TTS sample with the operating system voice."""
+    if os.name != "nt":
+        return setup.run(["say", "-o", str(path), SPOKEN], 60)[0]
+    script = ("Add-Type -AssemblyName System.Speech; "
+              "$voice=New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+              "$voice.SetOutputToWaveFile($args[0]); $voice.Speak($args[1]); $voice.Dispose()")
+    return setup.run(["powershell.exe", "-NoProfile", "-Command", script, str(path), SPOKEN], 60)[0]
+
+
 def check_transcription(skip: bool) -> None:
     """Model hash, then an actual transcription through the product's own path."""
     _product_paths()
@@ -132,9 +143,9 @@ def check_transcription(skip: bool) -> None:
     if skip:
         record("INFO", "transcription", "skipped by request"); return
     with tempfile.TemporaryDirectory(prefix="sniper-doctor-") as tmp:
-        speech = Path(tmp) / "speech.aiff"
-        if setup.run(["say", "-o", str(speech), SPOKEN], 60)[0] != 0:
-            record("FAIL", "transcription", "could not create the local speech sample with macOS 'say'"); return
+        speech = Path(tmp) / ("speech.wav" if os.name == "nt" else "speech.aiff")
+        if _make_speech_sample(speech) != 0:
+            record("FAIL", "transcription", "could not create the local speech sample"); return
         try:
             result = transcribe_media(LocalTranscribeRequest(path=str(speech)))
         except Exception as error:
@@ -143,7 +154,8 @@ def check_transcription(skip: bool) -> None:
         if isinstance(result, dict) else []
     text = " ".join(str(w.get("word", w.get("text", ""))) for w in words).lower()
     starts = [float(w.get("start", 0)) for w in words]
-    heard = sum(token in text for token in ("sniper", "checks", "local", "transcription", "mac"))
+    last = "pc" if os.name == "nt" else "mac"
+    heard = sum(token in text for token in ("sniper", "checks", "local", "transcription", last))
     ok = heard >= 4 and starts == sorted(starts) and len(words) >= 6
     record("PASS" if ok else "FAIL", "transcription",
            f"{len(words)} timed words, {heard}/5 expected words heard" if ok
@@ -161,15 +173,17 @@ def check_workspace() -> None:
                + ("" if free >= 20 else "; long-form renders need at least 20 GB"))
     except OSError as error:
         record("FAIL", "workspace", f"{root} not writable: {error.strerror}")
-    wrapper = PKG_ROOT / "sniper"
-    ok = wrapper.is_file() and os.access(wrapper, os.X_OK)
-    record("PASS" if ok else "FAIL", "./sniper", "runs Sniper's commands for your Codex or Claude Code" if ok
+    wrapper = PKG_ROOT / ("sniper.cmd" if os.name == "nt" else "sniper")
+    ok = wrapper.is_file() and (os.name == "nt" or os.access(wrapper, os.X_OK))
+    record("PASS" if ok else "FAIL", wrapper.name, "runs Sniper's commands for your Codex or Claude Code" if ok
            else f"{wrapper} is missing or not executable — this folder is incomplete")
 
 
 def check_optional() -> None:
     """Optional features: reported, never failing the doctor."""
-    demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
+    demucs_rel = "scripts/producer/audio/.demucs-venv/Scripts/python.exe" if os.name == "nt" \
+        else "scripts/producer/audio/.demucs-venv/bin/python3"
+    demucs = (APP / demucs_rel).exists()
     record("PASS" if demucs else "GATED", "audio preset: separate",
            "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
     record("GATED", "Palmier Pro mirror", "optional separate app; not configured in this package")

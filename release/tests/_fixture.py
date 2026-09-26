@@ -22,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SRC = ROOT / "release/payload_files/install"
 LOCK_SRC = ROOT / "scripts/infra/sniper_lock.py"
+LOCK_PLATFORM_SRC = ROOT / "scripts/infra/sniper_file_lock.py"
 FINDER_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
 SNIPER_SRC = ROOT / "sniper"
 COMPONENTS = {"node_floor": "22.13.0", "chrome_headless_shell": "152.0.7977.30"}
@@ -69,6 +70,7 @@ def make_package(base: Path, name: str = "pkg") -> Path:
     shutil.copy2(SNIPER_SRC, pkg / "sniper")
     (pkg / "scripts/infra").mkdir(parents=True)
     shutil.copyfile(LOCK_SRC, pkg / "scripts/infra/sniper_lock.py")
+    shutil.copyfile(LOCK_PLATFORM_SRC, pkg / "scripts/infra/sniper_file_lock.py")
     (pkg / "RELEASE.json").write_text(json.dumps({"version": "0.1.0-test", "components": COMPONENTS,
                                                   "sellable": False}), encoding="utf-8")
     runtime_bin = pkg / "runtime/bin"

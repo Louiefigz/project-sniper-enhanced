@@ -33,11 +33,10 @@
 - **Checked on every run.** The installer and the doctor re-check every file of the tools
   against what was installed and that each tool runs; a changed file is reinstalled from the
   checked downloads. An interrupted download resumes.
-- **Any Apple silicon Mac with its free macOS updates (macOS 13.5 or newer).** Every Apple
-  silicon Mac can install it. That is what the tools' own binaries need (Sniper's Node
-  is built for 13.5, though its package says 11); the release measures it from every installed
-  binary. Setup stops before downloading anything on an Intel Mac or an older macOS. Only macOS 26
-  has been tested so far.
+- **One package for Apple silicon and Intel Macs.** Setup detects the processor and selects the
+  matching hash-locked runtime, custom ffmpeg and rendering browser: macOS 13.5 or newer on Apple
+  silicon, or macOS 14 or newer on Intel. The Intel build and feature checks pass through Rosetta
+  on the developer Mac; a native Intel installation remains unqualified. Windows is not in rc4.
 - Folders of the same release share one copy of the tools; uninstalling the last one removes it.
 - git is still in the tool set but nothing uses it any more; it goes at the next tool update.
 

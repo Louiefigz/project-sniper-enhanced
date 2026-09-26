@@ -1,0 +1,39 @@
+name: Windows qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/cross-platform-installer]
+
+jobs:
+  install-and-admit:
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Assemble qualification package
+        shell: pwsh
+        run: python -m release.prepare_windows_qualification "$env:RUNNER_TEMP\Project Sniper ü"
+      - name: Run the buyer installer
+        shell: powershell
+        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+      - name: Re-run to prove idempotence
+        shell: powershell
+        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+      - name: Run the full installed doctor
+        shell: powershell
+        run: '& "$env:RUNNER_TEMP\Project Sniper ü\install\doctor.ps1" --json'
+      - name: Prove the command launcher
+        shell: cmd
+        run: '"%RUNNER_TEMP%\Project Sniper ü\sniper.cmd" workspace'
+      - name: Preserve diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-qualification-diagnostics
+          path: |
+            ${{ runner.temp }}\Project Sniper ü\runtime\logs
+            ${{ runner.temp }}\Project Sniper ü\runtime\state

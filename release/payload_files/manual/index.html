@@ -64,11 +64,10 @@ frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
 <h2>What you need</h2>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
-<tr><td>A Mac</td><td>Any Apple silicon Mac (M1 or later) with its free macOS updates: macOS 13.5 or newer, which
-every Apple silicon Mac can install. That is the oldest macOS Sniper's own tools run on (its Node
-needs 13.5). So far Sniper has only been run on a
-developer Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel
-Macs cannot run Sniper's tools.</td><td>—</td></tr>
+<tr><td>A Mac</td><td>macOS 13.5 or newer on Apple silicon, or macOS 14 or newer on Intel.
+Setup detects the processor and selects the matching pinned runtime and browser. Sniper has run on
+the developer Apple-silicon Mac with macOS 26. Its Intel runtime and ffmpeg have passed their checks
+through Rosetta there, but installation on native Intel hardware is not yet qualified.</td><td>—</td></tr>
 <tr><td>Memory</td><td>No minimum has been tested: Sniper has only run on a 64 GB Mac. Rendering
 does not start while macOS reports the Mac is short of memory, so on a Mac with less memory, close
 other large apps before a render.</td><td>—</td></tr>

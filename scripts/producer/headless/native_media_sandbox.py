@@ -22,8 +22,9 @@ from dataclasses import dataclass
 from headless.native_media_runtime import (
     LAUNCHER, MIN_FFMPEG_MAJOR, NativeMediaRuntime, NativeRuntimeError, required_native_runtime,
 )
-from headless.native_media_watchdog import JailWatchdog
-from headless.process_runner import ProcessDeadlineError, ProcessOutputLimitError, ProcessRequest, run_text
+if sys.platform != "win32":
+    from headless.native_media_watchdog import JailWatchdog
+    from headless.process_runner import ProcessDeadlineError, ProcessOutputLimitError, ProcessRequest, run_text
 
 MEMORY_MIB = 768  # same ceiling as the container probe (4K HEVC bound)
 INSPECT = "/dev/null"  # DECODER parameter of the inspection step: nothing may be executed
@@ -98,6 +99,8 @@ def _classify(returncode: int, stderr: str, watchdog: JailWatchdog) -> JailRejec
     """Name a nonzero exit the way the container probe named its failures."""
     if watchdog.exceeded:
         return JailRejection(watchdog.exceeded, f"killed by the supervisor watchdog (peak {watchdog.peak_bytes >> 20} MiB)")
+    if sys.platform == "win32" and (returncode == 137 or "SNIPER_MEMORY_LIMIT" in stderr):
+        return JailRejection("MEMORY_LIMIT", "the Windows Job Object enforced its process-memory limit")
     if returncode < 0:
         name = signal.Signals(-returncode).name
         if name == "SIGKILL":
@@ -116,8 +119,14 @@ def _attested(attestation: dict | None, runtime: NativeMediaRuntime, step: _Step
              and attestation.get("decoder") == step.decoder and attestation.get("input") == step.input_path
              and attestation.get("mode") == ("inspect" if step.decoder == INSPECT else "exec")
              and attestation.get("profileSha256") == runtime.identity["profileSha256"]
-             and attestation.get("memoryMiB") == step.limits.memory_mib
-             and (attestation.get("rlimits") or {}).get("RLIMIT_FSIZE") == [0, 0])
+             and attestation.get("memoryMiB") == step.limits.memory_mib)
+    if sys.platform == "win32":
+        valid = valid and attestation.get("kind") == "windows-appcontainer" \
+            and attestation.get("writeDeniedOutsideProfile") is True and attestation.get("networkCapabilities") == 0 \
+            and attestation.get("ephemeralProfile") is True \
+            and (attestation.get("job") or {}).get("activeProcessLimit") == 1
+    else:
+        valid = valid and (attestation.get("rlimits") or {}).get("RLIMIT_FSIZE") == [0, 0]
     if not valid:
         raise JailRejection("JAIL_UNATTESTED", "the launcher did not attest its confinement")
     return attestation
@@ -125,6 +134,14 @@ def _attested(attestation: dict | None, runtime: NativeMediaRuntime, step: _Step
 
 def _launch(runtime: NativeMediaRuntime, step: _Step, arguments: tuple[str, ...]):
     """Start the launcher under the watchdog; return the completed process, attestation and watchdog."""
+    if sys.platform == "win32":
+        from headless.windows_media_sandbox import launch  # noqa: PLC0415
+        try:
+            return launch(runtime, step, arguments)
+        except TimeoutError as error:
+            raise JailRejection("DECODE_TIMEOUT", str(error)) from error
+        except BufferError as error:
+            raise JailRejection("OUTPUT_LIMIT", str(error)) from error
     with tempfile.TemporaryDirectory(prefix=".sniper-media-jail-") as directory:
         os.chmod(directory, 0o700)
         request = _write_request(directory, runtime, step)
@@ -188,7 +205,7 @@ def verified_runtime() -> NativeMediaRuntime:
     if cached is None:
         versions = {}
         for name, path in (("ffprobe", runtime.ffprobe), ("ffmpeg", runtime.ffmpeg)):
-            done = run_decoder(runtime, path, ("-hide_banner", "-version"), ("/dev/null", JailLimits(30, 10)))
+            done = run_decoder(runtime, path, ("-hide_banner", "-version"), (os.devnull, JailLimits(30, 10)))
             line = done.stdout.splitlines()[0] if done.stdout else ""
             match = _VERSION.match(line)
             if not match or int(match.group(1)) < MIN_FFMPEG_MAJOR:

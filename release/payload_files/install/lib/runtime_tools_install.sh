@@ -46,7 +46,7 @@ extract_micromamba() {
 }
 
 # Offline, from the checked archives only, with micromamba's settings kept in ~/.project-sniper
-# (never ~/.conda or ~/.mamba). --platform lets it re-sign what it relocates on Apple silicon.
+# (never ~/.conda or ~/.mamba). --platform selects this Mac's native locked runtime.
 create_prefix() {
   local explicit="$DEPS_HOME/runtimes/$DEPS_ID.explicit.txt"
   { printf '@EXPLICIT\n'; lock_rows conda | awk -v pkgs="$PKGS" '{print "file://" pkgs "/" $4 "#sha256:" $2}'; } > "$explicit"
@@ -54,7 +54,8 @@ create_prefix() {
   say "Installing Sniper's tools (offline, from the checked downloads)."
   env -i HOME="$DEPS_HOME/mamba-home" PATH=/usr/bin:/bin:/usr/sbin:/sbin LANG=C \
       MAMBA_ROOT_PREFIX="$DEPS_HOME/mamba-root" \
-    "$MICROMAMBA" create --no-rc -y -q -p "$DEPS_PREFIX" --offline --platform osx-arm64 --always-copy \
+    "$MICROMAMBA" create --no-rc -y -q -p "$DEPS_PREFIX" --offline \
+      --platform "$SNIPER_RUNTIME_PLATFORM" --always-copy \
       --file "$explicit" >> "$TOOLS_LOG" 2>&1 \
     || fail "Installing Sniper's tools failed (details: $TOOLS_LOG). Run the installer again."
   rm -rf "$DEPS_HOME/mamba-root/pkgs"   # unpacked copies; the checked archives stay in pkgs/
@@ -71,7 +72,7 @@ add_ffmpeg() {
     || fail "Unpacking Sniper's ffmpeg failed. Run the installer again."
 }
 
-# Apple silicon runs nothing whose signature a relocation broke; catch that here, not mid-edit.
+# macOS runs nothing whose signature a relocation broke; catch that here, not mid-edit.
 check_signatures() {
   local file bad=0
   while IFS= read -r file; do

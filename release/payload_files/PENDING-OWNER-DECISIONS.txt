@@ -48,10 +48,11 @@ STILL OPEN — each blocks release
      source in third-party/sources/); the reviewed licence must not appear to restrict it.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
   3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
-     silicon has run this. A clean-Mac install is needed before any boundary is
-     stated to buyers. The installer admits macOS 13.5 or later, the floor measured from
-     Sniper's own binaries. Buyers' own Codex or Claude Code have their own macOS
-     requirements, which Sniper does not control.
+     silicon has run a complete install. The package now contains independent Apple-silicon
+     (macOS 13.5+) and Intel (macOS 14+) locks, custom ffmpeg builds and browser selections;
+     the Intel executables pass under Rosetta, but still need a native Intel clean-Mac run.
+     Windows needs a native no-network media-admission adapter and Windows qualification before
+     it can be advertised. Buyers' Codex or Claude Code also have requirements Sniper cannot control.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
      under Studio's timeline editor. A clarification request to the publisher is

@@ -56,7 +56,8 @@ def _denied(runtime, arguments: tuple[str, ...], allowed: str) -> str:
     try:
         run_decoder(runtime, runtime.ffmpeg, ("-nostdin", "-v", "error", *arguments), (allowed, JailLimits(30, 30)))
     except JailRejection as error:
-        return error.code if "Operation not permitted" in str(error) or error.code == "MEMORY_LIMIT" else ""
+        denied = ("Operation not permitted", "Permission denied", "Access is denied")
+        return error.code if any(text in str(error) for text in denied) or error.code == "MEMORY_LIMIT" else ""
     return ""
 
 

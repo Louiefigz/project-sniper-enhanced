@@ -24,7 +24,7 @@ RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
                  ("tesseract", ["--version"], "reference study (reading on-screen text)"),
                  ("yt-dlp", ["--version"], "adding a reference from a URL"),
                  ("node", ["--version"], "rendering and Sniper's scripts"),
-                 ("python3", ["--version"], "the editing engine"),
+                 (("python.exe" if os.name == "nt" else "python3"), ["--version"], "the editing engine"),
                  ("git", ["--version"], "Sniper's tool set (unused since Sniper stopped installing its own Codex/Claude; dropped at the next tool refresh)"))
 # What the tools write after installation; must match deps_tree_excludes in runtime_tools.sh.
 RUNTIME_EXCLUDES = {"var/cache/fontconfig", ".sniper-users", "name:__pycache__", "file:.sniper-runtime-complete"}
@@ -63,8 +63,9 @@ def node_problem(path: str, floor: str) -> str | None:
         return f"{path} does not report a Node version"
     if version < version_tuple(floor):
         return f"Node {out.strip()} at {path} is older than {floor}, the oldest version every dependency accepts"
-    if any(ch.isspace() for ch in path) or os.path.basename(path) != "node":
-        return f"{path} must be a whitespace-free path to an executable named node (Studio needs it)"
+    expected = "node.exe" if os.name == "nt" else "node"
+    if (os.name != "nt" and any(ch.isspace() for ch in path)) or os.path.basename(path).lower() != expected:
+        return f"{path} must name Sniper's {expected} executable"
     return None
 
 
@@ -83,7 +84,7 @@ def check_node(record: Record) -> None:
         return
     _, out, _ = run([pinned, "--version"], 30)
     prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
-    if not prefix or not os.path.realpath(pinned).startswith(f"{os.path.realpath(prefix)}/"):
+    if not prefix or os.path.commonpath((os.path.realpath(pinned), os.path.realpath(prefix))) != os.path.realpath(prefix):
         record("FAIL", "node", f"{pinned} is not Sniper's own Node — run install/install.command")
         return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); Sniper's commands and renders use it")
@@ -107,7 +108,7 @@ def check_runtime_tools(record: Record) -> None:
     for tool, args, feature in RUNTIME_TOOLS:
         found = shutil.which(tool) or ""
         real = os.path.realpath(found) if found else ""
-        if not real.startswith(f"{os.path.realpath(prefix)}/"):
+        if not real or os.path.commonpath((real, os.path.realpath(prefix))) != os.path.realpath(prefix):
             record("FAIL", tool, f"PATH finds {found or 'nothing'}, not Sniper's own — needed for {feature}: {fix}")
             continue
         code, out, err = run([found, *args], 60)
@@ -138,7 +139,7 @@ def check_media_admission(record: Record) -> None:
         record("FAIL", name, f"{ADMISSION_SELFTEST.relative_to(PKG_ROOT)} is not in this package; "
                "footage admission is unverified")
         return
-    python = APP / ".venv/bin/python3"
+    python = APP / (".venv/Scripts/python.exe" if os.name == "nt" else ".venv/bin/python3")
     code, out, err = run([str(python), "-B", str(ADMISSION_SELFTEST), "--json"], ADMISSION_TIMEOUT_S, APP)
     result = _last_json_object(out)
     if code == 0 and result is not None and result.get("ok") is True:

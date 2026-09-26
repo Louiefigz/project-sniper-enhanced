@@ -20,7 +20,7 @@ import zipfile
 from pathlib import Path
 
 REQUIRED = (
-    "AGENTS.md", "CLAUDE.md", "sniper", "docs/PIPELINE.md",
+    "AGENTS.md", "CLAUDE.md", "sniper", "sniper.cmd", "sniper.ps1", "docs/PIPELINE.md",
     "install/install.command", "install/doctor.command", "install/uninstall.command",
     "package.json", "package-lock.json", "requirements.txt",
     "templates/motion/package.json", "templates/motion/package-lock.json",
@@ -35,7 +35,7 @@ REQUIRED = (
     "vendor/hyperframes-catalog/catalog-index.json",
     "install/diagnostics.command", "install/clean-caches.command",
     "install/sniper_doctor.py", "install/requirements.lock.txt",
-    "install/lib/common.sh",
+    "install/lib/common.sh", "install/lib/platform.sh",
     "START-HERE.html", "manual/manual.css", "manual/index.html",
     "manual/install.html", "manual/privacy.html", "manual/license-and-updates.html",
     "RELEASE.json", "RELEASE-NOTES.md", "THIRD-PARTY-NOTICES.md",
@@ -50,9 +50,18 @@ REQUIRED = (
     "install/lib/download.sh", "install/lib/runtime_tools.sh", "install/lib/runtime_tools_install.sh",
     "install/deps/osx-arm64.lock", "install/deps/osx-arm64.json",
     "install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz",
+    "install/deps/osx-64.lock", "install/deps/osx-64.json",
+    "install/deps/sniper-ffmpeg-8.0.3-1-osx-64.tar.xz",
+    "install/deps/win-64.lock", "install/deps/win-64.json",
+    "install/install.ps1", "install/doctor.ps1", "install/uninstall.ps1",
+    "install/studio.cmd", "install/studio.ps1",
     "third-party/sources/README.md", "third-party/sources/ffmpeg-8.0.3.tar.xz",
     "third-party/sources/rubberband-4.0.0.tar.bz2",
     "scripts/infra/sniper_lock.py",
+    "scripts/infra/sniper_file_lock.py",
+    "scripts/producer/headless/windows_media_jail.cs",
+    "scripts/producer/headless/windows_media_inspect.cs",
+    "scripts/producer/headless/windows_media_runtime_approval.json",
     "src/app/fonts/archivo-latin-wght-normal.woff2",
     "resources/director/formats.md", "resources/director/hook-anchors.md",
     "resources/director/hook-formulas.md", "resources/director/hook-references.md",
@@ -103,7 +112,7 @@ def real_account_names() -> frozenset[str]:
                      if entry.is_dir() and not entry.name.startswith("."))
 _SIBLING = re.compile(r"\]\(\.\./\.\./|\]\(\.\./AGENTS\.md")
 _TEXT = {".md", ".txt", ".json", ".ts", ".tsx", ".js", ".mjs", ".py", ".html", ".css",
-         ".sh", ".command", ".example", ".yml"}
+         ".sh", ".command", ".ps1", ".cmd", ".cs", ".example", ".yml"}
 _findings: list[str] = []
 _passes: list[str] = []
 
@@ -293,15 +302,22 @@ def audit_runtime_inputs(root: Path) -> None:
 def audit_shipped_tools(root: Path) -> None:
     """The lock's shipped ('local') file is in the package byte for byte; every row is well formed."""
     import hashlib  # noqa: PLC0415
-    rows = [line.split() for line in (root / "install/deps/osx-arm64.lock").read_text().splitlines()
-            if line and not line.startswith("#")]
-    check(all(len(row) == 5 and re.fullmatch(r"[0-9a-f]{64}", row[1]) for row in rows),
-          "tool lock rows well formed", f"{len(rows)} rows")
-    for kind, sha, size, name, _ in (row for row in rows if row[0] == "local"):
-        shipped = root / "install/deps" / name
-        actual = hashlib.sha256(shipped.read_bytes()).hexdigest() if shipped.is_file() else "missing"
-        check(actual == sha and shipped.stat().st_size == int(size), f"shipped tool matches the lock: {name}",
-              f"{actual[:16]}… vs lock {sha[:16]}…")
+    for platform in ("osx-arm64", "osx-64", "win-64"):
+        lock = root / f"install/deps/{platform}.lock"
+        rows = [line.split() for line in lock.read_text().splitlines()
+                if line and not line.startswith("#")]
+        check(all(len(row) == 5 and re.fullmatch(r"[0-9a-f]{64}", row[1]) for row in rows),
+              f"tool lock rows well formed: {platform}", f"{len(rows)} rows")
+        for _, sha, size, name, _ in (row for row in rows if row[0] == "local"):
+            shipped = root / "install/deps" / name
+            actual = hashlib.sha256(shipped.read_bytes()).hexdigest() if shipped.is_file() else "missing"
+            size_ok = shipped.is_file() and shipped.stat().st_size == int(size)
+            check(actual == sha and size_ok, f"shipped tool matches the lock: {name}",
+                  f"{actual[:16]}… vs lock {sha[:16]}…")
+        for _, sha, size, name, source in (row for row in rows if row[0] == "download"):
+            valid = source.startswith("https://") and int(size) > 0
+            check(valid, f"downloaded tool is pinned: {name}",
+                  f"{sha[:16]}… from HTTPS" if valid else "invalid source or size")
 
 
 def main(argv: list[str]) -> int:

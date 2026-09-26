@@ -19,6 +19,7 @@ import os
 import platform
 import re
 import stat
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -154,8 +155,14 @@ def _identity(tools: tuple[str, str], profile_text: str, images: list[str], open
 
 def required_native_runtime() -> NativeMediaRuntime:
     """Resolve and identify the native admission runtime, or refuse with the reason."""
+    if sys.platform == "win32":
+        from headless.windows_media_runtime import required_windows_runtime  # noqa: PLC0415
+        try:
+            return required_windows_runtime(NativeMediaRuntime)
+        except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+            raise NativeRuntimeError(str(error)) from error
     if sys.platform != "darwin":
-        raise NativeRuntimeError("native media admission needs macOS")
+        raise NativeRuntimeError("native media admission needs macOS or Windows x64")
     tools = (_tool("ffprobe"), _tool("ffmpeg"))
     key = _cache_key(tools)
     if key in _CACHE:

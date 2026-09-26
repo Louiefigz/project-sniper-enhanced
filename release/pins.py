@@ -30,9 +30,20 @@ def browser_hashes(version: str) -> dict[str, str]:
         raise StagingError(f"browser pin is for {pin.get('version')}, but HyperFrames requires {version}; "
                            "run python -m release.pin_browser")
     hashes = {platform: row.get("sha256", "") for platform, row in pin.get("archives", {}).items()}
-    if set(hashes) != {"mac-arm64", "mac-x64"} or not all(_SHA256.match(h) for h in hashes.values()):
-        raise StagingError("browser pin must hold a SHA-256 for mac-arm64 and mac-x64")
+    platforms = {"mac-arm64", "mac-x64", "win64"}
+    if set(hashes) != platforms or not all(_SHA256.match(h) for h in hashes.values()):
+        raise StagingError("browser pin must hold a SHA-256 for both Mac architectures and Windows x64")
     return dict(sorted(hashes.items()))
+
+
+def browser_sizes(version: str) -> dict[str, int]:
+    """Per-platform byte sizes of the same pinned browser archives."""
+    browser_hashes(version)
+    pin = json.loads(BROWSER_PIN.read_text(encoding="utf-8"))
+    sizes = {platform: row.get("bytes", 0) for platform, row in pin["archives"].items()}
+    if not all(isinstance(size, int) and size > 0 for size in sizes.values()):
+        raise StagingError("browser pin must hold a positive byte size for every archive")
+    return dict(sorted(sizes.items()))
 
 
 def check_python_lock(lock: Path) -> None:

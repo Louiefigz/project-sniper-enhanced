@@ -69,8 +69,9 @@ Three tools:
 `tesseract` (reference study reads on-screen text and refuses to start without it; also
 Text Review's `--mode ocr`) and `yt-dlp` (adding a reference from a link,
 `study/fetch_reference.py`). In the packaged app these, Node, Python and git are Sniper's own:
-the installer puts them in `~/.project-sniper/runtimes/<lock id>/` from
-`install/deps/osx-arm64.lock` (ffmpeg is Sniper's build with zscale and rubberband), and the
+the installer puts them in `~/.project-sniper/runtimes/<lock id>/` from the detected Mac's
+`install/deps/osx-arm64.lock` or `install/deps/osx-64.lock` (ffmpeg is Sniper's matching build
+with zscale and rubberband), and the
 `./sniper` puts them first on PATH. Never install or point Sniper at a
 Homebrew or system copy instead. API routes that start Python import `spawnPython` /
 `pythonInterpreter` / `SCRIPTS_DIR` from `src/app/api/_lib/spawn-python.ts`.

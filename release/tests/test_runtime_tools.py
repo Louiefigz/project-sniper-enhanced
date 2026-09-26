@@ -202,6 +202,15 @@ class Preconditions(unittest.TestCase):
     def test_this_mac_meets_the_real_lock(self) -> None:
         self.assertEqual(fx.bash(self.pkg, "require_macos && echo supported").stdout.strip(), "supported")
 
+    def test_platform_selector_maps_native_macs_without_rosetta_confusion(self) -> None:
+        script = ('sniper_platform_from Darwin x86_64 0 && '
+                  'printf "%s|%s|%s" "$SNIPER_RUNTIME_PLATFORM" '
+                  '"$SNIPER_BROWSER_PLATFORM" "$SNIPER_BROWSER_PREFIX"')
+        done = fx.bash(self.pkg, script)
+        self.assertEqual(done.stdout, "osx-64|mac-x64|mac")
+        arm = fx.bash(self.pkg, script.replace("x86_64 0", "x86_64 1"))
+        self.assertEqual(arm.stdout, "osx-arm64|mac-arm64|mac_arm")
+
 
 class BuildSideLock(unittest.TestCase):
     """release/runtime_tools.py: the lock the package ships and the checks the build runs."""
@@ -212,6 +221,13 @@ class BuildSideLock(unittest.TestCase):
         kinds = [row["kind"] for row in rows]
         self.assertEqual((kinds.count("micromamba"), kinds.count("micromamba-bin"), kinds.count("local")), (1, 1, 1))
         self.assertGreater(kinds.count("conda"), 50)
+
+    def test_the_intel_lock_and_artifact_are_complete(self) -> None:
+        header, rows = runtime_tools.read_lock(platform="osx-64")
+        self.assertEqual(header["platform"], "osx-64")
+        self.assertEqual([row["kind"] for row in rows].count("local"), 1)
+        checked = runtime_tools.check("osx-64")
+        self.assertEqual(checked["runtime_min_macos"], "14.0")
 
     def test_a_malformed_row_is_refused(self) -> None:
         bad = Path(tempfile.mkdtemp()) / "lock"
@@ -307,6 +323,10 @@ class MachOFloor(unittest.TestCase):
         self.assertIsNone(macho_floor.file_floor(self._write("x86", _macho(0x01000007, (10, 15)))))
         fat = _fat(_macho(0x01000007, (10, 15)), _macho(0x0100000C, (14, 0)))
         self.assertEqual(macho_floor.file_floor(self._write("fat", fat)), "14.0")
+
+    def test_intel_target_reads_only_the_x86_64_slice(self) -> None:
+        fat = _fat(_macho(0x01000007, (14, 0)), _macho(0x0100000C, (15, 0)))
+        self.assertEqual(macho_floor.file_floor(self._write("universal", fat), "osx-64"), "14.0")
 
     def test_other_files_are_not_mistaken_for_binaries(self) -> None:
         java = b"\xca\xfe\xba\xbe\x00\x00\x00\x34" + b"\x00" * 40      # a Java class file shares the magic

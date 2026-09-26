@@ -1,0 +1,7 @@
+# Sniper's Windows x64 private tools. FFmpeg is a separate pinned static archive.
+python=3.14.4
+nodejs=24.21.0
+whisper.cpp=1.9.3
+tesseract=5.5.3
+yt-dlp=2026.8.19
+git=2.55.0

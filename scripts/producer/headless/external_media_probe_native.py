@@ -105,10 +105,13 @@ def _decode(runtime, path: str, limits: MediaProbeLimits) -> tuple[dict, list[di
 
 def native_isolation(runtime, attestations: list[dict]) -> dict:
     """What confined the observations, as recorded in the receipt."""
-    return {"kind": "macos-seatbelt", "policy": runtime.identity["policy"],
+    windows = runtime.identity["kind"] == "windows-appcontainer"
+    return {"kind": runtime.identity["kind"], "policy": runtime.identity["policy"],
             "profileSha256": runtime.identity["profileSha256"], "network": "denied",
-            "processCreation": "denied", "writes": "/dev/null only", "otherProcesses": "denied",
-            "memoryMiB": attestations[0]["memoryMiB"], "watchdog": "footprint+cpu", "jailRuns": attestations}
+            "processCreation": "job-limited" if windows else "denied",
+            "writes": "ephemeral profile only" if windows else "/dev/null only",
+            "otherProcesses": "denied", "memoryMiB": attestations[0]["memoryMiB"],
+            "watchdog": "job-object" if windows else "footprint+cpu", "jailRuns": attestations}
 
 
 def inspected_facts(runtime, path: str, limits: MediaProbeLimits) -> tuple[dict | None, dict]:

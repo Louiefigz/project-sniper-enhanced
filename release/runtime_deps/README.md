@@ -18,14 +18,14 @@ The buyer-facing summary is `release/payload_files/RELEASE-NOTES.md` and `manual
 | ffmpeg + ffprobe | 8.0.3, **Sniper build 1** | built here from FFmpeg 8.0.3 + Rubber Band 4.0.0 | GPL-3.0-or-later as configured |
 | micromamba (installs the rest) | 2.9.0 | conda-forge | BSD-3-Clause AND MIT AND OpenSSL |
 
-Plus the libraries these need: 86 conda-forge packages in all, about 294 MB. The complete list, with
-every package's exact build, licence, size and SHA-256, is the lock:
-`release/payload_files/install/deps/osx-arm64.lock` (read by the bash installer) and its companion
-`osx-arm64.json` (read by Python and the notices). Both are written by
-`python -m release.runtime_tools solve` from `specs.txt`; nothing is resolved on a buyer's Mac.
+Plus the libraries these need: 86 conda-forge packages per target, about 294–297 MB. The complete
+lists, with every package's exact build, licence, size and SHA-256, are
+`release/payload_files/install/deps/osx-arm64.lock` and `osx-64.lock`, with matching JSON records.
+They are written by `python -m release.runtime_tools --platform <platform> solve` from `specs.txt`;
+nothing is resolved on a buyer's Mac.
 
 **Why conda-forge.** It is the one widely used, open, reproducibly built distribution that has all six
-tools for macOS on Apple silicon as relocatable, pinned, hash-published packages. micromamba installs
+tools for both macOS architectures as relocatable, pinned, hash-published packages. micromamba installs
 them without compiling anything and without a system package manager. Homebrew bottles were rejected:
 they are built for `/opt/homebrew` and relocating them needs Apple's developer tools, which buyers lack.
 
@@ -33,7 +33,7 @@ they are built for `/opt/homebrew` and relocating them needs Apple's developer t
 filters (colour transforms in native export; pitch-preserving dialogue retime). conda-forge's ffmpeg
 has neither, and conda-forge has no arm64 rubberband. Martin Riedl's and osxexperts' static builds have
 zimg but not rubberband (osxexperts also re-uses one download URL, so a pin would break). The build:
-- `build_ffmpeg.sh`, pinned by `sniper-ffmpeg.json`: FFmpeg 8.0.3 (the latest bug-fix release of the 8.0
+- `build_ffmpeg.sh`, pinned by the target's `sniper-ffmpeg*.json`: FFmpeg 8.0.3 (the latest bug-fix release of the 8.0
   line the pipeline was qualified on with Homebrew's 8.0), signature checked against the FFmpeg release
   key FCF986EA15E6E293A5644F10B4322F04D67658D8; Rubber Band 4.0.0 (SHA-256 matches Homebrew's recorded
   checksum), built statically with Apple's vDSP.
@@ -41,23 +41,24 @@ zimg but not rubberband (osxexperts also re-uses one download URL, so a pin woul
   fribidi, lame, opus, dav1d, OpenSSL, libc++) through `@rpath`; its only run path is
   `@loader_path/../lib`. The script refuses any other run path, any library the runtime lacks, and any
   missing required filter, encoder or decoder (the lists are in the pin).
-- Reproducible: two independent builds produced byte-identical archives. The archive
-  (`sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz`, 14.5 MB) ships in the package under `install/deps/`; its
+- Reproducible: two independent arm64 builds produced byte-identical archives. The arm64 and x86_64
+  archives (`sniper-ffmpeg-8.0.3-1-osx-*.tar.xz`, 14.5–17.9 MB) ship under `install/deps/`; their
   complete corresponding source (the two unmodified tarballs) and the recipe ship under
   `third-party/sources/` and inside the archive (`share/sniper-ffmpeg/`).
-- Rebuild after changing the pin or re-solving the lock:
-  `release/runtime_deps/build_ffmpeg.sh && python -m release.runtime_tools pin-ffmpeg`.
+- Rebuild after changing a pin or re-solving a lock:
+  `release/runtime_deps/build_ffmpeg.sh <platform>` then
+  `python -m release.runtime_tools --platform <platform> pin-ffmpeg`.
 
 ## How it is installed (`install/lib/runtime_tools*.sh`)
 
 1. **Before anything else, with only macOS's own tools** (bash, curl, tar, shasum/openssl, codesign,
    lockf): Sniper's Python does not exist yet, and the maintenance lock's helper runs on it.
-2. Refuses up front, before downloading: an Intel Mac (`sysctl hw.optional.arm64`), a macOS older than
-   the lock's `min-macos` (13.5), a home folder whose path has whitespace. The floor is the highest of
-   the packages' `__osx` metadata, the pinned Python wheels (13; opencv) and what the installed binaries
-   themselves say: `python -m release.runtime_tools measure <runtime folder>` reads the `LC_BUILD_VERSION`
-   of all 452 Mach-O files and records it in `measured-min-macos.json`. Node 24.21.0's `bin/node` and
-   `libnode` are built for 13.5 although its package declares `__osx >=11.0`; the build refuses a lock
+2. Detects native Apple silicon, native Intel, and Apple silicon running a Rosetta shell; it selects
+   `osx-arm64` or `osx-64` without accepting a mismatched runtime. It refuses a macOS older than the
+   selected lock's floor (13.5 arm64; 14.0 x86_64) or a home path containing whitespace. The floor is
+   the highest of package metadata, pinned Python wheels and installed native binaries. The target-aware
+   `measure` command reads the selected slice's `LC_BUILD_VERSION` in all 451–452 Mach-O files. Node's
+   `bin/node` and `libnode` are built for 13.5 although its package declares `__osx >=11.0`; the build refuses a lock
    below its measured floor, or a measurement taken for other packages.
    Parts outside this lock, measured the same way on the qualification install: the app's npm
    packages need at most 13.3 (onnxruntime-node); pip picks the macOS 11/12 builds of numpy and scipy
@@ -68,7 +69,7 @@ zimg but not rubberband (osxexperts also re-uses one download URL, so a pin woul
    checked against its SHA-256 before use; a wrong file is deleted and reported; a partial one resumes.
    `SNIPER_TOOLS_BASE_URL` serves the same paths from a mirror (installer tests).
 4. Extracts micromamba and checks its binary's SHA-256 too.
-5. `micromamba create --offline --platform osx-arm64 --always-copy` from `file://` URLs with
+5. `micromamba create --offline --platform "$SNIPER_RUNTIME_PLATFORM" --always-copy` from `file://` URLs with
    `#sha256:` — into `~/.project-sniper/runtimes/<first 16 hex of the lock's SHA-256>/`, with
    micromamba's HOME and root prefix inside `~/.project-sniper` (never `~/.conda`/`~/.mamba`).
    `--platform` matters: without it micromamba does not re-sign the binaries it relocates, and Apple
@@ -103,5 +104,7 @@ CONDA_*/MAMBA_*, FONTCONFIG_* and TESSDATA_PREFIX (a certificate bundle set for 
   release with a re-solved lock.
 - **Size.** About 300 MB downloaded and 1.2 GB on disk for the tools (tesseract's language data is most
   of it).
-- **Tested boundary.** Only this developer Mac on macOS 26 has run it; the Intel refusal cannot be
-  exercised here; a clean-Mac install is still to be done.
+- **Tested boundary.** The Apple-silicon runtime has run on this developer Mac on macOS 26. The Intel
+  runtime, custom ffmpeg and required feature checks pass under Rosetta on that Mac; a native Intel
+  clean-Mac installation is still required. Windows is not implemented: the mandatory media-admission
+  sandbox must first gain a native Windows no-network/file-isolation adapter and be qualified there.

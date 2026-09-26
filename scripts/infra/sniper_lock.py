@@ -1,35 +1,15 @@
 #!/usr/bin/env python3
-"""Advisory locks that keep Sniper's maintenance steps and its work apart.
+"""Kernel locks that keep Sniper maintenance and active work apart.
 
-Two lock files, both held with ``flock(2)`` so the kernel releases them when the
-last holder exits — a ``kill -9`` never leaves a stale lock behind:
-
-* ``maintenance.lock`` — EXCLUSIVE for the installer (and so ``use-provider``),
-  ``uninstall`` and ``clean-caches``; SHARED for everything that uses the install
-  while it runs: the app server, editor and sign-in sessions, the doctor and any
-  process that resolves the render runtime (``studio.native_runtime``).
-* ``runtime-build.lock`` — EXCLUSIVE while one process constructs the render
-  runtime, so two renders never build it at the same time.
-
-A holder that ``exec``s (the shell wrappers do) or forks keeps the lock: the open
-file description is inherited, and ``SNIPER_LOCK_FD``/``SNIPER_LOCK_MODE`` tell a
-descendant that it already holds it, so the installer's own doctor run does not
-deadlock against the installer. Descriptors are verified by inode, never trusted
-from the environment alone.
-
-CLI (stdlib only; any Python 3.9+ can run it, so the installer uses it before the
-app's virtual environment exists)::
-
-    sniper_lock.py exec   --state-dir D --mode exclusive|shared --label L -- CMD...
-    sniper_lock.py hold   --state-dir D --mode exclusive|shared --label L --seconds N
-    sniper_lock.py status --state-dir D [--mode shared]
+POSIX uses inherited flock descriptors. Windows serializes both modes through a
+byte-range lock and keeps a parent process alive while its command runs. Holder
+records improve messages but never replace the kernel lock as authority.
 """
 from __future__ import annotations
 
 import argparse
 import atexit
 import errno
-import fcntl
 import json
 import os
 import subprocess
@@ -39,27 +19,20 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
+import sniper_file_lock
 MAINTENANCE = "maintenance"
 RUNTIME_BUILD = "runtime-build"
 ENV_FD = "SNIPER_LOCK_FD"
 ENV_MODE = "SNIPER_LOCK_MODE"
 BUSY_EXIT = 75  # EX_TEMPFAIL: try again later
-_MODES = {"exclusive": fcntl.LOCK_EX, "shared": fcntl.LOCK_SH}
+_MODES = {"exclusive", "shared"}
 _PROCESS_HOLD: dict[str, int] = {}
-
-
 class LockBusy(RuntimeError):
     """The lock is held by another process in a conflicting mode."""
 
 
 def state_dir(app_root: Path) -> Path:
-    """Where the locks live: ``runtime/state`` in a package, else beside the runtime cache.
-
-    A package is recognised by its installer (``install/lib/common.sh`` in the app
-    folder, which is the package folder itself); a developer checkout has no
-    installer or ``runtime/`` folder, so its locks sit in the git-ignored
-    render-runtime cache instead.
-    """
+    """Use package state when an installer is present, otherwise the developer cache."""
     if (app_root / "install/lib/common.sh").is_file():
         return app_root / "runtime" / "state"
     return app_root / "templates/motion/.sniper-native-runtime/.locks"
@@ -73,7 +46,9 @@ def lock_file(directory: Path, name: str) -> Path:
 def _open(path: Path) -> int:
     """Open (creating if needed) a lock file; never truncates, never deletes."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    return os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+    sniper_file_lock.prepare(fd)
+    return fd
 
 
 def inherited_mode(path: Path) -> str | None:
@@ -81,6 +56,14 @@ def inherited_mode(path: Path) -> str | None:
     raw, mode = os.environ.get(ENV_FD, ""), os.environ.get(ENV_MODE, "")
     if not raw.isdigit() or mode not in _MODES:
         return None
+    if sniper_file_lock.WINDOWS:
+        record = _records_dir(path) / f"{path.stem}.{raw}.json"
+        try:
+            row = json.loads(record.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        same = row.get("pid") == int(raw) and row.get("path") == str(path.resolve())
+        return mode if same and _pid_alive(int(raw)) and row.get("mode") == mode else None
     try:
         held, wanted = os.fstat(int(raw)), os.stat(path)
     except OSError:
@@ -117,12 +100,15 @@ def _write_record(path: Path, mode: str, label: str) -> Path:
             old.unlink(missing_ok=True)
     record = directory / f"{path.stem}.{os.getpid()}.json"
     record.write_text(json.dumps({"pid": os.getpid(), "mode": mode, "label": label,
+                                  "path": str(path.resolve()),
                                   "since": time.strftime("%H:%M:%S")}), encoding="utf-8")
     return record
 
 
 def _pids_with_file_open(path: Path) -> list[int]:
     """Every process with the lock file open, whether or not it wrote a record."""
+    if sniper_file_lock.WINDOWS:
+        return []
     try:
         done = subprocess.run(["lsof", "-t", "--", str(path)], capture_output=True,
                               text=True, timeout=10, check=False)
@@ -167,7 +153,7 @@ def acquire(path: Path, mode: str, label: str, wait: float = 0.0) -> int:
     deadline = time.monotonic() + wait
     while True:
         try:
-            fcntl.flock(fd, _MODES[mode] | fcntl.LOCK_NB)
+            sniper_file_lock.try_lock(fd, mode)
             break
         except OSError as error:
             if error.errno not in (errno.EWOULDBLOCK, errno.EAGAIN) or time.monotonic() >= deadline:
@@ -211,6 +197,7 @@ def held(path: Path, mode: str, label: str, wait: float = 0.0) -> Iterator[None]
         yield
     finally:
         (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
+        sniper_file_lock.unlock(fd)
         os.close(fd)
 
 
@@ -223,14 +210,28 @@ def _exec_holding(args: argparse.Namespace) -> int:
               f"({describe_holders(path)}). Close that session first, then run this again.",
               file=sys.stderr)
         return BUSY_EXIT
-    if held_mode is None:
+    acquired = held_mode is None
+    if acquired:
         try:
             fd = acquire(path, args.mode, args.label, args.wait)
         except LockBusy as error:
             print(f"STOPPED: {args.busy_message or 'Sniper is busy.'}\n  In use by: {error}.", file=sys.stderr)
             return BUSY_EXIT
-        os.set_inheritable(fd, True)
-        os.environ[ENV_FD], os.environ[ENV_MODE] = str(fd), args.mode
+        if sniper_file_lock.WINDOWS:
+            os.environ[ENV_FD] = str(os.getpid())
+        else:
+            os.set_inheritable(fd, True)
+            os.environ[ENV_FD] = str(fd)
+        os.environ[ENV_MODE] = args.mode
+    if sniper_file_lock.WINDOWS:
+        if not acquired:
+            return subprocess.run(args.command, check=False).returncode
+        try:
+            return subprocess.run(args.command, check=False).returncode
+        finally:
+            (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
+            sniper_file_lock.unlock(fd)
+            os.close(fd)
     os.execvp(args.command[0], args.command)
     return 127  # not reached
 
@@ -245,6 +246,7 @@ def _hold(args: argparse.Namespace) -> int:
         return BUSY_EXIT
     print(f"held {args.name} {args.mode} pid {os.getpid()}", flush=True)
     time.sleep(args.seconds)
+    sniper_file_lock.unlock(fd)
     os.close(fd)
     return 0
 
@@ -262,6 +264,7 @@ def _status(args: argparse.Namespace) -> int:
         print(f"held by {error}")
         return 1
     (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
+    sniper_file_lock.unlock(fd)
     os.close(fd)
     print("free")
     return 0

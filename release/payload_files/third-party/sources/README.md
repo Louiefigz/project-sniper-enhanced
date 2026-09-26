@@ -1,8 +1,8 @@
 # Source of the ffmpeg that ships with Project Sniper
 
-`install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz` holds the `ffmpeg` and `ffprobe` programs that
-Sniper installs among its own tools. They are built from the two source archives in this folder,
-unmodified:
+`install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz` and
+`install/deps/sniper-ffmpeg-8.0.3-1-osx-64.tar.xz` hold the architecture-matched `ffmpeg` and
+`ffprobe` programs Sniper installs. Both are built from the two unmodified source archives here:
 
 | File | Project | Licence |
 |---|---|---|

@@ -118,13 +118,13 @@ jobs:
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: test "$(./sniper workspace)" = "$RUNNER_TEMP/Sniper Projects"
-      - name: Prove literal local settings override
+      - name: Prove shell-safe local settings override
         if: steps.artifact.outputs.active == 'true'
         shell: bash
         working-directory: ${{ runner.temp }}/Project Sniper Intel
         run: |
           override="$RUNNER_TEMP/Local Project \$97"
-          printf 'SNIPER_WORKSPACE_ROOT=%s\n' "$override" > runtime/sniper.local.env
+          printf "SNIPER_WORKSPACE_ROOT='%s'\n" "$override" > runtime/sniper.local.env
           test "$(./sniper workspace)" = "$override"
       - name: Preserve diagnostics on failure
         if: failure()

@@ -6,6 +6,9 @@ on:
     branches: [codex/cross-platform-installer]
     paths-ignore:
       - release/macos-intel-qualification.url
+      - .github/workflows/macos-intel-qualification.yml
+      - release/prepare_macos_qualification.py
+      - release/tests/test_macos_intel_qualification.py
 
 jobs:
   install-and-admit:

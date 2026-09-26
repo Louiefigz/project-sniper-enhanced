@@ -14,7 +14,7 @@ PLATFORM = "osx-64"
 
 
 def _copy_ffmpeg(destination: Path) -> None:
-    """Copy the exact pinned Intel FFmpeg artifact into the buyer package."""
+    """Copy the exact pinned Intel FFmpeg artifact and its sources."""
     target = runtime_tools.runtime_target(PLATFORM)
     pin = json.loads(target.ffmpeg_pin.read_text(encoding="utf-8"))
     artifact = pin["artifact"]
@@ -22,6 +22,10 @@ def _copy_ffmpeg(destination: Path) -> None:
     installed = destination / "install" / "deps" / artifact["file"]
     installed.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, installed)
+    sources = destination / "third-party" / "sources"
+    sources.mkdir(parents=True, exist_ok=True)
+    for record in pin["sources"].values():
+        shutil.copy2(runtime_tools.DIST / "sources" / record["file"], sources / record["file"])
 
 
 def assemble(destination: Path) -> None:

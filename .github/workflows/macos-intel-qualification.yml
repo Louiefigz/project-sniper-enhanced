@@ -23,6 +23,8 @@ jobs:
       FFMPEG_SHA256: cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd
       FFMPEG_BYTES: 17918488
       FFMPEG_FILE: sniper-ffmpeg-8.0.3-1-osx-64.tar.xz
+      FFMPEG_SOURCE_SHA256: 6136812ea6d4e68bdba27e33c2a94382711cdf4f8602ffef056ff792bd6f9818
+      RUBBERBAND_SOURCE_SHA256: af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9
     steps:
       - uses: actions/checkout@v4
       - name: Resolve the qualification artifact URL
@@ -69,6 +71,15 @@ jobs:
             --output "$target" "${{ steps.artifact.outputs.url }}"
           test "$(stat -f %z "$target")" = "$FFMPEG_BYTES"
           test "$(shasum -a 256 "$target" | awk '{print $1}')" = "$FFMPEG_SHA256"
+          mkdir -p release/runtime_deps/dist/sources
+          ffmpeg_source=release/runtime_deps/dist/sources/ffmpeg-8.0.3.tar.xz
+          rubberband_source=release/runtime_deps/dist/sources/rubberband-4.0.0.tar.bz2
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$ffmpeg_source" https://ffmpeg.org/releases/ffmpeg-8.0.3.tar.xz
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$rubberband_source" https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2
+          test "$(shasum -a 256 "$ffmpeg_source" | awk '{print $1}')" = "$FFMPEG_SOURCE_SHA256"
+          test "$(shasum -a 256 "$rubberband_source" | awk '{print $1}')" = "$RUBBERBAND_SOURCE_SHA256"
       - name: Assemble qualification package
         if: steps.artifact.outputs.active == 'true'
         shell: bash

@@ -25,6 +25,8 @@ class MacosIntelQualification(unittest.TestCase):
             self.assertEqual(runtime_tools.file_sha256(installed), runtime_tools.file_sha256(artifact))
             self.assertIn('"platform": "osx-64"', pin)
             self.assertTrue((package / "sniper").is_file())
+            self.assertTrue((package / "third-party/sources/ffmpeg-8.0.3.tar.xz").is_file())
+            self.assertTrue((package / "third-party/sources/rubberband-4.0.0.tar.bz2").is_file())
 
     def test_workflow_uses_native_intel_and_fixed_artifact_identity(self) -> None:
         text = WORKFLOW.read_text(encoding="utf-8")
@@ -34,6 +36,8 @@ class MacosIntelQualification(unittest.TestCase):
         self.assertIn("test \"$(uname -m)\" = x86_64", text)
         self.assertIn("cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd", text)
         self.assertIn("17918488", text)
+        self.assertIn("6136812ea6d4e68bdba27e33c2a94382711cdf4f8602ffef056ff792bd6f9818", text)
+        self.assertIn("af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9", text)
         self.assertIn('"sha256": "cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd"', pin)
         for command in ("./sniper setup", "./sniper doctor --json", "./sniper workspace"):
             self.assertIn(command, text)

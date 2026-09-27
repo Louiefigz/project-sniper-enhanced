@@ -11,7 +11,7 @@ The operator's request is: $ARGUMENTS
 
 In the packaged app, run every step below as `install/studio.command <subcommand>
 <producer_dir> [options]` (open, status, sync, rebuild, stop, context): the same tool with this
-install's settings, and its `sync` prints the matching `install/studio.command rebuild` step.
+install's settings, and its `sync` prints the matching rebuild step.
 In a developer checkout (no `install/`), call `scripts/producer/studio/studio_review.py`
 directly.
 

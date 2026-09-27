@@ -33,7 +33,7 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     retired app).
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
-  - Footage admission: a native macOS sandbox, checked by install/doctor.command.
+  - Footage admission: native macOS Seatbelt sandbox, checked by the doctor.
     Two independent security reviews found nothing blocking.
   - Creator/teacher-derived doctrine: the Restrained, Punch and Slideware
     specifications and the module, editcraft, short-form and reference-style
@@ -47,11 +47,13 @@ STILL OPEN — each blocks release
      also distributes a GPL-3.0-or-later program (Sniper's ffmpeg build, with its complete
      source in third-party/sources/); the reviewed licence must not appear to restrict it.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
-  3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
-     silicon has run this. A clean-Mac install is needed before any boundary is
-     stated to buyers. The installer admits macOS 13.5 or later, the floor measured from
-     Sniper's own binaries. Buyers' own Codex or Claude Code have their own macOS
-     requirements, which Sniper does not control.
+  3. SUPPORTED PLATFORM BOUNDARY (input R): Apple silicon remains the developer platform.
+     The package contains independent Apple-silicon (macOS 13.5+) and Intel (macOS 14+)
+     locks, ffmpeg selections and browsers. Native Intel setup, rerun, doctor and launcher are
+     qualified on a macOS 15 Intel runner; complete Short and long-form production edits on
+     Intel remain acceptance work.
+     Buyers' Codex or Claude Code
+     also have requirements Sniper cannot control.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
      under Studio's timeline editor. A clarification request to the publisher is
@@ -76,6 +78,6 @@ NOT OWNER DECISIONS — acceptance still outstanding
     long-form, with a revision), accepted in the qualification record kept outside this
     package.
   - Human playback, listening and Studio checks of those edits.
-  - Clean-Mac install and an outside operator following the manual.
+  - An outside operator following the manual, including the macOS Gatekeeper click-through route.
   - Authenticated delivery of the exact bytes.
   - Listen to assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.

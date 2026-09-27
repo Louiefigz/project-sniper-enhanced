@@ -1,13 +1,14 @@
 #!/bin/bash
 # Build Sniper's ffmpeg and ffprobe for the private tool runtime (maintainer only).
 #
-#   release/runtime_deps/build_ffmpeg.sh          then: python -m release.runtime_tools pin-ffmpeg
+#   release/runtime_deps/build_ffmpeg.sh [osx-arm64|osx-64]
+#   python -m release.runtime_tools --platform <target> pin-ffmpeg
 #
 # Why Sniper builds ffmpeg itself: the renderer needs the zscale (libzimg) and rubberband
 # (librubberband) filters, and no trusted, pinned macOS arm64 build carries both.
 # Every input is pinned in sniper-ffmpeg.json: the FFmpeg release tarball (its signature is
 # checked against the FFmpeg release key), the rubberband release tarball, the configure
-# options, and — from release/payload_files/install/deps/osx-arm64.lock — the exact
+# options, and — from the target's release/payload_files/install/deps/*.lock — the exact
 # conda-forge libraries a buyer installs, which this build links. rubberband is linked in
 # statically; every other library through @rpath, and the only run path is
 # @loader_path/../lib, so the binaries work wherever the runtime lives.
@@ -21,8 +22,13 @@ set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 ROOT="$(cd "$HERE/../.." && pwd -P)"
-PIN="$HERE/sniper-ffmpeg.json"
-LOCK="$ROOT/release/payload_files/install/deps/osx-arm64.lock"
+PLATFORM="${1:-osx-arm64}"
+case "$PLATFORM" in
+  osx-arm64) PIN="$HERE/sniper-ffmpeg.json" ;;
+  osx-64) PIN="$HERE/sniper-ffmpeg-osx-64.json" ;;
+  *) printf 'build_ffmpeg: target must be osx-arm64 or osx-64\n' >&2; exit 2 ;;
+esac
+LOCK="$ROOT/release/payload_files/install/deps/$PLATFORM.lock"
 DIST="$HERE/dist"
 pin() { /usr/bin/python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))
 for k in sys.argv[2].split("."): v=v[k]
@@ -32,8 +38,9 @@ say() { printf '%s\n' "$*"; }
 die() { printf 'build_ffmpeg: %s\n' "$*" >&2; exit 1; }
 
 WORK="$(pin work_dir)"; VERSION="$(pin version)"; ARTIFACT="$(pin artifact.file)"
-MM="$DIST/tools/micromamba-2.9.0/bin/micromamba"
+MM="$DIST/tools/$PLATFORM/micromamba-2.9.0/bin/micromamba"
 GPG="$(PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" command -v gpg || true)"   # found before PATH is narrowed
+CC_BIN=/usr/bin/clang; CXX_BIN=/usr/bin/clang++
 [ -x "$MM" ] || die "run python -m release.runtime_tools solve first (it fetches the pinned micromamba)"
 case "$WORK" in /private/tmp/*) ;; *) die "work_dir must stay the neutral /private/tmp path the pin records" ;; esac
 
@@ -70,12 +77,22 @@ explicit_list() {
 make_envs() {
   local mm_env=(env -i HOME="$WORK/mamba-home" PATH=/usr/bin:/bin MAMBA_ROOT_PREFIX="$WORK/mamba-root")
   explicit_list > "$WORK/explicit.txt"
-  "${mm_env[@]}" "$MM" create --no-rc -y -q -p "$WORK/rt" --platform osx-arm64 --file "$WORK/explicit.txt"
-  "${mm_env[@]}" "$MM" create --no-rc -y -q -p "$WORK/env" --platform osx-arm64 --file "$WORK/explicit.txt"
+  "${mm_env[@]}" "$MM" create --no-rc -y -q -p "$WORK/rt" --platform "$PLATFORM" --file "$WORK/explicit.txt"
+  "${mm_env[@]}" "$MM" create --no-rc -y -q -p "$WORK/env" --platform "$PLATFORM" --file "$WORK/explicit.txt"
   # shellcheck disable=SC2046
   "${mm_env[@]}" "$MM" install --no-rc -y -q -p "$WORK/env" --override-channels -c conda-forge \
-    --platform osx-arm64 --freeze-installed $(pin build_packages)
+    --platform "$PLATFORM" --freeze-installed $(pin build_packages)
   ls "$WORK/env/conda-meta" | grep '\.json$' | sort > "$WORK/build-env-packages.txt"
+}
+
+prepare_toolchain() {
+  [ "$PLATFORM" = osx-64 ] || return 0
+  mkdir -p "$WORK/toolchain"
+  printf '#!/bin/sh\nexec /usr/bin/arch -x86_64 /usr/bin/clang "$@"\n' > "$WORK/toolchain/clang"
+  printf '#!/bin/sh\nexec /usr/bin/arch -x86_64 /usr/bin/clang++ "$@"\n' > "$WORK/toolchain/clang++"
+  chmod +x "$WORK/toolchain/clang" "$WORK/toolchain/clang++"
+  CC_BIN="$WORK/toolchain/clang"; CXX_BIN="$WORK/toolchain/clang++"
+  export CC="$CC_BIN" CXX="$CXX_BIN"
 }
 
 build_rubberband() {
@@ -88,7 +105,7 @@ build_ffmpeg() {
   local src="$WORK/ffmpeg-$VERSION" env="$WORK/env"
   tar -xJf "$DIST/sources/$(pin sources.ffmpeg.file)" -C "$WORK"
   ( cd "$src" && PKG_CONFIG_PATH="$WORK/rb/lib/pkgconfig:$env/lib/pkgconfig" PKG_CONFIG_LIBDIR="$WORK/rb/lib/pkgconfig:$env/lib/pkgconfig" \
-    ./configure --prefix="$WORK/out" --cc=/usr/bin/clang --cxx=/usr/bin/clang++ --pkg-config="$env/bin/pkg-config" \
+    ./configure --prefix="$WORK/out" --cc="$CC_BIN" --cxx="$CXX_BIN" --pkg-config="$env/bin/pkg-config" \
       --extra-cflags="-mmacosx-version-min=$(pin min_macos) -I$env/include" \
       --extra-ldflags="-mmacosx-version-min=$(pin min_macos) -L$env/lib -Wl,-rpath,$env/lib -Wl,-rpath,@loader_path/../lib -Wl,-headerpad_max_install_names" \
       --extra-libs=-lc++ $(pin configure) > "$WORK/configure.log" \
@@ -157,6 +174,7 @@ rm -rf "$WORK"; mkdir -p "$WORK" "$DIST"
 fetch_sources
 verify_ffmpeg_signature
 make_envs
+prepare_toolchain
 build_rubberband
 build_ffmpeg
 finish_binaries

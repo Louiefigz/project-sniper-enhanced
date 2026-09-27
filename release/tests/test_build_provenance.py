@@ -21,7 +21,7 @@ from release import build_package, payload
 from release.stage import StageReport, StagingError
 
 SOURCE = {"release_checkout_commit": "a" * 40, "release_checkout_tree": "b" * 40, "upstream_head": "c" * 40}
-SET = {"SHA256SUMS", "release-manifest.json", "file-manifest.json", "withheld.json", "project-sniper-t-mac.zip"}
+SET = {"SHA256SUMS", "release-manifest.json", "file-manifest.json", "withheld.json", "project-sniper-t.zip"}
 
 
 def _small_stage(root: Path, stage_dir: Path, allow_pending: bool) -> tuple[StageReport, list[str]]:
@@ -55,7 +55,7 @@ class BuildProvenance(unittest.TestCase):
         build_package.build("t", out, False)
         self.assertEqual({p.name for p in out.iterdir()}, SET)
         self.assertEqual(self._leftovers(), [])
-        with zipfile.ZipFile(out / "project-sniper-t-mac.zip") as bundle:
+        with zipfile.ZipFile(out / "project-sniper-t.zip") as bundle:
             release = json.loads(bundle.read("project-sniper-t/RELEASE.json"))
         self.assertEqual(release["source"]["release_checkout_commit"], "a" * 40)
         self.assertEqual(release["source"]["release_checkout_tree"], "b" * 40)

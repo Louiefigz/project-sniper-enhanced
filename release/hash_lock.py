@@ -5,9 +5,8 @@
 
 Reads the pinned ``name==version`` set from
 ``release/payload_files/install/requirements.lock.txt`` and, for every supported
-interpreter (CPython 3.12, 3.13, 3.14) and every macOS platform tag a buyer's pip
-may choose between (arm64 on macOS 13, 14 and 26, where numpy/scipy switch wheel
-builds; x86_64 on macOS 14 and 26, untested), runs::
+interpreter (CPython 3.12, 3.13, 3.14) and platform tag a buyer's pip may choose
+between on Apple silicon and Intel macOS, runs::
 
     pip download --only-binary=:all: --no-deps --platform <tag> --python-version <v> ...
 
@@ -82,8 +81,8 @@ def _normal(name: str) -> str:
 def render(pinned: list[tuple[str, str]], hashes: dict[str, set[str]]) -> str:
     """The lock text: a header, then each pin with all of its accepted hashes."""
     lines = ["# Pinned Python set this release is built and tested against, with the SHA-256",
-             "# of every wheel pip may choose for CPython 3.12-3.14 on macOS 13+ arm64 (and on",
-             "# macOS 14+ x86_64, untested). Regenerate with: python -m release.hash_lock",
+             "# of every wheel pip may choose for CPython 3.12-3.14 on macOS 13+ arm64,",
+             "# macOS 14+ x86_64. Regenerate with: python -m release.hash_lock",
              "# The installer runs: pip install --require-hashes --only-binary=:all: -r this-file"]
     for name, version in pinned:
         digests = sorted(hashes[_normal(name)])

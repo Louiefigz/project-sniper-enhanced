@@ -1,0 +1,136 @@
+name: macOS Intel qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      ffmpeg_url:
+        description: HTTPS URL for the exact pinned Intel FFmpeg artifact
+        required: true
+        type: string
+  push:
+    branches: [codex/cross-platform-installer]
+    paths:
+      - release/macos-intel-qualification.url
+
+permissions:
+  contents: read
+
+jobs:
+  install-and-admit:
+    runs-on: macos-15-intel
+    timeout-minutes: 120
+    env:
+      FFMPEG_SHA256: cfe4ecc62fb4ff633380adb3bc26aec78734361857f4c3b73f7501240d98b0dd
+      FFMPEG_BYTES: 17918488
+      FFMPEG_FILE: sniper-ffmpeg-8.0.3-1-osx-64.tar.xz
+      FFMPEG_SOURCE_SHA256: 6136812ea6d4e68bdba27e33c2a94382711cdf4f8602ffef056ff792bd6f9818
+      RUBBERBAND_SOURCE_SHA256: af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve the qualification artifact URL
+        id: artifact
+        shell: bash
+        env:
+          DISPATCH_URL: ${{ inputs.ffmpeg_url }}
+        run: |
+          set -euo pipefail
+          url="$DISPATCH_URL"
+          trigger=release/macos-intel-qualification.url
+          if [ -z "$url" ] && [ -f "$trigger" ]; then
+            test "$(wc -l < "$trigger" | tr -d ' ')" = 1
+            url="$(cat "$trigger")"
+          fi
+          if [ -z "$url" ]; then
+            echo 'active=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          case "$url" in *[[:space:]]*) exit 2 ;; https://*) ;; *) exit 2 ;; esac
+          echo 'active=true' >> "$GITHUB_OUTPUT"
+          printf 'url=%s\n' "$url" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        if: steps.artifact.outputs.active == 'true'
+        with:
+          python-version: '3.12'
+      - name: Prove the native Intel runner
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        run: |
+          test "$(uname -s)" = Darwin
+          test "$(uname -m)" = x86_64
+          source release/payload_files/install/lib/platform.sh
+          test "$SNIPER_RUNTIME_PLATFORM" = osx-64
+          test "$SNIPER_BROWSER_PLATFORM" = mac-x64
+      - name: Receive the pinned Intel media runtime
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release/runtime_deps/dist
+          target="release/runtime_deps/dist/$FFMPEG_FILE"
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$target" "${{ steps.artifact.outputs.url }}"
+          test "$(stat -f %z "$target")" = "$FFMPEG_BYTES"
+          test "$(shasum -a 256 "$target" | awk '{print $1}')" = "$FFMPEG_SHA256"
+          mkdir -p release/runtime_deps/dist/sources
+          ffmpeg_source=release/runtime_deps/dist/sources/ffmpeg-8.0.3.tar.xz
+          rubberband_source=release/runtime_deps/dist/sources/rubberband-4.0.0.tar.bz2
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$ffmpeg_source" https://ffmpeg.org/releases/ffmpeg-8.0.3.tar.xz
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$rubberband_source" https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2
+          test "$(shasum -a 256 "$ffmpeg_source" | awk '{print $1}')" = "$FFMPEG_SOURCE_SHA256"
+          test "$(shasum -a 256 "$rubberband_source" | awk '{print $1}')" = "$RUBBERBAND_SOURCE_SHA256"
+      - name: Assemble qualification package
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        run: python -m release.prepare_macos_qualification "$RUNNER_TEMP/Project Sniper Intel"
+      - name: Ensure qualification workspace capacity
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          free_kib="$(df -Pk "$RUNNER_TEMP" | awk 'NR == 2 {print $4}')"
+          if [ "$free_kib" -lt 22000000 ]; then
+            case "$RUNNER_TOOL_CACHE" in /Users/runner/hostedtoolcache) ;; *) exit 2 ;; esac
+            rm -rf -- "$RUNNER_TOOL_CACHE"
+          fi
+          test "$(df -Pk "$RUNNER_TEMP" | awk 'NR == 2 {print $4}')" -ge 20000000
+      - name: Run the buyer installer
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
+      - name: Re-run to prove idempotence
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: ./sniper setup --workspace "$RUNNER_TEMP/Sniper Projects"
+      - name: Run the full installed doctor
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: |
+          set -o pipefail
+          mkdir -p runtime/logs
+          ./sniper doctor --json | tee runtime/logs/qualification-doctor.json
+      - name: Prove the command launcher
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: test "$(./sniper workspace)" = "$RUNNER_TEMP/Sniper Projects"
+      - name: Prove shell-safe local settings override
+        if: steps.artifact.outputs.active == 'true'
+        shell: bash
+        working-directory: ${{ runner.temp }}/Project Sniper Intel
+        run: |
+          override="$RUNNER_TEMP/Local Project \$97"
+          printf "SNIPER_WORKSPACE_ROOT='%s'\n" "$override" > runtime/sniper.local.env
+          test "$(./sniper workspace)" = "$override"
+      - name: Preserve diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel-qualification-diagnostics
+          path: |
+            ${{ runner.temp }}/Project Sniper Intel/runtime/logs
+            ${{ runner.temp }}/Project Sniper Intel/runtime/state

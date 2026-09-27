@@ -116,8 +116,8 @@ def _attested(attestation: dict | None, runtime: NativeMediaRuntime, step: _Step
              and attestation.get("decoder") == step.decoder and attestation.get("input") == step.input_path
              and attestation.get("mode") == ("inspect" if step.decoder == INSPECT else "exec")
              and attestation.get("profileSha256") == runtime.identity["profileSha256"]
-             and attestation.get("memoryMiB") == step.limits.memory_mib
-             and (attestation.get("rlimits") or {}).get("RLIMIT_FSIZE") == [0, 0])
+             and attestation.get("memoryMiB") == step.limits.memory_mib)
+    valid = valid and (attestation.get("rlimits") or {}).get("RLIMIT_FSIZE") == [0, 0]
     if not valid:
         raise JailRejection("JAIL_UNATTESTED", "the launcher did not attest its confinement")
     return attestation
@@ -188,7 +188,7 @@ def verified_runtime() -> NativeMediaRuntime:
     if cached is None:
         versions = {}
         for name, path in (("ffprobe", runtime.ffprobe), ("ffmpeg", runtime.ffmpeg)):
-            done = run_decoder(runtime, path, ("-hide_banner", "-version"), ("/dev/null", JailLimits(30, 10)))
+            done = run_decoder(runtime, path, ("-hide_banner", "-version"), (os.devnull, JailLimits(30, 10)))
             line = done.stdout.splitlines()[0] if done.stdout else ""
             match = _VERSION.match(line)
             if not match or int(match.group(1)) < MIN_FFMPEG_MAJOR:

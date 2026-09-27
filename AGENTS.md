@@ -26,21 +26,23 @@ revisions and context handoffs.
 - **You are the editor.** The operator opened this folder in their own Codex or Claude Code,
   signed in to their own subscription. There is no Sniper web app, no Sniper copy of Codex
   or Claude and no Sniper sign-in: you do the editorial thinking in this conversation, and
-  Sniper's commands do the media work on this Mac. Nothing Sniper runs calls a provider.
-- **Run every Sniper command through `./sniper`, from this folder.** It finds Sniper's own
+  Sniper's commands do the media work on this computer. Nothing Sniper runs calls a provider.
+- **Run every Sniper command through the platform launcher, from this folder:** `./sniper`. It finds Sniper's own
   Python, Node, ffmpeg, Whisper and rendering browser, loads the install's settings and holds
-  the install's lock while the command runs. Commands in the skills and docs are written
-  bare; translate them: `python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
+  the install's lock while the command runs. Commands in the skills and docs use `./sniper`
+  as shorthand. Translate bare commands
+  like this: `python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
   `.venv/bin/python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
-  `node --import tsx scripts/x.ts` → `./sniper node --import tsx scripts/x.ts`. Never run
-  them with another Python, Node or ffmpeg on this Mac. Project folders go under
-  `$(./sniper workspace)`.
-- **Setting up.** If `./sniper` says Sniper is not set up, run `./sniper setup` (it downloads
+  `node --import tsx scripts/x.ts` → `./sniper node --import tsx scripts/x.ts`.
+  Never run them with another Python, Node or ffmpeg.
+  Project folders go under the path printed by `./sniper workspace`.
+- **Setting up.** If the launcher says Sniper is not set up, run `./sniper setup` (it downloads
   about 1.2 GB and takes several minutes; run it in the background, tell the operator what it
-  is doing and report its last lines). `./sniper doctor` checks the install and names the fix
-  for anything wrong.
-- **Codex's sandbox.** Sniper decodes every video it edits inside its own macOS sandbox, and
-  macOS does not let a sandbox start inside another one. If a Sniper command fails with
+  is doing and report its last lines). Run `./sniper doctor` to check
+  the install and name the fix for anything wrong.
+- **Media sandbox.** Sniper decodes every video inside its own macOS Seatbelt media jail.
+  macOS does not let a sandbox start inside
+  another one. On macOS, if a Sniper command fails with
   `sandbox initialization failed` or `Operation not permitted` while your own sandbox is on,
   ask the operator to approve running that same command outside your sandbox. Never skip,
   weaken or work around Sniper's own media check.
@@ -56,11 +58,11 @@ revisions and context handoffs.
   for the current edit. A saved key, an environment variable or a failed local run is never
   that authorization. The operator connects, replaces or removes the key by double-clicking
   `install/setup.command` (a hidden prompt in Terminal); if a key is missing, point them
-  there. Never ask the operator to paste a key into the conversation, and never display or
-  copy a key file. Nothing falls back to Deepgram.
+  there. Never ask the operator to paste a key into
+  the conversation, and never display or copy a key file. Nothing falls back to Deepgram.
 - **No Docker.** The supported route runs natively on macOS.
 
-## What leaves this Mac
+## What leaves this computer
 
 The full account, path by path, is `manual/privacy.html`. In short: what you read and write
 in this conversation (transcripts, plans, still frames you or a reviewer look at) goes to
@@ -69,11 +71,12 @@ nothing anywhere, except: reference links are downloaded with `yt-dlp` (Chrome c
 read only when the operator asks for that fetch); public-web b-roll capture, when a Short's
 media sources are set to public web, loads the pages the plan names
 (`scripts/producer/studio/web_capture.py`); `scripts/producer/planner/icon_library.py` downloads
-brand icons by name from `cdn.simpleicons.org` (`resolve` only for a mapped brand not yet on this
-Mac, `fetch` every time it is run);
+brand icons by name from `cdn.simpleicons.org` (`resolve` only for a mapped brand not yet local,
+`fetch` every time it is run);
 and Studio's page loads one GSAP file from `cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
 switched off. Open Studio only through Sniper (`install/studio.command` for a Producer edit,
-`./sniper python3 scripts/producer/studio/managed_preview.py open <project>` for a native
+or the platform launcher followed by
+`python3 scripts/producer/studio/managed_preview.py open <project>` for a native
 project), never with the stock `hyperframes preview`, which would send HeyGen's analytics. Instructions are not a
 privacy boundary: do not attach or upload video or audio files to the conversation; work
 from transcripts, plans and still frames.

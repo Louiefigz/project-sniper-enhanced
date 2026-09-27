@@ -108,7 +108,8 @@ def native_isolation(runtime, attestations: list[dict]) -> dict:
     return {"kind": "macos-seatbelt", "policy": runtime.identity["policy"],
             "profileSha256": runtime.identity["profileSha256"], "network": "denied",
             "processCreation": "denied", "writes": "/dev/null only", "otherProcesses": "denied",
-            "memoryMiB": attestations[0]["memoryMiB"], "watchdog": "footprint+cpu", "jailRuns": attestations}
+            "memoryMiB": attestations[0]["memoryMiB"], "watchdog": "footprint+cpu",
+            "jailRuns": attestations}
 
 
 def inspected_facts(runtime, path: str, limits: MediaProbeLimits) -> tuple[dict | None, dict]:

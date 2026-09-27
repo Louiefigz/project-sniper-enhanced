@@ -1,0 +1,9 @@
+{
+ "conda_rows_sha256": "a600a068f53d38758078bcd24c665ac472d263452d663e46ca194d14851652fd",
+ "min_macos": "13.5",
+ "set_by": [
+  "bin/node",
+  "lib/libnode.137.dylib"
+ ],
+ "macho_files": 451
+}

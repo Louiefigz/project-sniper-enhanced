@@ -53,7 +53,8 @@ def _destination_fd(path: str) -> int:
     flags = (os.O_WRONLY | os.O_CREAT | os.O_EXCL
              | getattr(os, "O_NOFOLLOW", 0))
     fd = os.open(path, flags, 0o600)
-    os.fchmod(fd, 0o600)
+    if hasattr(os, "fchmod"):
+        os.fchmod(fd, 0o600)
     return fd
 
 
@@ -113,7 +114,8 @@ def _verify_snapshot(path: str, expected_hash: str, expected_size: int,
     fd = _source_fd(path)
     try:
         before = snapshot_stat_identity(os.fstat(fd))
-        if before != snapshot_stat_identity(os.lstat(path)) or before[6] != expected_size:
+        named = snapshot_stat_identity(os.lstat(path))
+        if before != named or before[6] != expected_size:
             raise RuntimeError("content-addressed external media snapshot is corrupt or changed before verification")
         observed_hash, size = _hash_descriptor(fd, expected_size, runtime)
         check_verification_clock(runtime)

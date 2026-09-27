@@ -144,13 +144,13 @@ screenshot, brand, likeness or creator name is used.
 | `hyperframes` CLI and SDK 0.8.31 | HeyGen | Apache-2.0 (`licenses/Apache-2.0-hyperframes.txt`). Its Studio web bundle contains its own copy of GSAP 3.15.0 under the GSAP Standard "No Charge" License. |
 | `chrome-headless-shell` | The Chromium Authors, via Chrome for Testing | BSD-3-Clause and the Chromium licence set |
 | `ggml-small.en.bin` speech model | whisper.cpp project | MIT |
-| Sniper's own tools: Python 3.14.4, Node 24.21.0, whisper.cpp 1.9.3, tesseract 5.5.3 (with its language data), yt-dlp 2026.08.19, git 2.55.0, micromamba 2.9.0, and the libraries they and Sniper's ffmpeg use (86 packages in all) | conda-forge, <https://conda-forge.org> | each package's own; the complete list with every licence is `install/deps/osx-arm64.json`. They are downloaded by the installer from conda.anaconda.org, not redistributed in this package. |
+| Sniper's own tools: Python 3.14.4, Node 24.21.0, whisper.cpp 1.9.3, tesseract 5.5.3 (with its language data), yt-dlp 2026.08.19, git 2.55.0, micromamba 2.9.0, and the libraries they and Sniper's ffmpeg use (86 packages per target) | conda-forge, <https://conda-forge.org> | each package's own; the complete architecture-specific lists with every licence are `install/deps/osx-arm64.json` and `install/deps/osx-64.json`. They are downloaded by the installer from conda.anaconda.org, not redistributed in this package. |
 
 ## Shipped in this package: Sniper's ffmpeg build
 
 | Component | Publisher | Licence |
 |---|---|---|
-| `ffmpeg` and `ffprobe` 8.0.3 (`install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz`), built by Project Sniper from unmodified FFmpeg 8.0.3 and Rubber Band Library 4.0.0 | the FFmpeg developers; Particular Programs Ltd (Rubber Band) | GNU GPL version 3 or later as configured (FFmpeg itself is LGPL-2.1-or-later; Rubber Band is GPL-2.0-or-later). The complete corresponding source and the build recipe are in `third-party/sources/` and inside the archive under `share/sniper-ffmpeg/`, with the GPL text. They run as separate programs and do not change the licence of Project Sniper's own code. |
+| `ffmpeg` and `ffprobe` 8.0.3 (the `osx-arm64` and `osx-64` archives in `install/deps/`), built by Project Sniper from unmodified FFmpeg 8.0.3 and Rubber Band Library 4.0.0 | the FFmpeg developers; Particular Programs Ltd (Rubber Band) | GNU GPL version 3 or later as configured (FFmpeg itself is LGPL-2.1-or-later; Rubber Band is GPL-2.0-or-later). The complete corresponding source and the build recipe are in `third-party/sources/` and inside each archive under `share/sniper-ffmpeg/`, with the GPL text. They run as separate programs and do not change the licence of Project Sniper's own code. |
 
 ## Not shipped
 

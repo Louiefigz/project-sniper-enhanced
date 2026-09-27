@@ -1,0 +1,617 @@
+{
+ "micromamba": "2.9.0",
+ "min_macos": "14.0",
+ "packages": [
+  {
+   "build": "h374f1ed_10",
+   "file": "bzip2-1.0.8-h374f1ed_10.conda",
+   "license": "bzip2-1.0.6",
+   "name": "bzip2",
+   "version": "1.0.8"
+  },
+  {
+   "build": "had63097_2",
+   "file": "c-ares-1.34.8-had63097_2.conda",
+   "license": "MIT",
+   "name": "c-ares",
+   "version": "1.34.8"
+  },
+  {
+   "build": "hbd8a1cb_0",
+   "file": "ca-certificates-2026.7.22-hbd8a1cb_0.conda",
+   "license": "ISC",
+   "name": "ca-certificates",
+   "version": "2026.7.22"
+  },
+  {
+   "build": "h5791faa_3",
+   "file": "cairo-1.18.4-h5791faa_3.conda",
+   "license": "LGPL-2.1-only or MPL-1.1",
+   "name": "cairo",
+   "version": "1.18.4"
+  },
+  {
+   "build": "hebb0a2c_2",
+   "file": "dbus-1.16.2-hebb0a2c_2.conda",
+   "license": "AFL-2.1 OR GPL-2.0-or-later",
+   "name": "dbus",
+   "version": "1.16.2"
+  },
+  {
+   "build": "hab24e00_0",
+   "file": "font-ttf-dejavu-sans-mono-2.37-hab24e00_0.tar.bz2",
+   "license": "BSD-3-Clause",
+   "name": "font-ttf-dejavu-sans-mono",
+   "version": "2.37"
+  },
+  {
+   "build": "h77eed37_0",
+   "file": "font-ttf-inconsolata-3.000-h77eed37_0.tar.bz2",
+   "license": "OFL-1.1",
+   "name": "font-ttf-inconsolata",
+   "version": "3.000"
+  },
+  {
+   "build": "h77eed37_0",
+   "file": "font-ttf-source-code-pro-2.038-h77eed37_0.tar.bz2",
+   "license": "OFL-1.1",
+   "name": "font-ttf-source-code-pro",
+   "version": "2.038"
+  },
+  {
+   "build": "h77eed37_3",
+   "file": "font-ttf-ubuntu-0.83-h77eed37_3.conda",
+   "license": "LicenseRef-Ubuntu-Font-Licence-Version-1.0",
+   "name": "font-ttf-ubuntu",
+   "version": "0.83"
+  },
+  {
+   "build": "h7f3b9c9_1",
+   "file": "fontconfig-2.18.3-h7f3b9c9_1.conda",
+   "license": "MIT",
+   "name": "fontconfig",
+   "version": "2.18.3"
+  },
+  {
+   "build": "0",
+   "file": "fonts-conda-ecosystem-1-0.tar.bz2",
+   "license": "BSD-3-Clause",
+   "name": "fonts-conda-ecosystem",
+   "version": "1"
+  },
+  {
+   "build": "hc364b38_1",
+   "file": "fonts-conda-forge-1-hc364b38_1.conda",
+   "license": "BSD-3-Clause",
+   "name": "fonts-conda-forge",
+   "version": "1"
+  },
+  {
+   "build": "h694c41f_2",
+   "file": "freetype-2.14.3-h694c41f_2.conda",
+   "license": "GPL-2.0-only OR FTL",
+   "name": "freetype",
+   "version": "2.14.3"
+  },
+  {
+   "build": "hd115831_0",
+   "file": "fribidi-1.0.17-hd115831_0.conda",
+   "license": "LGPL-2.1-or-later",
+   "name": "fribidi",
+   "version": "1.0.17"
+  },
+  {
+   "build": "h0f9f378_1",
+   "file": "giflib-5.2.2-h0f9f378_1.conda",
+   "license": "MIT",
+   "name": "giflib",
+   "version": "5.2.2"
+  },
+  {
+   "build": "pl5321h38146f4_3",
+   "file": "git-2.55.0-pl5321h38146f4_3.conda",
+   "license": "GPL-2.0-or-later and LGPL-2.1-or-later",
+   "name": "git",
+   "version": "2.55.0"
+  },
+  {
+   "build": "h2fb4741_1",
+   "file": "graphite2-1.3.15-h2fb4741_1.conda",
+   "license": "LGPL-2.0-or-later",
+   "name": "graphite2",
+   "version": "1.3.15"
+  },
+  {
+   "build": "h694c41f_1",
+   "file": "harfbuzz-14.4.0-h694c41f_1.conda",
+   "license": "MIT",
+   "name": "harfbuzz",
+   "version": "14.4.0"
+  },
+  {
+   "build": "py313hbf1d544_2",
+   "file": "icu-78.3-py313hbf1d544_2.conda",
+   "license": "MIT",
+   "name": "icu",
+   "version": "78.3"
+  },
+  {
+   "build": "h69064fd_2",
+   "file": "krb5-1.22.2-h69064fd_2.conda",
+   "license": "MIT",
+   "name": "krb5",
+   "version": "1.22.2"
+  },
+  {
+   "build": "hf131caf_1",
+   "file": "lame-4.0-hf131caf_1.conda",
+   "license": "LGPL-2.0-only",
+   "name": "lame",
+   "version": "4.0"
+  },
+  {
+   "build": "h2f7ad99_1",
+   "file": "leptonica-1.87.0-h2f7ad99_1.conda",
+   "license": "BSD-2-Clause",
+   "name": "leptonica",
+   "version": "1.87.0"
+  },
+  {
+   "build": "h35c7297_0",
+   "file": "lerc-4.2.0-h35c7297_0.conda",
+   "license": "Apache-2.0",
+   "name": "lerc",
+   "version": "4.2.0"
+  },
+  {
+   "build": "gpl_h381e297_101",
+   "file": "libarchive-3.8.9-gpl_h381e297_101.conda",
+   "license": "BSD-2-Clause",
+   "name": "libarchive",
+   "version": "3.8.9"
+  },
+  {
+   "build": "h979882d_1",
+   "file": "libass-0.17.5-h979882d_1.conda",
+   "license": "ISC",
+   "name": "libass",
+   "version": "0.17.5"
+  },
+  {
+   "build": "he0616a4_4",
+   "file": "libbrotlicommon-1.2.0-he0616a4_4.conda",
+   "license": "MIT",
+   "name": "libbrotlicommon",
+   "version": "1.2.0"
+  },
+  {
+   "build": "h4a2f56c_4",
+   "file": "libbrotlidec-1.2.0-h4a2f56c_4.conda",
+   "license": "MIT",
+   "name": "libbrotlidec",
+   "version": "1.2.0"
+  },
+  {
+   "build": "h3d41943_4",
+   "file": "libbrotlienc-1.2.0-h3d41943_4.conda",
+   "license": "MIT",
+   "name": "libbrotlienc",
+   "version": "1.2.0"
+  },
+  {
+   "build": "h5318221_0",
+   "file": "libcurl-8.22.0-h5318221_0.conda",
+   "license": "curl",
+   "name": "libcurl",
+   "version": "8.22.0"
+  },
+  {
+   "build": "h19cb2f5_0",
+   "file": "libcxx-23.1.2-h19cb2f5_0.conda",
+   "license": "Apache-2.0 WITH LLVM-exception",
+   "name": "libcxx",
+   "version": "23.1.2"
+  },
+  {
+   "build": "had63097_4",
+   "file": "libdav1d7-1.5.4-had63097_4.conda",
+   "license": "BSD-2-Clause",
+   "name": "libdav1d7",
+   "version": "1.5.4"
+  },
+  {
+   "build": "h7ad9622_1",
+   "file": "libdeflate-1.25-h7ad9622_1.conda",
+   "license": "MIT",
+   "name": "libdeflate",
+   "version": "1.25"
+  },
+  {
+   "build": "pl5321hba2e2ab_1",
+   "file": "libedit-3.1.20250104-pl5321hba2e2ab_1.conda",
+   "license": "BSD-2-Clause",
+   "name": "libedit",
+   "version": "3.1.20250104"
+  },
+  {
+   "build": "ha3d0635_3",
+   "file": "libev-4.33-ha3d0635_3.conda",
+   "license": "BSD-2-Clause OR GPL-2.0-or-later",
+   "name": "libev",
+   "version": "4.33"
+  },
+  {
+   "build": "h6e061ac_0",
+   "file": "libexpat-2.8.4-h6e061ac_0.conda",
+   "license": "MIT",
+   "name": "libexpat",
+   "version": "2.8.4"
+  },
+  {
+   "build": "hd1f9c09_0",
+   "file": "libffi-3.5.2-hd1f9c09_0.conda",
+   "license": "MIT",
+   "name": "libffi",
+   "version": "3.5.2"
+  },
+  {
+   "build": "h694c41f_2",
+   "file": "libfreetype-2.14.3-h694c41f_2.conda",
+   "license": "GPL-2.0-only OR FTL",
+   "name": "libfreetype",
+   "version": "2.14.3"
+  },
+  {
+   "build": "h8afe040_2",
+   "file": "libfreetype6-2.14.3-h8afe040_2.conda",
+   "license": "GPL-2.0-only OR FTL",
+   "name": "libfreetype6",
+   "version": "2.14.3"
+  },
+  {
+   "build": "hf28f236_0",
+   "file": "libglib-2.88.3-hf28f236_0.conda",
+   "license": "LGPL-2.1-or-later",
+   "name": "libglib",
+   "version": "2.88.3"
+  },
+  {
+   "build": "h2974713_1",
+   "file": "libharfbuzz-14.4.0-h2974713_1.conda",
+   "license": "MIT",
+   "name": "libharfbuzz",
+   "version": "14.4.0"
+  },
+  {
+   "build": "h2974713_1",
+   "file": "libharfbuzz-devel-14.4.0-h2974713_1.conda",
+   "license": "MIT",
+   "name": "libharfbuzz-devel",
+   "version": "14.4.0"
+  },
+  {
+   "build": "h4ae439b_3",
+   "file": "libiconv-1.18-h4ae439b_3.conda",
+   "license": "LGPL-2.1-only",
+   "name": "libiconv",
+   "version": "1.18"
+  },
+  {
+   "build": "h98e67c8_2",
+   "file": "libintl-0.25.1-h98e67c8_2.conda",
+   "license": "LGPL-2.1-or-later",
+   "name": "libintl",
+   "version": "0.25.1"
+  },
+  {
+   "build": "ha1e9b39_1",
+   "file": "libjpeg-turbo-3.2.0-ha1e9b39_1.conda",
+   "license": "IJG AND BSD-3-Clause AND Zlib",
+   "name": "libjpeg-turbo",
+   "version": "3.2.0"
+  },
+  {
+   "build": "hbb4bfdb_1",
+   "file": "liblzma-5.8.3-hbb4bfdb_1.conda",
+   "license": "0BSD",
+   "name": "liblzma",
+   "version": "5.8.3"
+  },
+  {
+   "build": "ha1e9b39_2",
+   "file": "libmpdec-4.0.0-ha1e9b39_2.conda",
+   "license": "BSD-2-Clause",
+   "name": "libmpdec",
+   "version": "4.0.0"
+  },
+  {
+   "build": "h1e30255_1",
+   "file": "libnghttp2-1.68.1-h1e30255_1.conda",
+   "license": "MIT",
+   "name": "libnghttp2",
+   "version": "1.68.1"
+  },
+  {
+   "build": "had63097_1",
+   "file": "libopus-1.6.1-had63097_1.conda",
+   "license": "BSD-3-Clause",
+   "name": "libopus",
+   "version": "1.6.1"
+  },
+  {
+   "build": "h4382c61_1",
+   "file": "libpng-1.6.58-h4382c61_1.conda",
+   "license": "zlib-acknowledgement",
+   "name": "libpng",
+   "version": "1.6.58"
+  },
+  {
+   "build": "h7ff43d8_1",
+   "file": "libpsl-0.23.1-h7ff43d8_1.conda",
+   "license": "MIT",
+   "name": "libpsl",
+   "version": "0.23.1"
+  },
+  {
+   "build": "ha5db789_1",
+   "file": "libsqlite-3.53.4-ha5db789_1.conda",
+   "license": "blessing",
+   "name": "libsqlite",
+   "version": "3.53.4"
+  },
+  {
+   "build": "hd53bb72_1",
+   "file": "libssh2-1.11.1-hd53bb72_1.conda",
+   "license": "BSD-3-Clause",
+   "name": "libssh2",
+   "version": "1.11.1"
+  },
+  {
+   "build": "h01c3a8c_1",
+   "file": "libtiff-4.7.2-h01c3a8c_1.conda",
+   "license": "HPND",
+   "name": "libtiff",
+   "version": "4.7.2"
+  },
+  {
+   "build": "h2287256_0",
+   "file": "libusb-1.0.29-h2287256_0.conda",
+   "license": "LGPL-2.1-or-later",
+   "name": "libusb",
+   "version": "1.0.29"
+  },
+  {
+   "build": "ha3d0635_1",
+   "file": "libuv-1.52.1-ha3d0635_1.conda",
+   "license": "MIT",
+   "name": "libuv",
+   "version": "1.52.1"
+  },
+  {
+   "build": "h66869c8_2",
+   "file": "libvulkan-loader-1.4.357.0-h66869c8_2.conda",
+   "license": "Apache-2.0",
+   "name": "libvulkan-loader",
+   "version": "1.4.357.0"
+  },
+  {
+   "build": "hb276fe9_1",
+   "file": "libwebp-base-1.6.0-hb276fe9_1.conda",
+   "license": "BSD-3-Clause",
+   "name": "libwebp-base",
+   "version": "1.6.0"
+  },
+  {
+   "build": "h8376fb4_0",
+   "file": "libxml2-16-2.15.4-h8376fb4_0.conda",
+   "license": "MIT",
+   "name": "libxml2-16",
+   "version": "2.15.4"
+  },
+  {
+   "build": "hb56241c_0",
+   "file": "libxml2-2.15.4-hb56241c_0.conda",
+   "license": "MIT",
+   "name": "libxml2",
+   "version": "2.15.4"
+  },
+  {
+   "build": "hbb4bfdb_3",
+   "file": "libzlib-1.3.2-hbb4bfdb_3.conda",
+   "license": "Zlib",
+   "name": "libzlib",
+   "version": "1.3.2"
+  },
+  {
+   "build": "h8c1e6b9_0",
+   "file": "llvm-openmp-23.1.2-h8c1e6b9_0.conda",
+   "license": "Apache-2.0 WITH LLVM-exception",
+   "name": "llvm-openmp",
+   "version": "23.1.2"
+  },
+  {
+   "build": "hc569e58_2",
+   "file": "lz4-c-1.10.0-hc569e58_2.conda",
+   "license": "BSD-2-Clause",
+   "name": "lz4-c",
+   "version": "1.10.0"
+  },
+  {
+   "build": "had63097_1003",
+   "file": "lzo-2.10-had63097_1003.conda",
+   "license": "GPL-2.0-or-later",
+   "name": "lzo",
+   "version": "2.10"
+  },
+  {
+   "build": "h8d168ca_1",
+   "file": "mpg123-1.33.7-h8d168ca_1.conda",
+   "license": "LGPL-2.1-only",
+   "name": "mpg123",
+   "version": "1.33.7"
+  },
+  {
+   "build": "hcc0dc9a_1",
+   "file": "ncurses-6.6-hcc0dc9a_1.conda",
+   "license": "X11 AND BSD-3-Clause",
+   "name": "ncurses",
+   "version": "6.6"
+  },
+  {
+   "build": "hcead6ad_0",
+   "file": "nodejs-24.21.0-hcead6ad_0.conda",
+   "license": "MIT",
+   "name": "nodejs",
+   "version": "24.21.0"
+  },
+  {
+   "build": "he4eae51_1",
+   "file": "openjpeg-2.5.4-he4eae51_1.conda",
+   "license": "BSD-2-Clause",
+   "name": "openjpeg",
+   "version": "2.5.4"
+  },
+  {
+   "build": "h332eb6d_0",
+   "file": "openssl-3.6.4-h332eb6d_0.conda",
+   "license": "Apache-2.0",
+   "name": "openssl",
+   "version": "3.6.4"
+  },
+  {
+   "build": "h31793e3_1",
+   "file": "pcre2-10.47-h31793e3_1.conda",
+   "license": "BSD-3-Clause",
+   "name": "pcre2",
+   "version": "10.47"
+  },
+  {
+   "build": "9_hd115831_perl5",
+   "file": "perl-5.32.1-9_hd115831_perl5.conda",
+   "license": "GPL-1.0-or-later OR Artistic-1.0-Perl",
+   "name": "perl",
+   "version": "5.32.1"
+  },
+  {
+   "build": "pyh145f28c_0",
+   "file": "pip-26.2.1-pyh145f28c_0.conda",
+   "license": "MIT",
+   "name": "pip",
+   "version": "26.2.1"
+  },
+  {
+   "build": "h2fb4741_3",
+   "file": "pixman-0.46.4-h2fb4741_3.conda",
+   "license": "MIT",
+   "name": "pixman",
+   "version": "0.46.4"
+  },
+  {
+   "build": "h7c6738f_100_cp314",
+   "file": "python-3.14.4-h7c6738f_100_cp314.conda",
+   "license": "Python-2.0",
+   "name": "python",
+   "version": "3.14.4"
+  },
+  {
+   "build": "9_cp314",
+   "file": "python_abi-3.14-9_cp314.conda",
+   "license": "BSD-3-Clause",
+   "name": "python_abi",
+   "version": "3.14"
+  },
+  {
+   "build": "h000c2f7_1",
+   "file": "readline-8.3-h000c2f7_1.conda",
+   "license": "GPL-3.0-only",
+   "name": "readline",
+   "version": "8.3"
+  },
+  {
+   "build": "h2fb4741_0",
+   "file": "sdl2-2.32.56-h2fb4741_0.conda",
+   "license": "Zlib",
+   "name": "sdl2",
+   "version": "2.32.56"
+  },
+  {
+   "build": "h2f783eb_0",
+   "file": "sdl3-3.4.16-h2f783eb_0.conda",
+   "license": "Zlib",
+   "name": "sdl3",
+   "version": "3.4.16"
+  },
+  {
+   "build": "hf76ddcb_0",
+   "file": "tesseract-5.5.3-hf76ddcb_0.conda",
+   "license": "Apache-2.0",
+   "name": "tesseract",
+   "version": "5.5.3"
+  },
+  {
+   "build": "ha6c374e_4",
+   "file": "tk-8.6.13-ha6c374e_4.conda",
+   "license": "TCL",
+   "name": "tk",
+   "version": "8.6.13"
+  },
+  {
+   "build": "h151e31d_0",
+   "file": "tzdata-2026c-h151e31d_0.conda",
+   "license": "LicenseRef-Public-Domain",
+   "name": "tzdata",
+   "version": "2026c"
+  },
+  {
+   "build": "hddf3962_0",
+   "file": "whisper.cpp-1.9.3-hddf3962_0.conda",
+   "license": "MIT",
+   "name": "whisper.cpp",
+   "version": "1.9.3"
+  },
+  {
+   "build": "hd115831_3",
+   "file": "x264-1!164.3095-hd115831_3.conda",
+   "license": "GPL-2.0-or-later",
+   "name": "x264",
+   "version": "1!164.3095"
+  },
+  {
+   "build": "pyhcf101f3_0",
+   "file": "yt-dlp-2026.8.19-pyhcf101f3_0.conda",
+   "license": "Unlicense",
+   "name": "yt-dlp",
+   "version": "2026.8.19"
+  },
+  {
+   "build": "pyhcf101f3_0",
+   "file": "yt-dlp-ejs-0.8.0-pyhcf101f3_0.conda",
+   "license": "Unlicense",
+   "name": "yt-dlp-ejs",
+   "version": "0.8.0"
+  },
+  {
+   "build": "h21dd04a_0",
+   "file": "zimg-3.0.6-h21dd04a_0.conda",
+   "license": "WTFPL",
+   "name": "zimg",
+   "version": "3.0.6"
+  },
+  {
+   "build": "hbc1a06c_7",
+   "file": "zstd-1.5.7-hbc1a06c_7.conda",
+   "license": "BSD-3-Clause",
+   "name": "zstd",
+   "version": "1.5.7"
+  }
+ ],
+ "platform": "osx-64",
+ "tools": {
+  "git": "2.55.0",
+  "nodejs": "24.21.0",
+  "python": "3.14.4",
+  "tesseract": "5.5.3",
+  "whisper.cpp": "1.9.3",
+  "yt-dlp": "2026.8.19"
+ }
+}

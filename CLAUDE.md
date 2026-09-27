@@ -20,7 +20,8 @@ you; read the code for the rest.
 ### The tools
 
 Buyers use Sniper only through their own Codex or Claude Code opened on this folder: the
-skills are the product, `./sniper` runs the engine with Sniper's own tools, and the agent is
+skills are the product, `./sniper` runs the engine with
+Sniper's own tools, and the agent is
 the brain. The Next.js app under `src/` (pages and API routes) is the retired web UI; its
 libraries are still imported by Sniper's TypeScript commands (`scripts/infra/*.ts`, the
 native export), so it ships and must keep type-checking, but no buyer route serves it.
@@ -39,9 +40,9 @@ Three tools:
 
 ### Layout
 
-- `sniper` (repository root): the command the agent runs every engine command through. In a
-  package it loads `install/lib/common.sh` settings and the maintenance lock; in a developer
-  checkout (no `install/`) it just runs the command here.
+- `sniper` (repository root): the command the agent runs every engine
+  command through. In a package it loads the install settings and maintenance lock; in a
+  developer checkout (no `install/`) the macOS launcher just runs the command here.
 - `scripts/infra/project-intent.ts` writes a project's stored intent (the retired app's
   `POST /api/producer/intent`); `scripts/infra/mint-delivery-approval.ts` mints the delivery
   approval from the deterministic gates.
@@ -69,9 +70,10 @@ Three tools:
 `tesseract` (reference study reads on-screen text and refuses to start without it; also
 Text Review's `--mode ocr`) and `yt-dlp` (adding a reference from a link,
 `study/fetch_reference.py`). In the packaged app these, Node, Python and git are Sniper's own:
-the installer puts them in `~/.project-sniper/runtimes/<lock id>/` from
-`install/deps/osx-arm64.lock` (ffmpeg is Sniper's build with zscale and rubberband), and the
-`./sniper` puts them first on PATH. Never install or point Sniper at a
+the installer puts them in `~/.project-sniper/runtimes/<lock id>/`. It selects
+`install/deps/osx-arm64.lock` or `install/deps/osx-64.lock` for the detected Mac;
+each target uses Sniper's matching ffmpeg build, and the launcher puts the tools first on PATH.
+Never install or point Sniper at a
 Homebrew or system copy instead. API routes that start Python import `spawnPython` /
 `pythonInterpreter` / `SCRIPTS_DIR` from `src/app/api/_lib/spawn-python.ts`.
 

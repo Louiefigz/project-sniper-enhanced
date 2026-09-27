@@ -29,6 +29,7 @@ RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
 # What the tools write after installation; must match deps_tree_excludes in runtime_tools.sh.
 RUNTIME_EXCLUDES = {"var/cache/fontconfig", ".sniper-users", "name:__pycache__", "file:.sniper-runtime-complete"}
 Record = Callable[[str, str, str], None]
+SETUP_COMMAND = "install/install.command"
 
 
 def release() -> dict:
@@ -40,6 +41,15 @@ def version_tuple(text: str) -> tuple[int, ...]:
     """(22, 13, 0) from '22.13.0' or 'v22.13.0'; () when unparseable."""
     parts = text.strip().lstrip("v").split(".")
     return tuple(int(p) for p in parts) if all(p.isdigit() for p in parts) and len(parts) == 3 else ()
+
+
+def path_within(path: str | Path, root: str | Path) -> bool:
+    """Whether a resolved path is inside a resolved root."""
+    real_path, real_root = os.path.realpath(path), os.path.realpath(root)
+    try:
+        return os.path.commonpath((real_path, real_root)) == real_root
+    except ValueError:
+        return False
 
 
 def run(argv: list[str], timeout: int = 60, cwd: Path | None = None) -> tuple[int, str, str]:
@@ -64,7 +74,7 @@ def node_problem(path: str, floor: str) -> str | None:
     if version < version_tuple(floor):
         return f"Node {out.strip()} at {path} is older than {floor}, the oldest version every dependency accepts"
     if any(ch.isspace() for ch in path) or os.path.basename(path) != "node":
-        return f"{path} must be a whitespace-free path to an executable named node (Studio needs it)"
+        return f"{path} must be a whitespace-free path to Sniper's node executable"
     return None
 
 
@@ -74,17 +84,17 @@ def check_node(record: Record) -> None:
     pinned = os.environ.get("SNIPER_NODE_PATH", "")
     problem = node_problem(pinned, floor)
     if problem:
-        record("FAIL", "node", f"{problem} — run install/install.command")
+        record("FAIL", "node", f"{problem} — run {SETUP_COMMAND}")
         return
     found = shutil.which("node") or ""
     if os.path.realpath(found) != os.path.realpath(pinned):
         record("FAIL", "node", f"PATH finds {found or 'no node'}, not the installed {pinned}; "
-               "Sniper's commands and renders would run a different Node — run ./sniper setup")
+               f"Sniper's commands and renders would run a different Node — run {SETUP_COMMAND}")
         return
     _, out, _ = run([pinned, "--version"], 30)
     prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
-    if not prefix or not os.path.realpath(pinned).startswith(f"{os.path.realpath(prefix)}/"):
-        record("FAIL", "node", f"{pinned} is not Sniper's own Node — run install/install.command")
+    if not prefix or not path_within(pinned, prefix):
+        record("FAIL", "node", f"{pinned} is not Sniper's own Node — run {SETUP_COMMAND}")
         return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); Sniper's commands and renders use it")
 
@@ -93,7 +103,7 @@ def check_runtime_tools(record: Record) -> None:
     """Sniper's own tools: exactly as installed, found first on the app's PATH, and each runs."""
     import install_tools  # noqa: PLC0415  (same folder; stdlib only)
     prefix = Path(os.environ.get("SNIPER_DEPS_PREFIX", "/nonexistent"))
-    fix = "run install/install.command (it reinstalls Sniper's tools)"
+    fix = f"run {SETUP_COMMAND} (it reinstalls Sniper's tools)"
     try:
         want = json.loads((prefix.parent / f"{prefix.name}.tree.json").read_text(encoding="utf-8"))["files"]
     except (OSError, ValueError, KeyError):
@@ -107,7 +117,7 @@ def check_runtime_tools(record: Record) -> None:
     for tool, args, feature in RUNTIME_TOOLS:
         found = shutil.which(tool) or ""
         real = os.path.realpath(found) if found else ""
-        if not real.startswith(f"{os.path.realpath(prefix)}/"):
+        if not real or not path_within(real, prefix):
             record("FAIL", tool, f"PATH finds {found or 'nothing'}, not Sniper's own — needed for {feature}: {fix}")
             continue
         code, out, err = run([found, *args], 60)

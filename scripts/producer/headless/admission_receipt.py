@@ -78,9 +78,9 @@ def _run_valid(run: object, decoder: str, context: tuple[dict, str]) -> bool:
 def _isolation_valid(isolation: object, runtime: dict, facts: tuple[str, str]) -> bool:
     """Inspection is always attested; decoded media also needs attested ffprobe and ffmpeg runs."""
     kind, snapshot = facts
-    fixed = {"kind": "macos-seatbelt", "policy": JAIL_POLICY, "network": "denied", "processCreation": "denied",
-             "writes": "/dev/null only", "otherProcesses": "denied", "watchdog": "footprint+cpu",
-             "memoryMiB": _JAIL_MEMORY_MIB}
+    fixed = {"kind": "macos-seatbelt", "policy": JAIL_POLICY, "network": "denied",
+             "processCreation": "denied", "writes": "/dev/null only", "otherProcesses": "denied",
+             "watchdog": "footprint+cpu", "memoryMiB": _JAIL_MEMORY_MIB}
     if type(isolation) is not dict or any(isolation.get(key) != value for key, value in fixed.items()):
         return False
     if isolation.get("profileSha256") != runtime["profileSha256"]:

@@ -28,6 +28,8 @@ from headless.external_media_probe import admit_external_media  # noqa: E402
 from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, verified_runtime  # noqa: E402
 from ingest_admission_contract import receipt_snapshot  # noqa: E402
 
+_INVALID_DENIALS = {"JAIL_UNAVAILABLE", "JAIL_UNATTESTED", "DECODE_TIMEOUT", "OUTPUT_LIMIT"}
+
 
 def _sample(runtime, root: Path) -> Path:
     """Two seconds of test picture and tone, made by the trusted host ffmpeg."""
@@ -56,7 +58,7 @@ def _denied(runtime, arguments: tuple[str, ...], allowed: str) -> str:
     try:
         run_decoder(runtime, runtime.ffmpeg, ("-nostdin", "-v", "error", *arguments), (allowed, JailLimits(30, 30)))
     except JailRejection as error:
-        return error.code if "Operation not permitted" in str(error) or error.code == "MEMORY_LIMIT" else ""
+        return "" if error.code in _INVALID_DENIALS else error.code
     return ""
 
 

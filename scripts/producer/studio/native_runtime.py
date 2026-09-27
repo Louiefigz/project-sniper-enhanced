@@ -95,7 +95,7 @@ def _construct(stock: Path, parent: Path, manifest: dict) -> Path:
         (staging / 'dist' / row['file']).write_bytes(patched)
     shutil.copyfile(PATCH_ROOT / 'frame-source-transport.mjs', staging / 'dist/frame-source-transport.mjs')
     (staging / 'dist/cli.js').rename(staging / 'dist/native-render-sdk.mjs')
-    (staging / 'dist/cli.js').write_text(WRAPPER)
+    (staging / 'dist/cli.js').write_bytes(WRAPPER.encode())
     shutil.copyfile(PATCH_ROOT / GUARD, staging / 'dist' / GUARD)
     verify_runtime(staging, manifest)
     (staging / 'SNIPER-RUNTIME.json').write_text(json.dumps(manifest, indent=2))

@@ -9,7 +9,7 @@ granted by this file.
 Selected terms, in plain words
 ------------------------------
 1. WHAT YOU MAY DO
-   a. Install and use Project Sniper on Macs you control.
+   a. Install and use Project Sniper on supported computers you control.
    b. Produce videos for yourself and for your own business.
    c. Produce videos for paying clients. Nothing in this licence limits how you
       use, sell or monetise the videos you produce.
@@ -37,14 +37,14 @@ Selected terms, in plain words
 
 6. NO WARRANTY
    Project Sniper is provided "as is", without warranty of any kind. Rendering
-   video is resource-intensive and depends on your hardware, your macOS version
+   video is resource-intensive and depends on your hardware, operating-system version
    and your third-party AI subscription, none of which the seller controls.
 
 7. WHAT THIS LICENCE DOES NOT COVER
    Your Codex or Claude subscription is a contract between you and that provider.
    Their pricing, model availability, usage limits and data policies apply to the
    transcript text and the still frames Sniper sends them. See the manual page
-   "What leaves your Mac".
+   "What leaves your computer".
 
 STILL TO BE SETTLED BEFORE THIS CAN BE SOLD
 -------------------------------------------

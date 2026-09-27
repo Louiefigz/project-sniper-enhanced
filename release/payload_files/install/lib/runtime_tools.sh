@@ -2,7 +2,7 @@
 # Sniper's own tools: Python, Node, ffmpeg/ffprobe, whisper.cpp, tesseract, yt-dlp and git.
 # Sourced by lib/common.sh, never executed directly.
 #
-# install/deps/osx-arm64.lock names every file with its size and SHA-256. The first install
+# The detected target's install/deps/*.lock names every file with its size and SHA-256. The first install
 # downloads them with curl (resumable; each file is checked before it is used) and a
 # hash-pinned micromamba installs them offline into ONE private folder per lock:
 #     ~/.project-sniper/runtimes/<lock id>/
@@ -16,7 +16,7 @@
 # not inside this package, because Studio needs a Node path without spaces and this
 # package's own folder may contain them.
 
-DEPS_LOCK="$PKG_ROOT/install/deps/osx-arm64.lock"
+DEPS_LOCK="$PKG_ROOT/install/deps/$SNIPER_RUNTIME_PLATFORM.lock"
 DEPS_HOME="$HOME/.project-sniper"
 DEPS_TOOLS="ffmpeg ffprobe whisper-cli tesseract yt-dlp node npm python3 git"
 
@@ -31,11 +31,12 @@ deps_header() {  # key
 
 # Sets DEPS_ID (first 16 hex of the lock's SHA-256), DEPS_PREFIX and DEPS_RECORD.
 deps_paths() {
-  [ -f "$DEPS_LOCK" ] || fail "This folder is incomplete: install/deps/osx-arm64.lock is missing."
+  [ -f "$DEPS_LOCK" ] || fail "This release does not contain the $SNIPER_RUNTIME_PLATFORM runtime lock.
+  Download a Project Sniper build that includes this platform."
   case "$HOME" in /*) ;; *) fail "HOME is not set to your home folder; open Terminal normally and run this again." ;; esac
   case "$HOME" in *[[:space:]]*) fail "Your home folder path contains a space ($HOME). Sniper's tools
   must live on a path without spaces, and it keeps them in your home folder." ;; esac
-  DEPS_ID="$(sha "$DEPS_LOCK")" || fail "Cannot read install/deps/osx-arm64.lock."
+  DEPS_ID="$(sha "$DEPS_LOCK")" || fail "Cannot read $DEPS_LOCK."
   DEPS_ID="${DEPS_ID:0:16}"
   DEPS_PREFIX="$DEPS_HOME/runtimes/$DEPS_ID"
   DEPS_RECORD="$DEPS_HOME/runtimes/$DEPS_ID.tree.json"

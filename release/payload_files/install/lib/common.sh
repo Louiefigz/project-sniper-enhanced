@@ -1,5 +1,5 @@
 #!/bin/bash
-# Shared helpers for the Project Sniper Mac installer and launchers.
+# Shared helpers for the Project Sniper macOS installer and launchers.
 # Sourced, never executed directly. Its parts: lib/settings.sh (the settings
 # file), lib/tools.sh (Node, Python and the other executables Sniper uses) and
 # lib/processes.sh (which processes belong to this install).
@@ -30,6 +30,7 @@ INSTALL_TOOLS="$PKG_ROOT/install/lib/install_tools.py"
 # its own PATH from the settings (load_env).
 PATH=/usr/bin:/bin:/usr/sbin:/sbin
 export PATH
+. "$PKG_ROOT/install/lib/platform.sh" || exit 1
 # Settings for your own Python, Node or libraries would steer Sniper's instead (a
 # DYLD_LIBRARY_PATH to Homebrew would load Homebrew's libraries into Sniper's ffmpeg;
 # NODE_OPTIONS could load code into every Sniper process). They never reach Sniper.
@@ -76,13 +77,11 @@ write_receipt() {  # name value
 }
 clear_receipt() { rm -f "$RECEIPTS/$1" "$RECEIPTS/$1.tree.json"; }
 
-# Sniper's own tools are built for Apple silicon and name the oldest macOS they run on.
-# (sysctl, not uname: a Terminal running under Rosetta reports x86_64 on Apple silicon.)
+# Sniper's own tools are native to this Mac and name the oldest macOS they run on.
+# platform.sh uses sysctl so a Terminal under Rosetta still selects arm64 on Apple silicon.
 require_macos() {
   local have need
   [ "$(uname -s)" = "Darwin" ] || fail "Project Sniper runs on macOS only."
-  [ "$(/usr/sbin/sysctl -in hw.optional.arm64)" = 1 ] || fail "This Mac has an Intel processor. Sniper's
-  own tools are built for Apple silicon (M1 or later) only, so it cannot be installed on this Mac."
   have="$(/usr/bin/sw_vers -productVersion)"; need="$(deps_header min-macos)" || need=12.0
   version_ge "$have" "$need" || fail "This Mac runs macOS $have; Sniper's tools need macOS $need or
   later. Update macOS (Software Update: System Settings > General, or System Preferences on

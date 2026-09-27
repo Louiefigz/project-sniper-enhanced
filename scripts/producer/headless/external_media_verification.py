@@ -34,7 +34,7 @@ class VerifiedSnapshotIdentity:
 
 
 def snapshot_stat_identity(info: os.stat_result) -> tuple[int, ...]:
-    """Keep all nine source identity fields in the presenter-compatible ordering."""
+    """Keep all nine source identity fields in presenter-compatible ordering."""
     return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
             info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 

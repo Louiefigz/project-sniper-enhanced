@@ -98,7 +98,7 @@ browser_runs() {
 browser_step() {
   local pin platform prefix sha url dir key why archive record="$RECEIPTS/browser.tree.json"
   pin="$(release_value components.chrome_headless_shell)"
-  case "$(uname -m)" in arm64) platform=mac-arm64; prefix=mac_arm ;; *) platform=mac-x64; prefix=mac ;; esac
+  platform="$SNIPER_BROWSER_PLATFORM"; prefix="$SNIPER_BROWSER_PREFIX"
   sha="$(release_value "components.chrome_headless_shell_sha256.$platform")"
   url="${SNIPER_BROWSER_BASE_URL:-https://storage.googleapis.com/chrome-for-testing-public}/$pin/$platform/chrome-headless-shell-$platform.zip"
   dir="$BROWSER_CACHE/chrome-headless-shell/$prefix-$pin"

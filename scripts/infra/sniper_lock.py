@@ -1,29 +1,5 @@
 #!/usr/bin/env python3
-"""Advisory locks that keep Sniper's maintenance steps and its work apart.
-
-Two lock files, both held with ``flock(2)`` so the kernel releases them when the
-last holder exits — a ``kill -9`` never leaves a stale lock behind:
-
-* ``maintenance.lock`` — EXCLUSIVE for the installer (and so ``use-provider``),
-  ``uninstall`` and ``clean-caches``; SHARED for everything that uses the install
-  while it runs: the app server, editor and sign-in sessions, the doctor and any
-  process that resolves the render runtime (``studio.native_runtime``).
-* ``runtime-build.lock`` — EXCLUSIVE while one process constructs the render
-  runtime, so two renders never build it at the same time.
-
-A holder that ``exec``s (the shell wrappers do) or forks keeps the lock: the open
-file description is inherited, and ``SNIPER_LOCK_FD``/``SNIPER_LOCK_MODE`` tell a
-descendant that it already holds it, so the installer's own doctor run does not
-deadlock against the installer. Descriptors are verified by inode, never trusted
-from the environment alone.
-
-CLI (stdlib only; any Python 3.9+ can run it, so the installer uses it before the
-app's virtual environment exists)::
-
-    sniper_lock.py exec   --state-dir D --mode exclusive|shared --label L -- CMD...
-    sniper_lock.py hold   --state-dir D --mode exclusive|shared --label L --seconds N
-    sniper_lock.py status --state-dir D [--mode shared]
-"""
+"""Advisory POSIX locks that keep Sniper maintenance and active work apart."""
 from __future__ import annotations
 
 import argparse
@@ -53,13 +29,7 @@ class LockBusy(RuntimeError):
 
 
 def state_dir(app_root: Path) -> Path:
-    """Where the locks live: ``runtime/state`` in a package, else beside the runtime cache.
-
-    A package is recognised by its installer (``install/lib/common.sh`` in the app
-    folder, which is the package folder itself); a developer checkout has no
-    installer or ``runtime/`` folder, so its locks sit in the git-ignored
-    render-runtime cache instead.
-    """
+    """Use package state when an installer is present, otherwise the developer cache."""
     if (app_root / "install/lib/common.sh").is_file():
         return app_root / "runtime" / "state"
     return app_root / "templates/motion/.sniper-native-runtime/.locks"
@@ -230,7 +200,8 @@ def _exec_holding(args: argparse.Namespace) -> int:
             print(f"STOPPED: {args.busy_message or 'Sniper is busy.'}\n  In use by: {error}.", file=sys.stderr)
             return BUSY_EXIT
         os.set_inheritable(fd, True)
-        os.environ[ENV_FD], os.environ[ENV_MODE] = str(fd), args.mode
+        os.environ[ENV_FD] = str(fd)
+        os.environ[ENV_MODE] = args.mode
     os.execvp(args.command[0], args.command)
     return 127  # not reached
 

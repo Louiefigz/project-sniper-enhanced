@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check this install by asking the product's own code what it would do.
 
-    install/doctor.command [--json] [--skip-transcription]
+    install/doctor.command [--json] [--skip-transcription | --only-transcription]
 
 Nothing is re-implemented here. Render tools come from `graphics.render_tools`,
 transcription from `local_whisper.transcribe_media`, the render runtime from
@@ -35,6 +35,7 @@ MODEL_SHA = "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn", "loudnorm", "ebur128",
            "afftdn", "acompressor", "alimiter", "sidechaincompress", "aresample", "amix", "overlay", "crop")
 SPOKEN = "Sniper checks that local transcription works on this Mac."
+SETUP_COMMAND = "install/install.command"
 _RESULTS: list[dict] = []
 
 
@@ -52,15 +53,15 @@ def _product_paths() -> None:
 def _tree_intact(root: Path, receipt: str, exclude: set[str]) -> str | None:
     """None when a finished step's folder still matches its record, else what changed."""
     if not (RECEIPTS / receipt).exists():
-        return "not installed — run install.command"
+        return f"not installed — run {SETUP_COMMAND}"
     want = RECEIPTS / f"{receipt}.tree.json"
     try:
         files = json.loads(want.read_text(encoding="utf-8"))["files"]
     except (OSError, ValueError, KeyError):
-        return "no record of the finished step — run install.command"
+        return f"no record of the finished step — run {SETUP_COMMAND}"
     have = install_tools.tree_digests(root, exclude) if root.is_dir() else {}
     changed = sum(1 for k, v in files.items() if have.get(k) != v) + sum(1 for k in have if k not in files)
-    return f"{changed} file(s) differ from what was installed — run install.command" if changed else None
+    return f"{changed} file(s) differ from what was installed — run {SETUP_COMMAND}" if changed else None
 
 
 def check_foundations() -> None:
@@ -77,12 +78,12 @@ def check_foundations() -> None:
            "Sniper's TypeScript commands need it")
     venv = APP / ".venv/bin/python3"
     if not venv.exists():
-        record("FAIL", "python packages", "no environment — run install.command")
+        record("FAIL", "python packages", f"no environment — run {SETUP_COMMAND}")
         return
     code, out, _ = setup.run([str(venv), "-I", str(Path(install_tools.__file__)), "venv-check",
                               str(PKG_ROOT / "install/requirements.lock.txt")], 180)
     record("PASS" if code == 0 else "FAIL", "python packages",
-           out.strip() if code == 0 else f"{out.strip()} — run install.command")
+           out.strip() if code == 0 else f"{out.strip()} — run {SETUP_COMMAND}")
 
 
 def check_media() -> None:
@@ -118,6 +119,12 @@ def check_runtime() -> None:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
 
 
+def _make_speech_sample(path: Path) -> tuple[int, str]:
+    """Create a deterministic local speech sample with macOS ``say``."""
+    code, out, err = setup.run(["say", "-o", str(path), SPOKEN], 60)
+    return code, (err or out).strip()
+
+
 def check_transcription(skip: bool) -> None:
     """Model hash, then an actual transcription through the product's own path."""
     _product_paths()
@@ -127,14 +134,16 @@ def check_transcription(skip: bool) -> None:
     except Exception as error:
         record("FAIL", "speech model", str(error)); return
     if install_tools.file_digest(model) != MODEL_SHA:
-        record("FAIL", "speech model", f"{model} does not match the expected checksum — run install.command"); return
+        record("FAIL", "speech model", f"{model} does not match the expected checksum — run {SETUP_COMMAND}"); return
     record("PASS", "speech model", f"{model.name} checksum verified")
     if skip:
         record("INFO", "transcription", "skipped by request"); return
     with tempfile.TemporaryDirectory(prefix="sniper-doctor-") as tmp:
         speech = Path(tmp) / "speech.aiff"
-        if setup.run(["say", "-o", str(speech), SPOKEN], 60)[0] != 0:
-            record("FAIL", "transcription", "could not create the local speech sample with macOS 'say'"); return
+        code, detail = _make_speech_sample(speech)
+        if code != 0:
+            suffix = f": {detail[-300:]}" if detail else f" (exit {code})"
+            record("FAIL", "transcription", "could not create the local speech sample" + suffix); return
         try:
             result = transcribe_media(LocalTranscribeRequest(path=str(speech)))
         except Exception as error:
@@ -163,7 +172,7 @@ def check_workspace() -> None:
         record("FAIL", "workspace", f"{root} not writable: {error.strerror}")
     wrapper = PKG_ROOT / "sniper"
     ok = wrapper.is_file() and os.access(wrapper, os.X_OK)
-    record("PASS" if ok else "FAIL", "./sniper", "runs Sniper's commands for your Codex or Claude Code" if ok
+    record("PASS" if ok else "FAIL", wrapper.name, "runs Sniper's commands for your Codex or Claude Code" if ok
            else f"{wrapper} is missing or not executable — this folder is incomplete")
 
 
@@ -187,16 +196,27 @@ def _hold_install() -> bool:
     return True
 
 
+def _run_required_checks(skip_transcription: bool) -> None:
+    """Run the complete required install and media proof."""
+    check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
+    setup.check_media_admission(record); check_transcription(skip_transcription)
+
+
 def main() -> int:
     """Run the checks; exit 0 only when every required one passed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--skip-transcription", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--skip-transcription", action="store_true")
+    mode.add_argument("--only-transcription", action="store_true")
     args = parser.parse_args()
     if _hold_install():
-        check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
-        setup.check_media_admission(record); check_transcription(args.skip_transcription)
-    check_workspace(); check_optional()
+        if args.only_transcription:
+            check_transcription(False)
+        else:
+            _run_required_checks(args.skip_transcription)
+    if not args.only_transcription:
+        check_workspace(); check_optional()
     failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]
     if args.json:
         print(json.dumps({"ok": not failed, "failed": failed, "checks": _RESULTS}))

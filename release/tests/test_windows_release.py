@@ -29,6 +29,7 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('CharSet=CharSet.Unicode, SetLastError=true', jail)
         self.assertIn('TokenIsAppContainer', jail)
         self.assertIn('CreateProcessAsUser', jail)
+        self.assertIn('LowBoxConsoleEnabled', jail)
         self.assertIn('Job Object limits were not applied exactly', jail)
         self.assertIn('ProtectFile(args[1])', jail)
 

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using Microsoft.Win32;
 
 internal static class WindowsMediaJail {
     const string ProfilePrefix = "ProjectSniper.MediaAdmission.";
@@ -115,6 +116,11 @@ internal static class WindowsMediaJail {
             AccessControlType.Allow));
         File.SetAccessControl(path, security);
     }
+    static void EnableLowBoxConsole() {
+        using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Console")) {
+            key.SetValue("LowBoxConsoleEnabled", 1, RegistryValueKind.DWord);
+        }
+    }
     static string Quote(string value) {
         if (value.Length > 0 && value.IndexOfAny(new [] {' ', '\t', '"'}) < 0) return value;
         StringBuilder result = new StringBuilder("\""); int slashes = 0;
@@ -178,6 +184,7 @@ internal static class WindowsMediaJail {
         int wall=int.Parse(args[5]); string profileHash=args[6], decoder=args[7], mode=args[8];
         string[] command = new string[args.Length - split - 1]; Array.Copy(args, split + 1, command, 0, command.Length);
         string profileName=ProfilePrefix + Guid.NewGuid().ToString("N");
+        EnableLowBoxConsole();
         IntPtr sid=ProfileSid(profileName), attributes=IntPtr.Zero, capabilities=IntPtr.Zero, job=IntPtr.Zero;
         FileSystemAccessRule inputRule=null, programRule=null; ProcessInformation process=new ProcessInformation();
         string sidText=SidText(sid);

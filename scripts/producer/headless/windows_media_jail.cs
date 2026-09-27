@@ -60,8 +60,8 @@ internal static class WindowsMediaJail {
     [DllImport("kernel32.dll", SetLastError=true)] static extern bool UpdateProcThreadAttribute(
         IntPtr list, uint flags, IntPtr attribute, IntPtr value, IntPtr size, IntPtr previous, IntPtr returned);
     [DllImport("kernel32.dll")] static extern void DeleteProcThreadAttributeList(IntPtr list);
-    [DllImport("advapi32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool CreateProcessAsUser(
-        IntPtr token, string application, StringBuilder command, IntPtr processAttributes, IntPtr threadAttributes,
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool CreateProcess(
+        string application, StringBuilder command, IntPtr processAttributes, IntPtr threadAttributes,
         bool inherit, uint flags, IntPtr environment, string directory, ref StartupInfoEx startup,
         out ProcessInformation information);
     [DllImport("kernel32.dll", SetLastError=true)] static extern IntPtr CreateJobObject(IntPtr attributes, string name);
@@ -229,7 +229,7 @@ internal static class WindowsMediaJail {
             job=CreateJobObject(IntPtr.Zero,null); Check(job != IntPtr.Zero,"creating Job Object");
             ExtendedLimits limits=Limits(memory,cpu);
             Check(SetInformationJobObject(job,9,ref limits,Marshal.SizeOf(limits)),"setting Job Object limits");
-            Check(CreateProcessAsUser(IntPtr.Zero,command[0],Command(command),IntPtr.Zero,IntPtr.Zero,true,
+            Check(CreateProcess(command[0],Command(command),IntPtr.Zero,IntPtr.Zero,true,
                 ExtendedStartup|Suspended|NoWindow,IntPtr.Zero,Environment.SystemDirectory,ref startup,out process),"sandboxed process");
             Check(AssignProcessToJobObject(job,process.Process),"assigning Job Object");
             VerifiedLimits(job,memory,cpu);

@@ -20,7 +20,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Cache pinned Windows media preflight
-        uses: actions/cache@v4
+        id: media-cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}\sniper-native-preflight-cache
           key: windows-native-media-${{ hashFiles('release/payload_files/install/deps/win-64.lock') }}
@@ -118,6 +119,12 @@ jobs:
           $ffprobe = @(Get-ChildItem $runtime -Filter ffprobe.exe -Recurse)[0].FullName
           python -m release.windows_runtime_preflight $package --media-jail $jail --ffmpeg $ffmpeg --ffprobe $ffprobe
           if ($LASTEXITCODE -ne 0) { throw 'Real Windows media tools failed the production jail supervisor.' }
+      - name: Save pinned Windows media preflight cache
+        if: always() && steps.media-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}\sniper-native-preflight-cache
+          key: windows-native-media-${{ hashFiles('release/payload_files/install/deps/win-64.lock') }}
       - name: Exercise Windows Python runtime preflights
         shell: powershell
         run: |

@@ -199,10 +199,13 @@ internal static class WindowsMediaJail {
                 ExtendedStartup|Suspended|NoWindow,IntPtr.Zero,Environment.SystemDirectory,ref startup,out process),"sandboxed process");
             Check(AssignProcessToJobObject(job,process.Process),"assigning Job Object");
             VerifiedLimits(job,memory,cpu);
-            bool appContainer=IsAppContainer(process.Process);
-            if (!appContainer) throw new InvalidOperationException("child token is not an AppContainer");
-            WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode,appContainer);
             ResumeThread(process.Thread);
+            bool appContainer=IsAppContainer(process.Process);
+            if (!appContainer) {
+                TerminateJobObject(job,70);
+                throw new InvalidOperationException("running child token is not an AppContainer");
+            }
+            WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode,appContainer);
             if (WaitForSingleObject(process.Process,(uint)wall*1000) == 258) {
                 TerminateJobObject(job,124); Console.Error.WriteLine("SNIPER_TIMEOUT"); return 124;
             }

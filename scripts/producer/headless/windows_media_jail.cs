@@ -109,6 +109,18 @@ internal static class WindowsMediaJail {
         FileSecurity security = File.GetAccessControl(path);
         security.RemoveAccessRuleSpecific(rule); File.SetAccessControl(path, security);
     }
+    static FileSystemAccessRule GrantDirectoryRead(string path, string sidText) {
+        DirectorySecurity security = Directory.GetAccessControl(path);
+        FileSystemAccessRule rule = new FileSystemAccessRule(new SecurityIdentifier(sidText),
+            FileSystemRights.ReadAndExecute, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+            PropagationFlags.None, AccessControlType.Allow);
+        security.AddAccessRule(rule); Directory.SetAccessControl(path, security); return rule;
+    }
+    static void RevokeDirectoryRead(string path, FileSystemAccessRule rule) {
+        if (rule == null) return;
+        DirectorySecurity security = Directory.GetAccessControl(path);
+        security.RemoveAccessRuleSpecific(rule); Directory.SetAccessControl(path, security);
+    }
     static void ProtectFile(string path) {
         SecurityIdentifier owner = WindowsIdentity.GetCurrent().User;
         FileSecurity security = new FileSecurity();
@@ -116,6 +128,15 @@ internal static class WindowsMediaJail {
         security.AddAccessRule(new FileSystemAccessRule(owner, FileSystemRights.FullControl,
             AccessControlType.Allow));
         File.SetAccessControl(path, security);
+    }
+    static void ProtectDirectory(string path) {
+        SecurityIdentifier owner = WindowsIdentity.GetCurrent().User;
+        DirectorySecurity security = new DirectorySecurity();
+        security.SetOwner(owner); security.SetAccessRuleProtection(true, false);
+        security.AddAccessRule(new FileSystemAccessRule(owner, FileSystemRights.FullControl,
+            InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+            PropagationFlags.None, AccessControlType.Allow));
+        Directory.SetAccessControl(path, security);
     }
     static void EnableLowBoxConsole() {
         using (RegistryKey key = Registry.CurrentUser.CreateSubKey("Console")) {
@@ -187,10 +208,12 @@ internal static class WindowsMediaJail {
         string profileName=ProfilePrefix + Guid.NewGuid().ToString("N");
         EnableLowBoxConsole();
         IntPtr sid=ProfileSid(profileName), attributes=IntPtr.Zero, capabilities=IntPtr.Zero, job=IntPtr.Zero;
-        FileSystemAccessRule inputRule=null, programRule=null; ProcessInformation process=new ProcessInformation();
+        FileSystemAccessRule inputRule=null, programRule=null, programDirectoryRule=null;
+        ProcessInformation process=new ProcessInformation(); string programDirectory=Path.GetDirectoryName(command[0]);
         string sidText=SidText(sid);
         try {
-            inputRule=GrantRead(input, sidText); programRule=GrantRead(command[0], sidText); IntPtr size=IntPtr.Zero;
+            inputRule=GrantRead(input, sidText); programRule=GrantRead(command[0], sidText);
+            programDirectoryRule=GrantDirectoryRead(programDirectory,sidText); IntPtr size=IntPtr.Zero;
             InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref size);
             attributes=Marshal.AllocHGlobal(size); Check(InitializeProcThreadAttributeList(attributes,1,0,ref size),"attribute list");
             SecurityCapabilities security=new SecurityCapabilities { AppContainerSid=sid };
@@ -228,7 +251,8 @@ internal static class WindowsMediaJail {
             if (job != IntPtr.Zero) CloseHandle(job);
             if (attributes != IntPtr.Zero) { DeleteProcThreadAttributeList(attributes); Marshal.FreeHGlobal(attributes); }
             if (capabilities != IntPtr.Zero) Marshal.FreeHGlobal(capabilities);
-            RevokeRead(command[0],programRule); RevokeRead(input,inputRule); FreeSid(sid);
+            RevokeRead(command[0],programRule); RevokeDirectoryRead(programDirectory,programDirectoryRule);
+            RevokeRead(input,inputRule); FreeSid(sid);
             DeleteAppContainerProfile(profileName);
         }
     }
@@ -239,10 +263,11 @@ internal static class WindowsMediaJail {
                 Console.WriteLine(SidText(sid)); FreeSid(sid); DeleteAppContainerProfile(name); return 0;
             }
             if (args.Length == 2 && args[0] == "protect") { ProtectFile(args[1]); return 0; }
+            if (args.Length == 2 && args[0] == "protect-directory") { ProtectDirectory(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "read") { Console.Write(File.ReadAllText(args[1])); return 0; }
             if (args.Length == 1 && args[0] == "token") return IsAppContainer(GetCurrentProcess()) ? 0 : 91;
             if (args.Length >= 10 && args[0] == "run") return Run(args);
-            Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | read FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
+            Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | protect-directory DIR | read FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
             return 64;
         } catch (Exception error) { Console.Error.WriteLine("native-media-jail: " + error.Message); return 70; }
     }

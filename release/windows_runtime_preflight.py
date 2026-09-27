@@ -52,10 +52,18 @@ def _process(request_type: object, run: object) -> None:
 
 
 def _speech(make_sample: object) -> None:
-    """Run the exact Doctor TTS producer and require a nonempty wave file."""
+    """Run Doctor TTS without relying on a PowerShell entry in PATH."""
     with tempfile.TemporaryDirectory(prefix="sniper-windows-speech-") as root:
         sample = Path(root) / "speech.wav"
-        code, detail = make_sample(sample)
+        previous = os.environ.get("PATH")
+        os.environ["PATH"] = str(Path(root) / "missing")
+        try:
+            code, detail = make_sample(sample)
+        finally:
+            if previous is None:
+                os.environ.pop("PATH", None)
+            else:
+                os.environ["PATH"] = previous
         if code != 0 or not sample.is_file() or sample.stat().st_size <= 44:
             raise RuntimeError(f"Windows Doctor could not create its local speech sample: {detail}")
 

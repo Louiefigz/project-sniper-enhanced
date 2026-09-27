@@ -133,10 +133,12 @@ def _make_speech_sample(path: Path) -> tuple[int, str]:
               "$voice=New-Object System.Speech.Synthesis.SpeechSynthesizer; "
               "$voice.SetOutputToWaveFile($OutputPath); $voice.Speak($Text); $voice.Dispose()")
     encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
+    system_root = Path(os.environ.get("SystemRoot", r"C:\Windows"))
+    powershell = system_root / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
     detail = ""
     for attempt in range(3):
         path.unlink(missing_ok=True)
-        code, out, err = setup.run(["powershell.exe", "-NoProfile", "-EncodedCommand", encoded], 60)
+        code, out, err = setup.run([str(powershell), "-NoProfile", "-EncodedCommand", encoded], 60)
         detail = (err or out).strip()
         if code == 0 and path.is_file() and path.stat().st_size > 44:
             return 0, detail

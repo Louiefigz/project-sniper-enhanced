@@ -32,7 +32,9 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('LowBoxConsoleEnabled', jail)
         self.assertIn('startup.AttributeList=attributes', jail)
         self.assertIn('Job Object limits were not applied exactly', jail)
+        self.assertIn('GrantDirectoryRead(programDirectory,sidText)', jail)
         self.assertIn('ProtectFile(args[1])', jail)
+        self.assertIn('ProtectDirectory(args[1])', jail)
 
     def test_windows_jail_approval_bytes_keep_lf_on_windows(self) -> None:
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
@@ -119,6 +121,7 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('getattr(os, "O_NONBLOCK", 0)', whisper_io)
         doctor = (ROOT / "release/payload_files/install/sniper_doctor.py").read_text()
         self.assertIn('"-EncodedCommand", encoded', doctor)
+        self.assertIn('"WindowsPowerShell" / "v1.0" / "powershell.exe"', doctor)
         self.assertNotIn('$voice.Speak($args[1])', doctor)
 
     def test_workflow_runs_windows_python_failures_before_installing(self) -> None:
@@ -132,6 +135,7 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn("tokenIsAppContainer", workflow)
         self.assertIn("could not read its admitted input", workflow)
         self.assertIn("read a file that was not admitted", workflow)
+        self.assertIn("protect-directory $privateRuntime", workflow)
 
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")

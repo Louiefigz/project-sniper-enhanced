@@ -53,9 +53,9 @@ jobs:
           Set-Content -LiteralPath $other -Value 'private' -Encoding ASCII
           & $target protect $other
           if ($LASTEXITCODE -ne 0) { throw 'The Windows media jail could not protect its denial fixture.' }
-          & $target run $allowed $attest 33554432 10 10 preflight cmd.exe exec -- $env:ComSpec /d /c type $allowed
+          & $target run $allowed $attest 33554432 10 10 preflight probe.exe exec -- $target read $allowed
           if ($LASTEXITCODE -ne 0) { throw 'The AppContainer could not read its admitted input.' }
-          & $target run $allowed $attest 33554432 10 10 preflight cmd.exe exec -- $env:ComSpec /d /c type $other
+          & $target run $allowed $attest 33554432 10 10 preflight probe.exe exec -- $target read $other
           if ($LASTEXITCODE -eq 0) { throw 'The AppContainer read a file that was not admitted.' }
           $proof = Get-Content -LiteralPath $attest -Raw | ConvertFrom-Json
           if (-not $proof.tokenIsAppContainer -or $proof.networkCapabilities -ne 0 -or

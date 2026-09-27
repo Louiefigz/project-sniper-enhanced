@@ -230,8 +230,9 @@ internal static class WindowsMediaJail {
                 Console.WriteLine(SidText(sid)); FreeSid(sid); DeleteAppContainerProfile(name); return 0;
             }
             if (args.Length == 2 && args[0] == "protect") { ProtectFile(args[1]); return 0; }
+            if (args.Length == 2 && args[0] == "read") { Console.Write(File.ReadAllText(args[1])); return 0; }
             if (args.Length >= 10 && args[0] == "run") return Run(args);
-            Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
+            Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | read FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
             return 64;
         } catch (Exception error) { Console.Error.WriteLine("native-media-jail: " + error.Message); return 70; }
     }

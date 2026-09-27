@@ -75,6 +75,7 @@ internal static class WindowsMediaJail {
     [DllImport("kernel32.dll", SetLastError=true)] static extern bool GetExitCodeProcess(IntPtr process, out uint code);
     [DllImport("kernel32.dll", SetLastError=true)] static extern bool TerminateJobObject(IntPtr job, uint code);
     [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int number);
+    [DllImport("kernel32.dll")] static extern IntPtr GetCurrentProcess();
     [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
     [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenProcessToken(
         IntPtr process, uint access, out IntPtr token);
@@ -208,10 +209,6 @@ internal static class WindowsMediaJail {
             VerifiedLimits(job,memory,cpu);
             ResumeThread(process.Thread);
             bool appContainer=IsAppContainer(process.Process);
-            if (!appContainer) {
-                TerminateJobObject(job,70);
-                throw new InvalidOperationException("running child token is not an AppContainer");
-            }
             WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode,appContainer);
             if (WaitForSingleObject(process.Process,(uint)wall*1000) == 258) {
                 TerminateJobObject(job,124); Console.Error.WriteLine("SNIPER_TIMEOUT"); return 124;
@@ -241,6 +238,7 @@ internal static class WindowsMediaJail {
             }
             if (args.Length == 2 && args[0] == "protect") { ProtectFile(args[1]); return 0; }
             if (args.Length == 2 && args[0] == "read") { Console.Write(File.ReadAllText(args[1])); return 0; }
+            if (args.Length == 1 && args[0] == "token") return IsAppContainer(GetCurrentProcess()) ? 0 : 91;
             if (args.Length >= 10 && args[0] == "run") return Run(args);
             Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | read FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
             return 64;

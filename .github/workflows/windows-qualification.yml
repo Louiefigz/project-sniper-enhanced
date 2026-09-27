@@ -64,6 +64,7 @@ jobs:
             $deniedCode = $LASTEXITCODE
           } finally { $ErrorActionPreference = $previous }
           if ($deniedCode -eq 0) { throw 'The AppContainer read a file that was not admitted.' }
+          $global:LASTEXITCODE = 0
           $proof = Get-Content -LiteralPath $attest -Raw | ConvertFrom-Json
           if (-not $proof.tokenIsAppContainer -or $proof.networkCapabilities -ne 0 -or
               $proof.job.memoryLimitBytes -ne 33554432) {

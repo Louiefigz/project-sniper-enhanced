@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check this install by asking the product's own code what it would do.
 
-    install/doctor.command [--json] [--skip-transcription]
+    install/doctor.command [--json] [--skip-transcription | --only-transcription]
 
 Nothing is re-implemented here. Render tools come from `graphics.render_tools`,
 transcription from `local_whisper.transcribe_media`, the render runtime from
@@ -221,19 +221,30 @@ def _hold_install() -> bool:
     return True
 
 
+def _run_required_checks(skip_transcription: bool) -> None:
+    """Run the complete required install and media proof."""
+    check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
+    if os.name == "nt":
+        check_transcription(skip_transcription); setup.check_media_admission(record)
+    else:
+        setup.check_media_admission(record); check_transcription(skip_transcription)
+
+
 def main() -> int:
     """Run the checks; exit 0 only when every required one passed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--skip-transcription", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--skip-transcription", action="store_true")
+    mode.add_argument("--only-transcription", action="store_true")
     args = parser.parse_args()
     if _hold_install():
-        check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
-        if os.name == "nt":
-            check_transcription(args.skip_transcription); setup.check_media_admission(record)
+        if args.only_transcription:
+            check_transcription(False)
         else:
-            setup.check_media_admission(record); check_transcription(args.skip_transcription)
-    check_workspace(); check_optional()
+            _run_required_checks(args.skip_transcription)
+    if not args.only_transcription:
+        check_workspace(); check_optional()
     failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]
     if args.json:
         print(json.dumps({"ok": not failed, "failed": failed, "checks": _RESULTS}))

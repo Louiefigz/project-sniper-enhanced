@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Workspace, [switch]$Locked)
+param([string]$Workspace, [switch]$Locked, [switch]$SkipDoctor)
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 3
@@ -167,6 +167,7 @@ if (-not $Locked) {
         '--wait','0','--busy-message','Sniper cannot be installed while one of its commands is running.','--',
         'powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath,'-Locked')
     if ($Workspace) { $arguments += @('-Workspace',$Workspace) }
+    if ($SkipDoctor) { $arguments += '-SkipDoctor' }
     exit (Invoke-SniperNative $bootstrapRuntime.Tools.Python $arguments)
 }
 $mutex = [Threading.Mutex]::new($false, 'Local\ProjectSniperInstaller')
@@ -196,6 +197,10 @@ try {
     }
     Write-Receipt 'installed' $script:PackageRoot
     Write-Host "`nProject Sniper is installed. Video projects: $workspacePath"
+    if ($SkipDoctor) {
+        Write-Host 'Doctor skipped by request.'
+        exit 0
+    }
     & (Join-Path $script:PackageRoot 'install\doctor.ps1')
     exit $LASTEXITCODE
 } finally {

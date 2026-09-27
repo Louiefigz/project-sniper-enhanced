@@ -19,6 +19,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Cache pinned Windows media preflight
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\sniper-native-preflight-cache
+          key: windows-native-media-${{ hashFiles('release/payload_files/install/deps/win-64.lock') }}
       - name: Assemble qualification package
         shell: pwsh
         run: python -m release.prepare_windows_qualification "$env:RUNNER_TEMP\Project Sniper Windows"
@@ -74,6 +79,45 @@ jobs:
               $proof.job.memoryLimitBytes -ne 33554432) {
             throw 'The Windows media jail did not attest its AppContainer and exact Job Object limits.'
           }
+      - name: Launch pinned FFmpeg and FFprobe inside the Windows media jail
+        shell: powershell
+        run: |
+          $package = "$env:RUNNER_TEMP\Project Sniper Windows"
+          $jail = "$env:RUNNER_TEMP\sniper-private-runtime\windows_media_jail_preflight.exe"
+          $cache = "$env:RUNNER_TEMP\sniper-native-preflight-cache"
+          New-Item -ItemType Directory -Path $cache -Force | Out-Null
+          $lock = Join-Path $package 'install\deps\win-64.lock'
+          $rows = @(Get-Content -LiteralPath $lock | Where-Object { $_ -match '^download ' })
+          if ($rows.Count -ne 1) { throw "Expected one pinned media download; found $($rows.Count)." }
+          $parts = $rows[0] -split ' '
+          if ($parts.Count -ne 5) { throw 'The pinned media download row is malformed.' }
+          $expectedSha = $parts[1]
+          $expectedBytes = [long]$parts[2]
+          $archive = Join-Path $cache $parts[3]
+          $valid = (Test-Path $archive) -and ((Get-Item $archive).Length -eq $expectedBytes)
+          if ($valid) { $valid = (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -eq $expectedSha }
+          if (-not $valid) {
+            Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue
+            $download = "$archive.download"
+            Remove-Item -LiteralPath $download -Force -ErrorAction SilentlyContinue
+            curl.exe --fail --location --retry 3 --output $download $parts[4]
+            if ($LASTEXITCODE -ne 0) { throw 'Downloading the pinned Windows media archive failed.' }
+            Move-Item -LiteralPath $download -Destination $archive -Force
+          }
+          if ((Get-Item $archive).Length -ne $expectedBytes -or
+              (Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expectedSha) {
+            throw 'The cached Windows media archive does not match its immutable lock.'
+          }
+          $runtime = "$env:RUNNER_TEMP\sniper-native-ffmpeg"
+          Remove-Item -LiteralPath $runtime -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $runtime -Force | Out-Null
+          Expand-Archive -LiteralPath $archive -DestinationPath $runtime -Force
+          & $jail protect-directory $runtime
+          if ($LASTEXITCODE -ne 0) { throw 'The Windows media preflight runtime was not protected.' }
+          $ffmpeg = @(Get-ChildItem $runtime -Filter ffmpeg.exe -Recurse)[0].FullName
+          $ffprobe = @(Get-ChildItem $runtime -Filter ffprobe.exe -Recurse)[0].FullName
+          python -m release.windows_runtime_preflight $package --media-jail $jail --ffmpeg $ffmpeg --ffprobe $ffprobe
+          if ($LASTEXITCODE -ne 0) { throw 'Real Windows media tools failed the production jail supervisor.' }
       - name: Exercise Windows Python runtime preflights
         shell: powershell
         run: |
@@ -120,10 +164,16 @@ jobs:
           if ($free -lt 20GB) { throw "Windows qualification needs 20 GB free; found $free bytes." }
       - name: Run the buyer installer
         shell: powershell
-        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects" -SkipDoctor'
       - name: Re-run to prove idempotence
         shell: powershell
-        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects"'
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\install.ps1" -Workspace "$env:RUNNER_TEMP\Sniper Projects" -SkipDoctor'
+      - name: Run installed foundations and media admission
+        shell: powershell
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\doctor.ps1" --json --skip-transcription'
+      - name: Run installed local transcription proof
+        shell: powershell
+        run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\doctor.ps1" --json --only-transcription'
       - name: Run the full installed doctor
         shell: powershell
         run: '& "$env:RUNNER_TEMP\Project Sniper Windows\install\doctor.ps1" --json'

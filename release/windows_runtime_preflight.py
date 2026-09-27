@@ -7,6 +7,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 
 def _load(package: Path) -> tuple[object, object, object, object]:
@@ -68,17 +69,45 @@ def _speech(make_sample: object) -> None:
             raise RuntimeError(f"Windows Doctor could not create its local speech sample: {detail}")
 
 
+def _jailed_media(package: Path, jail: Path, tools: tuple[Path, Path]) -> None:
+    """Launch real media tools through the same captured-pipe supervisor as Doctor."""
+    sys.path[:0] = [str(package / "scripts"), str(package / "scripts/producer")]
+    from producer.headless.windows_media_sandbox import launch
+    runtime = SimpleNamespace(identity={"launcher": {"path": str(jail)}, "profileSha256": "preflight"})
+    limits = SimpleNamespace(memory_mib=768, cpu_seconds=15, wall_seconds=20,
+                             max_output_bytes=1024 * 1024, binary_stdout=False)
+    for tool in tools:
+        step = SimpleNamespace(input_path=os.devnull, limits=limits, decoder=str(tool), inspect_limits=None)
+        done, attestation, watchdog = launch(runtime, step, (str(tool), "-hide_banner", "-version"))
+        proof = attestation or {}
+        valid = (done.returncode == 0 and not watchdog.exceeded and proof.get("tokenIsAppContainer") is True
+                 and proof.get("networkCapabilities") == 0
+                 and (proof.get("job") or {}).get("memoryLimitBytes") == 768 * 1024 * 1024)
+        if not valid:
+            raise RuntimeError(f"{tool.name} AppContainer preflight failed: code={done.returncode}; "
+                               f"stderr={done.stderr[-500:]!r}; attestation={proof!r}")
+
+
 def main() -> int:
     """Validate staged imports, Windows snapshot publication and child ownership."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("package", type=Path)
-    package = parser.parse_args().package.resolve()
+    parser.add_argument("--media-jail", type=Path)
+    parser.add_argument("--ffmpeg", type=Path)
+    parser.add_argument("--ffprobe", type=Path)
+    args = parser.parse_args()
+    package = args.package.resolve()
     if os.name != "nt" or not package.is_dir():
         raise RuntimeError("Windows runtime preflight needs a staged package on Windows")
     capture, request_type, run, make_sample = _load(package)
     _snapshot(capture)
     _process(request_type, run)
     _speech(make_sample)
+    media = (args.media_jail, args.ffmpeg, args.ffprobe)
+    if any(media) and not all(path and path.is_file() for path in media):
+        raise RuntimeError("media preflight requires existing jail, ffmpeg and ffprobe files")
+    if all(media):
+        _jailed_media(package, args.media_jail, (args.ffmpeg, args.ffprobe))
     print("Windows Python runtime preflight passed.")
     return 0
 

@@ -83,7 +83,9 @@ internal static class WindowsMediaJail {
         IntPtr token, int informationClass, out int information, int length, out int returned);
 
     static void Check(bool value, string action) {
-        if (!value) throw new Win32Exception(Marshal.GetLastWin32Error(), action);
+        if (value) return;
+        int code=Marshal.GetLastWin32Error();
+        throw new Win32Exception(code, action + " (Win32 " + code + ": " + new Win32Exception(code).Message + ")");
     }
     static IntPtr ProfileSid(string name) {
         IntPtr sid;

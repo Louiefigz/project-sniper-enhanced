@@ -20,7 +20,7 @@ import zipfile
 from pathlib import Path
 
 REQUIRED = (
-    "AGENTS.md", "CLAUDE.md", "sniper", "sniper.cmd", "sniper.ps1", "docs/PIPELINE.md",
+    "AGENTS.md", "CLAUDE.md", "sniper", "docs/PIPELINE.md",
     "install/install.command", "install/doctor.command", "install/uninstall.command",
     "package.json", "package-lock.json", "requirements.txt",
     "templates/motion/package.json", "templates/motion/package-lock.json",
@@ -52,16 +52,9 @@ REQUIRED = (
     "install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz",
     "install/deps/osx-64.lock", "install/deps/osx-64.json",
     "install/deps/sniper-ffmpeg-8.0.3-1-osx-64.tar.xz",
-    "install/deps/win-64.lock", "install/deps/win-64.json",
-    "install/install.ps1", "install/doctor.ps1", "install/uninstall.ps1",
-    "install/studio.cmd", "install/studio.ps1",
     "third-party/sources/README.md", "third-party/sources/ffmpeg-8.0.3.tar.xz",
     "third-party/sources/rubberband-4.0.0.tar.bz2",
     "scripts/infra/sniper_lock.py",
-    "scripts/infra/sniper_file_lock.py",
-    "scripts/producer/headless/windows_media_jail.cs",
-    "scripts/producer/headless/windows_media_inspect.cs",
-    "scripts/producer/headless/windows_media_runtime_approval.json",
     "src/app/fonts/archivo-latin-wght-normal.woff2",
     "resources/director/formats.md", "resources/director/hook-anchors.md",
     "resources/director/hook-formulas.md", "resources/director/hook-references.md",
@@ -112,7 +105,7 @@ def real_account_names() -> frozenset[str]:
                      if entry.is_dir() and not entry.name.startswith("."))
 _SIBLING = re.compile(r"\]\(\.\./\.\./|\]\(\.\./AGENTS\.md")
 _TEXT = {".md", ".txt", ".json", ".ts", ".tsx", ".js", ".mjs", ".py", ".html", ".css",
-         ".sh", ".command", ".ps1", ".cmd", ".cs", ".example", ".yml"}
+         ".sh", ".command", ".example", ".yml"}
 _findings: list[str] = []
 _passes: list[str] = []
 
@@ -302,7 +295,7 @@ def audit_runtime_inputs(root: Path) -> None:
 def audit_shipped_tools(root: Path) -> None:
     """The lock's shipped ('local') file is in the package byte for byte; every row is well formed."""
     import hashlib  # noqa: PLC0415
-    for platform in ("osx-arm64", "osx-64", "win-64"):
+    for platform in ("osx-arm64", "osx-64"):
         lock = root / f"install/deps/{platform}.lock"
         rows = [line.split() for line in lock.read_text().splitlines()
                 if line and not line.startswith("#")]

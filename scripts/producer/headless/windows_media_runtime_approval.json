@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "policy": "sniper-windows-appcontainer-v1",
-  "approved": {
-    "windows_media_jail.cs": "0e6cb34e121494c613ee54767471ae9abecafcca18394b3a185eccda83dcdc7c",
-    "windows_media_inspect.cs": "3d34ac490324859e5bea9a0e43863e2573c42f404d272e380f52c2ccd54ac4f1"
-  }
-}

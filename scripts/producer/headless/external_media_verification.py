@@ -34,15 +34,9 @@ class VerifiedSnapshotIdentity:
 
 
 def snapshot_stat_identity(info: os.stat_result) -> tuple[int, ...]:
-    """Keep stable source identity fields in presenter-compatible ordering.
-
-    Windows can report a newer cached ``st_ctime_ns`` through an open handle
-    than through the path naming that same ``st_dev``/``st_ino`` file. The
-    remaining fields plus the full-byte hash retain the mutation check there.
-    """
-    fields = (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
-              info.st_nlink, info.st_size, info.st_mtime_ns)
-    return fields if os.name == "nt" else (*fields, info.st_ctime_ns)
+    """Keep all nine source identity fields in presenter-compatible ordering."""
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
+            info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
 
 
 def check_verification_clock(runtime: SourceVerificationRuntime | None) -> None:

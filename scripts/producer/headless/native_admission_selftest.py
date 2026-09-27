@@ -85,19 +85,16 @@ def _enforcement(runtime, root: Path) -> dict:
     allowed = str(root / "doctor-sample.mp4")
     other = root / "not-admitted.mp4"
     shutil.copyfile(allowed, other)
-    if sys.platform == "win32":
-        launcher = runtime.identity["launcher"]["path"]
-        subprocess.run([launcher, "protect", str(other)], capture_output=True, timeout=30, check=True)
     memory = ""
     try:
         run_decoder(runtime, runtime.ffmpeg, ("-nostdin", "-v", "error", "-f", "lavfi", "-i",
                                               "color=size=3840x2160:rate=30", "-t", "2", "-vf", "tmix=frames=16",
-                                              "-f", "null", "-"), (allowed, JailLimits(60, 60, memory_mib=32)))
+                                              "-f", "null", "-"), (allowed, JailLimits(60, 60, memory_mib=64)))
     except JailRejection as error:
         memory = error.code
     return {"otherFileReadDenied": bool(_denied(runtime, ("-i", str(other), "-f", "null", "-"), allowed)),
             "networkDenied": _network_denied(runtime, allowed),
-            "memoryLimitEnforced": bool(memory) and memory not in _INVALID_DENIALS}
+            "memoryLimitEnforced": memory == "MEMORY_LIMIT"}
 
 
 def run() -> dict:

@@ -10,7 +10,7 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     sharing or giving away Sniper; no reuse of its code in another paid product.
   - Base update rights: N1, the purchased release only.
   - Refunds: 14 days, unconditional.
-  - Media admission runs natively on macOS and Windows with no mandatory Docker (route B of the
+  - Media admission runs natively on macOS with no mandatory Docker (route B of the
     maintainer's sandbox-runtime decision record, not shipped).
   - The saved styles and the editing doctrine are re-authored as original material.
   - HyperFrames Studio's analytics are switched off by default (decided 2026-09-18);
@@ -33,8 +33,7 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     retired app).
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
-  - Footage admission: native macOS Seatbelt and Windows AppContainer sandboxes, checked by
-    the platform doctor.
+  - Footage admission: native macOS Seatbelt sandbox, checked by the doctor.
     Two independent security reviews found nothing blocking.
   - Creator/teacher-derived doctrine: the Restrained, Punch and Slideware
     specifications and the module, editcraft, short-form and reference-style
@@ -49,11 +48,10 @@ STILL OPEN — each blocks release
      source in third-party/sources/); the reviewed licence must not appear to restrict it.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
   3. SUPPORTED PLATFORM BOUNDARY (input R): Apple silicon remains the developer platform.
-     The package contains independent Apple-silicon (macOS 13.5+), Intel (macOS 14+) and
-     Windows x64 (Windows 10 build 19045+) locks, ffmpeg selections and browsers. Native Intel
-     setup, rerun, doctor and launcher are qualified on a macOS 15 Intel runner. Windows setup,
-     rerun, doctor, launcher and native media AppContainer are qualified on Windows Server 2025;
-     complete Short and long-form production edits on Intel and Windows remain acceptance work.
+     The package contains independent Apple-silicon (macOS 13.5+) and Intel (macOS 14+)
+     locks, ffmpeg selections and browsers. Native Intel setup, rerun, doctor and launcher are
+     qualified on a macOS 15 Intel runner; complete Short and long-form production edits on
+     Intel remain acceptance work.
      Buyers' Codex or Claude Code
      also have requirements Sniper cannot control.
   4. GSAP (the animation library every motion template uses): the licence neither

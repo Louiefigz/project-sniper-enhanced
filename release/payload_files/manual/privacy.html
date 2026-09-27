@@ -52,11 +52,10 @@ sandbox</td></tr>
 instructions — to your agent's provider. No API key is involved.</td>
 <td>Your agent's own permissions</td></tr>
 <tr><td>Every video Producer edits</td><td><strong>Nothing.</strong> Before any edit reads it,
-Sniper copies it into the project and decodes it in an OS sandbox with no network, no writes and
-access to that one file only: macOS Seatbelt on Mac or a disposable AppContainer on Windows.</td>
-<td><code>scripts/producer/headless/native_media_jail.py</code> and
-<code>windows_media_jail.cs</code>; <code>./sniper doctor</code> or
-<code>sniper.cmd doctor</code> checks it</td></tr>
+Sniper copies it into the project and decodes it in a macOS Seatbelt sandbox with no network, no
+writes and access to that one file only.</td>
+<td><code>scripts/producer/headless/native_media_jail.py</code>; <code>./sniper doctor</code>
+checks it</td></tr>
 <tr><td>Adding a reference from a link</td><td><strong>A download.</strong> The video is
 fetched to this computer from the YouTube, Instagram or TikTok link you give (HTTPS only, up to
 1080p and 2 GB) with <code>yt-dlp</code>, which contacts that site and its media servers.
@@ -70,8 +69,8 @@ default.</td><td>A per-fetch switch, off by default (<code>--allow-cookies</code
 <tr><td>Capturing a public website for b-roll</td><td><strong>Page requests.</strong> Used when
 a Short's media sources are set to public web (the default is local only): a fresh headless
 browser with no cookies or sign-in loads the pages the plan names and records the scroll on
-this computer. It sends ordinary page requests to those sites, nothing of yours.</td><td>On macOS,
-a sandbox profile allows only secure web connections. This capture route is not yet qualified on Windows.</td></tr>
+this computer. It sends ordinary page requests to those sites, nothing of yours.</td><td>A sandbox
+profile allows only secure web connections.</td></tr>
 <tr><td>A brand icon for a graphic</td><td><strong>The icon's name, to Simple Icons.</strong>
 When a plan uses a brand logo (for example a product the video mentions) that is not among the
 icons shipped with Sniper, your agent fetches that one icon by name from
@@ -85,7 +84,7 @@ plan checks and renders read icons already on this computer and never download</
 your audio</strong> to Deepgram, billed by Deepgram on your own key — only when you
 explicitly authorize Deepgram for a transcription. Local transcription is the default, and a
 saved key or setting alone never authorizes it. You connect, replace or remove the key privately
-with <code>install/setup.command</code> on macOS or <code>sniper.cmd connections</code> on Windows.</td>
+with <code>install/setup.command</code>.</td>
 <td>A transcription run needs the paired paid-transcription switches for that one run
 (<code>scripts/asr_policy.py</code>); nothing falls back to it</td></tr>
 <tr><td>Installing and setup</td><td><strong>Downloads, and one optional key check.</strong>
@@ -95,7 +94,7 @@ registries, the rendering browser from Google's Chrome for Testing and the speec
 Hugging Face. Like any download, each request shows those servers this computer's address and which
 file it wants. If you connect Deepgram, the key is checked once against Deepgram's HTTPS
 authentication endpoint; no audio or other media is sent. None of your files or text is
-sent.</td><td><code>install/install.command</code> on macOS or <code>install\install.ps1</code> on Windows</td></tr>
+sent.</td><td><code>install/install.command</code></td></tr>
 <tr><td>Framework usage statistics</td><td><strong>Switched off</strong> for the HyperFrames
 command-line tools that render and for the HyperFrames Studio page.</td>
 <td><code>HYPERFRAMES_NO_TELEMETRY</code> in <code>runtime/sniper.env</code>; for Studio, Sniper's
@@ -129,7 +128,7 @@ transcript, the rules and the project, and runs Sniper's commands. What that mea
   edit through Codex has not yet been run for this release.</li>
 </ul>
 <p>Sniper's video/audio sandbox wraps the media decoder, not your agent. On macOS, the OS does not
-allow that sandbox inside another one; on Windows the decoder uses a disposable AppContainer.
+allow that sandbox inside another one.
 If a still frame of a recording must never leave your computer, do not edit that recording
 with Sniper; the rendered review sends frames every time.</p>
 

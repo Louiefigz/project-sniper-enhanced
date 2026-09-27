@@ -30,9 +30,9 @@ def browser_hashes(version: str) -> dict[str, str]:
         raise StagingError(f"browser pin is for {pin.get('version')}, but HyperFrames requires {version}; "
                            "run python -m release.pin_browser")
     hashes = {platform: row.get("sha256", "") for platform, row in pin.get("archives", {}).items()}
-    platforms = {"mac-arm64", "mac-x64", "win64"}
+    platforms = {"mac-arm64", "mac-x64"}
     if set(hashes) != platforms or not all(_SHA256.match(h) for h in hashes.values()):
-        raise StagingError("browser pin must hold a SHA-256 for both Mac architectures and Windows x64")
+        raise StagingError("browser pin must hold a SHA-256 for both Mac architectures")
     return dict(sorted(hashes.items()))
 
 

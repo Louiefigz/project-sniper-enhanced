@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SUPPORTED = ("osx-arm64", "osx-64", "win-64")
+SUPPORTED = ("osx-arm64", "osx-64")
 
 
 @dataclass(frozen=True)
@@ -34,7 +34,7 @@ def target(platform: str) -> RuntimeTarget:
     """Return the validated release paths for ``platform``."""
     if platform not in SUPPORTED:
         raise ValueError(f"unsupported runtime platform: {platform}")
-    browser = {"osx-arm64": "mac-arm64", "osx-64": "mac-x64", "win-64": "win64"}[platform]
+    browser = {"osx-arm64": "mac-arm64", "osx-64": "mac-x64"}[platform]
     deps = ROOT / "payload_files/install/deps"
     suffix = "" if platform == "osx-arm64" else f"-{platform}"
     pin = ROOT / "runtime_deps" / f"sniper-ffmpeg{suffix}.json"

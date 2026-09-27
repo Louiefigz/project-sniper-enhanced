@@ -1,8 +1,8 @@
 """Build, read and verify Sniper's locked private tool runtimes.
 
 Each target lock pins micromamba, every conda archive, and FFmpeg by byte size and
-SHA-256. macOS carries the custom FFmpeg archive; Windows downloads the pinned
-BtbN archive. The installer checks every byte before offline installation.
+SHA-256. Both macOS architectures carry a matching custom FFmpeg archive. The
+installer checks every byte before offline installation.
 """
 from __future__ import annotations
 
@@ -37,8 +37,6 @@ MICROMAMBA = {
                    "sha256": "500f5074feb8d02c4296ef9921c3650ed2874171805a9fbb8fbb53896433646b"},
     "osx-64": {"version": "2.9.0", "file": "micromamba-2.9.0-0.tar.bz2", "bytes": 6804238,
                "sha256": "0426ecdc41636d369f57b8fe6acbf4385a69eca45b56d9ee7d3a840a9965d44f"},
-    "win-64": {"version": "2.9.0", "file": "micromamba-2.9.0-0.tar.bz2", "bytes": 4572807,
-               "sha256": "97a336f4ab794bd96a6a4da5e6ed63e75a1d31830414a182419b23d3b36f3fe0"},
 }
 TOOLS = ("python", "nodejs", "whisper.cpp", "tesseract", "yt-dlp", "git")
 HEADER = "# sniper-runtime-lock-v1"
@@ -51,7 +49,7 @@ LockError = LockFormatError
 
 def _micromamba_rel(platform: str) -> str:
     """Executable path inside the platform's conda package."""
-    return "Library/bin/micromamba.exe" if platform == "win-64" else "bin/micromamba"
+    return "bin/micromamba"
 
 
 def _download(url: str, target: Path, sha256: str) -> Path:
@@ -130,10 +128,9 @@ def write_lock(packages: list[dict], bin_sha: str, binary: Path, target: Runtime
     packages = sorted(packages, key=lambda p: p["fn"])
     tools = {p["name"]: p["version"] for p in packages if p["name"] in TOOLS}
     pin = MICROMAMBA[target.platform]
-    floor = min_macos(packages, target.platform) if target.is_macos else "10.0.19045"
-    floor_key = "min-macos" if target.is_macos else "min-windows"
+    floor = min_macos(packages, target.platform)
     lines = [f"{HEADER} — written by python -m release.runtime_tools; do not edit",
-             f"# platform {target.platform}", f"# {floor_key} {floor}",
+             f"# platform {target.platform}", f"# min-macos {floor}",
              "# tools " + " ".join(f"{name}={tools[name]}" for name in TOOLS),
              "# kind sha256 bytes path source",
              f"micromamba {pin['sha256']} {pin['bytes']} tools/{pin['file']} "
@@ -144,8 +141,7 @@ def write_lock(packages: list[dict], bin_sha: str, binary: Path, target: Runtime
     lines += _ffmpeg_row(target)
     target.lock.parent.mkdir(parents=True, exist_ok=True)
     target.lock.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    floor_record = {"min_macos": floor} if target.is_macos else {"min_windows": floor}
-    record = {"platform": target.platform, **floor_record, "tools": tools,
+    record = {"platform": target.platform, "min_macos": floor, "tools": tools,
               "micromamba": pin["version"],
               "packages": [{"name": p["name"], "version": p["version"], "build": p["build_string"],
                             "license": p.get("license") or "", "file": p["fn"]} for p in packages]}
@@ -154,17 +150,15 @@ def write_lock(packages: list[dict], bin_sha: str, binary: Path, target: Runtime
 
 def solve(target: RuntimeTarget = _DEFAULT_TARGET) -> None:
     """Resolve specs.txt once and freeze the result."""
-    specs_path = DEPS / ("specs-win-64.txt" if target.platform == "win-64" else "specs.txt")
-    specs = [line.strip() for line in specs_path.read_text(encoding="utf-8").splitlines()
+    specs = [line.strip() for line in SPECS.read_text(encoding="utf-8").splitlines()
              if line.strip() and not line.startswith("#")]
     binary, bin_sha = micromamba_binary(target)
-    solver = binary if target.platform != "win-64" else micromamba_binary(_DEFAULT_TARGET)[0]
-    packages = _solve(solver, specs, target.platform)
+    packages = _solve(binary, specs, target.platform)
     unexpected = [p["name"] for p in packages if p["name"] == "ffmpeg"]
     if unexpected:
         raise LockError("the solve pulled in conda-forge's ffmpeg; the runtime uses the Sniper build only")
     write_lock(packages, bin_sha, binary, target)
-    floor = min_macos(packages, target.platform) if target.is_macos else "10.0.19045"
+    floor = min_macos(packages, target.platform)
     print(f"{target.lock.relative_to(HERE.parent)}: {len(packages)} packages, "
           f"{sum(p['size'] for p in packages) / 1e6:.0f} MB, minimum OS {floor}")
 
@@ -259,14 +253,11 @@ def check(platform: str = "osx-arm64") -> dict[str, object]:
             raise LockError(f"{package_path}: {source} is missing or does not match its pin; "
                             "run release/runtime_deps/build_ffmpeg.sh")
     record = json.loads(target.lock_json.read_text(encoding="utf-8"))
-    floor = header.get("min-macos", header.get("min-windows", "unknown"))
+    floor = header["min-macos"]
     publisher = pin.get("publisher", "Sniper")
     result = {"runtime_lock_sha256": file_sha256(target.lock), "runtime_min_os": floor,
               "runtime_tools": {**record["tools"], "ffmpeg": f"{pin['version']} ({publisher} {pin['build']})"}}
-    if target.is_macos:
-        result["runtime_min_macos"] = floor
-    else:
-        result["runtime_min_windows"] = floor
+    result["runtime_min_macos"] = floor
     return result
 
 

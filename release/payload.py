@@ -64,7 +64,7 @@ def component_versions(root: Path) -> dict[str, object]:
     chrome = chrome_version(root)
     node = node_requirements(root)
     pins.check_python_lock(PAYLOAD / "install/requirements.lock.txt")
-    platforms = ("osx-arm64", "osx-64", "win-64")
+    platforms = ("osx-arm64", "osx-64")
     runtimes = {platform: _checked_runtime(node, platform) for platform in platforms}
     runtime = runtimes["osx-arm64"]
     return {
@@ -83,8 +83,7 @@ def component_versions(root: Path) -> dict[str, object]:
         "whisper_model": "ggml-small.en.bin",
         "supported_platform": (
             f"macOS {runtimes['osx-arm64']['runtime_min_macos']}+ on Apple silicon; "
-            f"macOS {runtimes['osx-64']['runtime_min_macos']}+ on Intel; "
-            f"Windows {runtimes['win-64']['runtime_min_windows']}+ on x64"
+            f"macOS {runtimes['osx-64']['runtime_min_macos']}+ on Intel"
         ),
     }
 
@@ -179,7 +178,7 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
         shutil.copyfile(path, target)
         target.chmod(0o755 if target.suffix in {".sh", ".command"} else 0o644)
         report.files.append(relative)
-    platforms = ("osx-arm64", "osx-64", "win-64")
+    platforms = ("osx-arm64", "osx-64")
     try:
         for platform in platforms:
             runtime_tools.check(platform)

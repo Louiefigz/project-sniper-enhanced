@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-"""Kernel locks that keep Sniper maintenance and active work apart.
-
-POSIX uses inherited flock descriptors. Windows serializes both modes through a
-byte-range lock and keeps a parent process alive while its command runs. Holder
-records improve messages but never replace the kernel lock as authority.
-"""
+"""Advisory POSIX locks that keep Sniper maintenance and active work apart."""
 from __future__ import annotations
 
 import argparse
 import atexit
 import errno
+import fcntl
 import json
 import os
 import subprocess
@@ -19,14 +15,15 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-import sniper_file_lock
 MAINTENANCE = "maintenance"
 RUNTIME_BUILD = "runtime-build"
 ENV_FD = "SNIPER_LOCK_FD"
 ENV_MODE = "SNIPER_LOCK_MODE"
 BUSY_EXIT = 75  # EX_TEMPFAIL: try again later
-_MODES = {"exclusive", "shared"}
+_MODES = {"exclusive": fcntl.LOCK_EX, "shared": fcntl.LOCK_SH}
 _PROCESS_HOLD: dict[str, int] = {}
+
+
 class LockBusy(RuntimeError):
     """The lock is held by another process in a conflicting mode."""
 
@@ -46,9 +43,7 @@ def lock_file(directory: Path, name: str) -> Path:
 def _open(path: Path) -> int:
     """Open (creating if needed) a lock file; never truncates, never deletes."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
-    sniper_file_lock.prepare(fd)
-    return fd
+    return os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
 
 
 def inherited_mode(path: Path) -> str | None:
@@ -56,14 +51,6 @@ def inherited_mode(path: Path) -> str | None:
     raw, mode = os.environ.get(ENV_FD, ""), os.environ.get(ENV_MODE, "")
     if not raw.isdigit() or mode not in _MODES:
         return None
-    if sniper_file_lock.WINDOWS:
-        record = _records_dir(path) / f"{path.stem}.{raw}.json"
-        try:
-            row = json.loads(record.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return None
-        same = row.get("pid") == int(raw) and row.get("path") == str(path.resolve())
-        return mode if same and _pid_alive(int(raw)) and row.get("mode") == mode else None
     try:
         held, wanted = os.fstat(int(raw)), os.stat(path)
     except OSError:
@@ -74,8 +61,6 @@ def inherited_mode(path: Path) -> str | None:
 
 def _pid_alive(pid: int) -> bool:
     """Whether a process with this pid exists."""
-    if sniper_file_lock.WINDOWS:
-        return _windows_pid_alive(pid)
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -83,28 +68,6 @@ def _pid_alive(pid: int) -> bool:
     except PermissionError:
         return True
     return True
-
-
-def _windows_pid_alive(pid: int) -> bool:
-    """Probe a Windows process without sending it a terminating signal."""
-    import ctypes
-    from ctypes import wintypes
-
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel32.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
-    kernel32.OpenProcess.restype = wintypes.HANDLE
-    kernel32.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
-    kernel32.GetExitCodeProcess.restype = wintypes.BOOL
-    kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
-    kernel32.CloseHandle.restype = wintypes.BOOL
-    handle = kernel32.OpenProcess(0x1000, False, pid)
-    if not handle:
-        return False
-    try:
-        code = wintypes.DWORD()
-        return bool(kernel32.GetExitCodeProcess(handle, ctypes.byref(code))) and code.value == 259
-    finally:
-        kernel32.CloseHandle(handle)
 
 
 def _records_dir(path: Path) -> Path:
@@ -124,15 +87,12 @@ def _write_record(path: Path, mode: str, label: str) -> Path:
             old.unlink(missing_ok=True)
     record = directory / f"{path.stem}.{os.getpid()}.json"
     record.write_text(json.dumps({"pid": os.getpid(), "mode": mode, "label": label,
-                                  "path": str(path.resolve()),
                                   "since": time.strftime("%H:%M:%S")}), encoding="utf-8")
     return record
 
 
 def _pids_with_file_open(path: Path) -> list[int]:
     """Every process with the lock file open, whether or not it wrote a record."""
-    if sniper_file_lock.WINDOWS:
-        return []
     try:
         done = subprocess.run(["lsof", "-t", "--", str(path)], capture_output=True,
                               text=True, timeout=10, check=False)
@@ -177,7 +137,7 @@ def acquire(path: Path, mode: str, label: str, wait: float = 0.0) -> int:
     deadline = time.monotonic() + wait
     while True:
         try:
-            sniper_file_lock.try_lock(fd, mode)
+            fcntl.flock(fd, _MODES[mode] | fcntl.LOCK_NB)
             break
         except OSError as error:
             if error.errno not in (errno.EWOULDBLOCK, errno.EAGAIN) or time.monotonic() >= deadline:
@@ -221,7 +181,6 @@ def held(path: Path, mode: str, label: str, wait: float = 0.0) -> Iterator[None]
         yield
     finally:
         (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
-        sniper_file_lock.unlock(fd)
         os.close(fd)
 
 
@@ -234,28 +193,15 @@ def _exec_holding(args: argparse.Namespace) -> int:
               f"({describe_holders(path)}). Close that session first, then run this again.",
               file=sys.stderr)
         return BUSY_EXIT
-    acquired = held_mode is None
-    if acquired:
+    if held_mode is None:
         try:
             fd = acquire(path, args.mode, args.label, args.wait)
         except LockBusy as error:
             print(f"STOPPED: {args.busy_message or 'Sniper is busy.'}\n  In use by: {error}.", file=sys.stderr)
             return BUSY_EXIT
-        if sniper_file_lock.WINDOWS:
-            os.environ[ENV_FD] = str(os.getpid())
-        else:
-            os.set_inheritable(fd, True)
-            os.environ[ENV_FD] = str(fd)
+        os.set_inheritable(fd, True)
+        os.environ[ENV_FD] = str(fd)
         os.environ[ENV_MODE] = args.mode
-    if sniper_file_lock.WINDOWS:
-        if not acquired:
-            return subprocess.run(args.command, check=False).returncode
-        try:
-            return subprocess.run(args.command, check=False).returncode
-        finally:
-            (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
-            sniper_file_lock.unlock(fd)
-            os.close(fd)
     os.execvp(args.command[0], args.command)
     return 127  # not reached
 
@@ -270,7 +216,6 @@ def _hold(args: argparse.Namespace) -> int:
         return BUSY_EXIT
     print(f"held {args.name} {args.mode} pid {os.getpid()}", flush=True)
     time.sleep(args.seconds)
-    sniper_file_lock.unlock(fd)
     os.close(fd)
     return 0
 
@@ -288,7 +233,6 @@ def _status(args: argparse.Namespace) -> int:
         print(f"held by {error}")
         return 1
     (_records_dir(path) / f"{path.stem}.{os.getpid()}.json").unlink(missing_ok=True)
-    sniper_file_lock.unlock(fd)
     os.close(fd)
     print("free")
     return 0

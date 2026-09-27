@@ -27,23 +27,21 @@ revisions and context handoffs.
   signed in to their own subscription. There is no Sniper web app, no Sniper copy of Codex
   or Claude and no Sniper sign-in: you do the editorial thinking in this conversation, and
   Sniper's commands do the media work on this computer. Nothing Sniper runs calls a provider.
-- **Run every Sniper command through the platform launcher, from this folder:** `./sniper`
-  on macOS or `sniper.cmd` on Windows. It finds Sniper's own
+- **Run every Sniper command through the platform launcher, from this folder:** `./sniper`. It finds Sniper's own
   Python, Node, ffmpeg, Whisper and rendering browser, loads the install's settings and holds
   the install's lock while the command runs. Commands in the skills and docs use `./sniper`
-  as shorthand; on Windows replace it with `sniper.cmd`. Translate bare commands on macOS
+  as shorthand. Translate bare commands
   like this: `python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
   `.venv/bin/python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
-  `node --import tsx scripts/x.ts` → `./sniper node --import tsx scripts/x.ts`; use the same
-  arguments after `sniper.cmd` on Windows. Never run them with another Python, Node or ffmpeg.
-  Project folders go under the path printed by `./sniper workspace` or `sniper.cmd workspace`.
-- **Setting up.** If the launcher says Sniper is not set up, run `./sniper setup` on macOS or
-  `sniper.cmd setup` on Windows (it downloads
+  `node --import tsx scripts/x.ts` → `./sniper node --import tsx scripts/x.ts`.
+  Never run them with another Python, Node or ffmpeg.
+  Project folders go under the path printed by `./sniper workspace`.
+- **Setting up.** If the launcher says Sniper is not set up, run `./sniper setup` (it downloads
   about 1.2 GB and takes several minutes; run it in the background, tell the operator what it
-  is doing and report its last lines). Run `./sniper doctor` or `sniper.cmd doctor` to check
+  is doing and report its last lines). Run `./sniper doctor` to check
   the install and name the fix for anything wrong.
-- **Media sandbox.** Sniper decodes every video inside its own media jail: macOS Seatbelt on
-  Mac and a no-network AppContainer on Windows. macOS does not let a sandbox start inside
+- **Media sandbox.** Sniper decodes every video inside its own macOS Seatbelt media jail.
+  macOS does not let a sandbox start inside
   another one. On macOS, if a Sniper command fails with
   `sandbox initialization failed` or `Operation not permitted` while your own sandbox is on,
   ask the operator to approve running that same command outside your sandbox. Never skip,
@@ -60,9 +58,9 @@ revisions and context handoffs.
   for the current edit. A saved key, an environment variable or a failed local run is never
   that authorization. The operator connects, replaces or removes the key by double-clicking
   `install/setup.command` (a hidden prompt in Terminal); if a key is missing, point them
-  there. On Windows use `sniper.cmd connections`. Never ask the operator to paste a key into
+  there. Never ask the operator to paste a key into
   the conversation, and never display or copy a key file. Nothing falls back to Deepgram.
-- **No Docker.** The supported route runs natively on macOS and Windows x64.
+- **No Docker.** The supported route runs natively on macOS.
 
 ## What leaves this computer
 
@@ -76,8 +74,8 @@ media sources are set to public web, loads the pages the plan names
 brand icons by name from `cdn.simpleicons.org` (`resolve` only for a mapped brand not yet local,
 `fetch` every time it is run);
 and Studio's page loads one GSAP file from `cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
-switched off. Open Studio only through Sniper (`install/studio.command` on macOS or
-`install\studio.cmd` on Windows for a Producer edit, or the platform launcher followed by
+switched off. Open Studio only through Sniper (`install/studio.command` for a Producer edit,
+or the platform launcher followed by
 `python3 scripts/producer/studio/managed_preview.py open <project>` for a native
 project), never with the stock `hyperframes preview`, which would send HeyGen's analytics. Instructions are not a
 privacy boundary: do not attach or upload video or audio files to the conversation; work
@@ -124,8 +122,7 @@ then read the files it identifies. Discovery alone neither reads them nor comple
 - Independent reviews (plan critics, the rendered review of still frames) are run by you as
   fresh subagents that did not author the plan, as the Producer skill describes.
 - At video handoff, give the operator both the encoded video and the matching editable
-  Studio project (`install/studio.command open <project>/producer` on macOS or
-  `install\studio.cmd open <project>\producer` on Windows), and keep both current
+  Studio project (`install/studio.command open <project>/producer`), and keep both current
   after an adjustment.
 - Run the applicable gates and QC (`./sniper python3 scripts/producer/audit/audit_render.py <out_dir>`)
   before claiming anything is complete.

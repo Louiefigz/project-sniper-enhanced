@@ -105,4 +105,4 @@ CONDA_*/MAMBA_*, FONTCONFIG_* and TESSDATA_PREFIX (a certificate bundle set for 
 - **Size.** About 300 MB downloaded and 1.2 GB on disk for the tools (tesseract's language data is most
   of it).
 - **Tested boundary.** The Apple-silicon runtime has run on this developer Mac on macOS 26. Native
-  Intel and Windows qualification status is recorded in the release notes and qualification evidence.
+  Intel qualification status is recorded in the release notes and qualification evidence.

@@ -8,8 +8,7 @@ this folder in their own Codex or Claude Code; there is nothing else to sign in 
 installs and repairs its own tools with `./sniper setup`. Be calm and plain-spoken; run the
 commands yourself and report back instead of pasting commands at them.
 
-Use `./sniper` on macOS and `sniper.cmd` on Windows for every command below. On Windows,
-also use `sniper.cmd connections` instead of the Finder-only connection setup.
+Use `./sniper` for every command below.
 
 If there is no `install/` folder here, this is a developer checkout, not the packaged app:
 point them to `CLAUDE.md` § Engineering reference instead and stop.
@@ -36,15 +35,14 @@ For each line that did not pass, say in one sentence what it is and what fixes i
   `ffmpeg`, `whisper-cli`, `tesseract`, `yt-dlp`, `node`, `python3`) → `./sniper setup`; it
   redoes only what is unfinished, from checked downloads. Never install these with Homebrew or
   any other system installer instead.
-- On macOS, `media admission` fails while your own sandbox is on → run `./sniper doctor`
-  again outside your sandbox, with their approval (macOS does not nest sandboxes). Windows
-  uses the installed AppContainer jail and does not use this workaround.
+- `media admission` fails while your own sandbox is on → run `./sniper doctor`
+  again outside your sandbox, with their approval (macOS does not nest sandboxes).
 - `install in use` → a Sniper command is still running; let it finish.
 
 Do not run `npm install` or `pip install` in this folder, do not change `runtime/sniper.env`,
 and do not add or copy API keys: editing runs on their own subscription. Deepgram
 transcription is the one optional paid add-on; if they ask for it, tell them to double-click
-`install/setup.command` in Finder on macOS or run `sniper.cmd connections` on Windows to enter
+`install/setup.command` in Finder to enter
 their Deepgram key privately. Never ask for a key in this conversation.
 
 ## Step 3 — When everything passes
@@ -54,6 +52,6 @@ Confirm it in one or two sentences, then tell them how to use it:
 > You're all set. Just tell me what to make — for example "cut a 45-second vertical short
 > from ~/Desktop/raw.mp4" or "clean up this long recording: <path>". The finished
 > `final.mp4` and its editable Studio project land in your video projects folder
-> (the path printed by `./sniper workspace` on macOS or `sniper.cmd workspace` on Windows).
+> (the path printed by `./sniper workspace`).
 
 Keep the closing short. The full manual is `manual/index.html`.

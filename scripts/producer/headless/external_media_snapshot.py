@@ -35,7 +35,7 @@ class ExternalMediaSnapshot:
 def _source_fd(path: str) -> int:
     """Open one safe source leaf and close on every failed acquisition path."""
     flags = (os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-             | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0))
+             | getattr(os, "O_NONBLOCK", 0))
     fd = os.open(path, flags)
     try:
         info = os.fstat(fd)
@@ -51,7 +51,7 @@ def _source_fd(path: str) -> int:
 def _destination_fd(path: str) -> int:
     """Create only a new private snapshot stage with the historical file mode."""
     flags = (os.O_WRONLY | os.O_CREAT | os.O_EXCL
-             | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0))
+             | getattr(os, "O_NOFOLLOW", 0))
     fd = os.open(path, flags, 0o600)
     if hasattr(os, "fchmod"):
         os.fchmod(fd, 0o600)
@@ -148,26 +148,14 @@ def _publish(stage: str, store: str, digest: str, size: int) -> str:
     try:
         os.link(stage, destination, follow_symlinks=False)
         os.unlink(stage)
-        _sync_directory(store)
+        directory_fd = os.open(store, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
     except FileExistsError:
         _verify_snapshot(destination, digest, size)
     return destination
-
-
-def _sync_directory(path: str) -> None:
-    """Flush published directory metadata where directory descriptors exist.
-
-    Windows refuses ``os.open`` on a directory. Its link/unlink operations are
-    already journaled by the filesystem, so the portable contract is to verify
-    the final file after publication rather than fail before that verification.
-    """
-    if os.name == "nt":
-        return
-    directory_fd = os.open(path, os.O_RDONLY)
-    try:
-        os.fsync(directory_fd)
-    finally:
-        os.close(directory_fd)
 
 
 def capture_external_media_snapshot(

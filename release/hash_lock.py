@@ -6,7 +6,7 @@
 Reads the pinned ``name==version`` set from
 ``release/payload_files/install/requirements.lock.txt`` and, for every supported
 interpreter (CPython 3.12, 3.13, 3.14) and platform tag a buyer's pip may choose
-between (both macOS architectures and Windows x64), runs::
+between on Apple silicon and Intel macOS, runs::
 
     pip download --only-binary=:all: --no-deps --platform <tag> --python-version <v> ...
 
@@ -31,7 +31,7 @@ PYTHONS = ("3.12", "3.13", "3.14")
 # opencv-python-headless 4.14.0.94 publishes macOS wheels for arm64 on 13+ and for
 # x86_64 on 14+ only, so an Intel Mac on macOS 13 has no installable set.
 PLATFORMS = ("macosx_13_0_arm64", "macosx_14_0_arm64", "macosx_26_0_arm64",
-             "macosx_14_0_x86_64", "macosx_26_0_x86_64", "win_amd64")
+             "macosx_14_0_x86_64", "macosx_26_0_x86_64")
 
 
 def pins(lock: Path) -> list[tuple[str, str]]:
@@ -82,7 +82,7 @@ def render(pinned: list[tuple[str, str]], hashes: dict[str, set[str]]) -> str:
     """The lock text: a header, then each pin with all of its accepted hashes."""
     lines = ["# Pinned Python set this release is built and tested against, with the SHA-256",
              "# of every wheel pip may choose for CPython 3.12-3.14 on macOS 13+ arm64,",
-             "# macOS 14+ x86_64 or Windows x64. Regenerate with: python -m release.hash_lock",
+             "# macOS 14+ x86_64. Regenerate with: python -m release.hash_lock",
              "# The installer runs: pip install --require-hashes --only-binary=:all: -r this-file"]
     for name, version in pinned:
         digests = sorted(hashes[_normal(name)])

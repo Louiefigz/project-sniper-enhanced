@@ -1,6 +1,6 @@
 # Pinned Python set this release is built and tested against, with the SHA-256
 # of every wheel pip may choose for CPython 3.12-3.14 on macOS 13+ arm64,
-# macOS 14+ x86_64 or Windows x64. Regenerate with: python -m release.hash_lock
+# macOS 14+ x86_64. Regenerate with: python -m release.hash_lock
 # The installer runs: pip install --require-hashes --only-binary=:all: -r this-file
 ImageHash==4.3.2 \
     --hash=sha256:02b0f965f8c77cd813f61d7d39031ea27d4780e7ebcad56c6cd6a709acc06e5f

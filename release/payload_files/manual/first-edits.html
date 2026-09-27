@@ -16,13 +16,12 @@
 <h2>How you drive it</h2>
 <p>Open the Sniper folder in your own Codex or Claude Code and describe what you want. Sniper's
 editing instructions and skills live in that folder, so your agent picks them up automatically,
-and it runs Sniper's tools through <code>./sniper</code> on macOS or <code>sniper.cmd</code> on
-Windows. There is no app to open.</p>
+and it runs Sniper's tools through <code>./sniper</code>. There is no app to open.</p>
 
 <div class="note">
 <p><strong>Every video Producer edits is checked first.</strong> Before a Producer edit reads a file, it
 copies it into the project and decodes it in the native OS sandbox (Segmenter and Clipper read your file
-directly, without this check). <code>./sniper doctor</code> or <code>sniper.cmd doctor</code> shows this working on
+directly, without this check). <code>./sniper doctor</code> shows this working on
 its <em>media admission (real sample)</em> line; if that line fails, fix it before your first edit.</p>
 </div>
 
@@ -63,7 +62,7 @@ two-second pause should be gone, and only the correct "lazy dog" line should rem
 for a word clipped at a cut. That is the one defect a trim-only edit can introduce, and
 it is the thing you are checking for.</p>
 <p>If this works, the install is good. If it does not, run
-<code>./sniper doctor</code> on macOS or <code>sniper.cmd doctor</code> on Windows before trying
+<code>./sniper doctor</code> before trying
 anything larger.</p>
 
 <h2>Edit two — a full-length video, with the lanes you choose</h2>

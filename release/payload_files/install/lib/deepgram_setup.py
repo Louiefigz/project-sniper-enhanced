@@ -139,7 +139,7 @@ def main() -> int:
     if args.if_needed and path.exists():
         return 0
     if not sys.stdin.isatty() or not sys.stdout.isatty():
-        print("Deepgram setup needs an interactive Terminal or PowerShell window.")
+        print("Deepgram setup needs an interactive Terminal window.")
         return 1
     try:
         configure(path)

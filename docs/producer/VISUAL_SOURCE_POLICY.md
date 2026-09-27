@@ -90,7 +90,7 @@ long-form beats with no compatible port explicitly need native catalog work.
 Never use a numeric counter or chart as filler to satisfy an unrelated beat.
 
 The supported release uses the native renderer through `./sniper` on macOS or
-`sniper.cmd` on Windows; it does not require a Docker image or image approval
+`./sniper`; it does not require a Docker image or image approval
 from another machine.
 
 Scoped scene text/timing operations recheck their current source evidence and

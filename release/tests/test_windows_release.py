@@ -126,6 +126,15 @@ class WindowsRelease(unittest.TestCase):
         self.assertIn('"WindowsPowerShell" / "v1.0" / "powershell.exe"', doctor)
         self.assertNotIn('$voice.Speak($args[1])', doctor)
 
+    def test_windows_jail_child_gets_only_non_secret_system_environment(self) -> None:
+        source = (HEADLESS / "windows_media_sandbox.py").read_text()
+        self.assertIn('"CommonProgramFiles(x86)"', source)
+        self.assertIn('"LOCALAPPDATA"', source)
+        self.assertIn('environment["PATH"] = str(Path(system_root) / "System32")', source)
+        self.assertIn("env=_child_environment()", source)
+        self.assertNotIn('"OPENAI_API_KEY"', source)
+        self.assertNotIn('"ANTHROPIC_API_KEY"', source)
+
     def test_workflow_runs_windows_python_failures_before_installing(self) -> None:
         workflow = (ROOT / ".github/workflows/windows-qualification.yml").read_text()
         preflight = workflow.index("release.windows_runtime_preflight")

@@ -20,6 +20,24 @@ class WindowsWatchdog:
     peak_bytes: int = 0
 
 
+_ENVIRONMENT_NAMES = (
+    "ALLUSERSPROFILE", "APPDATA", "CommonProgramFiles", "CommonProgramFiles(x86)", "CommonProgramW6432",
+    "ComSpec", "HOMEDRIVE", "HOMEPATH", "LOCALAPPDATA", "NUMBER_OF_PROCESSORS", "OS", "PATHEXT",
+    "PROCESSOR_ARCHITECTURE", "PROCESSOR_IDENTIFIER", "PROCESSOR_LEVEL", "PROCESSOR_REVISION", "ProgramData",
+    "ProgramFiles", "ProgramFiles(x86)", "ProgramW6432", "PUBLIC", "SystemDrive", "SystemRoot", "TEMP", "TMP",
+    "USERDOMAIN", "USERDOMAIN_ROAMINGPROFILE", "USERNAME", "USERPROFILE", "WINDIR",
+)
+
+
+def _child_environment() -> dict[str, str]:
+    """Non-secret Windows variables needed to initialize an AppContainer process."""
+    environment = {name: os.environ[name] for name in _ENVIRONMENT_NAMES if name in os.environ}
+    system_root = environment.get("SystemRoot") or environment.get("WINDIR")
+    if system_root:
+        environment["PATH"] = str(Path(system_root) / "System32")
+    return environment
+
+
 def _reader(stream, parts: list[bytes], state: dict, bound: int) -> None:
     """Drain one pipe while enforcing a shared stdout+stderr byte ceiling."""
     while block := stream.read(65536):
@@ -50,10 +68,8 @@ def launch(runtime, step, arguments: tuple[str, ...]):
     """Return completed-process, attestation and watchdog with bounded captured output."""
     with tempfile.TemporaryDirectory(prefix="sniper-windows-jail-") as directory:
         attest = str(Path(directory) / "attestation.json")
-        environment = {name: os.environ[name] for name in ("SystemRoot", "WINDIR", "ComSpec", "TEMP", "TMP")
-                       if name in os.environ}
         process = subprocess.Popen(_command(runtime, step, arguments, attest), cwd=directory,
-                                   env=environment, stdin=subprocess.DEVNULL,
+                                   env=_child_environment(), stdin=subprocess.DEVNULL,
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out: list[bytes] = []
         err: list[bytes] = []

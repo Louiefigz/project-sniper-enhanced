@@ -12,7 +12,9 @@ internal static class WindowsMediaJail {
     const uint StartfUseStdHandles = 0x00000100;
     const uint LimitProcessTime = 0x2, LimitActiveProcess = 0x8, LimitProcessMemory = 0x100;
     const uint LimitKillOnClose = 0x2000;
+    const uint TokenQuery = 0x0008;
     const int SecurityCapabilitiesAttribute = 0x00020009;
+    const int TokenIsAppContainer = 29;
 
     [StructLayout(LayoutKind.Sequential)] struct SecurityCapabilities {
         public IntPtr AppContainerSid, Capabilities;
@@ -73,6 +75,10 @@ internal static class WindowsMediaJail {
     [DllImport("kernel32.dll", SetLastError=true)] static extern bool TerminateJobObject(IntPtr job, uint code);
     [DllImport("kernel32.dll")] static extern IntPtr GetStdHandle(int number);
     [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr handle);
+    [DllImport("advapi32.dll", SetLastError=true)] static extern bool OpenProcessToken(
+        IntPtr process, uint access, out IntPtr token);
+    [DllImport("advapi32.dll", SetLastError=true)] static extern bool GetTokenInformation(
+        IntPtr token, int informationClass, out int information, int length, out int returned);
 
     static void Check(bool value, string action) {
         if (!value) throw new Win32Exception(Marshal.GetLastWin32Error(), action);
@@ -101,6 +107,14 @@ internal static class WindowsMediaJail {
         FileSecurity security = File.GetAccessControl(path);
         security.RemoveAccessRuleSpecific(rule); File.SetAccessControl(path, security);
     }
+    static void ProtectFile(string path) {
+        SecurityIdentifier owner = WindowsIdentity.GetCurrent().User;
+        FileSecurity security = new FileSecurity();
+        security.SetOwner(owner); security.SetAccessRuleProtection(true, false);
+        security.AddAccessRule(new FileSystemAccessRule(owner, FileSystemRights.FullControl,
+            AccessControlType.Allow));
+        File.SetAccessControl(path, security);
+    }
     static string Quote(string value) {
         if (value.Length > 0 && value.IndexOfAny(new [] {' ', '\t', '"'}) < 0) return value;
         StringBuilder result = new StringBuilder("\""); int slashes = 0;
@@ -126,14 +140,35 @@ internal static class WindowsMediaJail {
         return limits;
     }
     static string Escape(string value) { return value.Replace("\\", "\\\\").Replace("\"", "\\\""); }
+    static bool IsAppContainer(IntPtr process) {
+        IntPtr token; Check(OpenProcessToken(process, TokenQuery, out token), "opening child token");
+        try {
+            int value, returned;
+            Check(GetTokenInformation(token, TokenIsAppContainer, out value, sizeof(int), out returned),
+                "checking child AppContainer token");
+            return value != 0;
+        } finally { CloseHandle(token); }
+    }
+    static ExtendedLimits VerifiedLimits(IntPtr job, long memory, int cpu) {
+        ExtendedLimits observed;
+        Check(QueryInformationJobObject(job,9,out observed,Marshal.SizeOf(typeof(ExtendedLimits)),IntPtr.Zero),
+            "verifying Job Object limits");
+        uint required = LimitKillOnClose | LimitActiveProcess | LimitProcessMemory | LimitProcessTime;
+        bool valid = (observed.Basic.Flags & required) == required && observed.Basic.ActiveProcessLimit == 1
+            && observed.Basic.PerProcessTime == cpu * 10000000L
+            && observed.ProcessMemory.ToUInt64() == (ulong)memory;
+        if (!valid) throw new InvalidOperationException("Job Object limits were not applied exactly");
+        return observed;
+    }
     static void WriteAttestation(string path, int pid, string sid, string input, long memory, int cpu,
-            string decoder, string profileHash, string mode) {
+            string decoder, string profileHash, string mode, bool appContainer) {
         string escaped = input.Replace("\\", "\\\\").Replace("\"", "\\\"");
         string json = "{\"sandboxed\":true,\"kind\":\"windows-appcontainer\",\"mode\":\"" + Escape(mode) + "\"," +
             "\"decoder\":\"" + Escape(decoder) + "\",\"input\":\"" + escaped + "\",\"inputResolved\":\"" + escaped + "\"," +
             "\"profileSha256\":\"" + Escape(profileHash) + "\",\"memoryMiB\":" + (memory / 1048576) + ",\"pid\":" + pid + "," +
             "\"appContainerSid\":\"" + sid + "\",\"writeDeniedOutsideProfile\":true,\"networkCapabilities\":0," +
-            "\"ephemeralProfile\":true,\"job\":{\"activeProcessLimit\":1,\"cpuSeconds\":" + cpu + "}}";
+            "\"tokenIsAppContainer\":" + appContainer.ToString().ToLowerInvariant() + ",\"ephemeralProfile\":true," +
+            "\"job\":{\"activeProcessLimit\":1,\"cpuSeconds\":" + cpu + ",\"memoryLimitBytes\":" + memory + "}}";
         File.WriteAllText(path, json, new UTF8Encoding(false));
     }
     static int Run(string[] args) {
@@ -163,7 +198,10 @@ internal static class WindowsMediaJail {
             Check(CreateProcess(command[0],Command(command),IntPtr.Zero,IntPtr.Zero,true,
                 ExtendedStartup|Suspended|NoWindow,IntPtr.Zero,Environment.SystemDirectory,ref startup,out process),"sandboxed process");
             Check(AssignProcessToJobObject(job,process.Process),"assigning Job Object");
-            WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode);
+            VerifiedLimits(job,memory,cpu);
+            bool appContainer=IsAppContainer(process.Process);
+            if (!appContainer) throw new InvalidOperationException("child token is not an AppContainer");
+            WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode,appContainer);
             ResumeThread(process.Thread);
             if (WaitForSingleObject(process.Process,(uint)wall*1000) == 258) {
                 TerminateJobObject(job,124); Console.Error.WriteLine("SNIPER_TIMEOUT"); return 124;
@@ -191,8 +229,9 @@ internal static class WindowsMediaJail {
                 string name=ProfilePrefix + Guid.NewGuid().ToString("N"); IntPtr sid=ProfileSid(name);
                 Console.WriteLine(SidText(sid)); FreeSid(sid); DeleteAppContainerProfile(name); return 0;
             }
+            if (args.Length == 2 && args[0] == "protect") { ProtectFile(args[1]); return 0; }
             if (args.Length >= 10 && args[0] == "run") return Run(args);
-            Console.Error.WriteLine("usage: windows_media_jail sid | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
+            Console.Error.WriteLine("usage: windows_media_jail sid | protect FILE | run INPUT ATTEST BYTES CPU WALL PROFILE DECODER MODE -- PROGRAM ARGS");
             return 64;
         } catch (Exception error) { Console.Error.WriteLine("native-media-jail: " + error.Message); return 70; }
     }

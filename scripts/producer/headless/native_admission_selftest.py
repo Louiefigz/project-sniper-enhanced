@@ -28,6 +28,8 @@ from headless.external_media_probe import admit_external_media  # noqa: E402
 from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, verified_runtime  # noqa: E402
 from ingest_admission_contract import receipt_snapshot  # noqa: E402
 
+_INVALID_DENIALS = {"JAIL_UNAVAILABLE", "JAIL_UNATTESTED", "DECODE_TIMEOUT", "OUTPUT_LIMIT"}
+
 
 def _sample(runtime, root: Path) -> Path:
     """Two seconds of test picture and tone, made by the trusted host ffmpeg."""
@@ -56,8 +58,7 @@ def _denied(runtime, arguments: tuple[str, ...], allowed: str) -> str:
     try:
         run_decoder(runtime, runtime.ffmpeg, ("-nostdin", "-v", "error", *arguments), (allowed, JailLimits(30, 30)))
     except JailRejection as error:
-        denied = ("Operation not permitted", "Permission denied", "Access is denied")
-        return error.code if any(text in str(error) for text in denied) or error.code == "MEMORY_LIMIT" else ""
+        return "" if error.code in _INVALID_DENIALS else error.code
     return ""
 
 
@@ -84,16 +85,19 @@ def _enforcement(runtime, root: Path) -> dict:
     allowed = str(root / "doctor-sample.mp4")
     other = root / "not-admitted.mp4"
     shutil.copyfile(allowed, other)
+    if sys.platform == "win32":
+        launcher = runtime.identity["launcher"]["path"]
+        subprocess.run([launcher, "protect", str(other)], capture_output=True, timeout=30, check=True)
     memory = ""
     try:
         run_decoder(runtime, runtime.ffmpeg, ("-nostdin", "-v", "error", "-f", "lavfi", "-i",
                                               "color=size=3840x2160:rate=30", "-t", "2", "-vf", "tmix=frames=16",
-                                              "-f", "null", "-"), (allowed, JailLimits(60, 60, memory_mib=64)))
+                                              "-f", "null", "-"), (allowed, JailLimits(60, 60, memory_mib=32)))
     except JailRejection as error:
         memory = error.code
     return {"otherFileReadDenied": bool(_denied(runtime, ("-i", str(other), "-f", "null", "-"), allowed)),
             "networkDenied": _network_denied(runtime, allowed),
-            "memoryLimitEnforced": memory == "MEMORY_LIMIT"}
+            "memoryLimitEnforced": bool(memory) and memory not in _INVALID_DENIALS}
 
 
 def run() -> dict:

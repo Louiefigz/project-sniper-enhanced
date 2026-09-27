@@ -123,8 +123,9 @@ def _attested(attestation: dict | None, runtime: NativeMediaRuntime, step: _Step
     if sys.platform == "win32":
         valid = valid and attestation.get("kind") == "windows-appcontainer" \
             and attestation.get("writeDeniedOutsideProfile") is True and attestation.get("networkCapabilities") == 0 \
-            and attestation.get("ephemeralProfile") is True \
-            and (attestation.get("job") or {}).get("activeProcessLimit") == 1
+            and attestation.get("tokenIsAppContainer") is True and attestation.get("ephemeralProfile") is True \
+            and (attestation.get("job") or {}).get("activeProcessLimit") == 1 \
+            and (attestation.get("job") or {}).get("memoryLimitBytes") == step.limits.memory_mib * 1024 * 1024
     else:
         valid = valid and (attestation.get("rlimits") or {}).get("RLIMIT_FSIZE") == [0, 0]
     if not valid:

@@ -23,6 +23,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
@@ -121,17 +122,27 @@ def check_runtime() -> None:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
 
 
-def _make_speech_sample(path: Path) -> int:
-    """Create a deterministic local TTS sample with the operating system voice."""
+def _make_speech_sample(path: Path) -> tuple[int, str]:
+    """Create a deterministic local TTS sample; include the native failure detail."""
     if os.name != "nt":
-        return setup.run(["say", "-o", str(path), SPOKEN], 60)[0]
+        code, out, err = setup.run(["say", "-o", str(path), SPOKEN], 60)
+        return code, (err or out).strip()
     output = "'" + str(path).replace("'", "''") + "'"
     text = "'" + SPOKEN.replace("'", "''") + "'"
     script = (f"$OutputPath={output}; $Text={text}; Add-Type -AssemblyName System.Speech; "
               "$voice=New-Object System.Speech.Synthesis.SpeechSynthesizer; "
               "$voice.SetOutputToWaveFile($OutputPath); $voice.Speak($Text); $voice.Dispose()")
     encoded = base64.b64encode(script.encode("utf-16le")).decode("ascii")
-    return setup.run(["powershell.exe", "-NoProfile", "-EncodedCommand", encoded], 60)[0]
+    detail = ""
+    for attempt in range(3):
+        path.unlink(missing_ok=True)
+        code, out, err = setup.run(["powershell.exe", "-NoProfile", "-EncodedCommand", encoded], 60)
+        detail = (err or out).strip()
+        if code == 0 and path.is_file() and path.stat().st_size > 44:
+            return 0, detail
+        if attempt < 2:
+            time.sleep(0.25 * (2 ** attempt))
+    return code, detail
 
 
 def check_transcription(skip: bool) -> None:
@@ -149,8 +160,10 @@ def check_transcription(skip: bool) -> None:
         record("INFO", "transcription", "skipped by request"); return
     with tempfile.TemporaryDirectory(prefix="sniper-doctor-") as tmp:
         speech = Path(tmp) / ("speech.wav" if os.name == "nt" else "speech.aiff")
-        if _make_speech_sample(speech) != 0:
-            record("FAIL", "transcription", "could not create the local speech sample"); return
+        code, detail = _make_speech_sample(speech)
+        if code != 0:
+            suffix = f": {detail[-300:]}" if detail else f" (exit {code})"
+            record("FAIL", "transcription", "could not create the local speech sample" + suffix); return
         try:
             result = transcribe_media(LocalTranscribeRequest(path=str(speech)))
         except Exception as error:
@@ -214,7 +227,10 @@ def main() -> int:
     args = parser.parse_args()
     if _hold_install():
         check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
-        setup.check_media_admission(record); check_transcription(args.skip_transcription)
+        if os.name == "nt":
+            check_transcription(args.skip_transcription); setup.check_media_admission(record)
+        else:
+            setup.check_media_admission(record); check_transcription(args.skip_transcription)
     check_workspace(); check_optional()
     failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]
     if args.json:

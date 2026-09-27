@@ -55,9 +55,9 @@ def _speech(make_sample: object) -> None:
     """Run the exact Doctor TTS producer and require a nonempty wave file."""
     with tempfile.TemporaryDirectory(prefix="sniper-windows-speech-") as root:
         sample = Path(root) / "speech.wav"
-        code = make_sample(sample)
+        code, detail = make_sample(sample)
         if code != 0 or not sample.is_file() or sample.stat().st_size <= 44:
-            raise RuntimeError("Windows Doctor could not create its local speech sample")
+            raise RuntimeError(f"Windows Doctor could not create its local speech sample: {detail}")
 
 
 def main() -> int:

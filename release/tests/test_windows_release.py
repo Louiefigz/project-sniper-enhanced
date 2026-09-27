@@ -27,6 +27,9 @@ class WindowsRelease(unittest.TestCase):
         self.assertEqual(found, approval["approved"])
         jail = (HEADLESS / "windows_media_jail.cs").read_text()
         self.assertIn('CharSet=CharSet.Unicode, SetLastError=true', jail)
+        self.assertIn('TokenIsAppContainer', jail)
+        self.assertIn('Job Object limits were not applied exactly', jail)
+        self.assertIn('ProtectFile(args[1])', jail)
 
     def test_windows_jail_approval_bytes_keep_lf_on_windows(self) -> None:
         attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
@@ -123,6 +126,9 @@ class WindowsRelease(unittest.TestCase):
         source = (ROOT / "release/windows_runtime_preflight.py").read_text()
         self.assertIn("module._make_speech_sample", source)
         self.assertIn("project-sniper\\nwindows-media\\x1a-preflight", source)
+        self.assertIn("tokenIsAppContainer", workflow)
+        self.assertIn("could not read its admitted input", workflow)
+        self.assertIn("read a file that was not admitted", workflow)
 
     def test_shipped_agent_contract_names_the_windows_launcher(self) -> None:
         contract = (ROOT / "AGENTS.md").read_text(encoding="utf-8")

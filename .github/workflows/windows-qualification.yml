@@ -46,6 +46,22 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or $sid -notmatch '^S-1-15-2-') {
             throw "The Windows media jail preflight did not create an AppContainer SID: $sid"
           }
+          $allowed = "$env:RUNNER_TEMP\sniper-jail-allowed.txt"
+          $other = "$env:RUNNER_TEMP\sniper-jail-other.txt"
+          $attest = "$env:RUNNER_TEMP\sniper-jail-attestation.json"
+          Set-Content -LiteralPath $allowed -Value 'allowed' -Encoding ASCII
+          Set-Content -LiteralPath $other -Value 'private' -Encoding ASCII
+          & $target protect $other
+          if ($LASTEXITCODE -ne 0) { throw 'The Windows media jail could not protect its denial fixture.' }
+          & $target run $allowed $attest 33554432 10 10 preflight cmd.exe exec -- $env:ComSpec /d /c type $allowed
+          if ($LASTEXITCODE -ne 0) { throw 'The AppContainer could not read its admitted input.' }
+          & $target run $allowed $attest 33554432 10 10 preflight cmd.exe exec -- $env:ComSpec /d /c type $other
+          if ($LASTEXITCODE -eq 0) { throw 'The AppContainer read a file that was not admitted.' }
+          $proof = Get-Content -LiteralPath $attest -Raw | ConvertFrom-Json
+          if (-not $proof.tokenIsAppContainer -or $proof.networkCapabilities -ne 0 -or
+              $proof.job.memoryLimitBytes -ne 33554432) {
+            throw 'The Windows media jail did not attest its AppContainer and exact Job Object limits.'
+          }
       - name: Exercise Windows Python runtime preflights
         shell: powershell
         run: |

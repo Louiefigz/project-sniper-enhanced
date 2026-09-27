@@ -198,6 +198,7 @@ internal static class WindowsMediaJail {
             Check(UpdateProcThreadAttribute(attributes,0,(IntPtr)SecurityCapabilitiesAttribute,capabilities,
                 (IntPtr)Marshal.SizeOf(security),IntPtr.Zero,IntPtr.Zero),"AppContainer attribute");
             StartupInfoEx startup=new StartupInfoEx(); startup.StartupInfo.cb=Marshal.SizeOf(startup);
+            startup.AttributeList=attributes;
             startup.StartupInfo.flags=StartfUseStdHandles; startup.StartupInfo.stdInput=GetStdHandle(-10);
             startup.StartupInfo.stdOutput=GetStdHandle(-11); startup.StartupInfo.stdError=GetStdHandle(-12);
             job=CreateJobObject(IntPtr.Zero,null); Check(job != IntPtr.Zero,"creating Job Object");
@@ -207,9 +208,10 @@ internal static class WindowsMediaJail {
                 ExtendedStartup|Suspended|NoWindow,IntPtr.Zero,Environment.SystemDirectory,ref startup,out process),"sandboxed process");
             Check(AssignProcessToJobObject(job,process.Process),"assigning Job Object");
             VerifiedLimits(job,memory,cpu);
-            ResumeThread(process.Thread);
             bool appContainer=IsAppContainer(process.Process);
+            if (!appContainer) throw new InvalidOperationException("child token is not an AppContainer");
             WriteAttestation(attest,process.ProcessId,sidText,input,memory,cpu,decoder,profileHash,mode,appContainer);
+            ResumeThread(process.Thread);
             if (WaitForSingleObject(process.Process,(uint)wall*1000) == 258) {
                 TerminateJobObject(job,124); Console.Error.WriteLine("SNIPER_TIMEOUT"); return 124;
             }

@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 from studio.native_budget_schema import AI_POLICY
 from studio.production import host_contract
+from studio.production.host_end_notices import END_TOOLS  # the provisional notice table, re-exported (P3b-1)
 from studio.production.tasks import TaskConflict, TaskRefused
 
 AGENT_PATH = re.compile(r'(/[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}){1,4}')
@@ -29,26 +30,6 @@ PROCESS_KEYS = frozenset({'pid', 'pgid', 'started'})
 AGENT_BYTES = 200         # so identity_key stays <= 256 bytes, the TS reviewer sessionId bound
 STATUS_BYTES = 128
 DIRECTOR_KEY = 'director'  # the agent part of a director's identity key; never a valid agent
-
-# ----------------------------------------------------------------------------------------------------------
-# PROVISIONAL DATA TABLE: END_TOOLS, per host and host version (X55).
-# The notice a director may quote verbatim as an end observation: the host's notification element and the
-# host's literal background-work sentence, a protocol marker whose presence in the note makes the notice
-# interim (with its sha256). Rows come only from the M-080a host-surface probe (X30): Claude Code 2.1.281,
-# probed 2026-09-29. Codex has no row (not probed), so no Codex end can be quoted. A new host version needs a
-# new probe and a new row; only this table changes. What counts as end evidence is M-102's HOST_END_EVIDENCE.
-# ----------------------------------------------------------------------------------------------------------
-END_TOOLS = {
-    'claude-code': {
-        '2.1.281': {
-            'element': 'task-notification',
-            'backgroundWorkSentence': 'This agent stopped with background work of its own still running.',
-            'backgroundWorkSentenceSha256': '1ed07a3a96f9b503974e7bffd3323ac6c250e13e7470ae0aed251174e9315cff',
-        },
-    },
-    'codex': {},
-}
-HEADER_ELEMENTS = ('task-id', 'status', 'summary', 'note')   # one-line elements before a notice's body
 
 DIRECTOR_REFUSAL = ('A declared director handle names a known host, a Sniper session id, its host thread if known, '
                     f"and 2-{AI_POLICY['slotsCeiling']} slots")
@@ -83,7 +64,8 @@ class EndObservation:
     Attributes:
         tool: The host's notification element, ``END_TOOLS[host][version]['element']``.
         status: The notice's ``<status>``: one line, at most ``STATUS_BYTES`` bytes.
-        interim: True iff the notice's note contains that host version's background-work sentence.
+        interim: True iff the note holds the recorded interim sentence; a note holding neither or both
+            recorded sentences (interim, final) is refused, never read as final (X58, X63).
         task_id: The notice's ``<task-id>``: the host's id of the agent execution it reports on.
     """
 
@@ -98,10 +80,9 @@ def _matches(pattern: re.Pattern, value: object) -> bool:
     return type(value) is str and pattern.fullmatch(value) is not None
 
 
-def _line(value: object, limit: int) -> bool:
-    """A non-empty single-line string without NUL whose canonical encoding fits ``limit`` bytes."""
-    return type(value) is str and value.splitlines() == [value] and '\0' not in value \
-        and host_contract.encoded_length(value) <= limit
+def _short_text(value: object, limit: int) -> bool:
+    """A non-empty string without NUL whose canonical encoding fits ``limit`` bytes (one line by its source)."""
+    return type(value) is str and bool(value) and '\0' not in value and host_contract.encoded_length(value) <= limit
 
 
 def valid_agent(value: object) -> bool:
@@ -239,33 +220,45 @@ def _format(host: object, version: object) -> dict:
     return row
 
 
-def _header_element(line: str) -> tuple[str, str] | None:
+def _header_element(line: str, names: tuple) -> tuple[str, str] | None:
     """(name, value) of a one-line header element such as ``<status>killed</status>``, else None."""
-    for name in HEADER_ELEMENTS:
+    for name in names:
         opening, closing = f'<{name}>', f'</{name}>'
         if line.startswith(opening) and line.endswith(closing) and len(line) >= len(opening) + len(closing):
             return name, line[len(opening):len(line) - len(closing)]
     return None
 
 
-def _notice_header(text: object, element: str) -> dict | None:
-    """The header elements of one verbatim ``<element>`` notice (each at most once), or None.
+def _notice_header(text: object, row: dict) -> dict | None:
+    """The header elements of exactly one verbatim notice (each at most once), or None.
 
-    The header is the run of one-line ``HEADER_ELEMENTS`` after the opening tag; the body after it (the
-    agent's result, usage) is not read, so an agent's own words can never supply a status or note.
+    The header is the run of the row's one-line header elements after the opening tag; the body after it
+    (the agent's result, usage) is not read, so an agent's own words can never supply a status or note.
     """
     lines = text.strip().splitlines() if type(text) is str else []
-    if len(lines) < 3 or lines[0] != f'<{element}>' or lines[-1] != f'</{element}>':
+    opening, closing = f"<{row['element']}>", f"</{row['element']}>"
+    if len(lines) < 3 or lines[0] != opening or lines[-1] != closing \
+            or lines.count(opening) != 1 or lines.count(closing) != 1:
         return None
     header = {}
     for line in lines[1:-1]:
-        row = _header_element(line)
-        if row is None:
+        item = _header_element(line, row['header'])
+        if item is None:
             break
-        if row[0] in header:
+        if item[0] in header:
             return None
-        header[row[0]] = row[1]
+        header[item[0]] = item[1]
     return header
+
+
+def _interim(note: str, row: dict, where: str) -> bool:
+    """Whether the note is the recorded interim one; a note holding neither or both sentences is refused (X58)."""
+    kinds = [kind for kind, known in row['notes'].items() if known['sentence'] in note]
+    if len(kinds) != 1:
+        raise EndObservationRefused(f"The <{row['element']}> note of {where} must hold exactly one recorded end "
+                                    'sentence (interim or final); a missing, empty, altered, unknown or '
+                                    'out-of-header note is refused')
+    return kinds[0] == 'interim'
 
 
 def parse_end_observation(text: str, host: str, version: str) -> EndObservation:
@@ -275,24 +268,24 @@ def parse_end_observation(text: str, host: str, version: str) -> EndObservation:
     M-102 encodes that rule; this function only parses.
 
     Args:
-        text: The host's notification, verbatim: ``<task-notification>`` ... ``</task-notification>`` for
-            Claude Code 2.1.281, with one-line ``<task-id>`` and ``<status>`` elements and an optional note.
+        text: Exactly one host notification, verbatim: ``<task-notification>`` ... ``</task-notification>``
+            for Claude Code 2.1.281, whose header holds ``<task-id>``, ``<status>`` and its ``<note>``.
         host: The task's host (``host_contract.HOSTS``).
         version: The host version the session recorded; it must have an ``END_TOOLS`` row.
 
     Returns:
-        The observation: the element, the status, whether the note marks the notice interim, the task id.
+        The observation: the element, the status, whether the note is the interim one, the task id.
 
     Raises:
-        EndObservationRefused: No format is recorded for that host version, or the text is not one notice.
+        EndObservationRefused: No row for that host version, not exactly one notice, or an unknown note.
     """
     row = _format(host, version)
     element = row['element']
-    header = _notice_header(text, element)
+    header = _notice_header(text, row)
     if header is None or not _matches(host_contract.HOST_TOKEN, header.get('task-id')) \
-            or not _line(header.get('status'), STATUS_BYTES) or '<' in header['status']:
-        raise EndObservationRefused(f"--end-observation is the host's verbatim <{element}> notice: one "
-                                    f'<task-id>, one <status> of one line and at most {STATUS_BYTES} bytes, '
-                                    'and its note, each on its own line')
-    interim = row['backgroundWorkSentence'] in header.get('note', '')
+            or not _short_text(header.get('status'), STATUS_BYTES) or '<' in header['status']:
+        raise EndObservationRefused(f"--end-observation is the host's verbatim <{element}> notice, exactly one: "
+                                    f'a <task-id>, a one-line <status> of at most {STATUS_BYTES} bytes and its '
+                                    'note, each on its own line')
+    interim = _interim(header.get('note', ''), row, f'{host} {version}')
     return EndObservation(element, header['status'], interim, header['task-id'])

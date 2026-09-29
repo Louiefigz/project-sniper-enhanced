@@ -1,4 +1,4 @@
-"""Declared handles, identity keys and end observations (P3b-1, M-088, decision D-E)."""
+"""Declared handles, identity keys and end observations (P3b-1, M-088, D-E, X55, X58, X63)."""
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
@@ -10,8 +10,10 @@ import unittest
 from dataclasses import FrozenInstanceError
 from pathlib import Path
 
+from _host_notice_fixtures import (BACKGROUND_NOTE, CASE1, CLAUDE, FINAL_NOTE, FINAL_NOTE_SHA256, FINAL_NOTICE,
+                                   INTERIM_NOTE_SHA256, INTERIM_NOTICE, KILLED_NOTICE, TASKSTOP_RESULT)
 from studio.production import declared_identity as di
-from studio.production import host_contract
+from studio.production import host_contract, host_end_notices
 
 SESSION_ID = 's-0123456789abcdef'
 LAUNCH = '0123456789abcdef0123456789abcdef'
@@ -20,27 +22,6 @@ CODEX_AGENT = '/root/author_q1'
 PROCESS = {'pid': 4242, 'pgid': 4242, 'started': 'Mon Sep 28 21:16:06 2026'}
 LONGEST_PATH = ('/' + 'a' * 63) * 3 + '/' + 'b' * 7          # 200 bytes
 TOO_LONG_PATH = LONGEST_PATH + 'c'                              # 201 bytes
-# Verbatim host words from the M-080a probe (Claude Code 2.1.281): host-words-case1.txt (2) and (3) and
-# host-words-case2.txt. Copied here; the evidence files are never read at test time.
-CLAUDE = ('claude-code', '2.1.281')
-BACKGROUND_NOTE = ('<note>This agent stopped with background work of its own still running. It may resume on its '
-                   'own when that work completes or reports, and the same task-id notifies again if it does; the '
-                   'result below may be interim.</note>')
-FINAL_NOTE = ('<note>A task-notification fires each time this agent stops with no live background children of its '
-              'own. The user can send it another message and resume it, so the same task-id may notify more than '
-              'once.</note>')
-CASE1 = ('<task-notification>', '<task-id>a928cf82f8f21adc4</task-id>', '<status>completed</status>',
-         '<summary>Agent "Host probe case 1 natural end" finished</summary>')
-INTERIM_NOTICE = '\n'.join((*CASE1, BACKGROUND_NOTE, '</task-notification>'))
-FINAL_NOTICE = '\n'.join((*CASE1, FINAL_NOTE, '<result>...report delivered as a message...</result>',
-                          '<usage><subagent_tokens>64799</subagent_tokens><tool_uses>4</tool_uses>'
-                          '<duration_ms>249506</duration_ms></usage>', '</task-notification>'))
-KILLED_NOTICE = '\n'.join(('<task-notification>', '<task-id>a475c0287b60f97d5</task-id>', '<status>killed</status>',
-                           '<summary>Agent "Host probe case 2 stop" was stopped by Claude</summary>', FINAL_NOTE,
-                           '</task-notification>'))
-TASKSTOP_RESULT = ('{"message":"Successfully stopped task: a475c0287b60f97d5 (Host probe case 2 stop)",'
-                   '"task_id":"a475c0287b60f97d5","task_type":"local_agent","command":"Host probe case 2 stop"}')
-
 
 def director(host: str = 'claude-code') -> dict:
     """A valid director handle with a known host thread and 4 slots."""
@@ -63,7 +44,7 @@ def notice_with(status: str) -> str:
 
 
 class DeclaredIdentityTests(unittest.TestCase):
-    """P3b-1's twelve tests, M-088's two hostProcess tests (X40, D-E) and the X55 notice test."""
+    """P3b-1's twelve tests, M-088's two hostProcess tests (X40, D-E) and two notice tests (X55, X63)."""
 
     def assertInvalid(self, values: list) -> None:
         """Each value is not a valid declared handle."""
@@ -172,13 +153,19 @@ class DeclaredIdentityTests(unittest.TestCase):
                 self.assertFalse(di.registered_identity(handle))
 
     def test_end_observation_tools_are_per_host(self) -> None:
-        """The notice format is recorded per host and probed version; any other is refused by name."""
+        """Notice formats per host and probed version, pinned to the probe's note bytes; others refused by name."""
         self.assertEqual(set(di.END_TOOLS), set(host_contract.HOSTS))
+        self.assertIs(di.END_TOOLS, host_end_notices.END_TOOLS)
         row = di.END_TOOLS['claude-code']['2.1.281']
-        self.assertEqual(row['element'], 'task-notification')
-        sentence = row['backgroundWorkSentence']
-        self.assertEqual(hashlib.sha256(sentence.encode()).hexdigest(), row['backgroundWorkSentenceSha256'])
-        self.assertEqual((sentence in BACKGROUND_NOTE, sentence in FINAL_NOTE), (True, False))
+        self.assertEqual((row['element'], row['header']),
+                         ('task-notification', ('task-id', 'status', 'summary', 'note')))
+        for kind, note, sha in (('interim', BACKGROUND_NOTE, INTERIM_NOTE_SHA256),
+                                ('final', FINAL_NOTE, FINAL_NOTE_SHA256)):
+            text = note[len('<note>'):-len('</note>')]
+            with self.subTest(kind=kind):   # the pinned hashes come from the probe files' bytes, not the table
+                self.assertEqual((hashlib.sha256(text.encode()).hexdigest(), row['notes'][kind]['noteSha256']),
+                                 (sha, sha))
+                self.assertEqual(row['notes'][kind]['sentence'], text.split('. ')[0] + '.')
         for host, version in (('codex', '0.1.0'), ('claude-code', '2.1.282'), ('gemini', '1'), ('claude-code', None)):
             with self.subTest(host=host, version=version), \
                     self.assertRaisesRegex(di.EndObservationRefused, '^No end-observation format is recorded'):
@@ -192,23 +179,56 @@ class DeclaredIdentityTests(unittest.TestCase):
                          di.EndObservation('task-notification', 'completed', True, 'a928cf82f8f21adc4'))
         self.assertEqual(di.parse_end_observation(FINAL_NOTICE, *CLAUDE),
                          di.EndObservation('task-notification', 'completed', False, 'a928cf82f8f21adc4'))
-        self.assertEqual(di.parse_end_observation(KILLED_NOTICE + '\n', *CLAUDE),
+        self.assertEqual(di.parse_end_observation('\n  \n' + KILLED_NOTICE + '\n', *CLAUDE),
                          di.EndObservation('task-notification', 'killed', False, 'a475c0287b60f97d5'))
         plan_name = KILLED_NOTICE.replace('<task-notification>', '<agent-notification>').replace(
             '</task-notification>', '</agent-notification>')
         body_status = FINAL_NOTICE.replace('<status>completed</status>\n', '').replace(
             '<result>', '<result>x</result>\n<status>completed</status>\n<result>')
+        opening_moved = KILLED_NOTICE.replace('<task-notification>', '<agent-notification>', 1).replace(
+            '</task-notification>', '<task-notification>\n</task-notification>')   # opening tag not first
         malformed = ['', None, '{"tool": "TaskStop", "status": "killed"}', TASKSTOP_RESULT, plan_name, body_status,
-                     KILLED_NOTICE[:-1], KILLED_NOTICE.replace('<status>killed</status>\n', ''),
+                     opening_moved, KILLED_NOTICE + '\nThat was the notice.', KILLED_NOTICE[:-1],
+                     KILLED_NOTICE.replace('<status>killed</status>\n', ''),
                      KILLED_NOTICE.replace('<status>killed</status>', '<status>killed</status>\n<status>x</status>'),
-                     KILLED_NOTICE.replace('a475c0287b60f97d5', 'bad id'), KILLED_NOTICE.replace('\n', '\n  ')]
+                     KILLED_NOTICE.replace('a475c0287b60f97d5', 'bad id'), KILLED_NOTICE.replace('\n', '\n  '),
+                     FINAL_NOTICE + '\n' + INTERIM_NOTICE, INTERIM_NOTICE + '\n' + FINAL_NOTICE,   # two notices (m1)
+                     KILLED_NOTICE + '\n' + INTERIM_NOTICE]
         for text in malformed:
             with self.subTest(text=text), \
                     self.assertRaisesRegex(di.EndObservationRefused, "^--end-observation is the host's verbatim"):
                 di.parse_end_observation(text, *CLAUDE)
 
+    def test_end_observation_refuses_missing_lost_or_altered_notes(self) -> None:
+        """X58/X63: a note missing, empty, altered, lost from the header, unknown or naming both is refused."""
+        notes = di.END_TOOLS['claude-code']['2.1.281']['notes']
+        both = f"<note>{notes['interim']['sentence']} {notes['final']['sentence']}</note>"
+        cases = ['\n'.join(line for line in INTERIM_NOTICE.split('\n') if not line.startswith('<note>')),
+                 INTERIM_NOTICE.replace(BACKGROUND_NOTE, '<note></note>'),
+                 INTERIM_NOTICE.replace(BACKGROUND_NOTE, '  ' + BACKGROUND_NOTE),
+                 INTERIM_NOTICE.replace(BACKGROUND_NOTE, BACKGROUND_NOTE + ' '),
+                 INTERIM_NOTICE.replace('finished</summary>', 'finished</summary> '),
+                 INTERIM_NOTICE.replace(BACKGROUND_NOTE, '<output-file>/tmp/x</output-file>\n' + BACKGROUND_NOTE),
+                 INTERIM_NOTICE.replace('still running. It may', 'still running.\nIt may'),
+                 INTERIM_NOTICE.replace('of its own still', 'of its own\nstill'),
+                 INTERIM_NOTICE.replace('its own still', 'its own  still'),
+                 INTERIM_NOTICE.replace('its own still', 'its own\u00a0still'),
+                 INTERIM_NOTICE.replace('This agent stopped', 'The agent stopped'),
+                 '\n'.join((*CASE1, '<result>r</result>', BACKGROUND_NOTE, '</task-notification>')),
+                 FINAL_NOTICE.replace(FINAL_NOTE, '<note>something new</note>'),
+                 KILLED_NOTICE.replace('its own.', 'its own.\u2028'),
+                 INTERIM_NOTICE.replace('still running.', 'still running&#46;'),
+                 INTERIM_NOTICE.replace(BACKGROUND_NOTE, both)]
+        for text in cases:
+            with self.subTest(text=text), self.assertRaisesRegex(
+                    di.EndObservationRefused, '^The <task-notification> note of claude-code 2.1.281 must hold'):
+                di.parse_end_observation(text, *CLAUDE)
+
     def test_end_observation_status_bounded(self) -> None:
-        """The status is one line of the host's own words: no NUL or markup, 1-128 encoded bytes."""
+        """The status is the host's own words: no NUL or markup, 1-128 encoded bytes.
+
+        It is one line because it is read from one line of the notice; a line break inside it ends the header.
+        """
         for status in ('x' * 128, 'completed', '\u00e9' * 21):
             with self.subTest(status=status):
                 self.assertEqual(di.parse_end_observation(notice_with(status), *CLAUDE).status, status)

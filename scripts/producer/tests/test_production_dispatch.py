@@ -84,22 +84,28 @@ class LaunchTests(DispatchCase):
         self.media('draft-a', 'A', 1800.0)
         self.media('draft-b', 'B', 1700.0)
         runner = self.dispatcher()
-        self.assertIsNone(runner.step())
-        # P0 adapt (B-19): both claims launch at once, the most urgent first; the host pool orders capacity.
+        self.assertIsNone(runner.step())                                   # P0 adapt (B-19): both launch at once
         self.assertEqual([command[command.index('--task') + 1] for command in self.spawned], ['draft-b', 'draft-a'])
         self.assertEqual(self.task('draft-b')['claim']['claimer'], DISPATCHER)
         self.assertIsNone(runner.step())                                   # every clip claimed: nothing more
-        self.assertEqual(len(self.spawned), 2)
-        # P0 adapt (B-19, B-1): no slot waits for draft-b's completion, and an acknowledged media task completes
-        # only through its export watchdog (covered by test_production_recovery and test_production_settle).
+        claim = self.task('draft-b')['claim']
+        ref = ClaimRef('draft-b', claim['epoch'], claim['token'])
+        api.attach_task(self.root, BATCH, ref, CHILD)                       # the exporter acknowledged
+        self.rows = table(DISPATCHER, CHILD)
+        with self.assertRaisesRegex(TaskRefused, 'acknowledged media; its export watchdog must'):  # X93, B-1
+            api.complete_task(self.root, BATCH, ref, TaskResult(({'path': '/TEST/b.mp4', 'sha256': 'e' * 64,
+                                                                    'bytes': None},)))
+        self.assertEqual((len(self.spawned), sorted(runner.children)), (2, ['draft-a', 'draft-b']))  # X93, B-19
+        self.children[0].returncode = 0                                     # draft-b's run-media ended
+        self.assertIsNone(runner.step())
+        self.assertEqual((sorted(runner.children), len(self.spawned), self.state('draft-b')), (['draft-a'], 2, 'running'))
 
     def test_least_deadline_is_the_only_order(self) -> None:
         # Minor 13: no forecast fallback on this branch; ready media launch least task deadline first.
         self.media('draft-a', 'A', 1700.0)
         self.media('draft-b', 'B', 1800.0)
         self.assertFalse(hasattr(dispatch, 'launch_order'))
-        self.dispatcher().step()
-        # P0 adapt (B-19): both launch at once; least task deadline first is still the only order.
+        self.dispatcher().step()                                            # P0 adapt (B-19): both launch at once
         self.assertEqual([command[command.index('--task') + 1] for command in self.spawned], ['draft-a', 'draft-b'])
 
     def test_a_running_launch_no_task_owns_takes_a_pool_slot(self) -> None:
@@ -111,10 +117,8 @@ class LaunchTests(DispatchCase):
             self.reserve(self.project)
         self.media('draft-b', 'B')
         self.assertEqual(dispatch.busy_slots(self.record()), 1)
-        self.dispatcher().step()
-        # P0 adapt (B-19): an untasked launch no longer holds a claim slot; the host pool bounds capacity.
-        self.assertEqual((self.state('draft-b'), [c[c.index('--task') + 1] for c in self.spawned]),
-                         ('claimed', ['draft-b']))
+        self.dispatcher().step()                        # P0 adapt (B-19): an untasked launch holds no claim slot
+        self.assertEqual((self.state('draft-b'), [c[c.index('--task') + 1] for c in self.spawned]), ('claimed', ['draft-b']))
 
     def test_an_existing_output_directory_is_refused_at_enqueue(self) -> None:
         # Probes p1/p1b (BLOCKER 1): a request naming an existing attempt directory (a stale delivery, or the

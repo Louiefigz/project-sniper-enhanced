@@ -12,9 +12,11 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import unittest
 from unittest import mock
 
+import test_native_budget_family_admission as family_admission
 from _budget_fixture import FakeClock, approval, fake_clock
-from _native_pool_fixture import fixture_job, fixture_profile, qualify_fixture_profiles
+from _native_pool_fixture import TEST_HOST, fixture_job, fixture_profile, qualify_fixture_profiles
 from studio.native_budget_clock import start_anchor
+from studio.native_budget_family_forecast import pending_seconds
 from studio.native_budget_forecast import (
     attempt_forecast, heavy_lane_capacity, lane_exclusive, launch_fits, route_seconds, slot_count, slot_free_times,
 )
@@ -221,6 +223,29 @@ class MixedOccupancyTests(OccupancyCase):
             demands = forecast_inputs(self.record, 50.0, None, snapshot).demands
         self.assertEqual((fit['slots'], fit['queueDelaySeconds']), (3, round(end - 50.0, 1)))
         self.assertEqual({row.clip_id: row.exclusive for row in demands}['B'], False)
+
+
+class SectionFamilyDemandTests(unittest.TestCase):
+    """A Long whose remaining work is a section family (its real family admission) is still exclusive demand."""
+
+    def setUp(self) -> None:
+        """The family-admission harness (private authority, TEST processes, 1 heavy slot) and a TEST host."""
+        for cached in (heavy_lane_capacity, lane_exclusive):
+            cached.cache_clear()
+            self.addCleanup(cached.cache_clear)
+        self.enterContext(mock.patch('native_work_pool_policy.host_identity', return_value=dict(TEST_HOST)))
+        self.h = family_admission.FamilyAdmissionTests()
+        self.h.setUp()
+        self.addCleanup(self.h.doCleanups)
+
+    def test_a_section_family_long_demand_holds_every_slot(self) -> None:
+        """With one preview child running, the family's pending members are one exclusive Demand."""
+        self.h.reserve('first')
+        record = self.h.h.budget.record()
+        pending = pending_seconds(record, record['clips']['A'])
+        demand = {row.clip_id: row for row in forecast_inputs(record, record['clock']['elapsed']).demands}['A']
+        self.assertTrue(pending)
+        self.assertEqual((demand.durations, demand.exclusive), (pending, True))
 
 
 class OpenShortCapacityTests(OccupancyCase):

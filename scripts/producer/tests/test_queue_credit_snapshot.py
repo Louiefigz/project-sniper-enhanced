@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import json
 import subprocess
 import sys
 import time
@@ -88,6 +89,9 @@ class CreditReadTests(CreditCase):
         self.path.write_bytes(TORN)
         self.now = 1.0
         self.assertEqual(self.delta(), 30.0)
+        self.now = 1.1 + TOLERANCE                  # just past the tolerance: no longer held (review n9)
+        with self.assertRaises(CapacityCreditUnavailable):
+            self.delta()
         self.now = 1.5 + TOLERANCE
         owner = self.owner()
         self.assertTrue(monitor_limits(owner))
@@ -202,6 +206,15 @@ class WatchdogTaskRowTests(CreditCase):
             waited = time.monotonic() - began
         self.assertLess(waited, 0.5)
         self.assertEqual(row, self.record['production']['tasks']['check-1'])
+
+    def test_watchdog_task_rows_are_read_every_poll(self) -> None:
+        """D-O4: task rows are not cached; a stop request written half a second later is seen at the next read."""
+        self.assertFalse(process_watch._task_row(CLAIM)['cancelRequested'])
+        record = json.loads(self.path.read_bytes())
+        record['production']['tasks']['check-1']['cancelRequested'] = True
+        self.put(record)
+        self.now = 0.5
+        self.assertTrue(process_watch._task_row(CLAIM)['cancelRequested'])
 
     def test_watchdog_task_row_has_the_same_tolerance(self) -> None:
         """A failed read keeps the last row for the tolerance; past it the watchdog gets None (its existing stop).

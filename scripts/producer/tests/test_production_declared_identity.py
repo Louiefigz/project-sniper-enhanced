@@ -193,7 +193,9 @@ class DeclaredIdentityTests(unittest.TestCase):
                      KILLED_NOTICE.replace('<status>killed</status>', '<status>killed</status>\n<status>x</status>'),
                      KILLED_NOTICE.replace('a475c0287b60f97d5', 'bad id'), KILLED_NOTICE.replace('\n', '\n  '),
                      FINAL_NOTICE + '\n' + INTERIM_NOTICE, INTERIM_NOTICE + '\n' + FINAL_NOTICE,   # two notices (m1)
-                     KILLED_NOTICE + '\n' + INTERIM_NOTICE]
+                     KILLED_NOTICE + '\n' + INTERIM_NOTICE,
+                     FINAL_NOTICE.rsplit('\n', 1)[0] + '\n' + INTERIM_NOTICE,   # two openings, one closing (d1)
+                     FINAL_NOTICE + '\n</task-notification>']                  # one opening, two closings (d1)
         for text in malformed:
             with self.subTest(text=text), \
                     self.assertRaisesRegex(di.EndObservationRefused, "^--end-observation is the host's verbatim"):

@@ -145,8 +145,9 @@ class RevealCheckTests(unittest.TestCase):
             timed_out = reveal_check(self.options)
         self.assertEqual((timed_out['status'], reveal_defects(timed_out)[0]['code']), ('failed', 'reveal-probe-failed'))
         self.options = RevealProbeOptions(self.project, self.base / 'reveal-5', ())
-        unlisted = {key: value for key, value in result([]).items() if key != 'visibleAtMount'}
-        self.assertEqual(self.check(unlisted)['status'], 'failed')
+        unlisted = self.check({**result([]), 'visibleAtMount': 'TEST not a list'})
+        self.assertEqual(unlisted['status'], 'failed')
+        self.assertIn('reveal probe result is malformed', unlisted['error'])
 
     def test_unknown_or_inconsistent_status_blocks(self) -> None:
         """An entry whose status is unknown, or disagrees with its findings, is one blocking defect (fail closed)."""

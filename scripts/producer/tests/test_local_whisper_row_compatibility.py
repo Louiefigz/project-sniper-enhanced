@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 import unittest
 from unittest import mock
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # scripts/, as test_local_whisper.py does (X149)
 
 import local_whisper_parser as production
 import local_whisper_token_parser as experimental

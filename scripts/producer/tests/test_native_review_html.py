@@ -4,10 +4,11 @@ import copy
 import sys
 import unittest
 from fractions import Fraction
+from html.parser import HTMLParser
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
-from studio.native_review_html import adapt_html, canvas_clock, decimal_text, frame_points, without_audio
+from studio.native_review_html import AUDIO_HF_ID, adapt_html, canvas_clock, decimal_text, frame_points, without_audio
 
 
 def fixture(rate: str = '25/1', total: int = 25, name: str = 'native-canvas') -> tuple[str, dict]:
@@ -23,6 +24,31 @@ def fixture(rate: str = '25/1', total: int = 25, name: str = 'native-canvas') ->
         '<p>Unchanged captions and graphics</p></div><script>const tl=gsap.timeline({paused:true});'
         f'window.__timelines=window.__timelines||{{}};window.__timelines["{name}"]=tl;</script></body></html>')
     return source, canvas
+
+
+class UnstampedElements(HTMLParser):
+    """Body elements pinned Studio would stamp (and so rewrite the file for): its ensureHfIds walk."""
+
+    EXCLUDED = {'script', 'style', 'template', 'meta', 'link', 'noscript', 'base'}
+
+    def __init__(self, source: str) -> None:
+        """Walk the whole document once."""
+        super().__init__()
+        self.body, self.missing = False, []
+        self.feed(source)
+
+    def handle_starttag(self, tag: str, attrs: list) -> None:
+        """Record an element inside <body> without a selection id."""
+        self.body = self.body or tag == 'body'
+        if self.body and tag not in self.EXCLUDED | {'body'} and not dict(attrs).get('data-hf-id'):
+            self.missing.append(dict(attrs).get('id', tag))
+
+
+def stamped(source: str) -> str:
+    """The TEST fixture as a post-fix build leaves it: every authored element carries a selection id."""
+    for name in ('native-canvas', 'source-crop-0-0', 'source-0-0', 'spoken-source'):
+        source = source.replace(f'id="{name}"', f'id="{name}" data-hf-id="hf-{name}"', 1)
+    return source.replace('<p>', '<p data-hf-id="hf-p-0">', 1)
 
 
 class NativeReviewHtmlTests(unittest.TestCase):
@@ -57,6 +83,18 @@ class NativeReviewHtmlTests(unittest.TestCase):
         for rate in ['0/1', '1/0', '-25/1', '61/1']:
             with self.subTest(rate=rate), self.assertRaises((ValueError, ZeroDivisionError)):
                 canvas_clock({**canvas, 'frameRate': rate})
+
+    def test_inserted_dialogue_carries_a_studio_selection_id(self) -> None:
+        """A review fork of a stamped build gives Studio nothing to stamp, so opening it rewrites nothing."""
+        source, canvas = fixture()
+        self.assertEqual(UnstampedElements(stamped(source)).missing, [])
+        self.assertIn('spoken-source', UnstampedElements(source).missing)
+        adapted, proof = adapt_html(stamped(source), canvas)
+        self.assertEqual(UnstampedElements(adapted).missing, [])
+        self.assertEqual(adapted.count(f'data-hf-id="{AUDIO_HF_ID}"'), 1)
+        self.assertEqual(proof['audio']['studioSelectionId'], AUDIO_HF_ID)
+        with self.assertRaises(ValueError):
+            adapt_html(stamped(source).replace('hf-p-0', AUDIO_HF_ID), canvas)
 
     def test_adapted_and_noncontiguous_projects_reject(self) -> None:
         """Adapted and noncontiguous projects reject."""

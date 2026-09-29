@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_run import NativeRun
-from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_run_config import NativeRunConfig, local_environment, owner_file_pins
 from studio.native_runtime import digest
 
 
@@ -181,6 +181,12 @@ class NativeRunConfigTests(unittest.TestCase):
         self.acquire.assert_not_called()
         self.launch.assert_not_called()
         self.read.assert_not_called()
+
+
+    def test_owner_file_pins_bind_the_digest_memo(self) -> None:
+        """(X132 mi4) Every owner digest runs through native_digest_memo, so every owner pins its bytes."""
+        memo = Path(__file__).resolve().parents[1] / 'studio' / 'native_digest_memo.py'
+        self.assertEqual(owner_file_pins().get(str(memo)), digest(memo))
 
 
 if __name__ == '__main__':

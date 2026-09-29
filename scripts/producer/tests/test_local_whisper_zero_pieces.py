@@ -4,6 +4,9 @@ from __future__ import annotations
 import unittest
 import json
 from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # scripts/, as test_local_whisper.py does (X149)
 
 from local_whisper_token_parser import WhisperParseError, parse_whisper_json
 from test_local_whisper_tokens import _payload, _token, _words

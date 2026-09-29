@@ -4,10 +4,15 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
+
+# scripts/ holds the shared transcript modules; insert it here, as test_local_whisper.py does, so this module
+# imports alone and never relies on an earlier module having put it on sys.path (X149).
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from ingest_transcript_reuse import rescan_with_transcripts
 from ingest_retained_inventory import retained_primary_files

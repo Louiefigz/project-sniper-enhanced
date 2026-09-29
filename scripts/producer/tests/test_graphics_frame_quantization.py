@@ -50,7 +50,11 @@ class FrameQuantizationTests(unittest.TestCase):
         self.assertEqual(math.ceil(work.duration * 30.0), 58)
         self.assertEqual(rounded_frame_index(work.duration, 30.0), 58)
         self.assertEqual(entry["outEnd"], 9.10)
-        self.assertTrue(render._terminal_clear_required(work))
+        # A fades-clean comp must end clear. The class is patched explicitly (X149): the real
+        # comp_capabilities.json measures line-swap as partial-fade, and this test must not depend on the
+        # hermetic matrix another module's _common import installs during discovery.
+        with mock.patch.object(render, "measured_fade_class", return_value="fades-clean"):
+            self.assertTrue(render._terminal_clear_required(work))
 
     def test_word_edges_extend_to_placement_span(self) -> None:
         entry = _catalog_entry(7.16, 9.084)

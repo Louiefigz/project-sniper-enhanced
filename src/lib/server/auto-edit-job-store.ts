@@ -22,6 +22,8 @@ import {
   type CheckpointUpdate,
   type NewAutoEditJobArgs,
 } from "./auto-edit-job-types";
+import { assertNativeRouteHandoffCurrent } from
+  "@/lib/producer/contracts/native-route-handoff";
 export { autoEditRequestKey, fileSha256 } from "./auto-edit-hash";
 export {
   durableProcessAlive,
@@ -217,6 +219,7 @@ export function advanceAutoEditJob(
       ...(update.unresolvedFindingIds
         ? { unresolvedFindingIds: update.unresolvedFindingIds } : {}),
       ...(update.finalHash ? { finalHash: update.finalHash } : {}),
+      ...(update.nativeHandoff ? { nativeHandoff: update.nativeHandoff } : {}),
     });
   });
 }
@@ -278,12 +281,16 @@ function finishJob(
       ...job,
       status: update.status,
       message: update.message,
-      error: update.status === "complete" ? undefined : update.message,
+      error: ["failed", "interrupted"].includes(update.status)
+        ? update.message : undefined,
       updatedAt: new Date().toISOString(),
       ...(orphanedWorkerGroup ? { orphanedWorkerGroup } : {}),
       ...(orphanedWorkerGroup && job.workerIdentity
         ? { orphanedWorkerIdentity: job.workerIdentity } : {}),
       ...(update.status === "complete" ? { checkpoint: "complete" as const } : {}),
+      ...(update.status === "awaiting_native_author"
+        ? { workerPid: undefined, workerIdentity: undefined,
+          orphanedWorkerGroup: undefined, orphanedWorkerIdentity: undefined } : {}),
     });
   });
 }
@@ -303,6 +310,24 @@ export function interruptAutoEditJob(
 
 export function completeAutoEditJob(jobPath: string, token: string): AutoEditJob {
   return finishJob(jobPath, token, { status: "complete", message: "Auto Edit completed successfully." });
+}
+
+/** Stop after durable native dispatch; this status never implies a render. */
+export function pauseAutoEditForNativeAuthor(
+  jobPath: string,
+  token: string,
+): AutoEditJob {
+  const current = requiredJob(jobPath, token);
+  if (current.status === "awaiting_native_author") return current;
+  if (current.status !== "running" || current.checkpoint !== "route_dispatched"
+      || !current.nativeHandoff) {
+    throw new StaleAutoEditWorkerError(
+      "Only a controller-dispatched native route may await its native author",
+    );
+  }
+  assertNativeRouteHandoffCurrent(current.nativeHandoff);
+  return finishJob(jobPath, token, { status: "awaiting_native_author",
+    message: "Native route inputs are frozen and awaiting the native scene author; no final video has been rendered." });
 }
 
 export function checkpointReached(current: AutoEditCheckpoint, target: AutoEditCheckpoint): boolean {

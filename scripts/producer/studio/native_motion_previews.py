@@ -9,6 +9,7 @@ from guided_opening_picture import observe_picture
 from guided_opening_mux import mux_ranges
 from studio.native_review_regions import region_packet, preview_windows
 from studio.native_preview_history import prior_preview, preview_chain, discover_preview
+from studio.native_long_scope import request_preview_windows
 from studio.native_runtime import digest
 from studio.native_short_dialogue import clock
 from studio.native_stage_evidence import require
@@ -50,17 +51,27 @@ def bind_preview_options(request: dict, args: object) -> dict:
 
 def require_motion_previews(request: dict) -> dict:
     """No direct picture worker may omit the current continuous-preview result."""
+    value = current_motion_previews(request)
+    if request.get('sectionProduction'):
+        from studio.production.sections import require_all_early_reviews
+        require_all_early_reviews(request)
+    else:
+        from studio.native_motion_review import require_preview_review
+        require_preview_review(request, value['packet'])
+    return value
+
+
+def current_motion_previews(request: dict) -> dict:
+    """Check current preview media and coverage before asking a reviewer for judgment."""
     value = bound_json(Path(request['output']) / 'motion-previews.json')
     require(value.get('status') == STATUS and value['packet'] == region_packet(request)
             and value.get('priorPreview') == request.get('previewFrom'), 'Moving previews are absent or stale')
     prior = prior_preview(Path(request['previewFrom']), request['project']) if request.get('previewFrom') else None
-    windows = preview_windows(value['packet'], prior['packet'] if prior else None)
+    windows = request_preview_windows(request, value['packet'], prior['packet'] if prior else None)
     require([row['absoluteFrameRange'] for row in value['clips']] ==
             [[row['startFrame'], row['endFrame']] for row in windows], 'Moving previews omit changed regions')
     for row in value['clips']:
         require(digest(Path(row['path'])) == row['sha256'], 'Moving preview bytes changed')
-    from studio.native_motion_review import require_preview_review
-    require_preview_review(request, value['packet'])
     return value
 
 
@@ -117,7 +128,7 @@ def render_previews(request: dict, plan: dict) -> dict:
     packet = region_packet(request)
     prior = prior_preview(Path(request['previewFrom']), request['project']) if request.get('previewFrom') else None
     previous = prior['packet'] if prior else None
-    windows = preview_windows(packet, previous)
+    windows = request_preview_windows(request, packet, previous)
     write_new(root / 'motion-preview-input.json', {'packet': packet, 'windows': windows})
     clips = []
     for index, window in enumerate(windows):
@@ -137,6 +148,8 @@ def render_previews(request: dict, plan: dict) -> dict:
               'pictureFramesReused': sum(row['endFrame'] - row['startFrame'] for index, row in enumerate(windows)
                   if f'preview-picture-{index}' in request.get('previewSectionDonors', {})),
               'fullProgramMasterUsed': True, 'editorialReview': 'pending', 'finalQcRequired': True}
+    from studio.native_preview_schedule import schedule_summary
+    result.update(schedule_summary(packet, previous))
     write_new(root / 'motion-previews.json', result)
     return result
 

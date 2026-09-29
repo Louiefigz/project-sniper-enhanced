@@ -1,5 +1,6 @@
 import {
-  completeAutoEditJob, readAutoEditJob, type AutoEditJob,
+  completeAutoEditJob, pauseAutoEditForNativeAuthor, readAutoEditJob,
+  type AutoEditJob,
 } from "@/lib/server/auto-edit-job-store";
 import { pauseAutoEditForCutApproval } from "@/lib/server/auto-edit-cut-pause-store";
 import {
@@ -36,6 +37,11 @@ export async function settleWorkerExecution(input: WorkerExecution): Promise<voi
       await sealBootstrapPause(current, result.request, preview);
       const job = pauseAutoEditForCutApproval(input.jobPath, input.token, result.request, preview);
       producerRun(job.ctx.dir); // Project the durable waiting state into the run mirror.
+      return;
+    }
+    if (result.status === "awaiting_native_author") {
+      const job = pauseAutoEditForNativeAuthor(input.jobPath, input.token);
+      producerRun(job.ctx.dir);
       return;
     }
     if (result.status !== "completed") throw new Error("Auto Edit pipeline returned no explicit terminal outcome");

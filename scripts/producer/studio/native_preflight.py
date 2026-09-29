@@ -45,6 +45,11 @@ def _tools() -> dict:
     return value
 
 
+def validator_state() -> dict:
+    """Expose the exact validator identity used in frozen preflight inputs."""
+    return _tools()
+
+
 def _envelope(value: dict, expected: str) -> None:
     """Reject malformed worker metadata and unperformed-work misstatements."""
     if type(value) is not dict or value.get('scope') != 'native-static-preflight-only' \

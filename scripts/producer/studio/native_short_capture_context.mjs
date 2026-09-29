@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {nativeSourceCacheEntry,prepareNativeSourceCache,nativeSourceFileIdentity,nativeSourceMetadata} from './native_source_cache.mjs';
 import {nativeOriginalMediaGuard} from './native_original_media.mjs';
-import {prepareLongSources} from './native_long_sources.mjs';
+import {prepareLongSources,prepareNativeSources,CONTENT_SOURCE_MODES} from './native_long_sources.mjs';
 export {nativeSourceCacheEntry} from './native_source_cache.mjs';
 
 export const NATIVE_CAPTURE_BATCH_FRAMES = 48;
@@ -90,8 +90,8 @@ export async function createNativeCaptureContext(request, work, sdkOverride) {
     sourceHtmlSha256:nativeCaptureHash(path.join(project,'index.html')),runtimeLibrarySha256:nativeCaptureHash(library)};
 }
 
-/** Compile once and admit only the exact complete retained source-frame entries. */
-export async function prepareNativeCaptureContext(context) {
+/** Compile once with the qualified screenshot configuration. */
+export async function compileNativeCapture(context) {
   const {sdk,project,work,fps,plan,rate,log}=context;
   context.cfg=sdk.resolveConfig({chromePath:process.env.HYPERFRAMES_BROWSER_PATH,
     browserGpuMode:'software',forceScreenshot:true,useDrawElement:false,lowMemoryMode:true,
@@ -102,18 +102,41 @@ export async function prepareNativeCaptureContext(context) {
     needsAlpha:false,log,assertNotAborted:()=>{},failClosedFontFetch:true});
   assert.equal(context.result.composition.width,context.width);assert.equal(context.result.composition.height,context.height);
   assert.ok(Math.abs(context.result.composition.duration-plan.canvas.totalFrames/rate)<=1e-6);
+  return context;
+}
+
+/** Acquire the adapter's source evidence through its existing source owner. */
+export async function acquireNativeCaptureSources(context) {
   if(context.request.adapter==='native-long')await prepareLongSources(context);
+  else if(CONTENT_SOURCE_MODES.includes(context.request.sourceCacheMode))await prepareNativeSources(context);
   else await prepareNativeSourceCache(context);
+  return context.sourceEntries;
+}
+
+/** Compile once and admit only complete retained source frames. */
+export async function prepareNativeCaptureContext(context) {
+  await compileNativeCapture(context);
+  await acquireNativeCaptureSources(context);
+  return finalizeNativeCaptureContext(context);
+}
+
+/** Build the existing exact lookup after an independently admitted source acquisition. */
+export async function finalizeNativeCaptureContext(context) {
+  const {sdk,work,rate}=context;
   const extracted=[];
   for(const video of context.result.composition.videos){
-    const long=context.longExtracted?.find(row=>row.videoId===video.id);
-    const cached=long?{source:long.srcPath,entry:long.outputDir,names:[...long.framePaths.keys()],framePaths:long.framePaths,
-      keyBlob:{source:long.srcPath,mediaStart:video.mediaStart,duration:video.end-video.start}}:nativeSourceCacheEntry(context,video);
+    const shared=context.request.adapter==='native-long'||CONTENT_SOURCE_MODES.includes(context.request.sourceCacheMode);
+    const cached=shared?context.sourceEntries.get(video.id):nativeSourceCacheEntry(context,video);
+    assert.ok(cached,'Native source acquisition omitted a compiled video');
+    if(shared)assert.match(cached.frameDigest??'',/^[a-f0-9]{64}$/,'Shared source frames lack their admitted digest');
     const metadata=await nativeSourceMetadata(context,cached.source);
     extracted.push({videoId:video.id,srcPath:cached.source,outputDir:cached.entry,framePattern:'frame_%05d.png',
-      fps:rate,totalFrames:cached.names.length,metadata,framePaths:cached.framePaths});
+      fps:rate,totalFrames:cached.names.length,metadata,framePaths:cached.framePaths,...(shared?{ownedByLookup:true}:{})});
+    const sourceSha256=await nativeCaptureSourceHash(context,cached.source);
+    if(shared)assert.equal(sourceSha256,cached.contentBlob.source,'Source bytes differ from their admitted frames');
     context.cacheEntries.push({video,keyBlob:cached.keyBlob,path:cached.entry,count:cached.names.length,
-      width:metadata.width,height:metadata.height,sourceSha256:await nativeCaptureSourceHash(context,cached.source)});
+      width:metadata.width,height:metadata.height,sourceSha256,
+      ...(shared?{contentKey:cached.contentKey,frameDigest:cached.frameDigest}:{})});
   }
   context.compiledSha256=nativeCaptureHash(path.join(work,'compiled/index.html'));
   context.batchPlan=nativeCaptureBatchPlan(context.cacheEntries,context.result.composition.videos.length);
@@ -149,7 +172,7 @@ export async function withNativeCaptureSession(context, options, action) {
     assert.ok(server.frameTransport);
     assert.equal(context.cacheEntries.length,context.result.composition.videos.length,'Native source transport requires every compiled video');
     // Zero-video picture keeps the transport unconfigured: accidental resolution stays denied.
-    if(context.cacheEntries.length)server.frameTransport.configure(context.cacheEntries.map(entry=>entry.path));
+    if(context.cacheEntries.length)server.frameTransport.configure(context.transportRoots??context.cacheEntries.map(entry=>entry.path));
     const injector=sdk.createVideoFrameInjector(context.lookup,{frameDataUriCacheLimit:32,
       frameDataUriCacheBytesLimitMb:64,strictFrameDecode:true,frameSrcResolver:file=>server.frameTransport.resolve(file)});
     session=await sdk.createCaptureSession(server.url,options.framesDir,nativeCaptureOptions(context),injector,context.cfg);

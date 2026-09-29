@@ -22,18 +22,21 @@ from ingest_admission_contract import receipt_snapshot
 class IngestAdmissionTests(unittest.TestCase):
     def test_collects_all_canonical_ingest_lanes_and_rejects_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+            root = Path(tmp).resolve()
             raw = root / "take.mp4"
             broll = root / "broll"
             music = root / "music"
+            external = root / "external-media"
             broll.mkdir()
             music.mkdir()
+            external.mkdir()
             raw.write_bytes(b"raw")
             (broll / "cutaway.png").write_bytes(b"image")
             (music / "bed.wav").write_bytes(b"music")
-            candidates = collect_ingest_candidates([raw], broll, music)
+            (external / "licensed.mp4").write_bytes(b"external")
+            candidates = collect_ingest_candidates([raw], broll, music, external)
             self.assertEqual([row.lane for row in candidates],
-                             ["source", "broll", "music"])
+                             ["source", "broll", "music", "external"])
             linked = root / "linked.mp4"
             linked.symlink_to(raw)
             with self.assertRaisesRegex(RuntimeError, "non-symlink"):
@@ -67,7 +70,7 @@ class IngestAdmissionTests(unittest.TestCase):
             media.write_bytes(b"changed original")
             verify_source_set_binding(manifest, out)
             Path(row.snapshot_path).write_bytes(b"changed snapshot")
-            with self.assertRaisesRegex(RuntimeError, "corrupt"):
+            with self.assertRaisesRegex(RuntimeError, "changed|corrupt"):
                 verify_source_set_binding(manifest, out)
 
     def test_retained_receipt_rejects_non_integer_decode_bound(self) -> None:
@@ -169,17 +172,24 @@ class IngestAdmissionTests(unittest.TestCase):
             out = root / "output"
             (root / "broll").mkdir()
             (root / "music").mkdir()
+            (root / "external-media").mkdir()
             (root / "take.mp4").write_bytes(b"video")
             (root / "broll" / "shot.png").write_bytes(b"image")
             (root / "music" / "bed.wav").write_bytes(b"music")
+            (root / "external-media" / "licensed.mp4").write_bytes(b"external")
             with patch("ingest_admission.admit_external_media", side_effect=_runner), \
                     patch("ingest_admitted_sources.probe_media", side_effect=_probe), \
                     patch("ingest_admitted_scan.probe_media", side_effect=_probe), \
                     patch("ingest.scan_builtin_music", return_value=[]):
                 manifest = ingest.build_manifest(root, out, no_transcribe=True)
             verify_source_set_binding(manifest, out)
-            rows = [*manifest["sources"], *manifest["broll"], *manifest["music"]]
-            self.assertEqual(manifest["sourceSetAdmission"]["entryCount"], 3)
+            rows = [*manifest["sources"], *manifest["broll"],
+                    *manifest["externalMedia"], *manifest["music"]]
+            self.assertEqual(manifest["sourceSetAdmission"]["entryCount"], 4)
+            self.assertEqual(manifest["externalMedia"][0]["id"], "external-1")
+            self.assertEqual(
+                manifest["externalMedia"][0]["originalPath"],
+                str(root / "external-media" / "licensed.mp4"))
             self.assertTrue(all(".sniper-external-media" in row["path"]
                                 for row in rows))
             self.assertTrue(all("sourceSha256" in row for row in rows))

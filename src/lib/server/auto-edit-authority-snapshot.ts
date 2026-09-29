@@ -62,7 +62,13 @@ function jsonValue(filePath: string): unknown {
 function storedIntent(ctx: AutoEditCtx): unknown {
   const project = jsonValue(path.join(path.dirname(ctx.dir), "project.json"));
   if (!project || typeof project !== "object" || Array.isArray(project)) return null;
-  return (project as Record<string, unknown>).intent ?? null;
+  const row = project as Record<string, unknown>;
+  const intent = row.resolvedIntent ?? row.intent ?? null;
+  if (row.visualPlanPolicy === undefined) return intent;
+  return {
+    intent,
+    visualPlanPolicy: row.visualPlanPolicy,
+  };
 }
 
 function transcriptFiles(ctx: Pick<AutoEditCtx, "manifestPath" | "transcriptsDir">): FileAuthority[] {
@@ -108,10 +114,25 @@ function referenceFiles(ctx: AutoEditCtx): FileAuthority[] {
     study.deepStudyPath,
     ...study.representativeFrames,
     path.join(studyOutputDir, "reference.json"),
+    path.join(studyOutputDir, "reference_style_vocabulary.json"),
     path.join(studyOutputDir, "fingerprint.json"),
     path.join(study.dir, "reference-source.json"),
   ];
-  return [...new Set(candidates)].map((item) => logicalFile(item, study.dir));
+  const files = [...new Set(candidates)].filter(existsSync).map((item) => logicalFile(item, study.dir));
+  const vocabulary = path.join(studyOutputDir, "reference_style_vocabulary.json");
+  const value = existsSync(vocabulary) ? jsonValue(vocabulary) : null;
+  files.push(...styleVocabularyInputFiles(value));
+  return files;
+}
+
+function styleVocabularyInputFiles(value: unknown): FileAuthority[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const inputs = (value as Record<string, unknown>).inputPins;
+  if (!inputs || typeof inputs !== "object" || Array.isArray(inputs)) return [];
+  return Object.keys(inputs as Record<string, unknown>).sort().map((file, index) => ({
+    path: `style-vocabulary-input-${index + 1}:${path.basename(file)}`,
+    hash: fileSha256(file) ?? null,
+  }));
 }
 
 function repositoryRoot(): string {

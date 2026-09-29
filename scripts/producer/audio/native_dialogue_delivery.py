@@ -8,6 +8,7 @@ import subprocess
 import time
 from dataclasses import dataclass, replace
 from pathlib import Path
+from typing import Callable
 
 from audio.audio_mix_delivery import _observe_final_audio, measure_delivery
 from audio.aac_peak_candidates import AAC_PEAK_CANDIDATE_POLICY, corrected_peak_profile
@@ -47,6 +48,7 @@ class NativeDialogueDelivery:
     review_sections: tuple[dict, ...] = ()
     prepared_master: tuple[Path, str] | None = None
     prepared_donor: tuple[Path, str] | None = None
+    candidate_hook: Callable[[int], None] | None = None
 
 
 def _stable(request: NativeDialogueDelivery) -> None:
@@ -203,6 +205,8 @@ def _finish_candidates(request: NativeDialogueDelivery, receipt: dict, tools: tu
     profile = request.profile
     for index in range(1, AAC_PEAK_CANDIDATE_POLICY["maximumCandidates"] + 1):
         _stable(request)
+        if request.candidate_hook is not None:
+            request.candidate_hook(index)
         directory = request.directory / f"attempt-{index:02d}"
         directory.mkdir(exist_ok=False)
         current = replace(request, directory=directory, profile=profile,

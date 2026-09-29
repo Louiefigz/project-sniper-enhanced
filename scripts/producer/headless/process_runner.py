@@ -10,7 +10,7 @@ import stat
 import subprocess
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from contextvars import ContextVar
 from dataclasses import dataclass
 from typing import Any, Iterator
@@ -67,6 +67,11 @@ def _ledger_note(event: str, proc: subprocess.Popen | None, command: tuple[str, 
         os.close(handle)
 
 
+def note_owned_session(proc: subprocess.Popen, command: tuple[str, ...]) -> None:
+    """Record a child an owner started in its own session outside this runner (raises when unrecorded)."""
+    _ledger_note("spawned", proc, command)
+
+
 @dataclass(frozen=True)
 class ProcessRequest:
     """Closed inputs for one secret-free text subprocess."""
@@ -112,11 +117,9 @@ def _validate(request: ProcessRequest) -> None:
         raise RuntimeError("bounded process requires empty stdin and a valid byte cap")
     if request.decode_output is not True and (request.decode_output is not False or request.max_output_bytes is None):
         raise RuntimeError("undecoded output requires a byte-capped process")
-    command_ok = (request.command and all(isinstance(item, str) and item
-                                          for item in request.command)
+    command_ok = (request.command and all(isinstance(item, str) and item for item in request.command)
                   and os.path.isabs(request.command[0]))
-    environment_ok = all(isinstance(key, str) and isinstance(value, str)
-                         for key, value in request.environment.items())
+    environment_ok = all(isinstance(key, str) and isinstance(value, str) for key, value in request.environment.items())
     if (not command_ok or not isinstance(request.stdin_text, str)
             or not os.path.isabs(request.cwd) or not os.path.isdir(request.cwd)
             or not environment_ok or not 0 < request.timeout_seconds <= 3600
@@ -125,12 +128,8 @@ def _validate(request: ProcessRequest) -> None:
 
 
 def _signal_group(group_id: int, value: signal.Signals) -> None:
-    try:
+    with suppress(ProcessLookupError, PermissionError):
         os.killpg(group_id, value)
-    except ProcessLookupError:
-        pass
-    except PermissionError:
-        pass
 
 
 def _group_exists(group_id: int) -> bool:
@@ -160,11 +159,6 @@ def _terminate_group(proc: subprocess.Popen, grace: float) -> None:
         time.sleep(0.01)
     if _group_exists(group_id):
         raise ProcessReapError("child process group remains after forced reap")
-
-
-def _reap_success_descendants(proc: subprocess.Popen, grace: float) -> None:
-    if _group_exists(proc.pid):
-        _terminate_group(proc, grace)
 
 
 def _capture_chunk(selector: selectors.BaseSelector, event: selectors.SelectorKey,
@@ -238,15 +232,14 @@ def run_text(request: ProcessRequest) -> subprocess.CompletedProcess:
         stdout, stderr = (_capture_bounded(proc, request)
             if request.max_output_bytes is not None else proc.communicate(
                 request.stdin_text, timeout=request.timeout_seconds))
-    except subprocess.TimeoutExpired as exc:
+    except BaseException as exc:
         _terminate_group(proc, request.termination_grace_seconds)
         _ledger_note("reaped", proc, request.command)
-        raise ProcessDeadlineError("child process group exceeded its deadline") from exc
-    except BaseException:
-        _terminate_group(proc, request.termination_grace_seconds)
-        _ledger_note("reaped", proc, request.command)
+        if isinstance(exc, subprocess.TimeoutExpired):
+            raise ProcessDeadlineError("child process group exceeded its deadline") from exc
         raise
-    _reap_success_descendants(proc, request.termination_grace_seconds)
+    if _group_exists(proc.pid):  # a successful leader may leave descendants in its group: reap them too
+        _terminate_group(proc, request.termination_grace_seconds)
     _ledger_note("reaped", proc, request.command)
     return subprocess.CompletedProcess(
         list(request.command), proc.returncode, stdout, stderr)

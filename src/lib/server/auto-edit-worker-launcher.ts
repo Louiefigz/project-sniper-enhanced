@@ -8,6 +8,8 @@ import {
 } from "./auto-edit-job-store";
 import { setProducerRunOwner } from "./producer-run-registry";
 import { markHumanCutWorker } from "./human-cut-continuation";
+import { executablePipelineRoot } from
+  "./auto-edit-pipeline-authority";
 
 type SpawnWorker = (command: string, args: readonly string[], options: SpawnOptions) => ChildProcess;
 
@@ -40,6 +42,8 @@ export async function launchDetachedAutoEditWorker(
   const job = readAutoEditJob(jobPath);
   if (!job || !["running", "cut_accepted"].includes(job.status)) throw new Error(`No runnable Auto Edit job at ${jobPath}`);
   if (job.orphanedWorkerGroup) throw new Error("Previous Auto Edit worker processes are still stopping");
+  if (!job.ctx.pipeline) throw new Error("Auto Edit worker requires captured pipeline authority");
+  const pipelineRoot = executablePipelineRoot(job.ctx.dir, job.ctx.pipeline);
   const invocation = detachedWorkerInvocation(
     jobPath,
     job.token,
@@ -57,7 +61,7 @@ export async function launchDetachedAutoEditWorker(
       cwd: invocation.cwd,
       env: {
         ...process.env,
-        ...(job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT: job.ctx.pipeline.snapshotRoot } : {}),
+        SNIPER_PIPELINE_ROOT: pipelineRoot,
         SNIPER_RUNTIME_REPO_ROOT: invocation.cwd,
       },
       detached: true,

@@ -62,6 +62,17 @@ class ManagedPreviewTests(unittest.TestCase):
         """Use real manager/lease/registry logic for a fixture draft."""
         return managed.open_preview(str(self.projects[index]), 3990 + index)
 
+    def heavy_members(self) -> list[dict]:
+        """Inspect the real pool members; incomplete startup retains its actual reservation."""
+        return [json.loads(file.read_text()) for file in
+                (self.root / 'registry/pool-v1').glob('m-*.json')]
+
+    def assert_heavy_quarantined(self) -> None:
+        """An uncertain preview launch must block a later render, not just leave a marker."""
+        self.assertTrue(self.heavy_members())
+        with self.assertRaisesRegex(work.NativeWorkBusy, 'unverified|quarantined'):
+            work.NativeWorkLease.acquire('heavy', str(self.projects[0]))
+
     def stop_signal(self, pid: int, selected: object) -> None:
         """Simulate only the addressed inert server exiting on its signal."""
         self.identities.pop(pid)
@@ -141,7 +152,7 @@ class ManagedPreviewTests(unittest.TestCase):
         stop.assert_not_called()
         self.assertIn(first.pid, self.identities)
         self.assertEqual(self.mocks[3].call_count, 1)
-        self.assertFalse((self.root / 'registry/heavy.active.json').exists())
+        self.assertFalse(self.heavy_members())
 
     def test_wrong_runtime_after_launch_keeps_unverified_fence(self) -> None:
         """Do not publish readiness if the launched process points at another SDK."""
@@ -149,7 +160,7 @@ class ManagedPreviewTests(unittest.TestCase):
             '/stock/hyperframes/dist/cli.js', project, port, **options)
         with self.assertRaisesRegex(StudioServerError, 'does not use the qualified'):
             self.open()
-        self.assertTrue((self.root / 'registry/heavy.active.json').exists())
+        self.assert_heavy_quarantined()
         value = json.loads((self.root / 'registry/preview.json').read_text())
         self.assertEqual(value['state'], 'launching')
 
@@ -182,7 +193,7 @@ class ManagedPreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(StudioServerError, 'admission refused'):
             self.open()
         self.mocks[3].assert_not_called()
-        self.assertFalse((self.root / 'registry/heavy.active.json').exists())
+        self.assertFalse(self.heavy_members())
 
     def test_normal_large_host_admits_cache_and_compression_without_rebuilding(self) -> None:
         """Preview startup shares export's measured admission instead of a literal-free gate."""
@@ -196,7 +207,7 @@ class ManagedPreviewTests(unittest.TestCase):
         self.assertEqual(policy.maximum_owned_gib, 16)
         self.assertEqual(policy.maximum_process_gib, 8)
         self.assertEqual((self.projects[0] / 'index.html').read_bytes(), original)
-        self.assertFalse((self.root / 'registry/heavy.active.json').exists())
+        self.assertFalse(self.heavy_members())
 
     def test_shared_admission_rejects_unsafe_or_stale_readings_before_spawn(self) -> None:
         """Relaxing historical cache/compression limits preserves active host safety gates."""
@@ -209,7 +220,7 @@ class ManagedPreviewTests(unittest.TestCase):
                     self.assertRaisesRegex(StudioServerError, 'admission refused'):
                 self.open()
             self.mocks[3].assert_not_called()
-            self.assertFalse((self.root / 'registry/heavy.active.json').exists())
+            self.assertFalse(self.heavy_members())
             self.assertFalse((self.root / 'registry/preview.json').exists())
 
     def test_failed_cleanup_keeps_record_and_refuses_replacement(self) -> None:
@@ -235,7 +246,7 @@ class ManagedPreviewTests(unittest.TestCase):
         self.mocks[3].side_effect = RuntimeError('TEST uncertain startup')
         with self.assertRaisesRegex(RuntimeError, 'uncertain startup'):
             self.open()
-        self.assertTrue((self.root / 'registry/heavy.active.json').exists())
+        self.assert_heavy_quarantined()
         with self.assertRaisesRegex(StudioServerError, 'unverified'):
             self.open()
 

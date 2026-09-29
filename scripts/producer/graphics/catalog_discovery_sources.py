@@ -13,8 +13,10 @@ from graphics import comp_capabilities
 from graphics import comp_capability_artifact as artifact
 from graphics.template_contract import composition_dimensions, declared_variables
 from graphics.catalog_discovery_validation import (  # noqa: F401 (legacy exports)
-    ITEM_TYPES, NAME_RE, STUDY_TEXT, index_record_issue, study_record_issue, validated_lock,
+    ITEM_TYPES, MAX_ROWS, NAME_RE, STUDY_TEXT, index_record_issue, study_record_issue, validated_lock,
 )
+from graphics.catalog_resource_index import load_resource_index
+from graphics.catalog_snapshot_registry import resolve_snapshot
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PIPELINE_ROOT = os.environ.get(
@@ -28,6 +30,7 @@ LOCK_NAME = "hyperframes-catalog-lock.json"
 _TYPE_DIRS = {"block": ("compositions",),
               "component": ("compositions", "components")}
 _HEADER_MAX = 1200
+_JSON_MAX_BYTES = 4 * 1024 * 1024
 # The literal a ported template carries to declare where it came from.
 PROVENANCE_MARK = "vendor/hyperframes-catalog"
 # Port waves A/B: require declared provenance AND an indexed upstream name.
@@ -50,6 +53,7 @@ class DiscoveryPaths:
     catalog_dir: str = CATALOG_DIR
     study_path: str = STUDY_PATH
     capability_path: str | None = None
+    snapshot_id: str | None = None
 
     def capability(self) -> str:
         """Default to the same measured artifact as the plan-time predicates."""
@@ -69,6 +73,8 @@ class CatalogSources:
     ready: dict[str, dict]
     row_issues: dict[str, str]
     artifact_error: str
+    snapshot_id: str
+    resources: dict[str, dict]
     issues: list[str]
 
 
@@ -76,9 +82,14 @@ def _read_json(path: str, label: str) -> object:
     """Parse one regular JSON file or fail loudly (no fallback source)."""
     if not os.path.isfile(path) or os.path.islink(path):
         raise RuntimeError(f"{label} is not a regular file: {path}")
+    if os.path.getsize(path) > _JSON_MAX_BYTES:
+        raise RuntimeError(f"{label} exceeds the bounded read size: {path}")
     try:
-        with open(path, encoding="utf-8") as handle:
-            return json.load(handle)
+        with open(path, "rb") as handle:
+            content = handle.read(_JSON_MAX_BYTES + 1)
+        if len(content) > _JSON_MAX_BYTES:
+            raise RuntimeError(f"{label} grew beyond the bounded read size: {path}")
+        return json.loads(content)
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"{label} unreadable: {path} — {exc}") from exc
 
@@ -88,6 +99,8 @@ def load_index(path: str) -> tuple[dict[str, dict], list[str]]:
     data = _read_json(path, "catalog index")
     if not isinstance(data, list):
         raise RuntimeError(f"catalog index is not a list: {path}")
+    if len(data) > MAX_ROWS:
+        raise RuntimeError(f"catalog index exceeds {MAX_ROWS} rows: {path}")
     records: dict[str, dict] = {}
     issues: list[str] = []
     for position, record in enumerate(data):
@@ -116,6 +129,8 @@ def load_study(path: str) -> tuple[dict[str, dict], list[str]]:
     data = _read_json(path, "catalog study")
     if not isinstance(data, list):
         raise RuntimeError(f"catalog study is not a list: {path}")
+    if len(data) > MAX_ROWS:
+        raise RuntimeError(f"catalog study exceeds {MAX_ROWS} rows: {path}")
     records: dict[str, dict] = {}
     issues: list[str] = []
     for position, row in enumerate(data):
@@ -240,13 +255,20 @@ def capability_join(path: str) -> tuple[dict[str, dict], dict[str, str], str]:
 def load_sources(paths: DiscoveryPaths | None = None) -> CatalogSources:
     """Load every recorded source once; loader findings ride along."""
     paths = paths or DiscoveryPaths()
-    index, issues = load_index(os.path.join(paths.catalog_dir, INDEX_NAME))
-    lock, lock_issues = load_lock(os.path.join(paths.catalog_dir, LOCK_NAME))
+    snapshot = resolve_snapshot(paths.catalog_dir, paths.snapshot_id)
+    index, issues = load_index(snapshot.index_path)
+    lock, lock_issues = load_lock(snapshot.lock_path)
     study, study_issues = load_study(paths.study_path)
     local, local_issues = load_local()
     ported, port_issues = verify_ported(local, index)
     ready, row_issues, artifact_error = capability_join(paths.capability())
+    resources, resource_issues = load_resource_index(
+        snapshot.resource_path, snapshot.index_path, snapshot.lock_path)
+    if snapshot.snapshot_id == "legacy-unversioned":
+        resource_issues = []
     return CatalogSources(
-        catalog_dir=paths.catalog_dir, index=index, lock=lock, study=study, local=local, ported=ported,
+        catalog_dir=snapshot.root, index=index, lock=lock, study=study, local=local, ported=ported,
         ready=ready, row_issues=row_issues, artifact_error=artifact_error,
-        issues=issues + lock_issues + study_issues + local_issues + port_issues)
+        snapshot_id=snapshot.snapshot_id, resources=resources,
+        issues=issues + lock_issues + study_issues + local_issues + port_issues
+        + resource_issues)

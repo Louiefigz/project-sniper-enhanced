@@ -21,6 +21,15 @@ from studio.native_run import NativeRun
 STUDIO = Path(__file__).resolve().parents[1] / 'studio'
 
 
+def bind_long_policy(project: Path) -> None:
+    """Give prebuild tests a controller-style exact request binding."""
+    request = project / 'TEST-LONG-REQUEST.json'
+    request.write_text('{"scope":"TEST controller request"}')
+    (project / 'NATIVE-LONG-POLICY.json').write_text(json.dumps({
+        'schemaVersion': 1, 'requirement': 'required-for-new-native-long',
+        'requestPacket': {'path': str(request), 'sha256': digest(request)}}))
+
+
 class LaunchEnforcementTests(unittest.TestCase):
     """Exercise the actual shared admission boundary with tiny non-media test files."""
 
@@ -154,6 +163,26 @@ class AutomaticRecoveryTests(unittest.TestCase):
         recover.assert_not_called()
         self.assertEqual(result['recoverySelection']['mode'], 'fresh')
 
+    def test_visual_plan_change_reuses_audio_only_with_same_upstream_authority(self) -> None:
+        """Long recovery separates picture invalidation from exact upstream/audio reuse."""
+        identity = {'pictureInputSha256': '1' * 64,
+                    'upstreamAuthoritySha256': '2' * 64,
+                    'audioReuseSha256': '3' * 64}
+        previous = self.attempt('visual-change', visualPlanReuse=identity)
+        (previous / 'audio-preparation').mkdir()
+        (previous / 'audio-preparation/receipt.json').write_text(json.dumps({
+            'status': 'float-master-checked-awaiting-aac'}))
+        current = {**self.current,
+                   'pins': {'/TEST/source': '4' * 64},
+                   'visualPlanReuse': {**identity, 'pictureInputSha256': '5' * 64}}
+        with patch('studio.native_long_autoresume.picture_audio_reuse',
+                   return_value=({'preparedMaster': '/TEST/master'}, {'/TEST/master': '6' * 64})):
+            result = recover_automatically(current)
+        self.assertEqual(result['recoverySelection']['reused'], 'audio')
+        changed = {**current, 'visualPlanReuse': {
+            **current['visualPlanReuse'], 'upstreamAuthoritySha256': '7' * 64}}
+        self.assertEqual(recover_automatically(changed)['recoverySelection']['mode'], 'fresh')
+
     def test_incomplete_compatible_attempt_blocks_duplicate_work(self) -> None:
         """An in-flight or uncertain owner requires reconciliation, never a fresh duplicate."""
         unfinished = self.attempt('unfinished'); (unfinished / 'delivery.json').unlink()
@@ -184,6 +213,7 @@ class PrebuildEnforcementTests(unittest.TestCase):
     def test_missing_review_stops_before_validator_or_tools(self) -> None:
         """No source extraction or validator process can precede required evidence."""
         with tempfile.TemporaryDirectory() as root, patch('subprocess.run') as run:
+            bind_long_policy(Path(root).resolve())
             with self.assertRaisesRegex(ValueError, 'PREBUILD-REVIEW'):
                 require_long_prebuild(Path(root), {}, {})
             run.assert_not_called()
@@ -192,6 +222,7 @@ class PrebuildEnforcementTests(unittest.TestCase):
         """The binding includes complete media as well as HTML and timeline declarations."""
         with tempfile.TemporaryDirectory() as root:
             project = Path(root).resolve()
+            bind_long_policy(project)
             media = project / 'source.mp4'; media.write_bytes(b'TEST picture')
             original = prebuild_snapshot(project)['planHash']
             (project / 'PREBUILD-REVIEW.json').write_text('{}')
@@ -203,6 +234,7 @@ class PrebuildEnforcementTests(unittest.TestCase):
         """Mutation during validator execution must not be relabeled as the reviewed snapshot."""
         with tempfile.TemporaryDirectory() as root:
             project = Path(root).resolve(); media = project / 'source.mp4'; media.write_bytes(b'TEST before')
+            bind_long_policy(project)
             (project / 'PREBUILD-REVIEW.json').write_text('{}')
             snapshot = prebuild_snapshot(project)
             def changed_validator(*args: object, **kwargs: object) -> SimpleNamespace:

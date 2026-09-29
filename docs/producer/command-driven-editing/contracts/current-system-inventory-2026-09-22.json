@@ -1,13 +1,19 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-09-22",
+  "asOf": "2026-09-28",
   "completeness": "partial",
   "phaseExit": "blocked",
   "inventoryGaps": [
     "Discovery backlog retains individually reviewed literals pending full lifecycle and reader/writer ownership review.",
     "Direct writes and process boundaries retain explicit unknowns and unbound governed authority in dated persistence evidence.",
     "Historical broad directory and new exact-file writer bindings do not prove all transitive output lifecycles; see dated review record.",
-    "Assembled media/caption and rebuild writer files also stage candidate, master, audit, ledger, plan and sidecar effects; unrelated authority is not claimed complete by file-wide binding."
+    "Assembled media/caption and rebuild writer files also stage candidate, master, audit, ledger, plan and sidecar effects; unrelated authority is not claimed complete by file-wide binding.",
+    "2026-09-28 refresh records current Long section, shared-pool/source-store and existing visual-plan call sites. Owned new execution/state/media paths have reviewed blocking artifact-binding classifications; other new unbound persistence/process files remain blocking-unknown. This refresh is not full lifecycle review or measured qualification. Staged edit-plan writer bindings are file-wide and do not establish authority for their other outputs.",
+    "2026-09-28 budget/task integration: exact shared schema-7 production-budget authority and derived logical-section media manifests have typed ownership rows. Claim-owned author/reviewer result documents are written by external enrolled host tasks and checked by section_results; this source inventory does not infer an engine writer or prove actual playback/listening. Existing source/pool lifecycle gaps and measured production qualification remain pending.",
+    "Third-increment logical family and review-scope rows describe current authority adapters, not measured Long qualification. Sparse probe ownership and current discovery/persistence evidence must be refreshed after the mutable implementation freezes; incomplete lifecycle bindings remain blocking.",
+    "2026-09-28 calibration lifecycle: three narrow technical-input/measurement/rate-only rows are source-reviewed. Shared NativeRun/media helper effects are referenced narrowly, not blanket writer-bound. No production writer exists yet for independent rate-adoption validation; no forecast adoption is wired. Actual tiny owned smoke is technical behavior evidence only; cache/physical read observation, omitted production proof costs, representative Long and unchanged Short qualification remain pending.",
+    "2026-09-28 changed-author carry: immutable original-judgment/current-media sidecars have a narrow typed lifecycle; bounded optional sectionCarry/sectionCarryWithdrawal remain in existing production task authority. Public integration and withdrawal barriers are under independent review. Synthetic tests do not qualify actual editorial continuity or repair performance; no lifecycle completeness or baseline claim.",
+    "2026-09-28 retained-frame/runtime binding: two narrow derived sidecar/capture rows and existing window relay/calibration completedOutput/cacheObservation fields are source-reviewed. Node .mjs remains outside lexical/persistence scanning. Metadata sizing is partial, dynamic receipt capacity and retained-evidence GC remain unresolved. No actual production speed, editorial quality, physical IO, baseline or lifecycle completeness is claimed."
   ],
   "baseline": {
     "status": "required-unmeasured",
@@ -115,7 +121,9 @@
       ".sniper-supplied.json": "supporting-media-intake.ts writes create-once receipt under staging. Need inspect promoted target/readers and whether receipt is copied/retained before calling ephemeral.",
       ".sniper-timing-corrections": "Correction request store and published corrected-transcript manifest are authority-bearing; inspect store/read/publish lineage and promoted manifest ownership.",
       ".sniper-timing-reviews": "Timing review store is keyed by binding digest; inspect read/write approval and freshness semantics rather than treating review outputs as transient.",
-      ".sniper-qualification-docker-": "The private TemporaryDirectory is only Docker configuration. qualification_mezzanine_runtime.py passes caller output_dir into QualificationLaunch (lines171-173), launches the transcode, and _wait_result reads output_dir/result.json. File-wide writer binding to a temp row would conceal this durable caller-output process boundary. Keep unresolved until output ownership/result lifecycle is classified separately."
+      ".sniper-qualification-docker-": "The private TemporaryDirectory is only Docker configuration. qualification_mezzanine_runtime.py passes caller output_dir into QualificationLaunch (lines171-173), launches the transcode, and _wait_result reads output_dir/result.json. File-wide writer binding to a temp row would conceal this durable caller-output process boundary. Keep unresolved until output ownership/result lifecycle is classified separately.",
+      ".sniper-visual-catalog-authority": "2026-09-28 source refresh: catalog-receipt-controller.ts creates the issuer authority directory and launches catalog_receipt_issuer_cli.py; full receipt lifecycle and transitive ownership review remain blocking.",
+      ".sniper-visual-usage": "2026-09-28 source refresh: native-visual-usage-receipt.ts writes usage receipts; native_visual_usage_registration.py verifies registration paths. Full reader/writer lifecycle and artifact binding remain blocking."
     },
     "pathBoundaryEvidence": "docs/producer/command-driven-editing/contracts/p0-authority-path-boundary-evidence-2026-09-22.json",
     "persistenceDispositionEvidence": "docs/producer/command-driven-editing/contracts/p0-persistence-call-dispositions-2026-09-22.json"
@@ -142,7 +150,8 @@
         "src/app/api/producer/studio/process.ts",
         "src/lib/server/grade-observation-store.ts",
         "src/lib/server/guided-project-bootstrap-guard.ts",
-        "src/lib/server/guided-source-color-expectations.ts"
+        "src/lib/server/guided-source-color-expectations.ts",
+        "src/app/api/producer/auto-edit/visual-plan-related-usage.ts"
       ],
       "writers": [
         "src/app/api/_lib/workspace.ts",
@@ -155,7 +164,7 @@
         "resolvedIntent",
         "intentDecisions"
       ],
-      "durability": "atomic file replacement; not an immutable revision",
+      "durability": "atomic file replacement; not an immutable revision Calibration technical-project.json is a substring-only discovery match and does not read/write production intent.",
       "disposition": "adapter",
       "parityFixture": "intent-flow.test.ts",
       "removalCondition": "all intent readers resolve a committed ProjectRevisionV1",
@@ -179,6 +188,7 @@
         "src/app/api/producer/auto-edit/operator-intent-authority.ts": "reader-writer",
         "src/app/api/producer/auto-edit/planning-gate-contract.ts": "non-authority",
         "src/app/api/producer/auto-edit/saved-plan-request.ts": "reader",
+        "src/app/api/producer/auto-edit/visual-plan-related-usage.ts": "reader",
         "src/app/api/producer/color-diagnostic/files.ts": "reader",
         "src/app/api/producer/ingest/authority.ts": "reader",
         "src/app/api/producer/ingest/target.ts": "reader-writer",
@@ -195,7 +205,8 @@
         "src/lib/server/guided-project-bootstrap-guard.ts": "reader",
         "src/lib/server/guided-source-color-expectations.ts": "reader",
         "src/lib/server/project-status-projection.ts": "non-authority",
-        "src/lib/server/template-usage-approval.ts": "reader"
+        "src/lib/server/template-usage-approval.ts": "reader",
+        "scripts/producer/native_review_calibration.py": "non-authority"
       }
     },
     {
@@ -217,7 +228,10 @@
         "src/app/api/producer/studio/import/bridge.py",
         "src/lib/server/grade-observation-store.ts",
         "src/lib/server/guided-source-color-expectations.ts",
-        "src/lib/server/native-short-request.ts"
+        "src/lib/server/native-short-request.ts",
+        "scripts/producer/role_packet_evidence.py",
+        "scripts/producer/role_packet_evidence_record.py",
+        "scripts/producer/native-short.ts"
       ],
       "writers": [
         "scripts/producer/ingest.py"
@@ -272,7 +286,11 @@
         "src/lib/server/grade-observation-store.ts": "reader",
         "src/lib/server/guided-source-color-expectations.ts": "reader",
         "src/lib/server/native-short-request.ts": "reader",
-        "src/lib/server/producer-manifest.ts": "reader"
+        "src/lib/server/producer-manifest.ts": "reader",
+        "scripts/producer/role_packet_evidence.py": "reader",
+        "scripts/producer/role_packet_evidence_record.py": "reader",
+        "scripts/producer/role_packet_submission.py": "non-authority",
+        "scripts/producer/native-short.ts": "reader"
       }
     },
     {
@@ -310,7 +328,12 @@
         "src/lib/server/grade-observation-store.ts",
         "src/lib/server/guided-project-bootstrap-store.ts",
         "src/lib/server/guided-project-bootstrap.ts",
-        "src/lib/server/guided-source-color-expectations.ts"
+        "src/lib/server/guided-source-color-expectations.ts",
+        "scripts/producer/native_program_audio.py",
+        "scripts/producer/studio/native_long_contract.py",
+        "scripts/producer/visual-plan-context.ts",
+        "src/app/api/producer/auto-edit/initial-authoring-staging.ts",
+        "src/app/api/producer/auto-edit/initial-authoring-visual-validation.ts"
       ],
       "writers": [
         "scripts/producer/assemble_base_rebuild.py",
@@ -321,7 +344,9 @@
         "src/app/api/producer/save-plan/transaction.ts",
         "src/app/api/producer/studio/import/service.ts",
         "src/lib/server/cut-repair-media-activation.ts",
-        "src/lib/server/guided-project-bootstrap.ts"
+        "src/lib/server/guided-project-bootstrap.ts",
+        "src/app/api/producer/auto-edit/initial-authoring-staging.ts",
+        "src/app/api/producer/auto-edit/initial-authoring-visual-validation.ts"
       ],
       "promotionPoint": "route-specific atomic replacement",
       "fingerprintInputs": [
@@ -358,6 +383,7 @@
         "scripts/producer/guided_source_color_observation_read.py": "reader",
         "scripts/producer/guided_source_color_preparation.py": "reader",
         "scripts/producer/motion/recompose.py": "reader",
+        "scripts/producer/native_program_audio.py": "reader",
         "scripts/producer/ordinary_previews.py": "reader",
         "scripts/producer/palmier/__init__.py": "non-authority",
         "scripts/producer/palmier/translate.py": "reader",
@@ -365,6 +391,7 @@
         "scripts/producer/post_render_geometry_qc.py": "reader",
         "scripts/producer/prepare_current_baseline.py": "writer",
         "scripts/producer/render.py": "reader-writer",
+        "scripts/producer/studio/native_long_contract.py": "reader",
         "scripts/producer/studio/project_writer.py": "non-authority",
         "scripts/producer/studio/review_commands.py": "path-owner",
         "scripts/producer/studio/studio_project.py": "reader",
@@ -372,6 +399,7 @@
         "scripts/producer/studio/studio_sync.py": "reader-writer",
         "scripts/producer/studio/sync_diff.py": "reader",
         "scripts/producer/studio/sync_model.py": "non-authority",
+        "scripts/producer/visual-plan-context.ts": "reader",
         "src/app/api/_lib/plan-refit-transaction.ts": "reader-writer",
         "src/app/api/_lib/plan-snapshots.ts": "non-authority",
         "src/app/api/_lib/workspace.ts": "path-owner",
@@ -386,6 +414,8 @@
         "src/app/api/producer/auto-edit/cut-revision-prompt.ts": "non-authority",
         "src/app/api/producer/auto-edit/gate-fix.ts": "non-authority",
         "src/app/api/producer/auto-edit/geometry-replan-stage.ts": "launcher",
+        "src/app/api/producer/auto-edit/initial-authoring-staging.ts": "reader-writer",
+        "src/app/api/producer/auto-edit/initial-authoring-visual-validation.ts": "reader-writer",
         "src/app/api/producer/auto-edit/launch.ts": "non-authority",
         "src/app/api/producer/auto-edit/pipeline-palmier-publish.ts": "non-authority",
         "src/app/api/producer/auto-edit/planning-loop.ts": "launcher",
@@ -420,7 +450,10 @@
         "src/lib/server/guided-project-bootstrap-store.ts": "reader",
         "src/lib/server/guided-project-bootstrap.ts": "reader-writer",
         "src/lib/server/guided-source-color-expectations.ts": "reader",
-        "src/lib/server/template-usage-history.ts": "reader"
+        "src/lib/server/native-longform-request.ts": "non-authority",
+        "src/lib/server/native-short-request.ts": "non-authority",
+        "src/lib/server/template-usage-history.ts": "reader",
+        "scripts/producer/role_packet_catalog.py": "non-authority"
       }
     },
     {
@@ -598,7 +631,8 @@
       "authority": "canonical",
       "readers": [
         "src/app/api/producer/project-status",
-        "scripts/producer/palmier/master.py"
+        "scripts/producer/palmier/master.py",
+        "src/app/api/producer/auto-edit/visual-plan-related-usage.ts"
       ],
       "writers": [
         "src/app/api/producer/auto-edit/quality-loop-outcomes.ts"
@@ -621,6 +655,7 @@
       "callSiteDispositions": {
         "scripts/producer/draft_render.py": "reader",
         "scripts/producer/palmier/master.py": "reader",
+        "src/app/api/producer/auto-edit/visual-plan-related-usage.ts": "reader",
         "src/lib/server/auto-edit-quality-artifacts.ts": "reader-writer"
       }
     },
@@ -989,11 +1024,11 @@
         "src/app/api/producer/ai-edit/cut-repair-review-runner.ts": "reader",
         "src/lib/server/cut-repair-audition-store.ts": "reader-writer",
         "src/lib/server/cut-repair-execution-package-store.ts": "reader-writer",
+        "src/lib/server/cut-repair-media-activation.ts": "writer",
         "src/lib/server/cut-repair-preparation-store.ts": "non-authority",
         "src/lib/server/cut-repair-promotion-store.ts": "non-authority",
         "src/lib/server/cut-repair-review-store.ts": "non-authority",
         "src/lib/server/cut-repair-ripple-reopen-store.ts": "non-authority",
-        "src/lib/server/cut-repair-media-activation.ts": "writer",
         "src/lib/server/cut-repair-transition-reconciliation.ts": "non-authority",
         "src/lib/server/cut-repair-transition-store.ts": "non-authority",
         "src/lib/server/producer-authority-files.ts": "path-owner",
@@ -1012,7 +1047,9 @@
         "scripts/producer/headless/external_media_probe.py",
         "scripts/producer/headless/external_media_probe_native.py",
         "scripts/producer/ingest_admission_contract.py",
-        "src/lib/server/guided-source-color-expectations.ts"
+        "src/lib/server/guided-source-color-expectations.ts",
+        "scripts/producer/planner/visual_plan_media_authority.py",
+        "src/app/api/producer/auto-edit/visual-plan-media-authority.ts"
       ],
       "writers": [
         "scripts/producer/headless/external_media_snapshot.py"
@@ -1042,6 +1079,8 @@
         "scripts/producer/headless/external_media_probe_native.py": "reader",
         "scripts/producer/headless/external_media_snapshot.py": "reader-writer",
         "scripts/producer/ingest_admission_contract.py": "reader",
+        "scripts/producer/planner/visual_plan_media_authority.py": "reader",
+        "src/app/api/producer/auto-edit/visual-plan-media-authority.ts": "reader",
         "src/lib/server/guided-source-color-expectations.ts": "reader"
       }
     },
@@ -1053,7 +1092,9 @@
       "readers": [
         "scripts/producer/ingest.py",
         "scripts/producer/render.py",
-        "scripts/producer/assemble.py"
+        "scripts/producer/assemble.py",
+        "scripts/producer/planner/visual_plan_media_authority.py",
+        "src/app/api/producer/auto-edit/visual-plan-media-authority.ts"
       ],
       "writers": [
         "scripts/producer/ingest_admission.py",
@@ -1074,6 +1115,8 @@
       ],
       "callSiteDispositions": {
         "scripts/producer/ingest_admission_contract.py": "reader-writer",
+        "scripts/producer/planner/visual_plan_media_authority.py": "reader",
+        "src/app/api/producer/auto-edit/visual-plan-media-authority.ts": "reader",
         "src/lib/producer/types.ts": "non-authority"
       }
     },
@@ -1252,13 +1295,13 @@
         "scripts/producer/current_render_graph_contract.py": "path-owner",
         "src/app/api/producer/ai-edit/cut-repair-private-picture-render.ts": "reader",
         "src/app/api/producer/ai-edit/cut-repair-private-render.ts": "reader",
-        "src/lib/server/cut-repair-prepared-render-authority.ts": "reader",
         "src/lib/server/current-render-graph-authority.ts": "reader",
         "src/lib/server/current-render-graph-candidate.ts": "reader-writer",
         "src/lib/server/current-render-graph-promotion-recovery.ts": "reader-writer",
+        "src/lib/server/cut-repair-prepared-render-authority.ts": "reader",
         "src/lib/server/producer-auto-edit-genesis-facts.ts": "reader",
-        "src/lib/server/producer-qc-promotion-objects.ts": "reader",
         "src/lib/server/producer-qc-promotion-intent.ts": "reader",
+        "src/lib/server/producer-qc-promotion-objects.ts": "reader",
         "src/lib/server/render-graph-generation-authority.ts": "reader",
         "src/lib/server/staged-render-graph-authority.ts": "reader"
       }
@@ -2638,7 +2681,8 @@
         "scripts/producer/current_full_path_baseline.py": "reader",
         "scripts/producer/stage_timing.py": "writer",
         "scripts/producer/studio/native_preflight.py": "non-authority",
-        "src/lib/server/stage-timing.ts": "writer"
+        "src/lib/server/stage-timing.ts": "writer",
+        "scripts/producer/studio/native_budget_store.py": "non-authority"
       }
     },
     {
@@ -2924,6 +2968,1135 @@
       ],
       "callSiteDispositions": {
         "scripts/producer/headless/native_media_sandbox.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-production-budget-authority-v7",
+      "pathPattern": "<account>/.project-sniper/production-budgets/{registry.lock,batches/<batchId>/{authority.json,authority.pending.json,authority.lock,events.jsonl},batches/.creating-<batchId>-<nonce>/**,archive/**}",
+      "owner": "scripts/producer/studio/native_budget_store.py",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/studio/native_budget_batches.py",
+        "scripts/producer/studio/native_budget_binding.py",
+        "scripts/producer/studio/native_budget_clock.py",
+        "scripts/producer/studio/native_budget_continuation.py",
+        "scripts/producer/studio/native_budget_exporter.py",
+        "scripts/producer/studio/native_budget_owner.py",
+        "scripts/producer/studio/native_budget_policy.py",
+        "scripts/producer/studio/native_budget_registry.py",
+        "scripts/producer/studio/native_budget_schema.py",
+        "scripts/producer/studio/native_budget_section_schema.py",
+        "scripts/producer/studio/native_budget_sections.py",
+        "scripts/producer/studio/native_budget_staging.py",
+        "scripts/producer/studio/native_budget_store.py",
+        "scripts/producer/studio/native_long_budget.py",
+        "scripts/producer/studio/native_short_pipeline.py",
+        "scripts/producer/studio/production/api.py",
+        "scripts/producer/studio/production/approvals.py",
+        "scripts/producer/studio/production/authorization.py",
+        "scripts/producer/studio/production/outputs.py",
+        "scripts/producer/studio/production/section_plan.py",
+        "scripts/producer/studio/production/section_publication.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/production/session.py",
+        "scripts/producer/studio/production/settlement.py",
+        "scripts/producer/studio/production/tasks.py",
+        "scripts/producer/studio/native_budget_family.py",
+        "scripts/producer/studio/native_budget_family_schema.py",
+        "scripts/producer/studio/native_budget_family_state.py",
+        "scripts/producer/studio/native_budget_family_reservation.py",
+        "scripts/producer/studio/native_budget_family_outcome.py",
+        "scripts/producer/studio/native_budget_family_forecast.py",
+        "scripts/producer/studio/native_budget_family_repair.py",
+        "scripts/producer/studio/native_budget_forecast.py",
+        "scripts/producer/studio/native_budget_launch.py",
+        "scripts/producer/studio/native_long_integration.py",
+        "scripts/producer/studio/native_long_scope.py",
+        "scripts/producer/studio/native_long_scope_pipeline.py",
+        "scripts/producer/studio/native_long_export.py",
+        "scripts/producer/studio/production/section_scope.py",
+        "scripts/producer/studio/production/section_review_reuse.py",
+        "scripts/producer/studio/production/section_chunk_liveness.py",
+        "scripts/producer/role_packet_given.py",
+        "scripts/producer/studio/native_handoff_approval.py",
+        "scripts/producer/studio/native_handoff_content.py",
+        "scripts/producer/studio/native_handoff_open.py",
+        "scripts/producer/studio/native_handoff_verify.py",
+        "scripts/producer/studio/native_motion_review.py",
+        "scripts/producer/studio/native_short_export.py",
+        "scripts/producer/role_packet_given_check.py",
+        "scripts/producer/studio/production/cli.py",
+        "scripts/producer/studio/production/commands.py",
+        "scripts/producer/studio/production/dispatch.py",
+        "scripts/producer/studio/production/handover_commands.py",
+        "scripts/producer/studio/production/media.py",
+        "scripts/producer/studio/production/packets.py",
+        "scripts/producer/studio/production/process_settle.py",
+        "scripts/producer/studio/production/process_watch.py",
+        "src/lib/server/native-motion-review.ts",
+        "scripts/producer/studio/native_export.py",
+        "scripts/producer/studio/native_segments/review_budget.py",
+        "scripts/producer/studio/native_segments/review_forecast.py",
+        "scripts/producer/studio/native_segments/review_package.py",
+        "scripts/producer/studio/production/queue_authority.py",
+        "scripts/producer/studio/production/section_chunk_carry.py",
+        "scripts/producer/studio/native_segments/review_service_state.py",
+        "scripts/producer/studio/native_segments/review_service_binding.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_budget_store.py",
+        "scripts/producer/studio/native_budget_batches.py",
+        "scripts/producer/studio/native_budget_staging.py"
+      ],
+      "promotionPoint": "Existing registry/batch locks serialize binding and admission; an fsynced event precedes validated pending-replace publication. A family charges one ordinary preview/final attempt; each actual child binds its immutable request before owned launch and inherits the original deadline. Checked final family/continuation delivery is settled while the same batch and history locks protect publication.",
+      "fingerprintInputs": [
+        "original authorization, source/Long lineage and immutable format policy",
+        "original elapsed clock and absolute owner allocation",
+        "registered export request and canonical phase",
+        "section plan/input identity, launch owner and cumulative counters",
+        "logical task claim epoch, token, immutable section binding and exact result receipt",
+        "frozen logical family assignments, exact preview inventory, child scope/request identities and original attempt grant",
+        "optional immutable reviewService envelope pin shared by exact-plan preview/final families; operational only, never a creative fingerprint"
+      ],
+      "durability": "Closed schema 7 extends the same budget authority with bounded logical section families and actual child invocation outcomes. Closed schema 5/6 lifts preserve every original clock, counter and authorization. Logical waiting is not process liveness or a new allocation. Kernel locks, bounded fsynced records/events and reserved terminal room preserve spending and completed work. Unreadable authority refuses work; restart, repair and archive cannot renew limits. Tests use private temporary authorities; representative production qualification remains pending. The optional reviewService pin selects a derived file in the existing batch namespace. Its publication precedes separate authority commit, so failed admission may leave an unreferenced sidecar. Exact-plan preview/final inheritance preserves absence or the identical selected pin; original counters, clock and launch identity remain authoritative.",
+      "disposition": "extend",
+      "parityFixture": "test_native_section_budget.py + test_native_section_budget_continuation.py + test_native_section_budget_settlement.py + test_native_review_budget_acceptance.py + test_native_section_publication.py; these structural/behavior tests do not establish production host or media qualification",
+      "removalCondition": "Retain until every admitted author, reviewer and media owner preserves the same original authorization clock, cumulative limits, current result binding, terminal room and fail-closed restart semantics under a replacement authority.",
+      "authorityPathTokens": [
+        "production-budgets",
+        "native_budget_store",
+        "native_budget_staging",
+        "productionBudget",
+        "sectionOwners",
+        "sectionFamilies"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_budget_batches.py": "reader-writer",
+        "scripts/producer/studio/native_budget_binding.py": "reader-writer",
+        "scripts/producer/studio/native_budget_clock.py": "reader",
+        "scripts/producer/studio/native_budget_continuation.py": "reader-writer",
+        "scripts/producer/studio/native_budget_exporter.py": "reader",
+        "scripts/producer/studio/native_budget_owner.py": "reader",
+        "scripts/producer/studio/native_budget_policy.py": "reader",
+        "scripts/producer/studio/native_budget_registry.py": "reader",
+        "scripts/producer/studio/native_budget_schema.py": "reader",
+        "scripts/producer/studio/native_budget_section_schema.py": "reader",
+        "scripts/producer/studio/native_budget_sections.py": "reader-writer",
+        "scripts/producer/studio/native_budget_staging.py": "reader-writer",
+        "scripts/producer/studio/native_budget_store.py": "reader-writer",
+        "scripts/producer/studio/native_long_budget.py": "reader-writer",
+        "scripts/producer/studio/native_short_pipeline.py": "reader",
+        "scripts/producer/studio/production/api.py": "reader-writer",
+        "scripts/producer/studio/production/approvals.py": "reader-writer",
+        "scripts/producer/studio/production/authorization.py": "reader-writer",
+        "scripts/producer/studio/production/outputs.py": "reader-writer",
+        "scripts/producer/studio/production/section_plan.py": "reader",
+        "scripts/producer/studio/production/section_publication.py": "reader-writer",
+        "scripts/producer/studio/production/sections.py": "reader-writer",
+        "scripts/producer/studio/production/session.py": "reader-writer",
+        "scripts/producer/studio/production/settlement.py": "reader",
+        "scripts/producer/studio/production/tasks.py": "reader",
+        "scripts/producer/studio/native_budget_family.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_schema.py": "reader",
+        "scripts/producer/studio/native_budget_family_state.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_reservation.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_outcome.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_forecast.py": "reader",
+        "scripts/producer/studio/native_budget_family_repair.py": "reader-writer",
+        "scripts/producer/studio/native_budget_forecast.py": "reader",
+        "scripts/producer/studio/native_long_integration.py": "reader",
+        "scripts/producer/studio/native_long_scope.py": "reader",
+        "scripts/producer/studio/native_long_scope_pipeline.py": "reader-writer",
+        "scripts/producer/studio/native_long_export.py": "reader",
+        "scripts/producer/studio/production/section_chunk_liveness.py": "reader",
+        "scripts/producer/role_packet_given.py": "reader",
+        "scripts/producer/studio/native_handoff_approval.py": "reader",
+        "scripts/producer/studio/native_handoff_content.py": "reader",
+        "scripts/producer/studio/native_handoff_open.py": "reader",
+        "scripts/producer/studio/native_handoff_verify.py": "reader",
+        "scripts/producer/studio/native_motion_review.py": "reader",
+        "scripts/producer/studio/native_short_export.py": "reader",
+        "scripts/producer/role_packet_given_check.py": "reader-writer",
+        "scripts/producer/studio/production/cli.py": "reader-writer",
+        "scripts/producer/studio/production/commands.py": "reader-writer",
+        "scripts/producer/studio/production/dispatch.py": "reader-writer",
+        "scripts/producer/studio/production/handover_commands.py": "reader-writer",
+        "scripts/producer/studio/production/media.py": "reader-writer",
+        "scripts/producer/studio/production/packets.py": "reader-writer",
+        "scripts/producer/studio/production/process_settle.py": "reader-writer",
+        "scripts/producer/studio/production/process_watch.py": "reader-writer",
+        "src/lib/server/native-motion-review.ts": "reader",
+        "scripts/producer/studio/native_export.py": "reader",
+        "scripts/producer/studio/native_segments/review_budget.py": "reader",
+        "scripts/producer/studio/native_segments/review_forecast.py": "reader",
+        "scripts/producer/studio/native_segments/review_package.py": "reader",
+        "scripts/producer/studio/production/queue_authority.py": "reader-writer",
+        "scripts/producer/studio/production/section_chunk_carry.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_binding.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-section-media-manifest-v1",
+      "pathPattern": "<registered-Long-attempt>/{<encodedTaskId>-media.json,<encodedTaskId>-<scopeId>-media.json}; <review-claim>/chunks/<scopeId>-media.json",
+      "owner": "scripts/producer/studio/production/section_review_inputs.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/production/section_media.py",
+        "scripts/producer/studio/production/section_recovery.py",
+        "scripts/producer/studio/production/section_results.py",
+        "scripts/producer/studio/production/section_review_inputs.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/production/section_review_reuse.py",
+        "scripts/producer/studio/production/section_review_scope.py",
+        "scripts/producer/studio/production/section_chunk_plan.py",
+        "scripts/producer/studio/production/section_chunk_presentation.py",
+        "scripts/producer/studio/production/section_chunk_recovery.py",
+        "scripts/producer/studio/production/section_judgments.py",
+        "scripts/producer/studio/production/section_chunk_reuse.py",
+        "scripts/producer/studio/production/section_chunk_carry.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/production/section_review_inputs.py",
+        "scripts/producer/studio/production/section_chunk_plan.py",
+        "scripts/producer/studio/production/section_chunk_carry.py"
+      ],
+      "promotionPoint": "Create once only from current sealed picture and PCM for the exact logical section or frozen chunk/neighboring-edge scope. Missing later scopes grant no completion. Reviewer task and progress pins bind exact bytes.",
+      "fingerprintInputs": [
+        "immutable export-request digest and section plan identity",
+        "logical section id, generation, input identity and exact frame range",
+        "existing per-window StageEvidence seal, encoded picture and PCM hashes",
+        "current author and early-review receipt identities"
+      ],
+      "durability": "Manifest is an index into existing media authority, never replacement proof. Readers rehash the manifest and original request, validate exact tiling and reopen every current window seal. Restore reuses only the validated original logical review context. Recorded playback/listening observations are host-provided judgments; this mechanism does not prove that a human watched or listened.",
+      "disposition": "extend",
+      "parityFixture": "test_production_sections.py + test_production_section_results.py + test_native_long_section_resume_binding.py; actual host-driven creative review and full-media workflow qualification remain pending",
+      "removalCondition": "Remove only if another exact task input structure preserves these original request, seal, generation, media and neighboring-context checks.",
+      "authorityPathTokens": [
+        "native-long-section-media",
+        "read_media_manifest",
+        "media_manifest("
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/section_media.py": "reader",
+        "scripts/producer/studio/production/section_recovery.py": "reader",
+        "scripts/producer/studio/production/section_review_inputs.py": "reader-writer",
+        "scripts/producer/studio/production/sections.py": "reader",
+        "scripts/producer/studio/production/section_review_reuse.py": "reader",
+        "scripts/producer/studio/production/section_review_scope.py": "reader",
+        "scripts/producer/studio/production/section_chunk_plan.py": "reader-writer",
+        "scripts/producer/studio/production/section_chunk_presentation.py": "reader",
+        "scripts/producer/studio/production/section_chunk_recovery.py": "reader",
+        "scripts/producer/studio/production/section_judgments.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse.py": "reader",
+        "scripts/producer/studio/production/section_chunk_carry.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-long-external-section-result-v1",
+      "pathPattern": "<sectionBinding.outputRoot>/<task.id>/<claim.epoch>-<claim.token>/{result.json,declared artifacts/**}",
+      "owner": "scripts/producer/studio/production/section_results.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/studio/production/callbacks.py",
+        "scripts/producer/studio/production/claims.py",
+        "scripts/producer/studio/production/section_assignment_repair.py",
+        "scripts/producer/studio/production/section_publication.py",
+        "scripts/producer/studio/production/section_results.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/production/section_join_barrier.py",
+        "scripts/producer/studio/production/section_judgments.py",
+        "scripts/producer/studio/native_budget_family_repair.py",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py",
+        "scripts/producer/studio/production/section_chunk_results.py",
+        "scripts/producer/studio/production/section_chunk_progress.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [],
+      "externalWriters": [
+        {
+          "actor": "codex",
+          "ownershipValidator": "scripts/producer/studio/production/section_results.py",
+          "outputDerivation": "sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{result.json,artifacts/**}"
+        },
+        {
+          "actor": "claude-code",
+          "ownershipValidator": "scripts/producer/studio/production/section_results.py",
+          "outputDerivation": "sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{result.json,artifacts/**}"
+        }
+      ],
+      "promotionPoint": "An enrolled host author/reviewer writes canonical result.json and declared artifacts inside its exact registered claim directory. The existing production API validates claim epoch/token, exact host turn, current task state, immutable section binding and result/artifact hashes before completing the task; readers revalidate these proofs before integration, early render admission, assembly and final publication.",
+      "fingerprintInputs": [
+        "registered run, task id, claim epoch/token and exact host handle",
+        "immutable section generation, inputs, outputRoot and declared frame range",
+        "canonical result receipt bytes and every declared artifact hash",
+        "independent reviewer identity, upstream author receipt and exact preview/encoded/audio observation inputs"
+      ],
+      "durability": "External host output bytes are not written or approved by the inventory validator. The production authority stores exact result pins under its existing kernel lock; claim_directory derives the only admissible result path, and disjoint owned_artifacts are rehashed. Cancelled, stale, superseded or unresolved tasks cannot supply current approval. Recorded observations do not prove watching/listening, and actual host execution qualification remains pending.",
+      "disposition": "extend",
+      "parityFixture": "test_production_section_results.py + test_production_sections.py + test_inventory_external_writers.py; descriptor validation itself grants no execution or editorial approval",
+      "removalCondition": "Retain until external task ownership, immutable result identity and every current review dependency are represented by an equally strict registered host result contract.",
+      "authorityPathTokens": [
+        "native-long-section-result",
+        "read_completed_result",
+        "validate_settlement_result",
+        "claim_directory("
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/callbacks.py": "reader",
+        "scripts/producer/studio/production/section_assignment_repair.py": "reader",
+        "scripts/producer/studio/production/section_results.py": "reader",
+        "scripts/producer/studio/production/sections.py": "reader",
+        "scripts/producer/studio/production/section_join_barrier.py": "reader",
+        "scripts/producer/studio/production/section_judgments.py": "reader",
+        "scripts/producer/studio/native_budget_family_repair.py": "reader",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py": "reader",
+        "scripts/producer/studio/production/section_chunk_results.py": "reader",
+        "scripts/producer/studio/production/section_chunk_progress.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-review-scopes-v1",
+      "pathPattern": "<registered-Long-attempt>/<authorTaskId>-<early-review|encoded-review>-scopes.json",
+      "owner": "scripts/producer/studio/production/section_review_scope.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/production/section_review_scope.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/production/section_judgments.py",
+        "scripts/producer/studio/production/section_join_barrier.py",
+        "scripts/producer/studio/production/section_review_reuse.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/production/section_review_scope.py"
+      ],
+      "promotionPoint": "Create once from the registered immutable request, current logical assignments and actual existing preview/section seals; bind its exact bytes into the registered independent reviewer task inputs.",
+      "fingerprintInputs": [
+        "original request pin and frozen section plan",
+        "logical generation/input/author identities and exact frame ranges",
+        "separate interior, early continuous join and encoded neighboring picture/PCM observations",
+        "exact current preview and sealed media hashes"
+      ],
+      "durability": "This index derives observations, not editorial approval. read_scope rehashes the original request and recomputes observations. Retained unchanged interiors additionally require current claims, author/shared-plan equality, supported dependency compatibility and matching current picture/PCM. Changed joins need current independent judgments. Synthetic tests do not prove watching/listening or renderer equivalence.",
+      "disposition": "extend",
+      "parityFixture": "test_production_scoped_repair.py + test_production_sections.py + test_production_section_results.py; actual host execution and media qualification pending",
+      "removalCondition": "Replace only with a proved exact authority preserving original task ownership, separately current interior/join evidence and independent judgment under the same limits.",
+      "authorityPathTokens": [
+        "native-long-review-scopes",
+        "bind_scope(",
+        "read_scope("
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/section_review_scope.py": "reader-writer",
+        "scripts/producer/studio/production/sections.py": "reader",
+        "scripts/producer/studio/production/section_judgments.py": "reader",
+        "scripts/producer/studio/production/section_join_barrier.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-current-dependency-proof-v1",
+      "pathPattern": "<registered-Long-attempt>/<segment-owner>/{dependency-proof.json,dependency-capture/{capture.json,comparison.json,probe-*.jpg,comparison/**}}",
+      "owner": "scripts/producer/studio/native_segments/probe.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/probe.py",
+        "scripts/producer/studio/native_segments/owners.py",
+        "scripts/producer/studio/native_segments/worker.py",
+        "scripts/producer/studio/native_segments/verify.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/probe.py",
+        "scripts/producer/studio/native_segments/probe.mjs"
+      ],
+      "promotionPoint": "The existing restored-window owner captures current project pixels under its media jail, compares them with the donor, and writes create-once capture/comparison/proof artifacts. Existing StageEvidence seals the proof and exact screenshot inventory before a window can be reused.",
+      "fingerprintInputs": [
+        "registered immutable request and exact render window/plan identity",
+        "current project inventory and section implementation pins",
+        "donor picture digest and stream geometry",
+        "exact absolute probe frame inventory, captured images and decoded comparison"
+      ],
+      "durability": "Cold readers reopen the original sealed request, recompute expected frame coverage and current dependency identities, and require the proof, captures, comparison and individual screenshots to match sealed artifacts. This is bounded technical sample evidence only; it neither grants editorial approval nor establishes general Long runtime/color tolerance qualification. Node capture and shared source transport retain existing NativeRun ownership and cleanup.",
+      "disposition": "extend",
+      "parityFixture": "test_native_long_section_compatibility.py plus native sparse/source-capture regressions; synthetic source-grid diagnostics do not qualify representative Long delivery",
+      "removalCondition": "Replace only when another sealed current-project-versus-donor proof preserves exact frame coverage, request/project identity, media ownership and cold-read invalidation.",
+      "authorityPathTokens": [
+        "native-long-current-dependency-comparison",
+        "'dependencyProbe'",
+        "probe_artifacts",
+        "require_dependency_probe",
+        "execute_dependency_probe"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_segments/probe.py": "reader-writer",
+        "scripts/producer/studio/native_segments/owners.py": "reader",
+        "scripts/producer/studio/native_segments/worker.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-long-authored-chunk-contract-v1",
+      "pathPattern": "<admitted-Long-project>/LONG-CHUNKS.json",
+      "owner": "scripts/producer/studio/native_long_chunks.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/studio/native_export.py",
+        "scripts/producer/studio/native_long_budget.py",
+        "scripts/producer/studio/native_long_chunk_evidence.py",
+        "scripts/producer/studio/native_long_chunks.py",
+        "scripts/producer/studio/native_long_export.py",
+        "scripts/producer/studio/native_long_options.py",
+        "scripts/producer/studio/native_long_prebuild.py",
+        "scripts/producer/studio/native_long_recovery.py",
+        "scripts/producer/studio/native_segments/dependency.py",
+        "scripts/producer/studio/native_segments/section_closure.py",
+        "scripts/producer/studio/production/section_chunk_dispatch.py",
+        "scripts/producer/studio/production/section_chunk_recovery.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/native_segments/review_forecast.py",
+        "scripts/producer/studio/native_segments/review_media.py",
+        "scripts/producer/studio/native_segments/review_scopes.py",
+        "scripts/producer/studio/production/section_chunk_plan.py",
+        "scripts/producer/studio/production/section_chunk_presentation.py",
+        "scripts/producer/studio/production/section_review_scope.py",
+        "scripts/producer/studio/native_segments/review_budget.py",
+        "scripts/producer/studio/native_segments/review_service.py",
+        "scripts/producer/studio/production/section_review_materialize.py"
+      ],
+      "writers": [],
+      "promotionPoint": "An external project author/integration owner supplies the contract. The public --chunks path requires the exact frozen section plan, current source/timeline evidence, explicit independent prebuild evidence and exact encoder geometry before pinning admitted decisions into the immutable export request.",
+      "fingerprintInputs": [
+        "frozen creative assignment/shared-plan pins",
+        "exact absolute section/chunk/window ranges and authored purposes",
+        "versioned single-owner transition spans, neighbors, no-restart clock policy and current source/state identities"
+      ],
+      "durability": "The engine reads and validates authored decisions; it does not author their purposes or approve continuity. Local projections participate in existing dependency repair; changed shared transitions invalidate both sides. Contract currentness is not rendered transition or editorial qualification.",
+      "disposition": "extend",
+      "parityFixture": "test_native_long_chunk_admission.py + test_native_long_chunks.py; actual encoded/reference continuity and Long performance remain pending",
+      "removalCondition": "Replace only with equivalent original-authority, exact byte/frame identity, current dependency, recovery and independent review guarantees.",
+      "authorityPathTokens": [
+        "LONG-CHUNKS.json",
+        "sectionChunks",
+        "read_chunk_contract",
+        "bind_chunk_request",
+        "require_chunk_request",
+        "scoped_chunk_inputs",
+        "chunk_contract_changes",
+        "chunk_prebuild_pins",
+        "require_chunk_review",
+        "validate_chunk_options"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/current_system_inventory_check.py": "non-authority",
+        "scripts/producer/studio/native_export.py": "reader",
+        "scripts/producer/studio/native_long_budget.py": "reader",
+        "scripts/producer/studio/native_long_chunk_evidence.py": "reader",
+        "scripts/producer/studio/native_long_chunks.py": "reader",
+        "scripts/producer/studio/native_long_export.py": "reader",
+        "scripts/producer/studio/native_long_options.py": "reader",
+        "scripts/producer/studio/native_long_prebuild.py": "reader",
+        "scripts/producer/studio/native_long_recovery.py": "reader",
+        "scripts/producer/studio/native_segments/dependency.py": "reader",
+        "scripts/producer/studio/native_segments/section_closure.py": "reader",
+        "scripts/producer/studio/production/section_chunk_dispatch.py": "reader",
+        "scripts/producer/studio/production/section_chunk_recovery.py": "reader",
+        "scripts/producer/studio/production/sections.py": "reader",
+        "scripts/producer/studio/native_segments/review_forecast.py": "reader",
+        "scripts/producer/studio/native_segments/review_media.py": "reader",
+        "scripts/producer/studio/native_segments/review_scopes.py": "reader",
+        "scripts/producer/studio/production/section_chunk_plan.py": "reader",
+        "scripts/producer/studio/production/section_chunk_presentation.py": "reader",
+        "scripts/producer/studio/production/section_review_scope.py": "reader",
+        "scripts/producer/studio/native_segments/review_budget.py": "reader",
+        "scripts/producer/studio/native_segments/review_service.py": "reader",
+        "scripts/producer/studio/production/section_review_materialize.py": "reader"
+      },
+      "externalWriters": [
+        {
+          "actor": "codex",
+          "ownershipValidator": "scripts/producer/studio/native_long_chunks.py",
+          "outputDerivation": "request.project/LONG-CHUNKS.json"
+        },
+        {
+          "actor": "claude-code",
+          "ownershipValidator": "scripts/producer/studio/native_long_chunks.py",
+          "outputDerivation": "request.project/LONG-CHUNKS.json"
+        }
+      ]
+    },
+    {
+      "artifactId": "native-long-chunk-review-plan-v1",
+      "pathPattern": "<registered-Long-attempt>/<encodedTaskId>-chunks.json",
+      "owner": "scripts/producer/studio/production/section_chunk_plan.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/production/callbacks.py",
+        "scripts/producer/studio/production/claims.py",
+        "scripts/producer/studio/production/section_chunk_dispatch.py",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py",
+        "scripts/producer/studio/production/section_chunk_liveness.py",
+        "scripts/producer/studio/production/section_chunk_plan.py",
+        "scripts/producer/studio/production/section_chunk_progress.py",
+        "scripts/producer/studio/production/section_chunk_recovery.py",
+        "scripts/producer/studio/production/section_chunk_results.py",
+        "scripts/producer/studio/production/section_join_barrier.py",
+        "scripts/producer/studio/production/section_judgments.py",
+        "scripts/producer/studio/production/section_results.py",
+        "scripts/producer/studio/production/section_review_reuse.py",
+        "scripts/producer/studio/production/sections.py",
+        "scripts/producer/studio/production/section_chunk_reuse.py",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py",
+        "scripts/producer/studio/production/section_chunk_carry.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/production/section_chunk_plan.py"
+      ],
+      "promotionPoint": "Freeze one immutable assignment-local inventory from the registered request and exact admitted encoder windows, before future scope media exists. The ordinary counted section reviewer pins this inventory; later scopes do not create new review assignments.",
+      "fingerprintInputs": [
+        "original immutable request pin and complete creative scope",
+        "planner-derived exact chunk/window mapping",
+        "actual admitted window generation and input identities"
+      ],
+      "durability": "Cold readers rederive geometry and current pins; partial evidence cannot finish the task. Exact recovery retains the original plan and must validate current sealed media. This is derived input geometry, not editorial approval. Recovery integration is under focused validation.",
+      "disposition": "extend",
+      "parityFixture": "test_production_chunk_progress.py + test_production_chunk_dispatch.py + test_production_chunk_reuse.py; actual media/host qualification pending",
+      "removalCondition": "Replace only with equivalent original-authority, exact byte/frame identity, current dependency, recovery and independent review guarantees.",
+      "authorityPathTokens": [
+        "native-long-section-chunk-review-plan",
+        "'chunkPlan'",
+        "freeze_chunk_plan",
+        "read_chunk_plan"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/callbacks.py": "reader",
+        "scripts/producer/studio/production/claims.py": "reader",
+        "scripts/producer/studio/production/section_chunk_dispatch.py": "reader",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py": "reader",
+        "scripts/producer/studio/production/section_chunk_liveness.py": "reader",
+        "scripts/producer/studio/production/section_chunk_plan.py": "reader-writer",
+        "scripts/producer/studio/production/section_chunk_progress.py": "reader",
+        "scripts/producer/studio/production/section_chunk_recovery.py": "reader",
+        "scripts/producer/studio/production/section_chunk_results.py": "reader",
+        "scripts/producer/studio/production/section_join_barrier.py": "reader",
+        "scripts/producer/studio/production/section_judgments.py": "reader",
+        "scripts/producer/studio/production/section_results.py": "reader",
+        "scripts/producer/studio/production/section_review_reuse.py": "reader",
+        "scripts/producer/studio/production/sections.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py": "reader",
+        "scripts/producer/studio/production/section_chunk_carry.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-external-chunk-judgments-v1",
+      "pathPattern": "<sectionBinding.outputRoot>/<task.id>/<claim.epoch>-<claim.token>/{chunks/<scopeId>.json,global-joins.json}",
+      "owner": "scripts/producer/studio/production/section_chunk_results.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/studio/production/api.py",
+        "scripts/producer/studio/production/section_chunk_dispatch.py",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py",
+        "scripts/producer/studio/production/section_chunk_progress.py",
+        "scripts/producer/studio/production/section_chunk_results.py",
+        "scripts/producer/studio/production/section_join_barrier.py",
+        "scripts/producer/studio/production/task_schema.py",
+        "scripts/producer/studio/production/section_chunk_reuse.py",
+        "scripts/producer/studio/production/section_chunk_carry.py",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [],
+      "promotionPoint": "The attached independent reviewer writes claim-owned canonical scope judgments. The existing production transaction rechecks exact media, upstream authors, claim token and the original clock after proof reads, then stores an immutable nonterminal progress pin. Final completion requires every required chunk/internal edge and assigned global joins.",
+      "fingerprintInputs": [
+        "existing task id, claim epoch/token, frozen chunk plan and author dependency",
+        "scope id, exact current picture/PCM seals and authored observations/checks",
+        "all final scope pins and explicit independently authored full-project join evidence"
+      ],
+      "durability": "One assigned reviewer retains its slot and original cumulative charge while waiting; no per-chunk clock or allowance exists. Progress alone cannot approve assembly. Completed original receipts remain reusable only through exact current dependency and media comparisons. Review statements do not establish real watching/listening.",
+      "disposition": "extend",
+      "parityFixture": "test_production_chunk_progress.py + test_production_chunk_global_joins.py + test_production_chunk_dispatch.py + test_production_chunk_reuse.py; synthetic judgments only",
+      "removalCondition": "Replace only with equivalent original-authority, exact byte/frame identity, current dependency, recovery and independent review guarantees.",
+      "authorityPathTokens": [
+        "native-long-section-chunk-result",
+        "native-long-chunk-global-join-review",
+        "'sectionProgress'",
+        "record_section_review_progress",
+        "validate_chunk_global_joins",
+        "completed_scope_snapshot",
+        "read_progress("
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/api.py": "reader",
+        "scripts/producer/studio/production/section_chunk_dispatch.py": "reader",
+        "scripts/producer/studio/production/section_chunk_join_inputs.py": "reader",
+        "scripts/producer/studio/production/section_chunk_progress.py": "reader",
+        "scripts/producer/studio/production/section_chunk_results.py": "reader",
+        "scripts/producer/studio/production/section_join_barrier.py": "reader",
+        "scripts/producer/studio/production/task_schema.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse.py": "reader",
+        "scripts/producer/studio/production/section_chunk_carry.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader"
+      },
+      "externalWriters": [
+        {
+          "actor": "codex",
+          "ownershipValidator": "scripts/producer/studio/production/section_chunk_results.py",
+          "outputDerivation": "sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{chunks/<scopeId>.json,global-joins.json}"
+        },
+        {
+          "actor": "claude-code",
+          "ownershipValidator": "scripts/producer/studio/production/section_chunk_results.py",
+          "outputDerivation": "sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{chunks/<scopeId>.json,global-joins.json}"
+        }
+      ]
+    },
+    {
+      "artifactId": "native-long-continuous-review-package-v1",
+      "pathPattern": "<registered-Long-attempt>/review-package-<scope-hash>{.json,-stage.json,-work-<uuid>/**,-unsealed-<uuid>.json}",
+      "owner": "scripts/producer/studio/native_segments/review_package.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/review_package.py",
+        "scripts/producer/studio/production/section_chunk_presentation.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/review_media.py",
+        "scripts/producer/studio/native_segments/review_package.py"
+      ],
+      "promotionPoint": "Only successful original-family owner cleanup followed by StageEvidence sealing publishes a continuous review clip. Ready task readers cold-validate the receipt and original/current window, source, transition, master and implementation identities before presenting it.",
+      "fingerprintInputs": [
+        "registered immutable request and original production authority",
+        "admitted chunk or complete transition scope and exact current sealed picture/PCM windows",
+        "whole-program mastered audio and dialogue reference hashes",
+        "assignment generations, admission identities, canvas, audio profile and implementation pins",
+        "owned receipt and picture, excerpt, mux and metadata-corrected media artifact hashes"
+      ],
+      "durability": "Derived review-only AAC is distinct from final delivery authority. Completed exact packages are reused across registered compatible attempts; corrupt present evidence fails. Unsealed failed receipts and partial media remain retained. Technical packet/decode/sample/color proofs do not constitute editorial playback or listening approval. Engineering validation is in progress. Calibration/service metadata kind strings and forecast entrypoint labels are non-authority substring matches; they do not create, seal or read a production continuous package.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_package.py + test_native_review_package_media.py + test_production_chunk_presentation.py; focused validation pending, actual representative Long qualification unmeasured",
+      "removalCondition": "Replace only with equivalent current byte/frame/master lineage, original-family accounting, exact recovery and independently recorded review guarantees.",
+      "authorityPathTokens": [
+        "native-long-review-package",
+        "native_segments.review_package"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_segments/review_media.py": "writer",
+        "scripts/producer/studio/native_segments/review_package.py": "reader-writer",
+        "scripts/producer/studio/production/section_chunk_presentation.py": "reader",
+        "scripts/producer/native_review_calibration.py": "non-authority",
+        "scripts/producer/native_review_calibration_media.py": "non-authority",
+        "scripts/producer/native_review_calibration_worker.py": "non-authority",
+        "scripts/producer/native_work_service_evidence.py": "non-authority",
+        "scripts/producer/native_work_service_runs.py": "non-authority",
+        "scripts/producer/native_work_service_schema.py": "non-authority",
+        "scripts/producer/studio/native_segments/review_service_plan.py": "non-authority",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-assembled-picture-v1",
+      "pathPattern": "<registered-attempt>/{picture.pending.mp4,picture.mp4,revision-picture.json,picture-stage.json}",
+      "owner": "scripts/producer/studio/native_segments/assemble.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_budget_family_outcome.py",
+        "scripts/producer/studio/native_long_recovery.py",
+        "scripts/producer/studio/native_long_worker.py",
+        "scripts/producer/studio/native_segments/assemble.py",
+        "scripts/producer/studio/native_stage_evidence.py",
+        "scripts/producer/studio/production/section_publication.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/assemble.py",
+        "scripts/producer/studio/native_long_recovery.py"
+      ],
+      "promotionPoint": "Initial Long packet concatenation becomes picture.mp4 only after exact coverage/stream/packet checks and an unchanged current assembly snapshot under the existing production/history publication locks. The immutable revision receipt follows rename; the picture stage is sealed after successful NativeRun cleanup.",
+      "fingerprintInputs": [
+        "current sealed ordered window picture bytes and exact frame clock",
+        "current independent scope reviews and assignment generations",
+        "registered request and immutable revision plan identity"
+      ],
+      "durability": "Picture awaits audio and final QC; this row does not grant final delivery. Failed pending picture/listing and partially completed publication remain preserved. Atomic rename is not claimed to include a directory fsync. Legacy revision branches retain their separate checks and are not newly Long-qualified.",
+      "disposition": "extend",
+      "parityFixture": "test_native_section_publication.py + test_native_long_sections_acceptance.py; representative final playback unverified",
+      "removalCondition": "Replace only after equivalent original authority, exact media/source identity, current review and recovery guarantees are verified.",
+      "authorityPathTokens": [
+        "revision-picture.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_budget_family_outcome.py": "reader",
+        "scripts/producer/studio/native_long_recovery.py": "reader-writer",
+        "scripts/producer/studio/production/section_publication.py": "reader",
+        "scripts/producer/studio/native_segments/assemble.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-revision-packet-assembly-work-v1",
+      "pathPattern": "<owned-attempt-or-review-package-work>/revision-pieces.ffconcat; <attempt>/revision-pieces/gop-*.mp4; owner-selected picture target",
+      "owner": "scripts/producer/studio/native_segments/assemble.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/assemble.py",
+        "scripts/producer/studio/native_segments/manifest.py",
+        "scripts/producer/studio/native_segments/review_media.py",
+        "scripts/producer/studio/native_segments/verify.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/assemble.py"
+      ],
+      "promotionPoint": "Owner-local concat inputs and stream-copied GOPs remain execution intermediates. Only matching original packet payloads and current sealed windows may feed the assembled-picture or continuous-review package authority.",
+      "fingerprintInputs": [
+        "exact ordered canonical piece paths",
+        "per-piece byte and packet payload identities",
+        "admitted constant frame clock and compatible stream contract"
+      ],
+      "durability": "The concat listing is overwritten local execution input, not immutable authority. Failed work is retained; no cleanup or editorial approval is claimed. Legacy delivered-GOP splitting is not the initial-Long route.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_package_media.py + test_native_long_sections_acceptance.py; synthetic media evidence only",
+      "removalCondition": "Replace only after equivalent original authority, exact media/source identity, current review and recovery guarantees are verified.",
+      "authorityPathTokens": [
+        "revision-pieces.ffconcat"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_segments/assemble.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-long-owned-window-media-v1",
+      "pathPattern": "<attempt>/{segment-picture-<i>.json,segment-picture-<i>-stage.json}; segment-<i:03>-try-<0..7>/section-audio.wav and Python-owned copied <sealedArtifactName><originalSuffix>; segment-picture-<i>-restored/<sealedArtifactName><originalSuffix>",
+      "owner": "scripts/producer/studio/native_segments/owners.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_budget_continuation.py",
+        "scripts/producer/studio/native_budget_family_outcome.py",
+        "scripts/producer/studio/native_budget_family_repair.py",
+        "scripts/producer/studio/native_long_integration.py",
+        "scripts/producer/studio/native_long_scope_pipeline.py",
+        "scripts/producer/studio/native_segments/assemble.py",
+        "scripts/producer/studio/native_segments/compatibility.py",
+        "scripts/producer/studio/native_segments/owners.py",
+        "scripts/producer/studio/native_segments/review_media.py",
+        "scripts/producer/studio/native_segments/reviews.py",
+        "scripts/producer/studio/native_segments/supervision.py",
+        "scripts/producer/studio/native_segments/worker.py",
+        "scripts/producer/studio/native_stage_evidence.py",
+        "scripts/producer/studio/production/section_chunk_plan.py",
+        "scripts/producer/studio/production/section_chunk_presentation.py",
+        "scripts/producer/studio/production/section_chunk_recovery.py",
+        "scripts/producer/studio/production/section_media.py",
+        "scripts/producer/studio/production/section_recovery.py",
+        "scripts/producer/studio/production/section_review_inputs.py",
+        "scripts/producer/studio/production/section_chunk_reuse.py",
+        "scripts/producer/studio/native_segments/frame_reuse.py",
+        "scripts/producer/studio/native_segments/frame_capture.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/owners.py",
+        "scripts/producer/studio/native_segments/compatibility.py",
+        "scripts/producer/studio/native_segments/worker.py"
+      ],
+      "promotionPoint": "A fresh window receipt is sealed only after successful owned cleanup. Cross-generation repair copies proved picture/probes, captures current dependency proof and PCM and obtains a new seal. Whole-window reuse skips retainedFrame* copies and records retainedCaptureDonor equal to admitted revision.windowDonors[phase]. Exact restoration preserves original retained manifest/JPEG/proof references; cold baseline_capture reads the original SEALED receipt/request and follows admitted donor StageEvidence at most8 generations, rechecking inherited pins. Mutable restored fields grant no relay authority.",
+      "fingerprintInputs": [
+        "registered original and current request/implementation pins",
+        "exact window generation inputIdentity and admitted dependency closure",
+        "sealed picture/PCM/probe bytes and successful owned cleanup"
+      ],
+      "durability": "copy_picture uses exclusive creation, fsync and pre/post hash checks. Partial failed copies stay unusable. Repair compatibility excludes donor receipt and audio; copied old dependency artifacts may remain diagnostic leftovers and are not automatically current proof. No old editorial approval is transferred by media copying. Renderer-created window.json, original picture and frame intermediates are outside this Python-copy row; their existing renderer lifecycle gaps are not closed by this binding. Current dependency capture/proof has its separate typed row. Retained capture relay is a field of existing sealed window receipt, not an external artifact newly sealed in the current namespace. Absent genuine legacy baseline permits full capture; present corrupt/malformed/unsealed claims refuse. Original retained evidence must survive all descendants.",
+      "disposition": "extend",
+      "parityFixture": "test_native_long_section_compatibility.py + test_native_long_sections_acceptance.py + test_production_chunk_recovery.py; actual representative recovery qualification pending; test_native_long_frame_capture covers actual synthetic reuse/restore relay and future repair refusal after original corruption",
+      "removalCondition": "Replace only after equivalent original authority, exact media/source identity, current review and recovery guarantees are verified.",
+      "authorityPathTokens": [
+        "current_window",
+        "reuse_window",
+        "restore_window",
+        "retainedCaptureDonor",
+        "relay_frame_capture"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_budget_family_repair.py": "reader",
+        "scripts/producer/studio/native_long_scope_pipeline.py": "reader",
+        "scripts/producer/studio/native_budget_continuation.py": "reader",
+        "scripts/producer/studio/native_budget_family_outcome.py": "reader",
+        "scripts/producer/studio/native_long_integration.py": "reader",
+        "scripts/producer/studio/production/section_review_inputs.py": "reader",
+        "scripts/producer/studio/production/section_recovery.py": "reader",
+        "scripts/producer/studio/production/section_chunk_recovery.py": "reader",
+        "scripts/producer/studio/production/section_media.py": "reader",
+        "scripts/producer/studio/native_segments/worker.py": "reader-writer",
+        "scripts/producer/studio/native_segments/review_media.py": "reader",
+        "scripts/producer/studio/native_segments/compatibility.py": "reader-writer",
+        "scripts/producer/studio/native_segments/reviews.py": "reader",
+        "scripts/producer/studio/native_segments/owners.py": "reader-writer",
+        "scripts/producer/studio/native_segments/assemble.py": "reader",
+        "scripts/producer/studio/native_segments/supervision.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse.py": "reader",
+        "scripts/producer/studio/native_segments/frame_reuse.py": "reader",
+        "scripts/producer/studio/native_segments/frame_capture.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "selected-frame-filter-scratch-v1",
+      "pathPattern": "<owned-selection-directory>/selected-filter.txt, including dependency-capture/comparison and revision-probes",
+      "owner": "scripts/producer/studio/native_selected_frames.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/verify.py",
+        "scripts/producer/studio/native_selected_frames.py",
+        "scripts/producer/studio/native_short_delivery.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_selected_frames.py",
+        "scripts/producer/studio/native_segments/verify.py"
+      ],
+      "promotionPoint": "An exclusive filter script is local decode scratch only. The caller provides an exact selected-frame contract and verifies decoded frames; no filter file becomes retained approval.",
+      "fingerprintInputs": [
+        "exact requested frame selection and canvas",
+        "exclusive file identity and complete filter bytes"
+      ],
+      "durability": "owned_filter verifies exact bytes/inode and unlinks only its own inode in finally. The comparison directory may remain empty. RGB and PSNR statistics stream through pipes; this row does not invent RGB/statistics disk artifacts or whole-directory cleanup.",
+      "disposition": "extend",
+      "parityFixture": "test_native_selected_frames.py failure/cancellation/replaced-inode checks; synthetic dependency probe tests",
+      "removalCondition": "Replace only after equivalent original authority, exact media/source identity, current review and recovery guarantees are verified.",
+      "authorityPathTokens": [
+        "selected-filter.txt",
+        "owned_filter"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_selected_frames.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-long-review-calibration-inputs-v1",
+      "pathPattern": "<explicit-new-calibration-root>/attempts/prepare/{technical-inputs.json,technical-master.json,window-<start>-<end>.mp4,master.wav,reference.wav}",
+      "owner": "scripts/producer/native_review_calibration_media.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/native_review_calibration_media.py",
+        "scripts/producer/native_review_calibration_worker.py",
+        "scripts/producer/native_work_service_provenance.py",
+        "scripts/producer/native_work_service_pins.py",
+        "scripts/producer/native_review_proof_calibration.py",
+        "scripts/producer/native_proof_io.py"
+      ],
+      "writers": [
+        "scripts/producer/native_review_calibration_media.py"
+      ],
+      "promotionPoint": "Generated codec/audio files precede a create-once index; a cold read validates them before technical preparation completion. No production StageEvidence, source/editorial approval or delivery authority is created.",
+      "fingerprintInputs": [
+        "closed generated spec and native encoder command/contract/module",
+        "actual tools, packet/geometry/frame-clock facts and exact float PCM sample count",
+        "all generated media hashes"
+      ],
+      "durability": "write_new indexes are exclusive and fsynced; generated codec/reference files may precede failed preparation and remain retained. Cold readers reject links, changed bytes and escaped paths and rederive packet/PCM facts. Codec output atomicity/directory fsync is not claimed.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_calibration_media.py; tiny generated technical fixtures only",
+      "removalCondition": "Explicit operator retirement only after all referenced evidence is retired; no automatic retention or cleanup policy is implemented.",
+      "authorityPathTokens": [
+        "native-long-review-package-technical-inputs"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/native_review_calibration_media.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "native-long-review-calibration-measurements-v1",
+      "pathPattern": "<calibration-root>/{project/technical-project.json,ffmpeg-version.txt,ffprobe-version.txt,measurements.json,failure-<uuid>.json}; attempts/{prepare,measure-<NN>}/{request.json,result.json,inspection.render.*,measurement.json,cache-observations.json,cache-evidence.json,observed-resources.json,package/**}; prepare has no measurement/cache files",
+      "owner": "scripts/producer/native_review_calibration.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/native_review_calibration.py",
+        "scripts/producer/native_review_calibration_worker.py",
+        "scripts/producer/studio/owned_inspection.py",
+        "scripts/producer/native_work_service_runs.py",
+        "scripts/producer/native_work_service_evidence.py",
+        "scripts/producer/native_work_service_provenance.py",
+        "scripts/producer/native_work_service_pins.py",
+        "scripts/producer/studio/native_run_lifecycle.py",
+        "scripts/producer/native_work_service_cache.py",
+        "scripts/producer/native_review_proof_calibration.py"
+      ],
+      "writers": [
+        "scripts/producer/native_review_calibration.py",
+        "scripts/producer/native_review_calibration_worker.py"
+      ],
+      "promotionPoint": "Existing run_inspection/NativeRun owns request/process/log completion; worker validates actual live session and current request provenance before/after shared derive_media. Parent timing encloses input proofs, owner wait/work/cleanup and cold result hashes, deducting actual queue once. These shared lifecycle writers are referenced narrowly, not blanket-bound by this row. Production seal publication remains explicitly unsupported. run_inspection opts into bounded completedOutput={path,sha256,bytes} in inspection.render.json after child exit/verified cleanup and before existing NativeRun success persistence. All new calibration/rate readers require this owner digest. cacheObservation is inside that bound result; cache wrappers must equal its recomputed observations. Shared lifecycle fields are narrowly described, not blanket writer-bound. The same worker also dispatches a distinct proof-read operation under the unchanged before/after live-session and provenance gates. Its narrower raw result/experiment is inventoried separately and is not a package service-run or production seal.",
+      "fingerprintInputs": [
+        "actual host/policy/engine/tools/harness in owner-bound requests",
+        "pinned preparation/media output inventory and actual terminal owner",
+        "outer timing and same-input MP4/PCM/clock reference checks",
+        "successful owner-captured completedOutput and exact owner-bound cacheObservation"
+      ],
+      "durability": "Earlier successful rows survive later failures; actual terminal failed owners or diagnostic-only failures remain retained. Closing a session releases live authority; manifest write is in finally after setup. Early setup/version errors before try or abrupt death may leave partial files without a final manifest. No media/evidence cleanup. Serial1..8 only; repeated-pass unknown cache and null physical/read byte counters cannot qualify rate adoption. Present malformed/mismatched completedOutput always refuses; absent digest is accepted only by explicit legacy inspection callers. NativeRun pending write/file fsync/replacement remains unchanged, without new directory-fsync or SIGKILL guarantee. Current cacheObservation readPasses is null; no package/full-worker/process-tree physical observer, equivalent production proof traversal, or rate adoption is claimed. Separate bounded task-local proof passes have their own derived row; their narrower observations do not fill package cache counters.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_calibration.py + test_native_review_calibration_media.py + test_native_review_package_media.py; actual tiny owned smoke retained separately, not representative qualification; test_native_inspection_output_binding + test_native_service_observation_binding",
+      "removalCondition": "Explicit operator retirement only after all referenced evidence is retired; no automatic retention or cleanup policy is implemented.",
+      "authorityPathTokens": [
+        "native-long-review-package-service-run",
+        "native-long-review-package-measurements",
+        "native-long-review-package-technical-preparation",
+        "native-long-review-package-technical-result",
+        "native-long-review-package-measurement-failure",
+        "native-service-cache-evidence",
+        "native-service-cache-observations",
+        "'completedOutput'",
+        "require_owner_digest",
+        "native-service-owned-cache-observation",
+        "cacheObservation"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/native_review_calibration.py": "reader-writer",
+        "scripts/producer/native_review_calibration_worker.py": "reader-writer",
+        "scripts/producer/native_work_service_evidence.py": "reader",
+        "scripts/producer/native_work_service_runs.py": "reader",
+        "scripts/producer/native_work_service_cache.py": "reader",
+        "scripts/producer/studio/owned_inspection.py": "reader-writer",
+        "scripts/producer/studio/native_run_lifecycle.py": "reader-writer",
+        "scripts/producer/native_review_proof_calibration.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-review-service-rates-v1",
+      "pathPattern": "<canonical-user-home>/.project-sniper/native-pool/long-review-package-service-v1.json and .pending replacement",
+      "owner": "scripts/producer/native_work_service_rates.py",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/native_work_service_rates.py",
+        "scripts/producer/native_work_service_schema.py",
+        "scripts/producer/native_work_service_evidence.py",
+        "scripts/producer/native_work_service_runs.py",
+        "scripts/producer/native_work_service_provenance.py",
+        "scripts/producer/native_work_service_pins.py",
+        "scripts/producer/studio/native_segments/review_service_binding.py"
+      ],
+      "writers": [
+        "scripts/producer/native_work_service_rates.py"
+      ],
+      "promotionPoint": "Explicit write_service_rates cold-validates bounded current host/policy/engine/tool/harness and linked measurement/adoption evidence before existing durable private replacement. A conditional catalog read exists in Long prepare_admission, but public runtime conditions remain unavailable and conservative fallback remains selected. No harness auto-adoption/CLI, actual measured-rate selection, or independent adoption writer is established; pool capacity/fullExports readers do not consume this record.",
+      "fingerprintInputs": [
+        "exact current canonical private host/policy and actual owner-bound provenance",
+        "bounded serial cells, measured ceiling arithmetic, jointly exercised maxima and distinct held-out pictures",
+        "exact selected serial comparison receipt, retained failures and independent validation pin"
+      ],
+      "durability": "Bounded no-follow private reader and closed JSON reject duplicate/nonfinite/changed evidence; invalid/unreadable catalog becomes unavailable. Required independent service-validation artifact is externally supplied: no production authoring/approval writer exists yet. No undeclared-failure discovery, rate adoption or capacity qualification is claimed.",
+      "disposition": "extend",
+      "parityFixture": "test_native_work_service_rates.py + test_native_service_rate_provenance.py; synthetic receipts are not real performance evidence",
+      "removalCondition": "Explicit operator retirement only after all referenced evidence is retired; no automatic retention or cleanup policy is implemented.",
+      "authorityPathTokens": [
+        "long-review-package-service-v1.json",
+        "sniper-native-service-rates",
+        "native-long-review-package-service-v1"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/native_work_service_rates.py": "reader-writer",
+        "scripts/producer/native_work_service_schema.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-retained-chunk-judgment-v1",
+      "pathPattern": "<immutable-task-chunk-plan-parent>/<taskId>-<scopeId>-carry.json and -carry-media.json; sectionCarry references and sectionCarryWithdrawal remain inside the existing production task record",
+      "owner": "scripts/producer/studio/production/section_chunk_carry.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/production/section_chunk_carry.py",
+        "scripts/producer/studio/production/section_chunk_reuse.py",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py",
+        "scripts/producer/studio/production/section_chunk_dispatch.py",
+        "scripts/producer/studio/production/section_chunk_results.py",
+        "scripts/producer/studio/production/section_chunk_presentation.py",
+        "scripts/producer/studio/production/section_judgments.py",
+        "scripts/producer/studio/production/section_review_materialize.py",
+        "scripts/producer/studio/production/task_schema.py",
+        "scripts/producer/studio/native_segments/review_service_state.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/production/section_chunk_carry.py"
+      ],
+      "promotionPoint": "Immutable sidecars are prepared before task mutation. Existing locked materialization rechecks the original elapsed grant before ordinary enqueue and append-only sectionCarry references. Original task/claim/receipt are never relabeled as current progress. Final completion selects carried judgments separately and cold-revalidates live original-author/withdrawal authority; fresh current progress can override. Raw projected media alone is not a current continuous presentation.",
+      "fingerprintInputs": [
+        "registered exact repair-parent and explicit current/prior author replacement edge",
+        "original recorded independent claim receipt and continuous presentation, exact scope/dependencies and picture/PCM identity",
+        "current request/chunk plan/raw window seal projections; live historical withdrawal/current task authority"
+      ],
+      "durability": "Exclusive fsynced write_new sidecars replay only exact bytes and hashes. Failed preparation may leave unattached immutable evidence, never approval. References are bounded task-owned pins; explicit old-judgment withdrawal records an additive bounded marker inside the existing task transaction without changing claims, counters or cleanup. Later reads must check live authority. Original media, receipts and required donor evidence remain retained; no automatic GC policy is added.",
+      "disposition": "extend",
+      "parityFixture": "test_production_chunk_changed_reuse.py and test_production_chunk_carry_dispatch.py; synthetic media and explicit fictional review judgments only, actual qualification pending",
+      "removalCondition": "Retire only after no live or historical selected review/repair/recovery dependency references the original or current proof. No automatic removal implementation.",
+      "authorityPathTokens": [
+        "native-long-current-chunk-carry",
+        "native-long-retained-chunk-judgment",
+        "sectionCarry",
+        "retained_chunk_scopes",
+        "read_retained_chunk"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/production/section_chunk_carry.py": "reader-writer",
+        "scripts/producer/studio/production/section_chunk_results.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse.py": "reader",
+        "scripts/producer/studio/production/section_chunk_reuse_history.py": "reader-writer",
+        "scripts/producer/studio/production/section_review_materialize.py": "reader-writer",
+        "scripts/producer/studio/production/task_schema.py": "reader",
+        "scripts/producer/studio/native_segments/review_service_state.py": "reader"
+      }
+    },
+    {
+      "artifactId": "native-long-retained-frame-plan-v1",
+      "pathPattern": "<attempt>/segment-picture-<index>-frame-plan.json",
+      "owner": "scripts/producer/studio/native_segments/frame_capture.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/frame_capture.py",
+        "scripts/producer/studio/native_segments/frame_reuse.py",
+        "scripts/producer/studio/native_segments/retained_capture.mjs"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/frame_capture.py"
+      ],
+      "promotionPoint": "publish_request invokes bind_frame_reuse before request write/registration. Current repair authority derives exact capture/copy/check ranges; the request pins this immutable sidecar and its full inherited closure. Python cold recomputation and Node admitted-hash checks precede rendering. This is not editorial approval.",
+      "fingerprintInputs": [
+        "registered repair parent and sealed donor/request pins",
+        "current plan/window/dependencies and absolute capture/copy/check partition",
+        "baseline manifest/JPEG hashes, requiredPinsIdentity and compact plan identity"
+      ],
+      "durability": "Exclusive canonical write_new with file fsync; sidecar <=1MiB, request/stage retain existing16MiB bound. Partial preparation can leave unregistered sidecars. Exact resume may reference original sidecar. No directory-fsync or cleanup guarantee. Node .mjs is declared from source review but excluded from current callSiteAudit.",
+      "disposition": "extend",
+      "parityFixture": "test_native_long_frame_reuse + test_native_long_frame_capture + native_long_retained_capture.test.mjs; synthetic technical evidence only",
+      "removalCondition": "Retain original evidence while any descendant references it. No automatic GC or retirement is implemented.",
+      "authorityPathTokens": [
+        "native-long-retained-frame-repair",
+        "sectionFrameReuse",
+        "read_frame_plan",
+        "bind_frame_reuse"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_long_export.py": "launcher",
+        "scripts/producer/studio/native_segments/frame_capture.py": "reader-writer",
+        "scripts/producer/studio/native_segments/frame_reuse.py": "reader",
+        "scripts/producer/studio/native_segments/frame_metadata.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "native-long-retained-frame-capture-v1",
+      "pathPattern": "<attempt>/segment-<index:03>-try-<0..7>/{retained-frames.json,retained-frame-proof.json,frames/frame_<absolute:06>.jpg}",
+      "owner": "scripts/producer/studio/native_segments/frame_capture.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_retained_frames.py",
+        "scripts/producer/studio/native_segments/frame_reuse.py",
+        "scripts/producer/studio/native_segments/frame_capture.py",
+        "scripts/producer/studio/native_segments/retained_capture.mjs",
+        "scripts/producer/studio/native_segments/owners.py",
+        "scripts/producer/studio/native_segments/worker.py",
+        "scripts/producer/studio/native_stage_evidence.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/retained_capture.mjs",
+        "scripts/producer/studio/native_segments/frame_capture.py"
+      ],
+      "promotionPoint": "Fresh JPEGs delegate to existing render.mjs captureFrames; Long adapter copies exact admitted JPEGs. Before complete-window encode, every frame is hashed and unchanged recaptures must equal baseline. Python rechecks ordered inventory, sessions, bounds and partition. Only successful NativeRun cleanup and existing StageEvidence seal manifest/every JPEG/comparison. Unsealed output grants no reuse; comparison explicitly grants no editorial approval.",
+      "fingerprintInputs": [
+        "current registered request/window/canvas and complete ordered frame hashes",
+        "actual disposed capture sessions and exact captured/copied origins",
+        "repair sidecar and unchanged comparison; successful owner and stage pins"
+      ],
+      "durability": "Node manifest wx and exclusive copied JPEGs have no explicit fsync; shared fresh capture durability is unchanged. Python comparison/stage use exclusive file-fsynced write_new. Failed partial outputs remain untrusted. JPEG disk admission is separate; metadata preflight is only a necessary lower-bound test, not full dynamic receipt-size proof. Shared SDK/copy/NativeRun writers are not blanket-bound. Node .mjs is not scanned by current callSiteAudit. Renderer window.json/original picture lifecycle remains outside this row.",
+      "disposition": "extend",
+      "parityFixture": "test_native_long_frame_reuse + test_native_long_frame_capture + test_native_long_retained_disk + native_long_retained_capture.test.mjs; actual encoded quality/speed qualification pending",
+      "removalCondition": "Retain original evidence while any descendant references it. No automatic GC or retirement is implemented.",
+      "authorityPathTokens": [
+        "native-retained-capture-frames",
+        "native-long-retained-frame-comparison",
+        "retained-frames.json",
+        "'retainedFrames'",
+        "'retainedFrameProof'",
+        "frame_artifacts",
+        "finish_frame_capture"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_retained_frames.py": "reader",
+        "scripts/producer/studio/native_segments/frame_capture.py": "reader-writer",
+        "scripts/producer/studio/native_segments/frame_reuse.py": "reader",
+        "scripts/producer/studio/native_segments/owners.py": "reader-writer",
+        "scripts/producer/studio/native_segments/worker.py": "reader-writer",
+        "scripts/producer/studio/native_segments/frame_metadata.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "native-long-review-service-envelope-v1",
+      "pathPattern": "<existing-production-authority>/batches/<batchId>/long-review-service-<sha256>.json and same basename plus .pending",
+      "owner": "scripts/producer/studio/native_segments/review_service_binding.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/studio/native_segments/review_service_binding.py",
+        "scripts/producer/studio/native_budget_family.py",
+        "scripts/producer/studio/native_budget_family_reservation.py",
+        "scripts/producer/studio/native_budget_family_schema.py"
+      ],
+      "writers": [
+        "scripts/producer/studio/native_segments/review_service_binding.py"
+      ],
+      "promotionPoint": "freeze_binding publishes exact canonical prospective evidence under the existing batch lock. Only the family-selected immutable reviewService pin selects it; an unreferenced file grants no work. prepare_admission reads/estimates it before reserve_family refreshes the original clock and applies ordinary reservation rules. Schema validation is shape-only.",
+      "fingerprintInputs": [
+        "canonical batch/clip/section-plan/shared-plan identity",
+        "prospective canvas, frozen scope/window/read-plan inventory and envelope identity",
+        "explicit runtime conditions and selected service cells when available; no invented future media hashes"
+      ],
+      "durability": "At most existing16MiB MAX_JSON. Existing private durable replacement fsyncs pending bytes, replaces and fsyncs batch directory; existing content-addressed file must equal desired bytes. Cold reads require canonical no-follow owned single-link mode0600 file and exact byte/hash/context binding. Sidecar publication and authority commit are separate; failed admission may leave unreferenced or pending files. No new GC; retain while referenced. Whole-batch archive does not rewrite absolute live pins or establish archived replay. Missing runtime eligibility falls back; declared missing/corrupt/wrong-batch evidence refuses. Public conditions remain unavailable and conservative fallback is selected; no clock/cap/capacity/creative-identity change.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_service_binding.py; prospective and behavioral evidence only, not measured service or representative qualification",
+      "removalCondition": "Retain selected envelopes and their authority context while family history references them; no automatic retention or migration is claimed.",
+      "authorityPathTokens": [
+        "native-long-review-service-binding",
+        "long-review-service-",
+        "'reviewService'"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/studio/native_segments/review_service_binding.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_reservation.py": "reader-writer",
+        "scripts/producer/studio/native_budget_family_schema.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "native-long-technical-proof-read-experiment-v1",
+      "pathPattern": "<explicit-technical-proof-attempt>/{request.json,result.json,inspection.render.*,proof-read-experiment.json}; ordered plan/raw observation embedded in request/result",
+      "owner": "scripts/producer/native_review_proof_calibration.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/native_review_proof_calibration.py",
+        "scripts/producer/native_review_calibration_worker.py",
+        "scripts/producer/native_proof_io.py",
+        "scripts/producer/native_work_service_cache.py",
+        "scripts/producer/native_work_service_runs.py",
+        "scripts/producer/native_work_service_provenance.py",
+        "scripts/producer/studio/owned_inspection.py"
+      ],
+      "writers": [
+        "scripts/producer/native_review_proof_calibration.py",
+        "scripts/producer/native_review_calibration_worker.py"
+      ],
+      "promotionPoint": "Existing run_inspection/NativeRun owns immutable request/process/log completion and captured result digest. The admitted worker repeats live-session/provenance checks before and after proof_read, then exclusively publishes result.json. The parent cold-verifies owned output/request, run/plan/preparation, current provenance and input bytes before writing its derived experiment. Shared owner writers are narrowly referenced, not blanket writer-bound.",
+      "fingerprintInputs": [
+        "exact original measurementId, ordered proof plan and collector version",
+        "actual owner-bound preparation output subset and current input pins; repeated reads stay repeated",
+        "captured owner result bytes and sole PID/parentPID/PGID/BSD start identity inside live same-Mach-start bracket",
+        "raw task disk counters, actual returned bytes, monotonic nanoseconds, topology restrictions and separate outer timing"
+      ],
+      "durability": "Result/experiment use exclusive write_new with file fsync, without new directory-fsync/SIGKILL guarantees. Successful owned result may remain if later cold validation/timing/publication fails; no cleanup/retry added. Plan allows1..128 reads, each<=16MiB, total<=2GiB. Bounded stable no-follow reads count returned bytes; unique working set does not erase repeated reads. Physical unavailable stays null, failed raw reads refuse, and observed zero does not prove cold storage. Kernel interval includes read/hash/BSD identity/Python metadata; topology and parent validation lie outside it. Not file-exclusive, full-worker/tree/FFmpeg, equivalent production traversal, or recurring-coordinator IO. Keep unsupportedOperations. Parent scalar summary is not owner-captured authority; future consumers must reopen/recompute referenced evidence. Explicit productionAuthority:false/rateAdoptable:false grants no production seal, approval, rate or capacity. Actual owned smoke2026-09-28 refused after600.486s memory-pressure admission with verified cleanup and childNeverLaunched; successful owned measurement remains pending.",
+      "disposition": "extend",
+      "parityFixture": "test_native_review_proof_calibration.py + test_native_proof_io.py; actual SDK/local-file collector checks and synthetic cold-owner fixtures. Actual generated owner smoke refused before launch, not successful calibration.",
+      "removalCondition": "Retain preparation, original request, captured owner/result and code/tool/input pins for referenced evidence; explicit retirement only, no automatic cleanup policy.",
+      "authorityPathTokens": [
+        "native-technical-proof-read-plan",
+        "native-long-review-package-technical-proof-read-result",
+        "native-technical-proof-read-experiment",
+        "darwin-no-child-proof-read-v1"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/native_review_proof_calibration.py": "reader-writer",
+        "scripts/producer/native_proof_io.py": "reader"
       }
     }
   ]

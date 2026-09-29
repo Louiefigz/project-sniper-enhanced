@@ -3,10 +3,18 @@ import { shortDirectionInstructions } from "@/lib/producer/short-direction";
 import { visualStorytellingInstructions } from "@/lib/producer/visual-storytelling";
 import { type BrainProvider } from "../../_lib/ai-provider";
 import { catalogPromptLines, type CompCanvas } from "@/lib/producer/comps-catalog";
-import { AutoEditCtx } from "./stream";
+import { authoringWorkDir, ordinaryVisualPlanRequired, AutoEditCtx } from "./stream";
 import { validateIntent } from "@/lib/producer/intent-presets";
-import { pipelineAuthorityPath } from "@/lib/server/auto-edit-pipeline-authority";
-import { authoringGateCommands, authoringReadLines, promptPaths } from "./authoring-prompt-inputs";
+import {
+  executablePipelineRoot,
+  pipelineAuthorityPath,
+} from "@/lib/server/auto-edit-pipeline-authority";
+import {
+  authoringGateCommands,
+  authoringReadLines,
+  promptPaths,
+  visualPlanAuthoringCommands,
+} from "./authoring-prompt-inputs";
 import { transitionAuthoringSteps } from "./transition-authoring-prompt";
 import { templateUsagePromptAuthority } from "./template-usage-prompt";
 import { referenceExecutionClass } from
@@ -21,14 +29,27 @@ const SCOPE_LANES: Record<string, string> = {
   full: `full = produced with every owed lane covered. Same planners and judgment; where an asset is missing for an owed beat, do NOT fake one — note it in your final summary (generation is roadmap).`,
 };
 const SHELL_SAFE_TOKEN = /^[A-Za-z0-9_@%+=:,./-]+$/;
+const VISUAL_PLANNER_SCRIPTS = new Set([
+  "planner/visual_plan_cli.py",
+  "planner/ordinary_visual_plan_lint.py",
+  "planner/ordinary_visual_plan_search.py",
+]);
 function shellToken(value: string): string {
   if (value && SHELL_SAFE_TOKEN.test(value)) return value;
   return `'${value.replace(/'/g, `'"'"'`)}'`;
 }
 export function producerCommand(ctx: AutoEditCtx, script: string, args: string[]): string {
   const python = path.join(REPO_ROOT, ".venv", "bin", "python3");
-  const scriptPath = pipelineAuthorityPath(ctx, `scripts/producer/${script}`);
-  return [python, scriptPath, ...args].map(shellToken).join(" ");
+  if (!VISUAL_PLANNER_SCRIPTS.has(script)) {
+    const scriptPath = pipelineAuthorityPath(ctx, `scripts/producer/${script}`);
+    return [python, scriptPath, ...args].map(shellToken).join(" ");
+  }
+  const visualPipeline = ctx.visualPlanPipeline ?? ctx.pipeline;
+  const executableRoot = visualPipeline
+    ? executablePipelineRoot(ctx.dir, visualPipeline) : REPO_ROOT;
+  const command = [python, path.join(executableRoot, "scripts/producer", script), ...args];
+  if (visualPipeline) command.unshift("env", `SNIPER_PIPELINE_ROOT=${executableRoot}`);
+  return command.map(shellToken).join(" ");
 }
 
 export function verbatimBashCommand(command: string): string {
@@ -89,12 +110,13 @@ function referenceStrategyInstruction(ctx: AutoEditCtx): string {
 
 function scopeLaneInstruction(ctx: AutoEditCtx): string {
   const instruction = SCOPE_LANES[ctx.scope];
+  const workDir = authoringWorkDir(ctx);
   const graphics = producerCommand(ctx, "graphics_planner.py", [
     ctx.planPath,
     ctx.transcriptsDir,
     ctx.manifestPath,
     "--out",
-    path.join(ctx.dir, "graphics_proposal.json"),
+    path.join(workDir, "graphics_proposal.json"),
     "--json",
   ]);
   const pacing = producerCommand(ctx, "planner/pacing.py", [ctx.planPath]);
@@ -116,32 +138,29 @@ function graphicsStyleStep(ctx: AutoEditCtx): string[] {
 function graphicsProposalSteps(ctx: AutoEditCtx): string[] {
   if (!automaticProducedGraphics(ctx)) return [];
   return ["3a. Inspect the whole HyperFrames catalog for the actual visual needs. The compatibility menu is only the installed subset.",
-    "3b. Match information anatomy to the current beat. If compatibleKinds is empty or the required catalog item is not installed in this adapter, report native-project migration required; never substitute an old kind or invent filler to satisfy a count.",
-    "3c. Bind source evidence, copy and timing to the actual choice. A native source-bound project supports catalog components, current-job reference designs, and custom work justified by inspected alternatives."];
+    "3b. Match information anatomy to the current beat. If compatibleKinds is empty or the strongest catalog treatment needs native execution, keep that candidate so the allocator can select native-short/native-long; never substitute an old kind or invent filler to satisfy a count.",
+    "3c. The controller reads the allocated whole-project route. Native allocation creates an exact resumable native-author handoff; do not downgrade it to ordinary or claim the native edit is rendered.",
+    "3d. Bind source evidence, copy and timing to the actual choice. A native source-bound project supports catalog components, current-job reference designs, and custom work justified by inspected alternatives."];
 }
 export function claudeAuthoringBashPatterns(ctx: AutoEditCtx): string[] {
+  const paths = promptPaths(ctx, producerCommand);
+  const workDir = authoringWorkDir(ctx);
   const exactWriters = [
     producerCommand(ctx, "graphics_planner.py", [
       ctx.planPath,
       ctx.transcriptsDir,
       ctx.manifestPath,
       "--out",
-      path.join(ctx.dir, "graphics_proposal.json"),
+      path.join(workDir, "graphics_proposal.json"),
       "--json",
     ]),
     producerCommand(ctx, "planner/pacing.py", [ctx.planPath]),
+    ...visualPlanAuthoringCommands(paths),
   ];
-  const paths = promptPaths(ctx, producerCommand);
-  const readOnlyGates = [
-    paths.operatorIntent,
-    paths.transcriptCut,
-    paths.lint,
-    paths.hook,
-    paths.claims,
-    ...(paths.referenceLint ? [paths.referenceLint] : []),
-    templateUsagePromptAuthority(ctx, producerCommand).command,
-  ];
-  return [...exactWriters, ...readOnlyGates];
+  const readOnlyGates = authoringGateCommands(
+    paths, templateUsagePromptAuthority(ctx, producerCommand).command,
+  );
+  return [...new Set([...exactWriters, ...readOnlyGates])];
 }
 
 function intentCanvas(ctx: AutoEditCtx): CompCanvas | null {
@@ -157,13 +176,40 @@ function houseRules(ctx: AutoEditCtx): string {
   return `House rules: captions are computed from kept words (never write caption text); ${music}; no fuzzy fallbacks — report a missing asset instead of approximating.`;
 }
 
+function authoringGroundRules(
+  ctx: AutoEditCtx,
+  provider: BrainProvider,
+  pinnedProducer: string,
+  writeAuthority: string,
+): string[] {
+  const workDir = authoringWorkDir(ctx);
+  return [
+    `- AUTHOR ONLY. Never run render.py, assemble.py, cut_speed.py or any ffmpeg — the caller chains the render after you exit.`,
+    `- This is the INITIAL writer pass. Do not simulate or spawn an independent critic; the controller launches fresh read-only critics and separate revision writers after you exit.`,
+    `- cutTrack and cutDecisions are controller-approved and IMMUTABLE. Never add, remove, reorder, or change any cut field or removal evidence.`,
+    `- Write ONLY ${writeAuthority} (plus scratch JSON files inside ${workDir}). Touch no other file.`,
+    provider === "codex"
+      ? `- The repository at ${REPO_ROOT} is READ-ONLY. Run Producer CLIs only through the absolute pinned commands supplied below from ${pinnedProducer}; never substitute mutable repository scripts. Write only ${workDir}.`
+      : `- Run only the absolute pinned Producer CLI commands supplied below from ${pinnedProducer}; never substitute mutable repository scripts.`,
+    `- For every VERBATIM BASH COMMAND below, copy its COMMAND value exactly into one Bash tool call. Never prepend \`cd\`, replace either absolute path with a relative path, append \`&&\`, \`;\`, or \`|\`, wrap it in another shell, or combine it with another command. Rewritten shell spellings are outside the allowlist and will be denied.`,
+    `- Never invent sourceIds/assetIds/timestamps — only ids from the manifest, timestamps inside real ranges.`,
+  ];
+}
+
 export function buildAuthoringPrompt(ctx: AutoEditCtx, provider: BrainProvider = "legacy"): string {
   validateIntent({ ...ctx.intent, scope: ctx.scope });
-  const { dir, scope, planPath, manifestPath } = ctx;
+  if (ordinaryVisualPlanRequired(ctx) && !ctx.visualPlan) {
+    throw new Error("ordinary execution authoring requires a controller-allocated visual plan");
+  }
+  const { scope, planPath, manifestPath } = ctx;
   const paths = promptPaths(ctx, producerCommand);
   const pinnedProducer = pipelineAuthorityPath(ctx, "scripts/producer");
   const usage = templateUsagePromptAuthority(ctx, producerCommand);
   const gateCommands = authoringGateCommands(paths, usage.command);
+  const writeAuthority = !ctx.visualPlan && paths.visualPlanPath && paths.visualPlanPendingPath
+      && paths.visualSearchQueryPath
+    ? `${planPath}, ${paths.visualSearchQueryPath}, ${paths.visualPlanPendingPath}, and ${paths.visualPlanPath}`
+    : planPath;
   return [
     `You are the VISUAL/RETENTION PRODUCER running after controller-approved cuts. AUTHOR the remaining edit plan — do NOT render anything.`,
     provider === "legacy"
@@ -173,15 +219,7 @@ export function buildAuthoringPrompt(ctx: AutoEditCtx, provider: BrainProvider =
     `JOB: write ${planPath} for the footage described by ${manifestPath}, at scope "${scope}".`,
     ``,
     `Ground rules:`,
-    `- AUTHOR ONLY. Never run render.py, assemble.py, cut_speed.py or any ffmpeg — the caller chains the render after you exit.`,
-    `- This is the INITIAL writer pass. Do not simulate or spawn an independent critic; the controller launches fresh read-only critics and separate revision writers after you exit.`,
-    `- cutTrack and cutDecisions are controller-approved and IMMUTABLE. Never add, remove, reorder, or change any cut field or removal evidence.`,
-    `- Write ONLY ${planPath} (plus scratch JSON files inside ${dir}). Touch no other file.`,
-    provider === "codex"
-      ? `- The repository at ${REPO_ROOT} is READ-ONLY. Run Producer CLIs only through the absolute pinned commands supplied below from ${pinnedProducer}; never substitute mutable repository scripts. Write only ${dir}.`
-      : `- Run only the absolute pinned Producer CLI commands supplied below from ${pinnedProducer}; never substitute mutable repository scripts.`,
-    `- For every VERBATIM BASH COMMAND below, copy its COMMAND value exactly into one Bash tool call. Never prepend \`cd\`, replace either absolute path with a relative path, append \`&&\`, \`;\`, or \`|\`, wrap it in another shell, or combine it with another command. Rewritten shell spellings are outside the allowlist and will be denied.`,
-    `- Never invent sourceIds/assetIds/timestamps — only ids from the manifest, timestamps inside real ranges.`,
+    ...authoringGroundRules(ctx, provider, pinnedProducer, writeAuthority),
     ``,
     ...authoringReadLines(ctx, paths, usage.readLine),
     ``,

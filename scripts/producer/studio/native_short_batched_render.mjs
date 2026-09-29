@@ -1,4 +1,4 @@
-/** Experimental opt-in: disposable native screenshot sessions, one full-quality picture encode. */
+/** Retained native screenshots, scoped revision reuse, and one full-quality picture encode. */
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -10,6 +10,7 @@ import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCapture
   nativeCaptureHash,nativeCaptureBatches,nativeCaptureEvidence,nativeCaptureFailure} from './native_short_capture_context.mjs';
 import {nativeCaptureQcPoints} from './native_short_capture.mjs';
 import {nativeForwardQcIdentity,observeNativeForwardQc,writeNativePictureReceipt} from './native_forward_qc.mjs';
+import {revisionFramePlan,copyRevisionFrame,verifyUnchangedCapture} from './native_short_revision_frames.mjs';
 
 /** SDK high/crf15 encoding; explicit frame0/cap and no-overwrite flags change ownership, not picture quality. */
 export function nativeBatchEncoderArgs(options) {
@@ -25,7 +26,7 @@ export function nativeBatchEncoderArgs(options) {
 }
 
 /** Match SDK renderProvenance.readEngineVersion at the actual CLI module location. */
-function encoderVersion(runtime) {
+export function encoderVersion(runtime) {
   try { const version=createRequire(path.join(runtime,'dist/cli.js'))('../../package.json').version;
     return typeof version==='string'&&version.length?version:'0.0.0-dev'; }
   catch { return '0.0.0-dev'; }
@@ -60,19 +61,29 @@ async function captureAllFrames(context, receipt, framesDir) {
   const points=nativeCaptureQcPoints(context.plan,true,context.batchPlan.maximumFrames);
   const forward=points.slice(0,points.indexOf(context.plan.canvas.totalFrames-1)+1),checks=new Set(forward);
   receipt.forwardQc=nativeForwardQcIdentity(context,forward);
+  const revision=revisionFramePlan(context);
+  if(revision)receipt.pictureRevision=revision.proof;
+  fs.mkdirSync(framesDir,{recursive:true});
   for(const [index,points] of nativeCaptureBatches(frames,context.batchPlan.maximumFrames).entries()){
     const batch={index,startFrame:points[0],endFrameExclusive:points.at(-1)+1,frames:points,startedAt:new Date().toISOString()};
     receipt.batches.push(batch);
+    const reused=revision?points.filter(frame=>revision.unchanged.has(frame)&&!checks.has(frame)):[];
+    const captured=points.filter(frame=>!reused.includes(frame));
+    if(revision){batch.reusedFrames=reused;batch.capturedFrames=captured;}
+    for(const frame of reused)receipt.frames.push(copyRevisionFrame(context,revision,frame,framesDir));
+    if(!captured.length){batch.status='reused-and-verified';batch.finishedAt=new Date().toISOString();continue;}
     await withNativeCaptureSession(context,{framesDir,receipt:batch},async session=>{
-      for(const frame of points){
+      for(const frame of captured){
         const row=await captureNativeFrame(context,session,frame);
         assert.equal(row.path,path.join(framesDir,`frame_${String(frame).padStart(6,'0')}.jpg`),'Unexpected SDK screenshot filename');
         if(checks.has(frame))row.forwardQc=await observeNativeForwardQc(context,session,frame);
+        verifyUnchangedCapture(revision,row);
         receipt.frames.push(row);
       }
     });
     batch.status='captured-and-disposed';batch.finishedAt=new Date().toISOString();
   }
+  receipt.frames.sort((left,right)=>left.frame-right.frame);
 }
 
 /** Parent wrapper retains source authority, resource ownership, audio/color delivery and final QC. */

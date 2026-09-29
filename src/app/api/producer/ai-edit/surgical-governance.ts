@@ -16,6 +16,8 @@ import {
   captureTemplateUsageAuthority,
 } from "@/lib/server/template-usage-history";
 import { fileSha256 } from "@/lib/server/auto-edit-job-store";
+import { ordinaryVisualPlanGateAuthority } from
+  "../auto-edit/ordinary-visual-plan-authority";
 
 const CUT_APPROVAL_FILE = ".sniper-cut-approval.json";
 const HASH = /^[a-f0-9]{64}$/;
@@ -40,6 +42,13 @@ export interface SurgicalGovernanceResult {
   warnings: string[];
   templateUsage: ReturnType<typeof captureTemplateUsageAuthority>["authority"];
   cutApproval?: { path: string; text: string };
+}
+
+export interface SurgicalGovernanceDependencies {
+  prepareReview?: typeof prepareSavedPlanReview;
+  captureUsage?: typeof captureTemplateUsageAuthority;
+  runGates?: typeof runPlanningGateBundle;
+  visualAuthority?: typeof ordinaryVisualPlanGateAuthority;
 }
 
 export function surgicalCutOnlyPlan(planPath: string): Record<string, unknown> {
@@ -103,8 +112,9 @@ function gateError(verdict: GateBundleVerdict): Error {
 /** Run the same stored-intent, transcript, hook, claims, and lint wall as authoring. */
 export async function runSurgicalGovernance(
   input: SurgicalGovernanceInput,
+  dependencies: SurgicalGovernanceDependencies = {},
 ): Promise<SurgicalGovernanceResult> {
-  const base = prepareSavedPlanReview(input.dir).ctx;
+  const base = (dependencies.prepareReview ?? prepareSavedPlanReview)(input.dir).ctx;
   if (path.resolve(base.manifestPath) !== path.resolve(input.manifestPath)
       || path.resolve(base.transcriptsDir) !== path.resolve(input.transcriptsDir)) {
     throw new Error("surgical gate inputs do not match the stored project media authority");
@@ -112,7 +122,9 @@ export async function runSurgicalGovernance(
   let candidate: Awaited<ReturnType<typeof candidateCutApproval>> | undefined;
   try {
     const captureId = `surgical-${fileSha256(input.planPath)?.slice(0, 24) ?? randomUUID()}`;
-    const usage = captureTemplateUsageAuthority(base, undefined, {}, captureId);
+    const usage = (dependencies.captureUsage ?? captureTemplateUsageAuthority)(
+      base, undefined, {}, captureId,
+    );
     candidate = input.scope.lanes.includes("cuts")
       ? await candidateCutApproval(input) : undefined;
     const approvalPath = candidate
@@ -121,12 +133,15 @@ export async function runSurgicalGovernance(
     const reference = base.intent?.reference && base.referenceStudy
       ? { profilePath: base.referenceStudy.profilePath, intent: base.intent.reference }
       : undefined;
-    const verdict = await runPlanningGateBundle({
+    const visualPlan = (dependencies.visualAuthority
+      ?? ordinaryVisualPlanGateAuthority)(base);
+    const verdict = await (dependencies.runGates ?? runPlanningGateBundle)({
       planPath: input.planPath, manifestPath: input.manifestPath,
       transcriptsDir: input.transcriptsDir, cutApprovalPath: approvalPath,
       templateUsagePath: usage.authority.path,
       templateUsageDigest: usage.authority.digest,
       operatorIntent: gateBundleOperatorIntent(base.scope, base.intent), reference,
+      ...visualPlan,
     });
     if (!verdict.ok) throw gateError(verdict);
     return {

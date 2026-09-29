@@ -5,6 +5,8 @@ import argparse
 import json
 from pathlib import Path
 
+from studio.production.host_contract import HOSTS
+
 from baseline_trace_validation import validate_trace_document
 from current_system_inventory_discovery import verify_authority_discovery
 from current_system_inventory_sources import (
@@ -28,6 +30,7 @@ ALLOWED_DISPOSITIONS = {
 
 
 def _strings(value: object, label: str) -> tuple[str, ...]:
+    """Require distinct nonempty strings, preserving their declared order."""
     if (type(value) is not list or not value
             or any(type(item) is not str or not item for item in value)
             or len(set(value)) != len(value)):
@@ -36,6 +39,7 @@ def _strings(value: object, label: str) -> tuple[str, ...]:
 
 
 def _mapping(value: object, label: str) -> dict[str, str]:
+    """Validate every exact call-site disposition."""
     if type(value) is not dict or not value:
         raise RuntimeError(f"{label} must be a nonempty object")
     result: dict[str, str] = {}
@@ -48,6 +52,7 @@ def _mapping(value: object, label: str) -> dict[str, str]:
 
 
 def _evidence_path(repo: Path, relative: str) -> Path:
+    """Resolve a real evidence file within the audited repository."""
     candidate = repo / relative
     if candidate.is_symlink() or not candidate.is_file():
         raise RuntimeError(f"baseline evidence is unavailable: {relative}")
@@ -61,6 +66,7 @@ def _evidence_path(repo: Path, relative: str) -> Path:
 
 
 def _verify_baseline(repo: Path, value: object) -> int:
+    """Require complete measured traces before accepting a baseline claim."""
     if type(value) is not dict or set(value) != {
             "status", "requiredFixtures", "evidencePaths"}:
         raise RuntimeError("inventory baseline is malformed")
@@ -100,6 +106,7 @@ def _verify_baseline(repo: Path, value: object) -> int:
 
 
 def _matches(sources: dict[str, str], tokens: tuple[str, ...]) -> set[str]:
+    """Find every source file quoting one of the artifact tokens."""
     return {
         path for path, text in sources.items()
         if any(token in text for token in tokens)
@@ -111,6 +118,7 @@ def _verify_tokens(
     tokens: tuple[str, ...],
     sources: dict[str, str],
 ) -> None:
+    """Reject artifact tokens that have no current source occurrence."""
     for token in tokens:
         if not any(token in text for text in sources.values()):
             raise RuntimeError(
@@ -120,9 +128,12 @@ def _verify_tokens(
 def _verify_declaration_field(
     repo: Path, artifact: dict, field: str,
 ) -> None:
+    """Check declared owners, readers and engine writers exist."""
     artifact_id = artifact["artifactId"]
     raw = artifact.get(field)
     values = [raw] if field == "owner" else raw
+    if field == 'writers' and values == [] and artifact.get('externalWriters'):
+        return
     if (type(values) is not list or not values
             or any(type(item) is not str or not item for item in values)):
         raise RuntimeError(f"{artifact_id}.{field} is malformed")
@@ -134,8 +145,34 @@ def _verify_declaration_field(
 
 
 def _verify_declarations(repo: Path, artifact: dict) -> None:
+    """Validate engine paths and explicit external host ownership."""
     for field in ("owner", "readers", "writers"):
         _verify_declaration_field(repo, artifact, field)
+    _verify_external_writers(repo, artifact)
+
+
+def _verify_external_writers(repo: Path, artifact: dict) -> None:
+    """Describe external ownership without treating a read validator as an engine writer or approval."""
+    if 'externalWriters' not in artifact:
+        return
+    rows = artifact['externalWriters']
+    fields = {'actor', 'ownershipValidator', 'outputDerivation'}
+    derivations = {'sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{result.json,artifacts/**}',
+                   'sectionBinding.outputRoot/task.id/claim.epoch-claim.token/{chunks/<scopeId>.json,global-joins.json}',
+                   'request.project/LONG-CHUNKS.json'}
+    if type(rows) is not list or not rows or len(rows) > len(HOSTS):
+        raise RuntimeError('externalWriters must declare supported enrolled host tasks')
+    actors = set()
+    for row in rows:
+        if type(row) is not dict or set(row) != fields or row['actor'] not in HOSTS:
+            raise RuntimeError('externalWriters has an invalid closed host descriptor')
+        if row['actor'] in actors or row['outputDerivation'] not in derivations:
+            raise RuntimeError('externalWriters has duplicate actors or unsupported output derivation')
+        actors.add(row['actor'])
+        validator = row['ownershipValidator']
+        if type(validator) is not str or validator not in artifact['readers']:
+            raise RuntimeError('externalWriters ownership validator must be a declared reader')
+        _evidence_path(repo, validator)
 
 
 def _verify_artifact(
@@ -143,6 +180,7 @@ def _verify_artifact(
     artifact: object,
     sources: dict[str, str],
 ) -> None:
+    """Require exact correspondence between current source and declared call sites."""
     if type(artifact) is not dict:
         raise RuntimeError("inventory artifact is malformed")
     artifact_id = artifact.get("artifactId")
@@ -168,6 +206,7 @@ def _verify_artifact(
 
 
 def _verify_exit_claim(inventory: dict, backlog: int, dispositions: dict) -> None:
+    """Reject completeness while discovery or persistence bindings remain blocked."""
     if inventory.get("completeness") != "complete":
         return
     if backlog:

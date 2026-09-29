@@ -56,10 +56,10 @@ Upstream HyperFrames 0.8.31 is Copyright 2026 HeyGen, Inc. and licensed under
 the Apache License, Version 2.0; its original distribution, license and notices
 remain authoritative (upstream publishes no NOTICE file). The patch text in
 `patches.json` contains portions of the upstream files, modified by Project
-Sniper. Five upstream files are modified — `dist/cli.js` (28 patches; renamed
+Sniper. Seven upstream files are modified — `dist/cli.js` (33 patches; renamed
 `native-render-sdk.mjs` in the adapted runtime), `dist/hyperframe.runtime.iife.js`
 (2), `dist/hyperframe-runtime.js` (2), `dist/hyperframe.manifest.json` (1) and the
-derived `dist/native-capture-library.mjs` (1) — 34 patches in total.
+derived `dist/native-capture-library.mjs` (1), and both Studio entries (3 each) — 45 patches in total.
 [`NOTICE`](NOTICE) in this directory is the prominent statement that these files
 were modified by Project Sniper. It sits beside the patches, not inside the
 patched files, because every adapted file is hash-verified against
@@ -85,3 +85,24 @@ guard. Help and Studio preview remain available. The runtime identity includes
 the wrapper and guard hashes; earlier installed runtimes are preserved, not
 retroactively qualified. A separately installed external SDK is outside this
 application boundary. See `WORKFLOW_ENFORCEMENT_AUDIT_2026-09-16.md` for limits.
+
+September 28 optional original-grid selection: Long source preparation can pass a
+closed `nativeSourceFrameIndices` inventory (1–2048 sorted distinct indices,
+original-local index below 54000). The SDK retains the original `mediaStart`
+input seek and `fps=...:start_time=0`, selects those indices after the fps filter,
+and emits exactly the requested PNG count with passthrough timestamps. Selected
+entries add `selected-grid-v1:<indices>` to cache and deduplication identities;
+they cannot enter the SDK's shifted superset grouping. Ordinary extraction,
+including Shorts, omits the option and retains its existing sampling behavior.
+VFR/HDR, unknown CFR classification and final-frame reinterpretation refuse
+selected extraction; the Long caller may use an exact existing full cache only.
+
+The supervised synthetic diagnostic found shifted sparse seeks disagree with full
+extraction at converted/rational rates. The corrected SDK matched all 42 tested
+PNGs across six integer/converted/rational/fractional-offset cases. This is a
+bounded synthetic result, not representative Long render qualification. Selection
+bounds PNG storage; decoding still advances from the original seek through the
+furthest requested frame. Actual late-source time/resource measurements, browser
+and encoded comparisons, playback/listening and delivery review remain required.
+The diagnostic is `tests/native_sparse_media_diagnostic.py` under the existing
+inspection owner and native media jail; retained negative evidence is intentional.

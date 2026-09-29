@@ -4,19 +4,22 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {assertNativeCaptureOwner} from './runtime/native-export-guard.mjs';
-import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,
+import {createNativeCaptureContext,withNativeCaptureSession,
   captureNativeFrame,nativeCaptureEvidence,nativeCaptureFailure,nativeCaptureHash} from './native_short_capture_context.mjs';
 import {visualState} from './native_short_capture_checks.mjs';
 import {nativeBatchEncoderArgs,encodeNativeBatchPicture} from './native_short_batched_render.mjs';
+import {prepareSparseLongContext} from './native_segments/sparse_sources.mjs';
 
 /** Include a five-frame neighborhood around every cut, both endpoints and periodic interiors. */
-export function longCapturePoints(plan) {
+export function longCapturePoints(plan, scope=null) {
   const total=plan.canvas.totalFrames,[num,den]=plan.canvas.frameRate.split('/').map(Number),rate=num/den;
-  const values=new Set([0,total-1]);
+  const [start,end]=scope?.frameRange??[0,total];
+  assert.ok(Number.isInteger(start)&&Number.isInteger(end)&&0<=start&&start<end&&end<=total,'Invalid capture scope');
+  const values=new Set([start,end-1]);
   for(const scene of plan.scenes)for(const boundary of [scene.startFrame,scene.endFrame]){
-    for(let delta=-2;delta<=2;delta++)if(boundary+delta>=0&&boundary+delta<total)values.add(boundary+delta);
+    for(let delta=-2;delta<=2;delta++)if(boundary+delta>=start&&boundary+delta<end)values.add(boundary+delta);
   }
-  for(let frame=0;frame<total;frame+=Math.max(1,Math.floor(rate*2)))values.add(frame);
+  for(let frame=start;frame<end;frame+=Math.max(1,Math.floor(rate*2)))values.add(frame);
   const forward=[...values].sort((a,b)=>a-b);
   assert.ok(forward.length<=3000,'Long sample inventory exceeds its bound');
   return [...forward,...forward.slice().reverse()];
@@ -44,7 +47,7 @@ export async function checkLongScene(page, frame, plan) {
 }
 
 async function captureReferences(context, receipt) {
-  const frames=longCapturePoints(context.plan),work=context.work,prior=new Map();
+  const frames=longCapturePoints(context.plan,context.request.sectionScope),work=context.work,prior=new Map();
   receipt.expectedCapturePoints=frames;
   const sessionReceipt={frames,startedAt:new Date().toISOString()};receipt.sessions=[sessionReceipt];
   await withNativeCaptureSession(context,{framesDir:path.join(work,'frames'),receipt:sessionReceipt},async session=>{
@@ -85,7 +88,7 @@ export async function captureLong(request) {
   let context;
   try{
     context=await createNativeCaptureContext(request,path.join(request.output,'native-capture'));
-    await prepareNativeCaptureContext(context);
+    await prepareSparseLongContext(context,longCapturePoints(context.plan,request.sectionScope));
     await captureReferences(context,receipt);await encodeSamples(context,receipt);
     receipt.status='native-references-and-seek-states-pass';
   }catch(error){receipt.error=nativeCaptureFailure(error);}

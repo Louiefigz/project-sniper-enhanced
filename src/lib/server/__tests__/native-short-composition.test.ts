@@ -90,6 +90,23 @@ test("adjacent phrases never stack when rounded source-word frames overlap", () 
   assert.deepEqual(input.occurrences, originalWords, "Source word evidence must remain unchanged");
 });
 
+test("a nested final word preserves the full phrase lifetime and original highlight windows", () => {
+  const input = fixture();
+  input.occurrences = [[0, 0, 0, 0, 30, "Outer", 0], [1, 0, 1, 10, 20, "nested.", 0]];
+  input.captionGroups = [[0, 1]];
+  const originalWords = structuredClone(input.occurrences), html = buildNativeCanvas(input);
+  assert.match(/<div[^>]+id="caption-0-0"[^>]+>/u.exec(html)?.[0] ?? "", /data-duration="1\.2"/u);
+  assert.ok(html.includes(nativeVisualExit("caption-0-0", 30, "25/1")));
+  assert.match(html, /id="word-0-0"[^>]+data-word-start-frame="0" data-word-end-frame="30"/u);
+  assert.match(html, /id="word-1-0"[^>]+data-word-start-frame="10" data-word-end-frame="20"/u);
+  assert.deepEqual(input.occurrences, originalWords);
+  input.occurrences.push([2, 0, 2, 25, 40, "Next.", 0]); input.captionGroups.push([2]);
+  const clamped = buildNativeCanvas(input);
+  assert.match(/<div[^>]+id="caption-0-0"[^>]+>/u.exec(clamped)?.[0] ?? "", /data-duration="1"/u);
+  assert.ok(clamped.includes(nativeVisualExit("caption-0-0", 25, "25/1")));
+  assert.deepEqual(input.occurrences.slice(0, 2), originalWords, "Phrase clamping must not retime its words");
+});
+
 test("display corrections target one occurrence and preserve source words and highlight timing", () => {
   const input = fixture(); input.occurrences.forEach(row => { row[5] = "levels"; });
   const original = structuredClone(input.occurrences);

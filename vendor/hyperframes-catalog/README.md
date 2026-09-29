@@ -10,17 +10,23 @@ registry-side failure). `catalog-index.json` is the searchable metadata index
 the operator asks for a look ("a subtle glitch transition") — selection by mechanism,
 not by title — and so porting decisions are grounded in source.
 
-**Boundary (same doctrine as `vendor/hyperframes-skills/`):** this is NOT a Project
-Sniper capability surface. Nothing here is plannable or renderable. An item enters
-the working vocabulary ONLY by being ported into `templates/motion/compositions/`
-through the template contract: typed variable slots, brand tokens, capability probe
-(THE EXIT LAW measurement), and Studio session lint. Do not reference these files
-from plans, comps, or the Studio generator. Do not install catalog items inside a
-Studio review project (they will not sync to the plan and will not survive re-render
-— ask for a port instead).
+**Boundary (same doctrine as `vendor/hyperframes-skills/`):** this mirror is
+discovery evidence, never automatic execution approval. The ordinary compatibility
+renderer can use only an integrated, measured port in
+`templates/motion/compositions/`. A native Short or Long may select a reference and
+adapt its exact pinned source into a project-owned composition, but that adaptation
+still needs local dependency closure, typed inputs, a guarded capability probe and
+Studio lint. Plans and renderers must never execute these mirror files directly.
 
-Refresh: rerun the mirror script pattern (catalog --json, then `add <name> --dir`)
-against the pinned CLI and update the lock file.
+`catalog-snapshots-v1.json` pins the current metadata/resource sidecars by digest.
+Historical roots stay in place so an explicit old snapshot ID remains readable.
+`catalog-resource-index-v1.json` contains static, unmeasured resource signals used
+to decide which finalists need a guarded probe; it contains no source or preview
+bytes and grants no capability. A refresh is prepared in a new snapshot directory,
+then checked by `graphics/catalog_snapshot_admission.py` against the exact expected
+upstream commit before its registry row can be promoted. Never overwrite an admitted
+root. The documented September 16 399-item audit cannot be promoted from the current
+checkout because its exact generated index/source bundle is not present here.
 
 ## Licence, notices and what ships
 

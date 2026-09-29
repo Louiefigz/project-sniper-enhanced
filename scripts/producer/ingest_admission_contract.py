@@ -24,6 +24,7 @@ SOURCE_SET_POLICY = "sniper-producer-source-set-v1"
 _SHA256 = set("0123456789abcdef")
 MAX_ADMISSION_RECEIPT_BYTES = 4 * 1024 * 1024
 MAX_SOURCE_SET_BYTES = 64 * 1024 * 1024
+MAX_ORIGIN_RECEIPT_BYTES = 4 * 1024 * 1024
 
 
 def _sha(value: object, label: str) -> str:
@@ -90,14 +91,44 @@ def source_set_document(entries: list[dict]) -> dict:
     }
 
 
+def _verify_authorization(entry: dict) -> None:
+    evidence = entry.get("authorizationEvidence")
+    if entry["lane"] != "external":
+        if evidence is not None:
+            raise RuntimeError("non-external source-set entry has authorization")
+        return
+    if evidence is None:
+        return
+    if type(evidence) is not dict or set(evidence) != {"path", "sha256"}:
+        raise RuntimeError("external source-set authorization is malformed")
+    path = evidence.get("path")
+    sha256 = _sha(evidence.get("sha256"), "origin receipt sha256")
+    if type(path) is not str or not os.path.isabs(path):
+        raise RuntimeError("external source-set authorization path is malformed")
+    origin = Path(path)
+    try:
+        if origin.resolve(strict=True) != origin or origin.is_symlink():
+            raise RuntimeError(
+                "external source-set authorization path is not canonical")
+        payload = _read_regular(
+            origin, MAX_ORIGIN_RECEIPT_BYTES, "external origin receipt")
+    except OSError as exc:
+        raise RuntimeError(
+            "external source-set authorization is unavailable") from exc
+    if hashlib.sha256(payload).hexdigest() != sha256:
+        raise RuntimeError("external source-set authorization hash mismatch")
+
+
 def _verify_entry(entry: object, manifest_dir: Path, capture: SourceVerificationCapture | None = None) -> None:
-    keys = {
+    base_keys = {
         "lane", "originalPath", "snapshotPath", "sha256", "sizeBytes",
         "mediaKind", "admissionReceiptPath", "admissionReceiptSha256",
     }
-    if type(entry) is not dict or set(entry) != keys:
+    entry_keys = frozenset(entry) if type(entry) is dict else frozenset()
+    if type(entry) is not dict or entry_keys not in {
+            frozenset(base_keys), frozenset(base_keys | {"authorizationEvidence"})}:
         raise RuntimeError("source-set entry is malformed")
-    if (entry["lane"] not in {"source", "broll", "music"}
+    if (entry["lane"] not in {"source", "broll", "external", "music"}
             or type(entry["originalPath"]) is not str
             or not os.path.isabs(entry["originalPath"])):
         raise RuntimeError("source-set ingress identity is malformed")
@@ -133,6 +164,7 @@ def _verify_entry(entry: object, manifest_dir: Path, capture: SourceVerification
     observed = receipt_snapshot(receipt, manifest_dir / STORE_NAME, capture)
     if observed != (snapshot, sha256, size, entry["mediaKind"]):
         raise RuntimeError("source-set entry does not bind its admission receipt")
+    _verify_authorization(entry)
 
 
 def _source_set_binding(manifest: dict) -> tuple[dict, Path]:

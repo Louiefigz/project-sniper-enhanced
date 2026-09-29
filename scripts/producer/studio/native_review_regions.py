@@ -53,6 +53,9 @@ def region_rows(project: Path, canvas: dict) -> list[dict]:
     if not file.exists():
         return []
     mapping = bound_json(file)
+    if mapping.get('schemaVersion') == 2:
+        from studio.native_region_contract import read_region_map
+        return read_region_map(project, canvas)
     if set(mapping) != {'schemaVersion', 'units'} or mapping['schemaVersion'] != 1:
         raise ValueError('Invalid native review region map')
     rows = mapping['units']
@@ -128,8 +131,22 @@ def source_decisions(receipt: dict) -> dict:
     return value
 
 
+def implementation_digest(request: dict) -> str:
+    """Pin invoked code and dependencies too, without introducing a review-receipt cycle."""
+    repo = Path(__file__).resolve().parents[3]
+    roots = [repo / name for name in ('scripts', 'src', 'schemas')]
+    roots.append(Path(request['runtime']))
+    return digest({name: sha for name, sha in request['pins'].items()
+                   if any(Path(name).is_relative_to(root) for root in roots)
+                   or name in request['tools'].values()})
+
+
+
 def region_packet(request: dict) -> dict:
-    """Bind all unassigned inputs globally and only declared literal-copy files locally."""
+    """Use Short content identities; retain the Long scoped dependency contract."""
+    if request.get('adapter') != 'native-long':
+        from studio.native_short_regions import short_packet
+        return short_packet(request)
     project = Path(request['project'])
     long = request.get('adapter') == 'native-long'
     plan = bound_json(project / ('LONG-PROJECT.json' if long else 'SHORT-PROJECT.json'))
@@ -158,8 +175,22 @@ def region_packet(request: dict) -> dict:
                                        or name in request['tools'].values()})
     base = digest(shared)
     units = dependency_units(rows, project, canvas, base)
-    return {'schemaVersion': 1, 'scope': 'native-preview-dependencies-not-editorial-approval',
-            'project': str(project), 'canvas': canvas, 'sharedHash': base, 'units': units}
+    packet = {'schemaVersion': 1, 'scope': 'native-preview-dependencies-not-editorial-approval',
+              'project': str(project), 'canvas': canvas, 'sharedHash': base, 'units': units}
+    return scoped_packet(packet, request.get('sectionScope'))
+
+
+def scoped_packet(packet: dict, scope: dict | None) -> dict:
+    """Limit private section previews to admitted owned frames; full-project packets stay unchanged."""
+    if scope is None:
+        return packet
+    bounds = scope['frameRange']
+    if not isinstance(bounds, list) or len(bounds) != 2 or any(type(value) is not int for value in bounds) \
+            or not 0 <= bounds[0] < bounds[1] <= packet['canvas']['totalFrames']:
+        raise ValueError('Invalid scoped preview frame range')
+    units = [{**row, 'startFrame': max(row['startFrame'], bounds[0]), 'endFrame': min(row['endFrame'], bounds[1])}
+             for row in packet['units'] if row['startFrame'] < bounds[1] and row['endFrame'] > bounds[0]]
+    return {**packet, 'scopeFrameRange': list(bounds), 'units': units}
 
 
 def dependency_units(rows: list[dict], project: Path, canvas: dict, base: str) -> list[dict]:
@@ -185,16 +216,20 @@ def dependency_units(rows: list[dict], project: Path, canvas: dict, base: str) -
 
 
 def preview_windows(packet: dict, previous: dict | None = None) -> list[dict]:
-    """Merge changed regions plus two seconds of context; bound long regions by samples."""
+    """Use event windows for Short packets; preserve the existing Long schedule."""
+    if packet.get('schemaVersion') == 2:
+        from studio.native_preview_schedule import preview_schedule
+        return preview_schedule(packet, previous)['windows']
     old = {row['id']: row['hash'] for row in (previous or {}).get('units', [])}
     rate = Fraction(packet['canvas']['frameRate'])
     pad, maximum = max(1, round(rate * 2)), max(1, round(rate * 12))
     total = packet['canvas']['totalFrames']
+    low, high = packet.get('scopeFrameRange', [0, total])
     spans = []
     for row in packet['units']:
         if old.get(row['id']) == row['hash']:
             continue
-        start, end = max(0, row['startFrame'] - pad), min(total, row['endFrame'] + pad)
+        start, end = max(low, row['startFrame'] - pad), min(high, row['endFrame'] + pad)
         if end - start <= maximum:
             spans.append((start, end))
         else:

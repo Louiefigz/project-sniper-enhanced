@@ -83,6 +83,20 @@ class NativeRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Unsupported'):
             render_command(request, {'frameRate': '25/1'})
 
+    def test_streaming_delivery_explicitly_pins_sdr_before_sdk_hdr_detection(self):
+        """HLG camera metadata must not select an unqualified H.265 delivery path."""
+        request = {'tools': {'node': '/test/node'}, 'runtime': '/test/sdk',
+                   'output': '/test/output', 'project': '/test/project', 'cache': '/test/cache'}
+        for mode in (None, 'sdk-streaming'):
+            selected = request if mode is None else {**request, 'captureMode': mode}
+            command = render_command(selected, {'frameRate': '30/1'})
+            self.assertEqual(command.count('--sdr'), 1)
+            self.assertNotIn('--hdr', command)
+            self.assertEqual(command[command.index('--crf') + 1], '15')
+            self.assertEqual(command[command.index('--video-frame-format') + 1], 'png')
+            self.assertEqual(command[command.index('--frames-cache-dir') + 1], '/test/cache')
+            self.assertIn('--no-best-effort', command)
+
     def test_patch_refuses_a_different_input_or_output(self):
         """A runtime change needs a newly qualified patch, never a fuzzy match."""
         row = {'file': 'test.js', 'baseSha256': hashlib.sha256(b'abc').hexdigest(),

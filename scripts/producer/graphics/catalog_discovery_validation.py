@@ -9,6 +9,10 @@ ITEM_TYPES = ("block", "component")
 STUDY_TEXT = ("mechanism", "fit", "quality", "aspectFlex", "port")
 _LOCK_TEXT = ("source", "cliVersion", "mirroredAt", "boundary")
 _LOCK_COUNTS = ("itemsListed", "itemsInstalled", "files")
+MAX_ROWS = 4096
+MAX_TEXT = 4000
+MAX_TAGS = 128
+MAX_VARIABLES = 128
 
 
 def _dims_issue(value: object) -> str | None:
@@ -32,10 +36,11 @@ def index_record_issue(record: object) -> str | None:
     if record.get("type") not in ITEM_TYPES:
         return f"{name}: type must be block|component"
     for key in ("title", "description"):
-        if not isinstance(record.get(key), str):
+        if not isinstance(record.get(key), str) or len(record[key]) > MAX_TEXT:
             return f"{name}: {key} must be a string"
     tags = record.get("tags")
-    if not isinstance(tags, list) or any(not isinstance(t, str) for t in tags):
+    if (not isinstance(tags, list) or len(tags) > MAX_TAGS
+            or any(not isinstance(t, str) or len(t) > 256 for t in tags)):
         return f"{name}: tags must be a list of strings"
     dims = _dims_issue(record.get("dimensions"))
     if dims:
@@ -56,14 +61,18 @@ def study_record_issue(row: object) -> str | None:
         return f"invalid name {name!r}"
     if row.get("type") is not None and row["type"] not in ITEM_TYPES:
         return "type must be block|component when present"
-    if any(row.get(key) is not None and not isinstance(row[key], str) for key in STUDY_TEXT):
+    if any(row.get(key) is not None
+           and (not isinstance(row[key], str) or len(row[key]) > MAX_TEXT)
+           for key in STUDY_TEXT):
         return "study text fields must be strings or null"
     if any(row.get(key) is not None and type(row[key]) not in (bool, str)
            for key in ("scrubSafe", "selfContained")):
         return "study safety claims must be booleans, explanatory strings or null"
     variables = row.get("variables")
     if variables is not None and (not isinstance(variables, list)
-                                 or any(not isinstance(item, str) for item in variables)):
+                                 or len(variables) > MAX_VARIABLES
+                                 or any(not isinstance(item, str) or len(item) > 256
+                                        for item in variables)):
         return "variables must be a list of strings or null"
     return None
 
@@ -72,14 +81,15 @@ def _known_missing(value: object, issues: list[str]) -> dict[str, str]:
     """Keep valid missing-source rows while reporting malformed container/rows."""
     if value is None:
         return {}
-    if not isinstance(value, list):
+    if not isinstance(value, list) or len(value) > MAX_ROWS:
         issues.append("lock knownMissing ignored: must be a list or null")
         return {}
     missing = {}
     for row in value:
         name = row.get("name") if isinstance(row, dict) else None
-        if not isinstance(name, str) or not NAME_RE.fullmatch(name) \
-                or not isinstance(row.get("reason", ""), str):
+        if (not isinstance(name, str) or not NAME_RE.fullmatch(name)
+                or not isinstance(row.get("reason", ""), str)
+                or len(row.get("reason", "")) > MAX_TEXT):
             issues.append(f"lock knownMissing row ignored: {row!r}")
             continue
         missing[name] = row.get("reason", "")

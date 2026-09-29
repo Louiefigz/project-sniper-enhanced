@@ -8,7 +8,8 @@ import { NextRequest } from "next/server";
 import { prepareNativeShortRequest } from "../native-short-request";
 import { fileSha256 } from "../auto-edit-hash";
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
-import { nativeShortFixture, refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
+import { bindNativeVisualPlanFixture, nativeShortFixture,
+  refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
 import { readNativeShortProject, writeNativeShortProject } from "../native-short-project";
 import { POST } from "../../../app/api/producer/native-short/route";
 import { refreshVisualSourceFixture } from "./_visual-source-fixture";
@@ -61,9 +62,33 @@ test("prepare is idempotent, carries whole-source search and makes no provider c
     assert.ok(packet.stages.indexOf("check-full-plan-feasibility") < packet.stages.indexOf("independent-current-plan-review"));
     assert.ok(packet.stages.indexOf("independent-current-plan-review") < packet.stages.indexOf("assemble"));
     assert.match(result.handoff, /opening-only Director critique do not satisfy/);
+    assert.match(result.handoff, /visual-plan-usage\.ts register/);
     assert.ok(packet.references.length >= 2);
     writeFileSync(f.plan.assets[0].path, "changed source");
     assert.throws(() => prepareNativeShortRequest(f.input), /changed since ingest/);
+  } finally { f.cleanup(); }
+});
+
+test("prepare rejects related-output allocation without its selected vocabulary", () => {
+  const f = fixture(), context = path.join(f.directory, "related-style-context.json");
+  const choice = { choiceKind: "vocabulary", choiceId: "scene-0-comparison", sceneIndex: 0,
+    familyId: "comparison", contenderRef: "mirror:meter-card",
+    anatomy: "TEST split comparison with one result accent",
+    configuration: "TEST split comparison", development: "TEST baseline then result" };
+  const record = { schemaVersion: 1, scope: "related-native-short-style-context",
+    groupId: "launch-set", currentOutputId: "short-two", referenceId: "reference-one",
+    vocabularySha256: "a".repeat(64), planningMode: "shared-allocation",
+    outputs: [{ outputId: "short-one", status: "planned", choices: [choice] },
+      { outputId: "short-two", status: "planned", choices: [{ ...choice,
+        choiceId: "scene-0-callout",
+        contenderRef: "mirror:callout-card", configuration: "TEST centered callout",
+        development: "TEST claim then evidence" }] }], limitations: [] };
+  writeFileSync(context, JSON.stringify(record));
+  try {
+    assert.throws(() => prepareNativeShortRequest({ ...f.input, relatedStyleContextPath: context }),
+      /requires a current selected reference vocabulary/);
+    record.outputs.pop(); writeFileSync(context, JSON.stringify(record));
+    assert.throws(() => prepareNativeShortRequest({ ...f.input, relatedStyleContextPath: context }), /current output conflicts/);
   } finally { f.cleanup(); }
 });
 
@@ -74,6 +99,7 @@ test("requested cleanup reaches the saved project and cold reader without substi
     const result = prepareNativeShortRequest({ ...f.input, intent });
     const packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    bindNativeVisualPlanFixture(f.plan, f.directory);
     refreshVisualSourceFixture(f.plan);
     refreshNativeAssetUseFixture(f.plan);
     refreshNativePrebuildReviewFixture(f.plan);
@@ -95,6 +121,7 @@ test("prepared request binds the real writer and cold reader to style and transc
   try {
     const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    bindNativeVisualPlanFixture(f.plan, f.directory);
     assert.throws(() => assertNativeVisualSources(f.plan), /current request packet/);
     refreshVisualSourceFixture(f.plan);
     assert.deepEqual(f.plan.visualSources!.request, f.plan.requestPacket);
@@ -136,6 +163,7 @@ test("native assembly cannot silently discard requested audio work or override d
       const result = prepareNativeShortRequest({ ...f.input, intent: { ...f.intent, ...extra } });
       const packet = path.join(result.directory, "SHORT-REQUEST.json");
       f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+      bindNativeVisualPlanFixture(f.plan, f.directory);
       refreshVisualSourceFixture(f.plan);
       refreshNativeAssetUseFixture(f.plan);
       refreshNativePrebuildReviewFixture(f.plan);
@@ -161,9 +189,28 @@ function suppliedPicture(f: ReturnType<typeof fixture>, include = true) {
   return asset;
 }
 
+function admittedExternal(f: ReturnType<typeof fixture>) {
+  const source = path.dirname(f.plan.assets[0].path);
+  const original = path.join(source, "external-original.mp4");
+  const snapshot = path.join(source, "external-snapshot.media");
+  const receipt = path.join(source, "external-admission.json");
+  writeFileSync(original, "TEST original external media");
+  writeFileSync(snapshot, "TEST admitted external snapshot");
+  writeFileSync(receipt, "TEST external admission receipt");
+  const manifestFile = path.join(source, "asset_manifest.json");
+  const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+  manifest.externalMedia = [{ id: "external-1", path: snapshot,
+    originalPath: original, sourceSha256: fileSha256(snapshot)!,
+    sourceSizeBytes: readFileSync(snapshot).byteLength,
+    admissionReceiptPath: receipt, admissionReceiptSha256: fileSha256(receipt)! }];
+  writeFileSync(manifestFile, JSON.stringify(manifest));
+  return { original, snapshot, receipt };
+}
+
 function bindPrepared(f: ReturnType<typeof fixture>) {
   const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
   f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+  bindNativeVisualPlanFixture(f.plan, f.directory);
   refreshVisualSourceFixture(f.plan);
   refreshNativeAssetUseFixture(f.plan);
   refreshNativePrebuildReviewFixture(f.plan);
@@ -195,6 +242,34 @@ test("unselected prepared B-roll bytes are still checked at cold read", () => {
     const { directory } = writeNativeShortProject(f.plan, path.join(f.directory, "unselected-project"));
     writeFileSync(picture.path, "TEST changed unselected supplied image");
     assert.throws(() => readNativeShortProject(directory), /Prepared supplied B-roll changed/);
+  } finally { f.cleanup(); }
+});
+
+test("external media stays a pinned prerequisite and is rechecked without becoming supplied B-roll", () => {
+  const f = fixture();
+  try {
+    const external = admittedExternal(f), packet = bindPrepared(f);
+    assert.equal(packet.availableSupportingAssets.length, 0);
+    assert.equal(packet.availableExternalMedia.length, 1);
+    assert.equal(packet.availableExternalMedia[0].path, external.snapshot);
+    assert.equal(packet.availableExternalMedia[0].originalPath, external.original);
+    assert.equal(packet.availableExternalMedia[0].modality, "external-media");
+    assert.equal(packet.availableExternalMedia[0].recordId, "external-1");
+    assert.equal(packet.availableExternalMedia[0].sourceSetLane, "external");
+    assert.equal(packet.availableExternalMedia[0].sourceSetEvidence.sha256,
+      packet.availableExternalMedia[0].admissionReceiptSha256);
+    assert.equal(packet.availableExternalMedia[0].authorizationEvidence, null);
+    assert.equal(packet.availableExternalMedia[0].availability,
+      "prerequisite-awaiting-controller-authorization");
+    assert.equal(packet.availableExternalMedia[0].admissionReceipt.path, external.receipt);
+    const { directory } = writeNativeShortProject(f.plan, path.join(f.directory, "external-project"));
+    writeFileSync(external.snapshot, "TEST changed admitted external snapshot");
+    assert.throws(() => readNativeShortProject(directory),
+      /external-media inventory changed/);
+    writeFileSync(external.snapshot, "TEST admitted external snapshot");
+    writeFileSync(external.receipt, "TEST changed external admission receipt");
+    assert.throws(() => readNativeShortProject(directory),
+      /external-media admission receipt changed/);
   } finally { f.cleanup(); }
 });
 

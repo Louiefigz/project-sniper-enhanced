@@ -93,6 +93,21 @@ The supported release uses the native renderer through `./sniper` on macOS or
 `sniper.cmd` on Windows; it does not require a Docker image or image approval
 from another machine.
 
+## External media planning authority
+
+Put custom or previously acquired supporting media in the project
+`external-media/` ingress directory and run Producer ingest again. Ingest gives
+those files the distinct `external` source-set lane and publishes them as
+`externalMedia[]`; visual planning can use only the exact controller-frozen
+record, snapshot path and hash. The source-set and sandbox receipts establish
+technical provenance and decode admission. They are not rights approval.
+
+Supervised public-web capture remains separate. Preserve its
+`ASSET-ORIGIN.json` and review disposition, then explicitly re-admit the chosen
+capture through `external-media/`, rematerialize visual-plan context and re-plan.
+Before that second pass, the planner must not fabricate an eligible public-web
+candidate or treat an author-supplied authorization pin as a source inventory.
+
 Scoped scene text/timing operations recheck their current source evidence and
 preserve the same selected source through the exact authorized edit. They cannot
 change the executable bundle, element membership or source rationale. The new

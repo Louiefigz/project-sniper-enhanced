@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch
 
 from native_render_processes import ProcessRequest
 from native_render_resources import GIB, parse_snapshot
+from _native_pool_fixture import pool_lease_double
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig
 from studio.native_run_lifecycle import ABORT_SIGNALS
@@ -45,7 +46,7 @@ class NativeRunSignalTests(unittest.TestCase):
         for number, handler in self.original_handlers.items():
             self.addCleanup(signal.signal, number, handler)
             signal.signal(number, self.caller_handler)
-        self.lease = Mock()
+        self.lease = pool_lease_double()
         self.acquire = self.enterContext(patch('studio.native_run.NativeWorkLease.acquire', return_value=self.lease))
         snapshot = parse_snapshot(raw_sample(), ProcessRequest(), 40 * GIB)
         self.read = self.enterContext(patch('studio.native_measurement_retry.read_snapshot', return_value=snapshot))
@@ -188,8 +189,15 @@ class NativeRunSignalTests(unittest.TestCase):
             signal.getsignal(signal.SIGTERM)(signal.SIGTERM, None)
             return snapshot
         self.read.side_effect = canceled_read
-        with patch.object(pipeline, 'render') as render, patch.object(pipeline, 'verify') as verify:
+        # This lifecycle fixture has no native project; admission is covered by early-stage tests.
+        with patch('studio.native_early_stage.run_early_checks') as early, \
+                patch('studio.native_early_stage.capture_diagnostics_gate') as diagnostics, \
+                patch.object(pipeline, 'preview') as preview, patch.object(pipeline, 'render') as render, \
+                patch.object(pipeline, 'verify') as verify:
             self.assertFalse(pipeline.execute())
+        early.assert_called_once_with(pipeline)
+        diagnostics.assert_not_called()
+        preview.assert_not_called()
         render.assert_not_called()
         verify.assert_not_called()
         self.launch.assert_not_called()

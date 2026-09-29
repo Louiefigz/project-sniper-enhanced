@@ -51,6 +51,7 @@
       "privatePrefix": "_",
       "rootFields": [
         "broll",
+        "externalMedia",
         "generatedAt",
         "input",
         "music",
@@ -512,6 +513,41 @@
       "readerFiles": ["scripts/producer/broll/broll_insert.py", "scripts/producer/plan_lint_overlays.py"],
       "mutations": [
         {"caseId": "manifest-broll-path", "fixture": "short-basic", "pointer": "/manifest/broll/0/path", "after": "/immutable/broll-after.mp4", "expectedChangedRoots": ["manifest.base", "manifest.final"]}
+      ]
+    },
+    {
+      "effectId": "manifest-external-media",
+      "document": "manifest",
+      "rootFields": [
+        "externalMedia"
+      ],
+      "patterns": [
+        "/externalMedia/**"
+      ],
+      "classification": "render-affecting",
+      "stageRoots": [
+        "source-authority",
+        "base",
+        "final"
+      ],
+      "authorityEffects": [
+        "authorized external media identity, immutable bytes, and origin evidence"
+      ],
+      "readerFiles": [
+        "scripts/producer/ingest_execution_authority.py"
+      ],
+      "mutations": [
+        {
+          "caseId": "manifest-external-media-authority",
+          "fixture": "short-basic",
+          "pointer": "/manifest/externalMedia",
+          "after": [],
+          "expectedChangedRoots": [
+            "manifest.base",
+            "manifest.final",
+            "manifest.source"
+          ]
+        }
       ]
     },
     {

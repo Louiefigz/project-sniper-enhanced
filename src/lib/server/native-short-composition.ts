@@ -3,7 +3,8 @@ import { aspectK } from "@/lib/producer/crop-geometry";
 import { assertNativeCaptionGroups, nativeCaptionGroupEnd, type NativeCaptionGroups } from "./guided-native-captions";
 import type { ProposalWordOccurrence } from "./guided-proposal-speech";
 import { renderNativeTitleCard, type NativeTitleCard } from "./native-title-card";
-import { assertNativeCaptionPresentation, nativeCaptionDisplayMap, type NativeCaptionDisplayCorrection } from "./native-caption-display";
+import { assertNativeCaptionPresentation, nativeCaptionDisplayMap, nativeCaptionSuppressions,
+  type NativeCaptionDisplayCorrection, type NativeCaptionSuppression } from "./native-caption-display";
 
 export type NativeBox = [number, number, number, number];
 export interface NativeWindow { startFrame: number; endFrame: number }
@@ -36,6 +37,8 @@ export interface NativeCanvasInput {
   captionCorrections?: NativeCaptionDisplayCorrection[];
   /** Existing source pixels own captions only when explicitly declared and visually reviewed. */
   captionMode?: "native" | "source-burned";
+  /** Reasoned caption-free output windows; with captionViews they partition the Short. */
+  captionSuppressions?: NativeCaptionSuppression[];
   pictureViews: NativePictureView[]; captionViews: NativeCaptionView[];
   text: NativeTextCue[]; shapes: NativeShapeCue[]; motion: NativeMotionCue[];
   titleCard?: NativeTitleCard;
@@ -77,16 +80,20 @@ function exits(input: NativeCanvasInput): string {
     const end = Math.min(segment.endFrameExclusive, view.endFrame);
     if (end > Math.max(segment.startFrame, view.startFrame)) result.push(nativeVisualExit(`source-crop-${index}-${number}`, end, input.frameRate));
   }));
-  input.captionGroups.forEach((group, index) => input.captionViews.forEach((view, number) => {
-    const end = captionEnd(input, index, view);
-    if (end > Math.max(input.occurrences[group[0]][3], view.startFrame)) result.push(nativeVisualExit(`caption-${index}-${number}`, end, input.frameRate));
+  input.captionGroups.forEach((_group, index) => input.captionViews.forEach((view, number) => {
+    const shown = captionElementWindow(input, index, view);
+    if (shown.endFrame > shown.startFrame) result.push(nativeVisualExit(`caption-${index}-${number}`, shown.endFrame, input.frameRate));
   }));
   return result.join("\n");
 }
 
-/** Rounded word bounds may overlap; the next phrase owns its first visible frame. */
-function captionEnd(input: NativeCanvasInput, index: number, view: NativeCaptionView): number {
-  return Math.min(nativeCaptionGroupEnd(input, index), view.endFrame);
+/**
+ * One phrase's element window inside one caption view; empty when it is not rendered there.
+ * Rounded word bounds may overlap, so the next phrase owns its first visible frame.
+ */
+function captionElementWindow(input: NativeCanvasInput, index: number, view: NativeCaptionView): NativeWindow {
+  return { startFrame: Math.max(input.occurrences[input.captionGroups[index][0]][3], view.startFrame),
+    endFrame: Math.min(nativeCaptionGroupEnd(input, index), view.endFrame) };
 }
 function color(value: string): void {
   if (!/^#[0-9a-f]{6}$/iu.test(value) && value !== "transparent") throw new Error("Native color must be exact hex or transparent");
@@ -172,14 +179,28 @@ function footage(input: NativeCanvasInput): string {
   }).join("\n");
 }
 
+const SOURCE_CAPTION_MOUNT = "<!--native-source-caption-mount-->";
+const SUPPRESSED_CAPTION_MOUNT = "<!--native-caption-mount-->";
+
+/**
+ * The literal that project assembly mounts scene-extension markup before. A suppressed
+ * opening removes caption-0-0, so any suppression gets an explicit mount ahead of the
+ * caption layer; unsuppressed native HTML keeps its historical anchor byte for byte.
+ */
+export function nativeExtensionMount(input: NativeCanvasInput): string {
+  if (input.captionMode === "source-burned") return SOURCE_CAPTION_MOUNT;
+  return nativeCaptionSuppressions(input).length ? SUPPRESSED_CAPTION_MOUNT : '<div id="caption-0-0"';
+}
+
 function captions(input: NativeCanvasInput): string {
   const display = nativeCaptionDisplayMap(input);
-  if (input.captionMode === "source-burned") return "<!--native-source-caption-mount-->";
-  return input.captionGroups.flatMap((group, index) => input.captionViews.map((view, number) => {
+  if (input.captionMode === "source-burned") return SOURCE_CAPTION_MOUNT;
+  const mount = nativeCaptionSuppressions(input).length ? SUPPRESSED_CAPTION_MOUNT : "";
+  return mount + input.captionGroups.flatMap((group, index) => input.captionViews.map((view, number) => {
     if (view.activeColor) color(view.activeColor);
     if (view.strokeColor) color(view.strokeColor);
     const words = group.map((id) => input.occurrences[id]);
-    const startFrame = Math.max(words[0][3], view.startFrame), endFrame = captionEnd(input, index, view);
+    const { startFrame, endFrame } = captionElementWindow(input, index, view);
     if (endFrame <= startFrame) return "";
     return `<div ${identity(`caption-${index}-${number}`)} class="clip text caption" ${timing({ startFrame, endFrame }, input)} data-track-index="8" style="${geometry(view.box)}${typography(view.style)}">`
       + words.map((word) => `<span ${identity(`word-${word[0]}-${number}`)} data-occurrence-id="${word[0]}" data-word-start-frame="${word[3]}" data-word-end-frame="${word[4]}"`
@@ -195,12 +216,25 @@ export function centeredNativeCaptionView(input: NativeWindow & { top: number })
       align: "center", padding: 8, radius: 0, lineHeight: 1.15 } };
 }
 
+/** Word spans that exist: every word of each phrase element actually rendered in a view. */
+function renderedWordIds(input: NativeCanvasInput): Set<string> {
+  return new Set(input.captionGroups.flatMap((group, index) => input.captionViews.flatMap((view, number) => {
+    const shown = captionElementWindow(input, index, view);
+    return shown.endFrame > shown.startFrame ? group.map((id) => `word-${id}-${number}`) : [];
+  })));
+}
+
+/**
+ * Word highlights on the source word clock, per view. A suppressed build schedules them only for
+ * rendered spans; unsuppressed HTML keeps its historical tween list because cold reads compare it.
+ */
 function captionHighlights(input: NativeCanvasInput): string {
+  const rendered = nativeCaptionSuppressions(input).length ? renderedWordIds(input) : undefined;
   return input.captionViews.flatMap((view, number) => {
     if (!view.activeColor) return [];
     return input.occurrences.flatMap((word) => {
       const start = Math.max(word[3], view.startFrame), end = Math.min(word[4], view.endFrame);
-      if (end <= start) return [];
+      if (end <= start || (rendered && !rendered.has(`word-${word[0]}-${number}`))) return [];
       const target = `#word-${word[0]}-${number}`;
       return [`tl.fromTo("${target}",{color:"${view.style.color}"},{color:"${view.activeColor}",duration:0,immediateRender:false},${seconds(start, input.frameRate)});`,
         `tl.set("${target}",{color:"${view.style.color}"},${seconds(end, input.frameRate)});`];

@@ -13,7 +13,8 @@ from ingest_retained_inventory import (
 def admitted(original: str, lane: str = "broll") -> AdmittedMedia:
     """Return synthetic proof fields without decoding or admitting any media."""
     return AdmittedMedia(original, lane, f"/snapshot/{Path(original).name}",
-                         "a" * 64, 100, "image", "receipt.json", "b" * 64)
+                         "a" * 64, 100, "image", "receipt.json", "b" * 64,
+                         None)
 
 
 def row(original: str, asset_id: str) -> dict:

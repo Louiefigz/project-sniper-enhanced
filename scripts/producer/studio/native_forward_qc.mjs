@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {nativeCaptureHash,nativeCaptureBatches} from './native_short_capture_context.mjs';
 import {checkTypography,visualState} from './native_short_capture_checks.mjs';
+import {verifyRevisionBatch} from './native_short_revision_frames.mjs';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const MAX_RECEIPT_BYTES=32*1024*1024;
@@ -66,11 +67,19 @@ function verifyPicture(context, picture, root, points) {
   assert.deepEqual(picture.frames.map(row=>row.frame),frames,'Incomplete original picture inventory');
   const groups=nativeCaptureBatches(frames,context.batchPlan.maximumFrames);
   assert.equal(picture.batches.length,groups.length);
-  picture.batches.forEach((batch,index)=>verifyBatch(batch,groups[index],index));
+  const revisionRequest=context.request.pictureDonor
+    ?readReceipt(path.join(root,'export-request.json')):null;
+  if(revisionRequest)assert.equal(revisionRequest.sha256,context.request.pins[path.join(root,'export-request.json')]);
+  assert.deepEqual(picture.pictureRevision,(revisionRequest?.value??context.request).pictureRevision,'Picture revision proof differs');
+  picture.batches.forEach((batch,index)=>verifyBatch(batch,groups[index],index,picture.pictureRevision));
 }
 
-function verifyBatch(batch, frames, index) {
+function verifyBatch(batch, frames, index, revision) {
   assert.equal(batch.index,index);assert.deepEqual(batch.frames,frames);
+  if(revision){
+    verifyRevisionBatch(batch,revision);
+    if(batch.status==='reused-and-verified')return;
+  }
   assert.equal(batch.status,'captured-and-disposed');assert.equal(batch.transport.errors,0);
   for(const key of ['sessionClosed','browserPoolDrained','serverClosed','mediaGuardDisposed'])assert.equal(batch[key],true);
   assert.equal(batch.originalMedia?.status,'original-payloads-suppressed');

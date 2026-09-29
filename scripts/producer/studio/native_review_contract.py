@@ -30,6 +30,8 @@ class ReviewComposition:
     video: Path
     video_sha256: str
     native_long: bool = False
+    review_state: str = 'checked'
+    label: str | None = None
 
 
 def relative_file(root: Path, name: str) -> Path:
@@ -81,12 +83,12 @@ def checked_delivery(export: Path, layout: dict | None = None) -> tuple[dict, di
     media_result(render)
     require(render['artifacts']['review']['sha256'] == delivery['sha256'], 'review media differs from render seal')
     capture_file = Path(request.get('captureStage', export / 'capture-stage.json'))
-    if request.get('adapter') != 'native-long' and layout and (
+    if request.get('adapter') != 'native-long' and layout and not request.get('captureDependencySha256') and (
             layout.get('plan') != 'SHORT-PROJECT.json' or layout.get('entry') != 'index.html'):
         capture, capture_pins = read_compatible_capture(capture_file, render, {**layout, 'project': request['project'], 'renderStage': str(render_file)})
-    else:
-        from studio.native_short_capture_resume import read_capture
-        capture, capture_pins = read_capture(capture_file, render_file)
+    else:  # Own-attempt seals and adopted standalone seals share one render-aware reader.
+        from studio.native_capture_reuse import capture_for_render
+        capture, capture_pins = capture_for_render(capture_file, render_file)
     require(digest(export / 'native-frames.json') == capture['artifacts']['native']['sha256'], 'review capture changed')
     pins.update(capture_pins)
     stages = delivery.get('stages', [])
@@ -118,7 +120,9 @@ def read_composition(row: dict) -> ReviewComposition:
     export = Path(row['export'])
     require(export.is_absolute() and export.resolve(strict=True) == export, 'export path must be canonical and absolute')
     layout = {'plan': row.get('plan', 'SHORT-PROJECT.json'), 'entry': row.get('entry', 'index.html')}
-    delivery, request, pins = checked_delivery(export, layout)
+    from studio.native_short_draft import DRAFT_LABEL, review_draft_delivery
+    draft = bound_json(export / 'export-request.json').get('reviewDraft') is True  # labeled, never final
+    delivery, request, pins = (review_draft_delivery if draft else checked_delivery)(export, layout)
     project = Path(request['project']); files = project_files(project, request)
     default_plan = 'LONG-PROJECT.json' if request.get('adapter') == 'native-long' else 'SHORT-PROJECT.json'
     plan_name, entry = row.get('plan', default_plan), row.get('entry', 'index.html')
@@ -132,7 +136,8 @@ def read_composition(row: dict) -> ReviewComposition:
     canvas_clock(plan['canvas'])
     return ReviewComposition(identity, title, export, project, Path(request['runtime']), files, pins,
                              plan, entry, Path(delivery['output']), delivery['sha256'],
-                             request.get('adapter') == 'native-long')
+                             request.get('adapter') == 'native-long',
+                             'draft' if draft else 'checked', DRAFT_LABEL if draft else None)
 
 
 def read_manifest(file: Path) -> list[ReviewComposition]:

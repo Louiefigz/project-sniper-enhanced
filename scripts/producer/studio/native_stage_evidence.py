@@ -12,7 +12,7 @@ from pathlib import Path
 
 from cross_runtime_canonical_json import canonical_compact_json
 from cut_preview_io import MAX_JSON, bound_json, file_hash, real_directory, write_new
-from studio.native_run_config import source_hashes
+from studio.native_run_config import authored_source_hashes, source_hashes
 
 MAX_NATIVE_FILE_BYTES = 1024 ** 4  # Stream large originals without the preview's 2 GiB cap.
 MAX_NATIVE_CAPTURE_JSON_BYTES = 256 * 1024 * 1024
@@ -84,9 +84,10 @@ def verify_supervised_inputs(project: Path, request_path: Path, request: dict, p
     require(all(before.get(key) == value for key, value in _pin_map(request.get('pins')).items()),
             'donor request pins were not supervised')
     require(before.get(str(request_path)) == _hash(request_path), 'donor request changed after supervision')
-    sources = pipeline.get('sourceHashesBefore')
-    require(type(sources) is dict and bool(sources)
-            and sources == pipeline.get('sourceHashesAfter') == source_hashes(project),
+    before_sources, after_sources = pipeline.get('sourceHashesBefore'), pipeline.get('sourceHashesAfter')
+    require(type(before_sources) is dict and type(after_sources) is dict, 'missing supervised source maps')
+    sources = authored_source_hashes(before_sources)
+    require(bool(sources) and sources == authored_source_hashes(after_sources) == source_hashes(project),
             'current authored project differs from supervised sources')
     require(all(_hash(project / name) == value for name, value in sources.items()),
             'supervised authored project bytes changed')

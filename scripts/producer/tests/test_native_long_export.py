@@ -86,12 +86,85 @@ class LongContractTests(unittest.TestCase):
         """Exercise the actual cold reader after each independent mutation."""
         (self.root / 'LONG-PROJECT.json').write_text(json.dumps(self.plan))
         (self.root / 'index.html').write_text(self.html)
-        return read_long_plan(self.root)
+        marker = self.root / 'NATIVE-LONG-POLICY.json'
+        authority = None if marker.exists() else {
+            'schemaVersion': 1, 'scope': 'legacy-native-long-cold-read',
+            'project': str(self.root),
+            'planSha256': digest(self.root / 'LONG-PROJECT.json'),
+            'htmlSha256': digest(self.root / 'index.html')}
+        return read_long_plan(self.root, authority)
+
+    def test_marker_omission_cannot_select_legacy_behavior(self) -> None:
+        """The public reader cannot mint provenance from rehashable project bytes."""
+        (self.root / 'LONG-PROJECT.json').write_text(json.dumps(self.plan))
+        (self.root / 'index.html').write_text(self.html)
+        with self.assertRaisesRegex(ValueError, 'external controller-owned'):
+            read_long_plan(self.root)
 
     def test_exact_scene_inventory_and_sample_schedule(self) -> None:
         """Include the final frame and both sides of the internal scene change."""
         self.assertEqual(self.read()['canvas']['totalFrames'], 120)
         self.assertEqual(sample_frame_count(self.plan), 20)
+
+    def test_prepared_request_cannot_switch_to_legacy_schema(self) -> None:
+        """A generated v2 scaffold cannot silently use the historical v1 lane."""
+        request = self.root / 'LONG-REQUEST.json'
+        request.write_text('{"TEST":"prepared request"}')
+        (self.root / 'NATIVE-LONG-POLICY.json').write_text(json.dumps({
+            'schemaVersion': 1, 'requirement': 'required-for-new-native-long',
+            'requestPacket': {'path': str(request), 'sha256': digest(request)}}))
+        with self.assertRaisesRegex(ValueError, 'require schema 2'):
+            self.read()
+
+    def current_project(self) -> tuple[Path, Path]:
+        """Promote the fixture to one prepared schema-2 project input graph."""
+        producer = self.root / 'producer'; producer.mkdir()
+        (producer / 'edit_plan.json').write_text('{"cutTrack":[]}')
+        manifest = self.root / 'manifest.json'; manifest.write_text('{"sources":[]}')
+        request = self.root / 'LONG-REQUEST.json'
+        request.write_text(json.dumps({'producerDir': str(producer), 'manifest': {
+            'path': str(manifest), 'sha256': digest(manifest),
+            'sizeBytes': manifest.stat().st_size}}))
+        packet = {'path': str(request), 'sha256': digest(request)}
+        (self.root / 'NATIVE-LONG-POLICY.json').write_text(json.dumps({
+            'schemaVersion': 1, 'requirement': 'required-for-new-native-long',
+            'requestPacket': packet}))
+        self.plan.update({'schemaVersion': 2, 'requestPacket': packet,
+                          'visualPlan': {'current': True},
+                          'visualPlanApplication': {'current': True},
+                          'audio': {'file': 'assets/program.wav'}})
+        for scene in self.plan['scenes']:
+            scene['visualIds'] = []
+        self.html = self.html.replace('assets/dialogue.wav', 'assets/program.wav')
+        return producer, manifest
+
+    def test_current_long_requires_controller_program_audio_and_exact_manifest(self) -> None:
+        """Schema 2 cannot select an arbitrary project WAV or stale Producer inputs."""
+        producer, manifest = self.current_project()
+        installation = {'authority': {'path': str(self.root / 'owned/result.json'),
+            'sha256': 'a' * 64, 'owner': str(self.root / 'owned/inspection.render.json'),
+            'ownerSha256': 'b' * 64}, 'audio': {'sha256': 'c' * 64}}
+        (self.root / 'PROGRAM-AUDIO.json').write_text('{}')
+        with patch('native_program_audio.read_native_program_audio_installation',
+                   return_value=installation) as read, \
+                patch('studio.native_long_contract.validate_long_style_application'), \
+                patch('studio.native_long_contract.validate_long_visual_plan_application'):
+            self.assertEqual(self.read()['audio']['file'], 'assets/program.wav')
+        read.assert_called_once_with(self.root, producer, manifest)
+        manifest.write_text('{"sources":[],"changed":true}')
+        with patch('native_program_audio.read_native_program_audio_installation') as read, \
+                self.assertRaisesRegex(ValueError, 'manifest audio input changed'):
+            self.read()
+        read.assert_not_called()
+
+    def test_current_long_rejects_any_other_audio_file(self) -> None:
+        """The HTML and plan cannot route around the installed program authority."""
+        self.current_project()
+        self.plan['audio']['file'] = 'assets/dialogue.wav'
+        with patch('native_program_audio.read_native_program_audio_installation') as read, \
+                self.assertRaisesRegex(ValueError, 'assets/program.wav'):
+            self.read()
+        read.assert_not_called()
 
     def test_scene_gap_duplicate_ids_and_missing_end_are_rejected(self) -> None:
         """Stop ambiguous plans before audio, probes or picture work."""

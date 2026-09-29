@@ -17,6 +17,7 @@ from audio.native_audio_donor import prepare_audio_donor
 from audio.mastering_profile import NATIVE_SHORT_MASTERING_PROFILE, resolve_mastering_profile
 from audio.program_audio_clock import exact_aac_audio_clock
 from studio.native_runtime import digest
+from studio.native_budget_owner import aac_budget_hook
 from studio.native_short_dialogue import clock, dialogue_reference, normalize_dialogue_reference, run
 from studio.native_stage_evidence import MAX_NATIVE_FILE_BYTES, read_native_capture_receipt
 from cut_preview_io import MAX_JSON, file_hash, file_identity, write_new
@@ -80,7 +81,8 @@ def finish_dialogue(request: dict, canvas: dict, audio_finishing: object = None,
         samples, root / 'audio',
         digest(picture), digest(reference), donor,
         profile=profile, review_sections=dialogue_review_sections(canvas),
-        prepared_master=binding, prepared_donor=donor_binding))
+        prepared_master=binding, prepared_donor=donor_binding,
+        candidate_hook=aac_budget_hook(request, digest(reference), profile.identity)))
 
 
 def dialogue_review_sections(canvas: dict) -> tuple[dict, ...]:
@@ -99,12 +101,17 @@ def picture_payload(file: Path) -> str:
         '-f', 'hash', '-hash', 'sha256', '-']).strip()
 
 
-def native_srgb_delivery(root: Path, audio: dict) -> dict:
+def native_srgb_delivery(root: Path, audio: dict, output_name: str = 'review.mp4') -> dict:
     """Correct the measured native Chrome route only, preserving picture and AAC."""
-    source, output = root / 'audio/candidate.mp4', root / 'review.mp4'
+    source, output = root / 'audio/candidate.mp4', root / output_name
     if audio['status'] != 'audio-qualified' or digest(source) != audio['candidateSha256']:
         raise RuntimeError('Native audio candidate changed or did not qualify')
     samples = audio['audioClock']['presentedSamples']
+    return correct_native_srgb(source, output, samples)
+
+
+def correct_native_srgb(source: Path, output: Path, samples: int) -> dict:
+    """Apply the shared metadata-only native color correction to an already qualified A/V clip."""
     before = observe_picture_source(str(source), samples / 48000)
     stream = json.loads(run(['ffprobe', '-v', 'error', '-select_streams', 'v:0',
                             '-show_streams', '-of', 'json', str(source)]))['streams']

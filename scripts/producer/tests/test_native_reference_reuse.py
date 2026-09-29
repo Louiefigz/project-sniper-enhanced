@@ -103,6 +103,11 @@ class NativeReferenceReuseTests(ReuseFixture):
         """Long review hashes include declared map dependencies without another export flag."""
         self.body['format'] = 'longform'
         self.publish()
+        request = self.project / 'TEST-LONG-REQUEST.json'
+        request.write_text('{"scope":"TEST controller request"}')
+        self.write_json(self.project / 'NATIVE-LONG-POLICY.json', {
+            'schemaVersion': 1, 'requirement': 'required-for-new-native-long',
+            'requestPacket': {'path': str(request), 'sha256': file_hash(request)}})
         self.write_json(self.project / 'LONG-PROJECT.json', {'referenceMap': str(self.mapping)})
         reviewed = prebuild_snapshot(self.project)
         self.assertEqual(reviewed['referenceMap'], str(self.mapping))

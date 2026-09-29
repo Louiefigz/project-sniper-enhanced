@@ -67,6 +67,28 @@ def picture_metrics(reference: Path, actual: np.ndarray,
 
 def qualify_reverse_frames(native: dict, shape: tuple[int, int, int] | None = None) -> list[dict]:
     """Permit bounded browser edge antialiasing only after exact scene/source checks."""
+    comparisons = reverse_frame_comparisons(native, shape)
+    if not comparisons or not all(row['passed'] for row in comparisons):
+        raise RuntimeError(f'Reverse-seek pixel stability failed: {comparisons}')
+    return comparisons
+
+
+def reference_identities(native: dict) -> dict[Path, tuple[int, ...]]:
+    """Remember every reference, including repeats, to reject later replacement."""
+    return {Path(row['path']): file_identity(Path(row['path']).lstat()) for row in native['frames']}
+
+
+def assert_picture_inputs(paths: dict[Path, tuple[int, ...]], candidate: tuple[Path, str],
+                          receipt: tuple[Path, str]) -> None:
+    """Keep checked media, capture schedule and retained reference identities bound."""
+    if any(file_identity(path.lstat()) != expected for path, expected in paths.items()):
+        raise RuntimeError('Native picture reference changed during verification')
+    if any(file_hash(path, maximum=MAX_NATIVE_FILE_BYTES) != expected for path, expected in (candidate, receipt)):
+        raise RuntimeError('Native picture candidate or capture receipt changed during verification')
+
+
+def reverse_frame_comparisons(native: dict, shape: tuple[int, int, int] | None = None) -> list[dict]:
+    """Measure every reverse seek against its forward reference; callers decide pass/fail."""
     comparisons = []
     for row in (value for value in native['frames'] if value['repeat']):
         prior = next((value for value in native['frames']
@@ -87,20 +109,4 @@ def qualify_reverse_frames(native: dict, shape: tuple[int, int, int] | None = No
         passed = metrics['mae'] <= .01 and metrics['psnrDb'] >= 60
         comparisons.append({'frame': row['frame'], **metrics, 'passed': passed,
                             'byteIdentical': prior['sha256'] == row['sha256']})
-    if not comparisons or not all(row['passed'] for row in comparisons):
-        raise RuntimeError(f'Reverse-seek pixel stability failed: {comparisons}')
     return comparisons
-
-
-def reference_identities(native: dict) -> dict[Path, tuple[int, ...]]:
-    """Remember every reference, including repeats, to reject later replacement."""
-    return {Path(row['path']): file_identity(Path(row['path']).lstat()) for row in native['frames']}
-
-
-def assert_picture_inputs(paths: dict[Path, tuple[int, ...]], candidate: tuple[Path, str],
-                          receipt: tuple[Path, str]) -> None:
-    """Keep checked media, capture schedule and retained reference identities bound."""
-    if any(file_identity(path.lstat()) != expected for path, expected in paths.items()):
-        raise RuntimeError('Native picture reference changed during verification')
-    if any(file_hash(path, maximum=MAX_NATIVE_FILE_BYTES) != expected for path, expected in (candidate, receipt)):
-        raise RuntimeError('Native picture candidate or capture receipt changed during verification')

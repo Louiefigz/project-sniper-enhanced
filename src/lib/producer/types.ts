@@ -76,6 +76,8 @@ export interface AssetManifest {
   input: string;
   sources: ManifestSource[];
   broll: ManifestAsset[];
+  /** Explicit external media re-admitted through the distinct external source-set lane. */
+  externalMedia?: ManifestAsset[];
   music: ManifestAsset[];
   /** Required on new Producer ingests; absent only on legacy/test manifests. */
   sourceSetAdmission?: SourceSetAdmissionBinding;

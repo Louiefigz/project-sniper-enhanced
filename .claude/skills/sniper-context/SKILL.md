@@ -31,6 +31,12 @@ The report locates context; it does not replace reading or applying it.
    their applicable references; avoid dumping unrelated documents. A path marked
    readable is only available, not already read. State markers are historical
    claims; inspect the actual brief, plan, bindings and handoff to establish state.
+   For clip discovery or a collaboration preset, read
+   [Producer collaboration presets](../../../docs/producer/COLLABORATION_MODES.md)
+   and the existing brief/working notes for the route, current stage, selected
+   ideas, accepted script versions, treatment decisions, delegation and next
+   held checkpoint. Resume that stage within the current request; do not treat
+   saved ranking, an absent note or a completed render as operator selection.
 4. For video or motion work, read the **hyperframes** entry skill if one is installed
    (the packaged app ships none; the inventory says which exist) and
    the owning workflow/domain skills it selects. The inventory lists installed

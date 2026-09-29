@@ -6,7 +6,7 @@ import { cutPreviewLeaseGuard } from "@/app/api/producer/auto-edit/cut-preview-l
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import type { AutoEditJob } from "./auto-edit-job-types";
 import type { ProjectMutationLease } from "./project-mutation-lease";
-import { pipelineAuthorityPath } from "./auto-edit-pipeline-authority";
+import { executablePipelineRoot, pipelineAuthorityPath } from "./auto-edit-pipeline-authority";
 import { stageTimingEnv } from "./stage-timing-context";
 import { assertBootstrapCurrent } from "./guided-project-bootstrap-guard";
 import { BootstrapCleanupError, assertBootstrapQuiescent, withBootstrapProcessScope } from "./guided-project-bootstrap-observer";
@@ -38,7 +38,8 @@ export async function verifyBootstrapSources(job: AutoEditJob, lease: ProjectMut
   const result = await runCutPreviewProcess({ command: pythonInterpreter(),
     args: ["-c", VERIFY, job.ctx.planPath, expected.planHash, job.ctx.manifestPath, expected.manifestHash],
     cwd: path.dirname(source), timeoutMs: Math.min(120_000, authoredPreparationRemainingMs(job.ctx) ?? 120_000), trackForShutdown: true,
-    env: { ...stageTimingEnv(), PYTHONPATH: path.dirname(source), SNIPER_PIPELINE_ROOT: job.ctx.pipeline!.snapshotRoot } });
+    env: { ...stageTimingEnv(), PYTHONPATH: path.dirname(source), SNIPER_PIPELINE_ROOT:
+      executablePipelineRoot(job.ctx.dir, job.ctx.pipeline!) } });
   const actual = JSON.parse(result.stdout.trim());
   if (JSON.stringify(Object.keys(actual).sort()) !== JSON.stringify(Object.keys(expected).sort())
       || actual.status !== expected.status || actual.planHash !== expected.planHash || actual.manifestHash !== expected.manifestHash) {

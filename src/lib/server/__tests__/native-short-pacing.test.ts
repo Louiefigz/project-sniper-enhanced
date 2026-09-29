@@ -27,6 +27,23 @@ test("overlapping word windows are unioned and phrase timing matches the rendere
   assert.equal(report.wordsPerMinute, 60);
 }));
 
+test("nested phrase endings use the union endpoint while the next phrase still owns its first frame", () => withFixture(input => {
+  input.canvas.occurrences[0][4] = 40;
+  input.canvas.occurrences[1][3] = 10; input.canvas.occurrences[1][4] = 20;
+  input.canvas.captionGroups = [[0, 1]];
+  const before = structuredClone(input.canvas.occurrences), report = measureNativeShortPacing(input.canvas);
+  assert.equal(report.speechCoverageFrames, 40);
+  assert.equal(report.phrases[0].endFrame, 40);
+  assert.deepEqual(report.gaps, [{ startFrame: 40, endFrame: 50 }]);
+  assert.deepEqual(input.canvas.occurrences, before);
+  input.canvas.occurrences.push([2, 0, 2, 35, 45, "Next.", 0]); input.canvas.captionGroups.push([2]);
+  const clamped = measureNativeShortPacing(input.canvas);
+  assert.equal(clamped.speechCoverageFrames, 45);
+  assert.equal(clamped.phrases[0].endFrame, 35);
+  assert.equal(clamped.phrases[1].startFrame, 35);
+  assert.equal(clamped.phrases[1].endFrame, 45);
+}));
+
 test("identical overall speaking rates retain different pause structure without classifying energy", () => withFixture(input => {
   const continuous = measureNativeShortPacing(input.canvas);
   input.canvas.occurrences[0][4] = 5;

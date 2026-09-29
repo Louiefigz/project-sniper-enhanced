@@ -86,6 +86,40 @@ brief, resolved request, inspected scout evidence and proposed scene plan, and
 reject a silently narrowed source policy or a blanket no-insert decision. Do
 not claim automatic request-authority verification for an unbound manual plan.
 
+### Prepare related Shorts as one group
+
+When two to four Shorts intentionally use the same selected reference style,
+freeze their allocations together instead of invoking `prepare-related` by hand
+for each output:
+
+```bash
+./sniper node --import tsx scripts/producer/native-short.ts prepare-related-group \
+  /absolute/RELATED-GROUP-DRAFT.json /absolute/new-related-group
+```
+
+The draft has scope `native-short-related-group-draft`, the shared `groupId`,
+`referenceId`, exact vocabulary SHA-256, `outputs` with unique `outputId`,
+canonical `producerDir`, and allocated `choices`, plus optional `completed`
+predecessors (`outputId`, canonical native project directory) and `limitations`.
+Each planned choice uses the same closed summary accepted by the application
+gate: vocabulary choices carry `choiceKind`, `choiceId`, `sceneIndex`,
+`familyId`, `contenderRef`, `anatomy`, `configuration`, and `development`;
+supplemental choices replace the family/contender pair with `catalogId`.
+The controller accepts two to four new outputs. It verifies that every target
+currently selects the same vocabulary, writes one immutable
+`RELATED-STYLE-GROUP.json`, writes a current-output projection for every target,
+and prepares every request against that shared allocation. A partial or changed
+allocation fails instead of silently preparing an unrelated Short.
+
+Completed predecessors are cold-read as native projects. Their usage receipts
+bind `SHORT-PROJECT.json`, `STYLE-APPLICATION.json`, each staged catalog
+implementation, and the exact mounted HTML tags. Cross-output repeat checks use
+those executable signatures; changing only the anatomy, configuration, or
+development prose cannot turn the same implementation into a varied treatment.
+Planned siblings still use the frozen group allocation until executable receipts
+exist. Keep the group file and request directories; they are small planning
+evidence and do not add media to memory.
+
 Use the shared [real-first scouting and agent review](WEB_BROLL_WORKFLOW.md#scouting-and-independent-agent-verification)
 for produced work, while preserving deliberately simple presenter-led requests.
 
@@ -604,6 +638,11 @@ See [supplied formats](SUPPLIED_MEDIA_FORMATS_2026-09-13.md) for the full bounda
 
 ### Build and export
 
+For an approved Short or batch, follow [the authorized production route](NATIVE_SHORTS_DEADLINE_BATCH.md).
+It connects durable approvals, task dispatch, typed independent reviews, draft/final exports
+and visible handoff. Its per-Short clock excludes only verified idle render-capacity waits.
+
+
 Author `NativeShortProjectInput` using the shared types in
 `src/lib/server/native-short-project.ts` and `native-short-strategy.ts`. It
 contains request, source-bound strategy, explicit canvas, frozen asset bindings,
@@ -684,18 +723,23 @@ Historical donors missing the current AAC encoding policy require fresh audio
 encoding under either profile. Do not backfill their old receipts. Profile
 selection does not change long-form defaults or skip current audio qualification.
 
-`--cached-native-batches` opts into native sessions of at most 48 frames. The
+New Short exports default to native sessions of at most 48 frames; the
+`--cached-native-batches` flag remains an explicit compatibility spelling. The
 shared source-pixel budget selects smaller sessions for larger inputs; the
-tested four-4K-view plus page composition uses eight. It requires the exact SDK
-source-frame cache and does not migrate keys, resize source pixels or change
-final encoding quality. Add `--acquire-source-cache` to populate missing supported
-SDR entries sequentially through the pinned SDK, with original geometry, exact
-frame inventories and normal playback speed. Unsupported or incomplete sources
-fail explicitly. This is an opt-in path, not a fallback after a failed render. Use
-`--picture-donor /absolute/prior-export` with that mode to reuse a verified,
-completed batch picture after a later-stage failure. All current final checks
-still run. A missing cache without acquisition enabled, or changed donor
-evidence, is an explicit failure.
+tested four-4K-view plus page composition uses eight. New requests use the shared
+content-addressed source store: identical admitted source bytes, extraction ranges,
+clock, colour transform and tool identities retain the decoded PNGs across staged
+project paths. Legacy path-keyed caches are preserved but never adopted. The pinned
+SDK publishes missing entries under the current owner's disk grant and deadline;
+source pixels retain their original geometry. `--acquire-source-cache` selects
+sequential SDR extraction into that same store; HDR is explicitly refused in that
+mode. Default acquisition preserves whole-composition SDR/HDR negotiation.
+`--sdk-streaming` explicitly selects the old picture route, using the same admitted
+source view, and does not retain a repairable JPEG inventory. Cached batches retain
+every frame for scoped revision repair. `--picture-donor /absolute/prior-export`
+can reuse a completed eligible picture after a later-stage failure. Current final
+checks still run, and changed or missing donor evidence fails explicitly. These
+new default/revision paths still need the deferred real-video qualification.
 
 New shared `NativeRun` attempts use a capacity-derived memory policy. The job
 ceiling is the smaller of 16 GiB and one quarter of physical RAM; the single
@@ -741,6 +785,11 @@ preparation time, per-owner elapsed time, all failure states and reuse status.
 Only `delivery.json` status `native-short-checked-for-review` qualifies the
 technical handoff after capture, encoded checks and every owner's cleanup pass.
 Editorial authoring time belongs to the separate continuous production clock.
+For current projects with a visual plan, the exporter then automatically records
+the allocation and writes `visual-usage-registration.json` before reporting
+workflow success. A registration failure preserves the checked render and
+returns a failed workflow result; use `visual-plan-usage.ts register` only to
+recover or backfill. This machine record keeps `humanApprovalClaim: false`.
 
 Detailed native capture receipts use the shared `read_native_capture_receipt`
 reader with a 256 MiB limit. Both pipeline handoff and encoded-picture checks
@@ -854,9 +903,9 @@ clocks remain visible. Uninstrumented time is not automatically idle time.
 Telemetry is not an editorial or quality gate, and a 30-minute target never
 waives a real defect or missing proof.
 
-Keep the default streaming render route unless measured project evidence
-justifies explicit cached batches. Repeated browser startup can dominate short
-timelines; additional agent processes do not accelerate that capture loop.
+The retained-frame default implements the required revision checkpoints, without
+a claim that initial rendering is faster. Repeated browser startup can dominate
+short timelines; additional agent processes do not accelerate that capture loop.
 
 Batch-mode reference/seek QC runs sequential phases when a verified retained
 forward inventory is available. The original point planner still defines every
@@ -918,6 +967,18 @@ missing or substituted processing fails assembly. Gain windows use final output
 seconds, remain inside the actual duration, cannot overlap and are bounded to
 ±12 dB. Existing 50 ms ramps avoid abrupt gain steps. Omitted processing leaves
 the normalized dialogue unchanged. Keep original source audio for comparison.
+
+For source-specific centered dialogue, optional `channelMode: "mono"` averages
+the already observed stereo dialogue with explicit `0.5L + 0.5R` gains **before**
+cleanup, then duplicates the single processed channel into both output channels
+at unity gain. Omitted mode or `"stereo"` preserves the existing stereo path.
+Mono may be used alone or with an installed cleanup preset and gain windows.
+It deliberately removes the spatial image; inspect the original channel evidence
+and phase/correlation before choosing it, since opposite-phase channels can cancel.
+Retain the original stereo audio and compare the processed voice. The receipt
+records the mode and exact processing filter. Source checks, measured latency,
+tail preservation, sample clock, mastering and final audio checks remain required;
+mono is an authored treatment, never an automatic response to a failed gate.
 
 The sequence is observed channel normalization → shared cleanup with measured
 latency removal and tail flushing → authored gain → shared loudness/peak master

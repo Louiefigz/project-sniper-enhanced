@@ -26,10 +26,11 @@ package in templates/motion/node_modules/hyperframes is never changed.
 
 The following upstream files were modified by Project Sniper (September 2026):
 
-  dist/cli.js                      28 patches (runtime realm checks, file-backed
+  dist/cli.js                      33 patches (runtime realm checks, file-backed
                                    frame transport, zero-anchored source
                                    extraction clock, half-open video windows,
-                                   sequential source work). In the adapted
+                                   sequential source work, optional original-grid
+                                   selected source frames). In the adapted
                                    runtime this patched file is renamed
                                    dist/native-render-sdk.mjs.
   dist/hyperframe.runtime.iife.js  2 patches (same-document realm checks)

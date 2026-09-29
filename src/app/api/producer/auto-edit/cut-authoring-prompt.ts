@@ -3,7 +3,7 @@ import { type BrainProvider } from "../../_lib/ai-provider";
 import { MODES, SCOPES } from "@/lib/producer/intent-presets";
 import { doctrinePromptPath, doctrinePromptRoot } from "@/lib/server/auto-edit-doctrine";
 import { pipelineAuthorityPath } from "@/lib/server/auto-edit-pipeline-authority";
-import { parseAutoEditIntent, type AutoEditCtx } from "./stream";
+import { authoringWorkDir, parseAutoEditIntent, type AutoEditCtx } from "./stream";
 import {
   producerCommand,
   REPO_ROOT,
@@ -23,7 +23,7 @@ function writablePlanShape(): string {
 function commands(ctx: AutoEditCtx): CutCommands {
   return {
     speech: producerCommand(ctx, "edit/speech_cleanup.py", [
-      ctx.manifestPath, "--out", path.join(ctx.dir, "speech_cleanup.json"),
+      ctx.manifestPath, "--out", path.join(authoringWorkDir(ctx), "speech_cleanup.json"),
     ]),
     approval: producerCommand(ctx, "transcript_cut_contract.py", [
       ctx.planPath, ctx.transcriptsDir, ctx.manifestPath, "--previsual",
@@ -38,9 +38,10 @@ export function claudeCutAuthoringBashPatterns(ctx: AutoEditCtx): string[] {
 
 function providerRule(ctx: AutoEditCtx, provider: BrainProvider): string {
   const root = pipelineAuthorityPath(ctx, "scripts/producer");
+  const workDir = authoringWorkDir(ctx);
   return provider === "codex"
-    ? `The repository at ${REPO_ROOT} is READ-ONLY. Use only the pinned commands below from ${root}; write only ${ctx.planPath} and scratch JSON inside ${ctx.dir}.`
-    : `Use only the pinned commands below from ${root}; write only ${ctx.planPath} and scratch JSON inside ${ctx.dir}.`;
+    ? `The repository at ${REPO_ROOT} is READ-ONLY. Use only the pinned commands below from ${root}; write only ${ctx.planPath} and scratch JSON inside ${workDir}.`
+    : `Use only the pinned commands below from ${root}; write only ${ctx.planPath} and scratch JSON inside ${workDir}.`;
 }
 
 /** Validate exact brief data without importing any stage-specific outcome policy. */

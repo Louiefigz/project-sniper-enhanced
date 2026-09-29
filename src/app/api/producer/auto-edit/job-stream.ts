@@ -34,7 +34,8 @@ function send(session: StreamSession, payload: Record<string, unknown>): void {
   if (session.closed) return;
   session.sawError ||= payload.event === "error";
   session.sawOutputs ||= payload.event === "outputs";
-  session.sawWaiting ||= payload.event === "awaiting_cut_approval";
+  session.sawWaiting ||= payload.event === "awaiting_cut_approval"
+    || payload.event === "awaiting_native_author";
   try {
     session.controller?.enqueue(session.encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
   } catch {
@@ -80,6 +81,12 @@ function pump(session: StreamSession): void {
     if (job.status === "awaiting_cut_approval") {
       if (!session.sawWaiting) send(session, { event: "awaiting_cut_approval",
         requestHash: job.cutApprovalRequest!.requestHash, message: job.message, recovered: true });
+      closeSession(session);
+    }
+    if (job.status === "awaiting_native_author") {
+      if (!session.sawWaiting) send(session, { event: "awaiting_native_author",
+        route: job.nativeHandoff!.route, handoff: job.nativeHandoff,
+        message: job.message, recovered: true });
       closeSession(session);
     }
     if (job.status === "cut_accepted") {

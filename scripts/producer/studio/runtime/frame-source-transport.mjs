@@ -17,6 +17,18 @@ export function nativeSourceFrameCount(duration, fps) {
   }
   return Math.max(1, Math.ceil(frames - 1e-7));
 }
+
+/** Select bounded original-local indices after the unchanged original seek and fps clock. */
+export function nativeSourceFrameSelection(indices) {
+  if(indices===undefined)return undefined;
+  if(!Array.isArray(indices)||!indices.length||indices.length>2048
+      ||indices.some((value,index)=>!Number.isSafeInteger(value)||value<0||value>=54000
+        ||(index>0&&value<=indices[index-1]))) {
+    throw new RangeError('Native source selection requires sorted distinct bounded frame indices');
+  }
+  return {count:indices.length,transform:`selected-grid-v1:${indices.join(',')}`,
+    filter:'select='+indices.map(value=>`eq(n\\,${value})`).join('+')};
+}
 const IMAGE_TYPES = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
 const MAX_FRAME_BYTES = 64 * 1024 * 1024;
 const MAX_REGISTERED_FRAMES = 100000;

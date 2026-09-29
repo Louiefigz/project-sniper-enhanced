@@ -97,7 +97,9 @@ def supervise(request: dict, file: Path) -> NativeRun:
     settings = NativeRunConfig(file.parent, root, cli,
         ['/usr/bin/sandbox-exec', '-f', str(sandbox), sys.executable, str(Path(__file__).resolve()), '--worker', str(file)],
         environment, {'output': str(root / 'media-preparation.json'), 'sdkSha256': digest(cli), 'sandboxSha256': digest(sandbox)},
-        additional_pins={**request['pins'], str(file): digest(file)}, deadline=600, success_status=STATUS)
+        additional_pins={**request['pins'], str(file): digest(file)}, deadline=600, success_status=STATUS,
+        lane='audio', capacity_wait_seconds=600,
+        serves=tuple(Path(row['project']) for row in request['compositions']))
     owner = NativeRun('native-review', settings)
     require(owner.execute(), 'review preparation owner failed; preserve the attempt')
     return owner
@@ -177,6 +179,19 @@ def publish(request: dict, owner: NativeRun) -> dict:
     return result
 
 
+def visible_files(studio: Path) -> set[str]:
+    """Editable fork files a user sees; hidden Studio caches and node_modules are not edits."""
+    return {str(file.relative_to(studio)) for file in studio.rglob('*') if file.is_file()
+            and not any(part.startswith('.') or part == 'node_modules' for part in file.relative_to(studio).parts)}
+
+
+def fork_hashes(row: dict) -> dict[str, str | None]:
+    """Current bytes of every prepared or visible fork file (None when missing or linked)."""
+    studio = Path(row['studio'])
+    return {name: digest(studio / name) if (studio / name).is_file() and not (studio / name).is_symlink() else None
+            for name in sorted({*row['forkFiles'], *visible_files(studio)})}
+
+
 def studio_state(row: dict) -> dict:
     """Describe editable divergence without treating it as a new checked export."""
     studio = Path(row['studio']); changed = []
@@ -184,9 +199,7 @@ def studio_state(row: dict) -> dict:
         file = studio / name
         if not file.is_file() or file.is_symlink() or digest(file) != sha:
             changed.append(name)
-    visible = {str(file.relative_to(studio)) for file in studio.rglob('*') if file.is_file()
-               and not any(part.startswith('.') or part == 'node_modules' for part in file.relative_to(studio).parts)}
-    added = sorted(visible - row['forkFiles'].keys())
+    added = sorted(visible_files(studio) - row['forkFiles'].keys())
     return {'status': 'edited-since-preparation' if changed or added else 'prepared-files-unchanged',
             'changedOrMissingFiles': sorted(changed), 'addedFiles': added,
             'exportConsistencyVerified': False, 'newExportRequiredForEdits': bool(changed or added)}
@@ -222,16 +235,22 @@ def read_bundle(directory: Path) -> dict:
 
 
 def open_bundle(directory: Path, identity: str) -> dict:
-    """Open actual managed Studio and report editable state separately from MP4 proof."""
-    from studio.managed_preview import open_preview
+    """Open (unowned) and load actual managed Studio; files it changed on open are reported apart from edits."""
+    from studio.managed_preview import open_view
+    from studio.native_handoff_checks import DEFAULT_LOAD_SECONDS, studio_served
     from studio.native_runtime import install_runtime
     bundle = read_bundle(directory)
     rows = [row for row in bundle['compositions'] if row['id'] == identity]
     require(len(rows) == 1, 'unknown review composition')
     require(str(install_runtime()) == bundle['runtime'], 'current Studio runtime differs from the prepared bundle')
-    preview = open_preview(rows[0]['studio']).to_json()
-    return {**preview, 'surface': 'managed-hyperframes-studio', 'studioState': rows[0]['studioState'],
-            'localVideoStatus': rows[0]['localVideoStatus'], 'browserPlaybackVerified': False}
+    row, before = rows[0], fork_hashes(rows[0])
+    record, launched = open_view(row['studio'], None, Path(row['localVideo']))
+    served, after = studio_served(row['studio'], record, DEFAULT_LOAD_SECONDS), fork_hashes(row)
+    return {**record.to_json(), 'surface': 'managed-hyperframes-studio', 'launched': launched, 'served': served,
+            'studioChangedOnOpen': sorted(name for name in before.keys() | after.keys() if before.get(name) != after.get(name)),
+            'studioStateBeforeOpen': row['studioState'], 'studioState': studio_state(row),
+            'localVideoStatus': row['localVideoStatus'], 'browserPlaybackVerified': False,
+            'reviewState': row.get('reviewState', 'checked'), 'label': row.get('label')}
 
 
 def main() -> None:

@@ -38,6 +38,7 @@ import { initializeAutoEditProducerAuthoritySync } from
   "@/lib/server/producer-auto-edit-genesis";
 import { approvedProducerRevisionReady } from
   "@/lib/server/producer-approved-revision-authority";
+import { dispatchAutoEditCreativeRoute } from "./creative-route-dispatch";
 
 export interface PipelineDependencies {
   exists: typeof existsSync;
@@ -72,6 +73,7 @@ export interface PipelineDependencies {
   approvedRevisionReady: typeof approvedProducerRevisionReady;
   reconciliationReady: typeof assertAutoEditPromotionReadySync;
   initializeAuthority: typeof initializeAutoEditProducerAuthoritySync;
+  dispatchRoute: typeof dispatchAutoEditCreativeRoute;
 }
 
 export const DEFAULT_PIPELINE_DEPENDENCIES: PipelineDependencies = {
@@ -102,4 +104,5 @@ export const DEFAULT_PIPELINE_DEPENDENCIES: PipelineDependencies = {
   approvedRevisionReady: approvedProducerRevisionReady,
   reconciliationReady: assertAutoEditPromotionReadySync,
   initializeAuthority: initializeAutoEditProducerAuthoritySync,
+  dispatchRoute: dispatchAutoEditCreativeRoute,
 };

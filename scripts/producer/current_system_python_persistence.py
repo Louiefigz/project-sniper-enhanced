@@ -210,6 +210,11 @@ class PythonPersistenceModel:
             return self._canonical_mutator(canonical, call)
         if not isinstance(call.func, ast.Attribute):
             return None
+        receiver = call.func.value
+        if isinstance(receiver, ast.Call) and isinstance(receiver.func, ast.Attribute) \
+                and receiver.func.attr in {'read_text', 'read_bytes'} \
+                and self._path_expression(receiver.func.value):
+            return None  # Path reads return text/bytes; replace on that value cannot rename a file.
         leaf = call.func.attr
         root = _root_name(call.func.value)
         if (leaf not in PATH_MUTATORS

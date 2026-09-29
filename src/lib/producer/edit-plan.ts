@@ -1,5 +1,10 @@
 // Editor read-side subset of the Python-owned EDL. All `out*` times are OUTPUT
 // seconds and therefore map 1:1 onto the rendered video's currentTime.
+import type { AudioEnhance, AudioGainEntry, CaptionChapterV1,
+  CaptionCorrectionLedgerV1, CaptionTrackV1, MusicSpec, ReframeSpec } from "./edit-plan-media";
+import type { OrdinaryStyleApplication, OrdinaryVisualPlanApplication } from "./edit-plan-visual";
+export type * from "./edit-plan-media";
+export type * from "./edit-plan-visual";
 
 export interface CutSegment {
   id?: string;
@@ -70,91 +75,6 @@ export interface Transition {
   sfx?: boolean;
 }
 
-/** OUTPUT-time dialogue gain window, applied BASE-side (pre-master). */
-export interface AudioGainEntry {
-  id?: string;
-  outStart: number;
-  outEnd: number;
-  dB: number;
-}
-
-/** Dialogue cleanup preset, BASE-side (catalog: producer_config.AUDIO_ENHANCE). */
-export interface AudioEnhance {
-  preset: "voice" | "voice-rnn" | "voice-strong" | "separate";
-}
-
-/** Music bed, applied at ASSEMBLE time (post-master, audio-only, video copied). */
-export interface MusicSpec {
-  enabled: boolean;
-  path?: string;
-  assetId?: string;
-  duck?: boolean;
-  /** How far under the dialogue the bed sits at rest (dB; smaller = louder music). */
-  gapDb?: number;
-}
-
-/** Normalized [x, y, w, h] rect on the SOURCE frame — each component 0-1. */
-export type CropRect = [number, number, number, number];
-
-export interface SplitCell {
-  crop?: CropRect;
-  /** Top cell only: its share of the output height (0.3-0.7, default 0.5). */
-  frac?: number;
-}
-
-/**
- * plan.reframe — BASE-side layout contract (any change flips the base
- * fingerprint → smart re-render rebuilds the base, ~3 min). `layout` absent =
- * today's behavior (fill). Split renders ONLY for 9:16 shorts.
- */
-export interface ReframeSpec {
-  strategy?: string;
-  layout?: "fill" | "split";
-  /** Fill-mode manual override — wins over the automatic face crop. */
-  crop?: CropRect;
-  split?: { top?: SplitCell; bottom?: SplitCell };
-  /** Reserved for the tracker; only `false` is accepted for v1. */
-  track?: boolean;
-}
-
-export interface CaptionGroupV1 {
-  groupId: string;
-  anchor: { kind: "word-range"; wordIds: string[] };
-  styleId: string;
-  mode: "line" | "karaoke-word" | "karaoke-phrase";
-  placement: "bottom-center" | "lower-third" | "center" | "top-center";
-  language?: string;
-  suppressUnderSceneIds?: string[];
-}
-
-export interface CaptionTrackV1 {
-  schemaVersion: 1;
-  source: "kept-transcript";
-  defaultPolicy: "off" | "line" | "karaoke";
-  groups: CaptionGroupV1[];
-  transcriptCorrectionHash?: string;
-}
-
-export interface CaptionCorrectionV1 {
-  correctionId: string;
-  sourceWordIds: string[];
-  displayTokens: string[];
-  timingPolicy: "proportional-codepoints";
-  reason?: string;
-}
-
-export interface CaptionCorrectionLedgerV1 {
-  schemaVersion: 1;
-  kind: "caption-correction-ledger";
-  corrections: CaptionCorrectionV1[];
-}
-
-export interface CaptionChapterV1 {
-  chapterId: string;
-  title: string;
-  wordId: string;
-}
-
 export type GraphicsDecisionAction = "graphic" | "broll" | "omit";
 
 /** Transcript-bound disposition for one deterministic introSemanticBeats row. */
@@ -186,6 +106,10 @@ export interface EditPlan {
   graphicsTrack?: GraphicEntry[];
   /** Preserved source-derived intro obligations; never inferred from card count. */
   graphicsDecisions?: GraphicsDecision[];
+  /** Evidence-bound creative choices when the selected reference has a style vocabulary. */
+  styleApplication?: OrdinaryStyleApplication;
+  /** Exact shared-plan selection to executable ordinary-plan rows. */
+  visualPlanApplication?: OrdinaryVisualPlanApplication;
   punchIns?: PunchIn[];
   transitions?: Transition[];
   audioGain?: AudioGainEntry[];

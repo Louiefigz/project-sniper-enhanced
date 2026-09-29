@@ -111,3 +111,37 @@ export function terminateTrackedProcessTrees(
   }
   return signaled;
 }
+
+function processTargetAlive(target: number): boolean {
+  try {
+    process.kill(target, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function pause(delayMs: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+/** Fence a provider's detached process group before reading writable output. */
+export async function fenceProcessTree(
+  child: ChildProcess,
+  timeoutMs = 2_000,
+): Promise<void> {
+  if (!child.pid) return;
+  const target = processTreeTarget(child.pid, process.platform);
+  if (!processTargetAlive(target)) return;
+  terminateProcessTree(child, 100);
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (!processTargetAlive(target)) return;
+    await pause(25);
+  }
+  try { process.kill(target, "SIGKILL"); } catch { /* already stopped */ }
+  await pause(25);
+  if (processTargetAlive(target)) {
+    throw new Error("provider process tree survived the authoring fence");
+  }
+}

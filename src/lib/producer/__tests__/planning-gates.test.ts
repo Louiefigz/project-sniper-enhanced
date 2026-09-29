@@ -103,6 +103,40 @@ assert.deepEqual(baseCommands[7].args, [
 ], "geometry_feasibility writes geometry_predictions.json into the producer dir");
 assert.match(baseCommands[7].script, /planner[/\\]geometry_feasibility\.py$/);
 
+const visualInput: GateBundleInput = {
+  ...baseInput,
+  visualPlanRequired: true,
+  visualPlan: {
+    path: "/project/producer/VISUAL-PLAN.json",
+    byteHash: "b".repeat(64),
+    visualPlanSha256: "c".repeat(64),
+  },
+  visualPlanProject: {
+    mode: "long", aspect: "16:9", durationFrames: 900,
+    fps: { numerator: 30, denominator: 1 },
+    intentSha256: "d".repeat(64), acceptedProgramSha256: "e".repeat(64),
+    transcriptSha256: "f".repeat(64),
+  },
+  visualPlanCatalogPinSha256: "1".repeat(64),
+  visualPlanControllerAuthoritySha256: "2".repeat(64),
+};
+const visualCommands = planningGateCommands(visualInput);
+assert.equal(visualCommands[2].gate, "visual_plan_application");
+assert.match(visualCommands[2].script, /planner[/\\]ordinary_visual_plan_lint\.py$/);
+assert.deepEqual(visualCommands[2].args, [
+  baseInput.planPath, visualInput.visualPlan!.path,
+  "--expected-byte-hash", visualInput.visualPlan!.byteHash,
+  "--expected-visual-plan-sha256", visualInput.visualPlan!.visualPlanSha256,
+  "--expected-project-json", JSON.stringify(visualInput.visualPlanProject),
+  "--expected-catalog-pin-sha256", visualInput.visualPlanCatalogPinSha256,
+  "--expected-controller-authority-sha256",
+  visualInput.visualPlanControllerAuthoritySha256,
+]);
+assert.throws(
+  () => planningGateCommands({ ...baseInput, visualPlanRequired: true }),
+  /require allocated VISUAL-PLAN\.json/,
+);
+
 const referenceInput: GateBundleInput = {
   ...baseInput,
   reference: {
@@ -119,6 +153,12 @@ const referenceCommand = planningGateCommands(referenceInput).at(-1)!;
 assert.equal(referenceCommand.gate, "reference_lint");
 assert.deepEqual(referenceCommand.args.slice(-2), ["--strategy", "mimic"]);
 assert.ok(!referenceCommand.args.includes("--target-style"));
+const vocabularyPath = "/references/restrained/reference_style_vocabulary.json";
+const vocabularyCommand = planningGateCommands({
+  ...referenceInput,
+  reference: { ...referenceInput.reference!, vocabularyPath },
+}).at(-1)!;
+assert.deepEqual(vocabularyCommand.args.slice(-2), ["--vocabulary", vocabularyPath]);
 assert.throws(() => planningGateCommands({ ...referenceInput, reference: {
   ...referenceInput.reference!, intent: {
     ...referenceInput.reference!.intent, strategy: "extend", targetStyle: "restrained",

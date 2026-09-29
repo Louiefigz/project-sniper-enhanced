@@ -7,12 +7,26 @@ import {assertNativePreviewOwner} from './runtime/native-export-guard.mjs';
 import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,captureNativeFrame,
   nativeCaptureBatches,nativeCaptureHash} from './native_short_capture_context.mjs';
 import {nativeBatchEncoderArgs,encodeNativeBatchPicture} from './native_short_batched_render.mjs';
+import {prepareSparseLongContext} from './native_segments/sparse_sources.mjs';
+
+/** Validate all retained ranges before any source decode or frame inventory allocation. */
+function previewFrameInventory(context,windows) {
+  assert.ok(Array.isArray(windows)&&windows.length>0&&windows.length<=768,'Invalid preview window count');
+  for(const {startFrame,endFrame} of windows)assert.ok(Number.isSafeInteger(startFrame)&&Number.isSafeInteger(endFrame)
+    &&startFrame>=0&&endFrame<=context.plan.canvas.totalFrames&&endFrame>startFrame
+    &&(endFrame-startFrame)/context.rate<=12,'Motion preview window exceeds its explicit clock or duration');
+  const count=windows.reduce((sum,window)=>sum+window.endFrame-window.startFrame,0);
+  assert.ok(count<=10000,'Preview frame inventory exceeds the bounded source preparation request');
+  return windows.flatMap(window=>Array.from({length:window.endFrame-window.startFrame},(_,offset)=>window.startFrame+offset));
+}
 
 /** The original composition, clock, source lookup and full-quality encoder remain unchanged. */
 export async function renderMotionWindows(request, windows, dependencies={}) {
   const work=path.join(request.output,`motion-preview-capture-${windows[0]?.startFrame??'empty'}`);
   const context=await createNativeCaptureContext(request,work,dependencies.sdk);
-  await prepareNativeCaptureContext(context);
+  const required=previewFrameInventory(context,windows);
+  if(request.adapter==='native-long')await prepareSparseLongContext(context,required);
+  else await prepareNativeCaptureContext(context);
   const results=[];
   for(const [index,window] of windows.entries()){
     const {startFrame,endFrame}=window;

@@ -18,6 +18,12 @@ if TYPE_CHECKING:
 HERE = Path(__file__).resolve().parent
 REQUEST_ENV = 'SNIPER_NATIVE_EXPORT_REQUEST'
 OWNER_ENV = 'SNIPER_NATIVE_EXPORT_OWNER'
+PID_ENV = 'SNIPER_NATIVE_EXPORT_PID'
+AUDIO_REQUEST_ENV = 'SNIPER_NATIVE_AUDIO_REQUEST'
+BINDING_ENV = (REQUEST_ENV, AUDIO_REQUEST_ENV, OWNER_ENV, PID_ENV)
+AUDIO_WORKER = HERE / 'native_audio_stage.py'
+AUDIO_SCOPE = 'native-short-audio-stage-request'
+SANDBOX_PREFIX = ('/usr/bin/sandbox-exec', '-f')
 
 
 def native_project(project: Path) -> bool:
@@ -53,14 +59,27 @@ def validate_export_launch(settings: NativeRunConfig) -> dict | None:
             and Path(request['runtime']) / 'dist/cli.js' == settings.cli,
             'Native export request does not bind this project, output and runtime')
     phase, worker = admitted_worker(settings, request, file)
+    from studio.native_preview_sections import section_phase
+    section = section_phase(phase)
+    audio_package = adapter == 'native-short' and section and section[0] == 'package'
+    require(settings.lane == ('audio' if audio_package else 'heavy'), 'Native worker resource class differs')
+    if adapter == 'native-short':
+        from studio.native_short_draft import admit_draft_launch
+        admit_draft_launch(request, phase)
+    if adapter == 'native-long':
+        from studio.native_long_chunks import require_chunk_request
+        require_chunk_request(request)
+    from studio.native_long_scope import require_scope_request
+    require_scope_request(request, phase)
     from graphics.visual_source_project import admit_project_sources
     admit_project_sources(settings.project)
     require(settings.additional_pins.get(str(file)) == digest(file)
             and settings.additional_pins.get(str(worker)) == digest(worker), 'Native export worker/request is unpinned')
-    if adapter == 'native-long' and phase in {'picture', 'render'}:
+    final_picture = phase in {'picture', 'render'} or phase.startswith('segment-picture-')
+    if adapter == 'native-long' and final_picture:
         require(bound_json(settings.root / 'sample-qc/result.json').get('passed') is True,
                 'Long picture requires passed encoded seam samples')
-    if phase in {'picture', 'render'} and not request.get('verifyStage'):
+    if final_picture and not request.get('verifyStage'):
         from studio.native_motion_previews import require_motion_previews
         require_motion_previews(request)
     return request
@@ -77,14 +96,65 @@ def admitted_worker(settings: NativeRunConfig, request: dict, file: Path) -> tup
     child = [interpreter, str(worker), str(file), *([] if short_capture else [phase])]
     outputs = {'capture': 'native-frames.json', 'preview': 'motion-previews.json',
                'picture': 'picture.mp4', 'render': 'review.mp4', 'verify': 'checks.json'}
+    if not long:
+        from studio.native_short_draft import LAUNCH_OUTPUTS
+        outputs.update(LAUNCH_OUTPUTS)
     from studio.native_preview_sections import section_phase, section_output
     if section_phase(phase):
         outputs[phase] = section_output(phase)
+    from studio.native_segments.owners import segment_phase, segment_output
+    if segment_phase(phase) is not None:
+        require(long and request.get('revision', {}).get('mode') == 'initial-long',
+                'segment workers require an admitted initial Long section plan')
+        outputs[phase] = segment_output(phase)
+    from studio.native_segments.review_scopes import package_phase, phase_scope
+    if package_phase(phase):
+        require(long and request.get('productionBudget', {}).get('familyInvocation'),
+                'review package requires its original Long section family')
+        phase_scope(request, phase)
+        outputs[phase] = f'{phase}.json'
     require(phase in outputs and (long or phase != 'picture')
             and settings.command == ['/usr/bin/sandbox-exec', '-f', str(settings.sandbox), *child]
             and settings.admission['output'] == str(settings.root / outputs[phase]),
             'Native work must run through the shared export worker, not a custom wrapper')
     return phase, worker
+
+
+def validate_audio_launch(settings: NativeRunConfig) -> Path | None:
+    """Close the audio-stage worker's command, request, output, lane and pins before admission.
+
+    Returns None for owners that do not run the audio worker; any launch naming it must
+    match the one command ``native_audio_stage.owner_config`` builds for its own request.
+    """
+    if not any(Path(part).name == AUDIO_WORKER.name for part in settings.command):
+        return None
+    from studio.native_audio_seal import REQUEST_NAME, RESULT_NAME
+    file = settings.root / REQUEST_NAME
+    require(file.is_file() and not file.is_symlink(), 'Native audio worker requires its stage-request.json')
+    request = bound_json(file)
+    require(request.get('scope') == AUDIO_SCOPE and request.get('stageRoot') == str(settings.root)
+            and request.get('project') == str(settings.project) and request.get('leaseClass') == settings.lane,
+            'Native audio request does not bind this stage, project and pool class')
+    require(settings.command == [*SANDBOX_PREFIX, str(settings.sandbox), sys.executable, str(AUDIO_WORKER),
+                                 'worker', str(file)]
+            and settings.admission['output'] == str(settings.root / RESULT_NAME),
+            'Native audio work must run through the shared audio-stage worker, not a custom wrapper')
+    pins = {**request['pins'], str(file): digest(file)}
+    require(all(settings.additional_pins.get(path) == value for path, value in pins.items()),
+            'Native audio worker/request is unpinned')
+    return file
+
+
+def launch_binding(settings: NativeRunConfig) -> tuple[str, Path] | None:
+    """Validate one native launch and name the request variable its child must bind.
+
+    Exports bind ``export-request.json``; the audio stage binds its closed audio request.
+    Supporting utilities (review bundles, cache aliases) bind neither.
+    """
+    if validate_export_launch(settings) is not None:
+        return REQUEST_ENV, settings.root / 'export-request.json'
+    audio = validate_audio_launch(settings)
+    return None if audio is None else (AUDIO_REQUEST_ENV, audio)
 
 
 def require_owned_worker(request: dict) -> None:
@@ -106,20 +176,18 @@ def active_owner_snapshot(file: Path) -> dict:
         try:
             return bound_json(file)
         except RuntimeError as error:
-            if attempt == 2 or 'artifact changed during read' not in str(error):
-                raise
+            failure = error
+        if attempt == 2 or 'artifact changed during read' not in str(failure):
+            raise failure
     raise RuntimeError('Native owner snapshot unavailable')
 
 
 def worker_environment(settings: NativeRunConfig, owner_file: Path) -> dict[str, str]:
-    """Bind SDK render admission to the live owner and its exact immutable request."""
-    environment = dict(settings.environment)
-    environment.pop(REQUEST_ENV, None)
-    environment.pop(OWNER_ENV, None)
-    environment.pop('SNIPER_NATIVE_EXPORT_PID', None)
-    if validate_export_launch(settings) is not None:
-        environment.update({REQUEST_ENV: str(settings.root / 'export-request.json'),
-                            OWNER_ENV: str(owner_file), 'SNIPER_NATIVE_EXPORT_PID': str(os.getpid())})
+    """Bind the child to the live owner and its exact immutable request; never inherit a binding."""
+    environment = {key: value for key, value in settings.environment.items() if key not in BINDING_ENV}
+    binding = launch_binding(settings)
+    if binding is not None:
+        environment.update({binding[0]: str(binding[1]), OWNER_ENV: str(owner_file), PID_ENV: str(os.getpid())})
     return environment
 
 
@@ -129,6 +197,14 @@ def main() -> None:
         import json
         from graphics.visual_source_project import describe_project
         print(json.dumps(describe_project(Path(sys.argv[2]).resolve(strict=True)), indent=2))
+        return
+    if len(sys.argv) == 5 and sys.argv[1] == 'section-review-input':
+        import json
+        from studio.native_long_scope import scope_for_project
+        from studio.native_long_prebuild import prebuild_snapshot
+        project = Path(sys.argv[2]).resolve(strict=True)
+        scope = scope_for_project(project, Path(sys.argv[3]).resolve(strict=True), sys.argv[4])
+        print(json.dumps({**prebuild_snapshot(project, scope), 'sectionScope': scope}, indent=2))
         return
     if len(sys.argv) == 3 and sys.argv[1] == 'review-input':
         import json

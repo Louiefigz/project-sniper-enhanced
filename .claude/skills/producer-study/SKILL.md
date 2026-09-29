@@ -35,6 +35,15 @@ or animation. If a requested build needs a missing capability, follow Phase 4
 for that work. Compile no verified style pack from a sampled editorial study;
 the reference-editor qualification requirements remain authoritative for packs.
 
+When the operator wants reusable options that preserve a selected reference's
+language without repeating one formula, follow
+[Reference style vocabulary](../../../docs/producer/REFERENCE_STYLE_VOCABULARY.md).
+After visual and catalog-source inspection, author stable traits, flexible
+traits, signature devices, and purpose-based families with honest inspected
+contenders. Do not treat raw search hits as endorsed options or pad a family to
+three or four. Prepare/check `reference_style_vocabulary.json` with its CLI;
+this planning artifact is separate from exact-shot maps and release-ready packs.
+
 For reusable planning evidence, preserve actual creator full frames and sampled
 before/after sequences beside their detailed descriptions. Use
 [the Shorts reference library](../../../resources/references/README.md)

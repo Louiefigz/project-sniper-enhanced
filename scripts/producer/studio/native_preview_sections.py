@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 from cut_preview_io import bound_json, write_new
+from studio.native_long_scope import request_preview_windows
 from studio.native_runtime import digest
 from studio.native_review_regions import region_packet, preview_windows
 from studio.native_preview_history import prior_preview
@@ -32,7 +33,7 @@ def section_windows(request: dict) -> tuple[dict, list[dict]]:
     """Derive the current exact preview schedule through the existing region planner."""
     packet = region_packet(request)
     prior = prior_preview(Path(request['previewFrom']), request['project']) if request.get('previewFrom') else None
-    windows = preview_windows(packet, prior['packet'] if prior else None)
+    windows = request_preview_windows(request, packet, prior['packet'] if prior else None)
     require(len(windows) <= 768, 'Preview schedule exceeds section bound')
     return packet, windows
 

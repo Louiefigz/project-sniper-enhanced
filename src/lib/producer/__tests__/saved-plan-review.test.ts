@@ -3,7 +3,14 @@ import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from "node:
 import os from "node:os";
 import path from "node:path";
 import { prepareSavedPlanReview } from "../../../app/api/producer/auto-edit/saved-plan-request";
-import { readProjectJson } from "../../../app/api/_lib/workspace";
+import {
+  projectVisualPlanPolicyVersion,
+  projectVisualPlanPolicyVersionIfPresent,
+  readProjectJson,
+} from "../../../app/api/_lib/workspace";
+import { planningGateInput } from
+  "../../../app/api/producer/auto-edit/planning-loop-review";
+import type { AutoEditJob } from "../../server/auto-edit-job-store";
 import {
   autoEditJobPath,
   failAutoEditJob,
@@ -22,6 +29,7 @@ mkdirSync(source);
 writeFileSync(path.join(root, "project.json"), JSON.stringify({
   origin: "raw",
   history: [],
+  visualPlanPolicy: { schemaVersion: 1, ordinaryAutoEdit: "required" },
   intent: {
     mode: "longform",
     scope: "produced",
@@ -40,6 +48,16 @@ writeFileSync(planPath, JSON.stringify({
 }));
 
 try {
+  const unmarked = path.join(root, "unmarked");
+  mkdirSync(unmarked);
+  writeFileSync(path.join(unmarked, "project.json"), JSON.stringify({
+    origin: "raw", history: [],
+  }));
+  assert.throws(
+    () => projectVisualPlanPolicyVersion(unmarked),
+    /lacks visual-plan policy/,
+  );
+  assert.equal(projectVisualPlanPolicyVersionIfPresent(unmarked), undefined);
   const prepared = prepareSavedPlanReview(producer);
   assert.equal(prepared.resume, false);
   assert.equal(prepared.bootstrapPlanHash, fileSha256(planPath));
@@ -79,6 +97,26 @@ try {
   assert.equal(
     prepareSavedPlanReview(producer, "mp4-only").ctx.deliveryPolicy,
     "mp4-only",
+  );
+
+  writeFileSync(path.join(root, "project.json"), JSON.stringify({
+    ...readProjectJson(root),
+    visualPlanPolicy: { schemaVersion: 1, ordinaryAutoEdit: "required" },
+  }));
+  const marked = prepareSavedPlanReview(producer);
+  marked.ctx.templateUsage = {
+    schemaVersion: 1,
+    path: path.join(producer, "template-usage.json"),
+    digest: "a".repeat(64),
+  };
+  assert.equal(marked.ctx.visualPlanRequiredVersion, 1);
+  assert.throws(
+    () => planningGateInput({
+      ctx: marked.ctx,
+      reviewSavedPlan: true,
+    } as AutoEditJob),
+    /required VISUAL-PLAN\.json is missing/,
+    "saved-plan review mode cannot waive a new project's visual-plan contract",
   );
 
   unlinkSync(planPath);

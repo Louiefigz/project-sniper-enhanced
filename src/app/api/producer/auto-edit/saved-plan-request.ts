@@ -4,7 +4,11 @@ import { resolveReferenceStudy } from "../../_lib/reference-library";
 import { validStoredReferenceDecision } from "../../_lib/reference-decision";
 import type { ReferenceDecision } from "../../_lib/reference-types";
 import type { ReferenceIntent } from "@/lib/producer/intent-presets";
-import { fileSha256 } from "@/lib/server/auto-edit-job-store";
+import {
+  autoEditJobPath,
+  fileSha256,
+  readAutoEditJob,
+} from "@/lib/server/auto-edit-job-store";
 import { resolveManifest } from "./chain";
 import {
   resolvePlanRefitDecision,
@@ -25,6 +29,14 @@ import {
   DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
   type AutoEditDeliveryPolicy,
 } from "@/lib/producer/auto-edit-delivery-policy";
+import {
+  projectVisualPlanBinding,
+  visualPlanValidationAuthority,
+} from "@/lib/server/visual-plan-binding";
+import {
+  findProjectRoot,
+  projectVisualPlanPolicyVersionIfPresent,
+} from "../../_lib/workspace";
 
 function readReferenceDecision(study: ResolvedReferenceStudy): ReferenceDecision {
   const decisionPath = path.join(path.dirname(study.deepStudyPath), "reference.json");
@@ -80,12 +92,26 @@ export function resolveAutoEditContext(
   intent: AutoEditIntent | undefined,
   deliveryPolicy: AutoEditDeliveryPolicy = DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
 ): AutoEditCtx {
+  const savedCtx = readAutoEditJob(autoEditJobPath(dir))?.ctx;
+  const savedPipeline = savedCtx?.visualPlanPipeline ?? savedCtx?.pipeline;
+  const authority = visualPlanValidationAuthority({
+    dir, visualPlanPipeline: savedPipeline,
+  });
+  const visualPlan = projectVisualPlanBinding(
+    dir, authority, savedCtx?.visualPlan?.catalogReceiptAuthority,
+  );
+  const root = findProjectRoot(dir);
+  const visualPlanRequiredVersion = root
+    ? projectVisualPlanPolicyVersionIfPresent(root) : undefined;
   return {
     dir,
     scope,
     deliveryPolicy,
     intent,
     referenceStudy: resolveReferenceContext(intent),
+    ...(visualPlan ? { visualPlan } : {}),
+    ...(visualPlan && savedPipeline ? { visualPlanPipeline: savedPipeline } : {}),
+    ...(visualPlanRequiredVersion ? { visualPlanRequiredVersion } : {}),
     planPath: path.join(dir, "edit_plan.json"),
     ...resolveManifest(dir),
   };

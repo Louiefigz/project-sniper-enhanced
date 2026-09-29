@@ -10,6 +10,7 @@ from studio.native_runtime import digest
 from studio.native_short_picture_reuse import picture_reuse_pins
 from studio.native_short_resume import prepared_audio_reuse, prepare_reverification, render_stage_for_attempt
 from studio.native_stage_evidence import require, verify_pins, verify_supervised_inputs
+from studio.native_visual_plan import same_audio_reuse_identity
 
 TERMINAL = {'failed', 'native-short-rendered-awaiting-qc', 'native-short-checked-for-review'}
 POLICY = ('runtime', 'tools', 'cache', 'captureMode', 'sourceCacheMode', 'audioProfile', 'referenceMap')
@@ -46,25 +47,61 @@ def matching_attempt(current: dict, attempt: Path) -> tuple[int, str] | None:
     original = bound_json(file)
     if original.get('adapter', 'native-short') != 'native-short' or original.get('project') != current['project']:
         return None
+    if original.get('reviewDraft'):
+        return None  # Review drafts are never final-media donors; only --promote-draft reuses their bytes.
     require(original.get('output') == str(attempt), 'Short recovery attempt moved; preserve its original location')
     inputs = original.get('renderInputs', original['pins'])
-    if any(inputs.get(file) != sha for file, sha in current['pins'].items()):
+    if not matching_implementation(current, inputs):
+        return None
+    exact_inputs = not any(inputs.get(file) != sha for file, sha in current['pins'].items())
+    if not exact_inputs and not same_audio_reuse_identity(current, original):
         return None
     if any(original.get(key) != current.get(key) for key in POLICY):
         return None
+    if original.get('previewOnly') or original.get('promoteDraft'):
+        return None  # Preview-only work (even while it runs) has no final-media owner: capture and section
+        # seals are adopted by their own discovery; a promotion copies a draft's bytes and has no render.
     delivery_file = attempt / 'delivery.json'
     require(delivery_file.is_file(), 'Compatible Short attempt is active or interrupted; reconcile its owner first')
     delivery = bound_json(delivery_file)
-    if original.get('previewOnly') and delivery.get('status') == 'native-motion-previews-complete':
-        return None  # Preview discovery owns these; they have no final-media owner.
     require(delivery.get('status') in TERMINAL and isinstance(delivery.get('completedAt'), str)
             and bool(delivery['completedAt'].strip()), 'Compatible Short attempt has no terminal delivery state')
-    if (attempt / 'render-stage.json').exists() or original.get('verifyStage'):
+    if exact_inputs and ((attempt / 'render-stage.json').exists() or original.get('verifyStage')):
         captured = (attempt / 'capture-stage.json').exists() or original.get('captureStage')
         return (4 if captured else 3), delivery['completedAt']
-    if retained_picture(original, attempt):
+    if exact_inputs and retained_picture(original, attempt):
         return 2, delivery['completedAt']
-    return (1, delivery['completedAt']) if retained_audio(attempt) else None
+    return (1, delivery['completedAt']) if retained_audio(attempt) and render_child_started(attempt) else None
+
+
+def render_child_started(attempt: Path) -> bool:
+    """A stopped preflight has no renderer-owned partial work to recover.
+
+    The render owner writes its receipt before launching anything, so a missing receipt means
+    the render phase never began (for example, a final that failed in its preview phase),
+    unless the delivery records a render stage: then the missing proof fails in the reader.
+    """
+    file = attempt / 'pipeline.render.json'
+    if not file.is_file():
+        stages = bound_json(attempt / 'delivery.json').get('stages') or []
+        return any(isinstance(row, dict) and row.get('phase') == 'pipeline' for row in stages)
+    owner = bound_json(file)
+    never_launched = (owner.get('status') == 'failed' and owner.get('pid') is None
+                     and owner.get('exitCode') is None
+                     and owner.get('cleanup') == {'childNeverLaunched': True, 'verified': True})
+    return not never_launched
+
+
+def matching_implementation(current: dict, previous: dict[str, str]) -> bool:
+    """Audio identity cannot authorize reuse across changed executable dependencies."""
+    roots = (STUDIO.parent, STUDIO.parents[2] / 'src', Path(current['runtime']))
+    tools = {*current['tools'].values(), str(Path(sys.executable).resolve())}
+    present = current['pins']
+    for filename in previous.keys() | present.keys():
+        executable = filename in tools or any(Path(filename).is_relative_to(root) for root in roots)
+        if executable and previous.get(filename) != present.get(filename):
+            return False
+    return True
 
 
 def partial_owner_pins(original: dict, attempt: Path) -> dict[str, str]:

@@ -7,16 +7,17 @@ import {
 } from "../../_lib/ai-provider";
 import {
   shouldDetachProcessGroup,
+  fenceProcessTree,
   terminateProcessTree,
   trackProcessTree,
 } from "../../_lib/child-process-lifecycle";
 import { derror, dlog } from "@/lib/debug";
 import { admitSubscriptionInvocation } from "../../_lib/subscription-invocation";
-import { REPO_ROOT } from "./authoring-prompt";
+import { executablePipelineRoot } from "@/lib/server/auto-edit-pipeline-authority";
 import { AUTHORING_OUTPUT_MAX_BYTES, authoringPermissionDenial, authoringStreamSessionId,
   authoringTextState, failAuthoringProtocol, observeAuthoringEvent, type AuthoringBlock, type AuthoringTextState } from "./authoring-stream-contract";
-import type { AuthoringSessionMode, AuthoringStage } from "./authoring";
-import { type AutoEditCtx, type Send, lineSplitter, tailCollector } from "./stream";
+import type { AuthoringPassStage, AuthoringSessionMode } from "./authoring";
+import { authoringWorkDir, type AutoEditCtx, type Send, lineSplitter, tailCollector } from "./stream";
 
 const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
 // Opus 4.8 at xhigh effort reasons for a long time on visual authoring ("all
@@ -56,7 +57,7 @@ export interface AuthoringResult {
 interface ProcessInput {
   ctx: AutoEditCtx;
   send: Send;
-  stage: AuthoringStage;
+  stage: AuthoringPassStage;
   started: number;
   timeoutMs: number;
 }
@@ -183,14 +184,15 @@ export function bindClaudeAuthoringProcess(
 export async function runClaudeAuthoringProcess(
   ctx: AutoEditCtx,
   send: Send,
-  stage: AuthoringStage,
+  stage: AuthoringPassStage,
   args: string[],
 ): Promise<AuthoringResult> {
   const env = claudeProcessEnv();
-  if (ctx.pipeline) env.SNIPER_PIPELINE_ROOT = ctx.pipeline.snapshotRoot;
+  const pipeline = ctx.visualPlanPipeline ?? ctx.pipeline;
+  if (pipeline) env.SNIPER_PIPELINE_ROOT = executablePipelineRoot(ctx.dir, pipeline);
   const started = performance.now();
   const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
-    args, cwd: REPO_ROOT, env, timeoutMs: AUTHORING_TIMEOUT_MS });
+    args, cwd: authoringWorkDir(ctx), env, timeoutMs: AUTHORING_TIMEOUT_MS });
   const model = claudeSettings().model;
   dlog("producer:auto-edit", "spawn claude (authoring)", { dir: ctx.dir, scope: ctx.scope, model });
   send({ event: "authoring_model_selected", provider: "legacy", model });
@@ -198,7 +200,10 @@ export async function runClaudeAuthoringProcess(
   const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
     cwd: admitted.cwd, env: admitted.env, detached: shouldDetachProcessGroup(),
   }));
-  return new Promise((resolve) => bindClaudeAuthoringProcess(proc, { ctx, send, stage, started, timeoutMs }, resolve));
+  const result = await new Promise<AuthoringResult>((resolve) =>
+    bindClaudeAuthoringProcess(proc, { ctx, send, stage, started, timeoutMs }, resolve));
+  await fenceProcessTree(proc);
+  return result;
 }
 
 export type { AuthoringSessionMode };

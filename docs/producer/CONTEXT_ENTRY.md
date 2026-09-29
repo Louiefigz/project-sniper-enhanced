@@ -126,3 +126,10 @@ Verification completed:
   instruction/skill lookup; the bounded candidate-discovery addition also
   passed a separate re-review. These reviews concern this context tool, not the
   video project's production, playback or listening approval.
+
+## Approved Shorts
+
+Use [authorized Shorts production](NATIVE_SHORTS_DEADLINE_BATCH.md) after approval.
+`context.py --role` resolves exact owner/critic packets; evidence and review submission
+flags write explicit versioned artifacts and, for bound batches, authority events.
+The default context inventory above remains read-only.

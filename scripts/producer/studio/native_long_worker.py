@@ -58,10 +58,14 @@ def render(request: dict, plan: dict) -> dict:
     print('SNIPER_PROGRESS delivery 1', flush=True)
     with stage_span(str(root), 'native_color_metadata'):
         color = native_srgb_delivery(root, audio)
+    encodes = 0 if request.get('pictureStage') else 1
+    if request.get('revision', {}).get('mode') == 'initial-long':
+        from studio.native_segments.assemble import window_encodes
+        encodes = window_encodes(request)
     return {'status': 'media-complete-awaiting-qc', 'output': color['output'], 'sha256': color['sha256'],
             'audioReceipt': str(root / 'audio/receipt.json'), 'audioReviewRequired': audio['audioReviewRequired'],
             'audioQuality': audio['audioQuality'], 'color': color, 'humanApproved': False,
-            'additionalPictureEncodes': 0 if request.get('pictureStage') else 1,
+            'additionalPictureEncodes': encodes,
             'sourceCurrent': True, 'providerCalls': 0}
 
 
@@ -69,10 +73,20 @@ def execute(request: dict, phase: str) -> None:
     """Retain the shared supervisor, immutable request and final verification authority."""
     os.environ['SNIPER_NODE_PATH'] = request['tools']['node']
     os.environ['FFMPEG_PROCESS_TIMEOUT_MS'] = str(source_process_timeout_ms(request, phase))
-    plan = read_long_plan(Path(request['project']))
+    from studio.native_long_scope import require_scope_request
+    require_scope_request(request, phase)
+    plan = read_long_plan(Path(request['project']), section_scope=request.get('sectionScope'))
     verify_files(request)
     if phase == 'capture':
         capture(request, plan)
+    elif phase.startswith('segment-picture-'):
+        from studio.native_motion_previews import require_motion_previews
+        from studio.native_segments.worker import execute_segment
+        require_motion_previews(request)
+        execute_segment(request, phase)
+    elif phase.startswith('review-package-'):
+        from studio.native_segments.review_media import execute_package
+        execute_package(request, phase)
     elif phase.startswith(('preview-picture-', 'preview-package-')):
         from studio.native_preview_sections import execute_section
         execute_section(request, plan, phase)
@@ -80,13 +94,7 @@ def execute(request: dict, phase: str) -> None:
         from studio.native_motion_previews import render_previews
         render_previews(request, plan)
     elif phase == 'picture':
-        from studio.native_motion_previews import require_motion_previews
-        require_motion_previews(request)
-        if bound_json(Path(request['output']) / 'sample-qc/result.json').get('passed') is not True:
-            raise RuntimeError('Long picture requires passed encoded seam samples')
-        with stage_span(request['output'], 'native_picture_render'):
-            subprocess.run([*render_command(request, plan['canvas']), '--sdr'], check=True,
-                           timeout=request['budget']['pictureSeconds'])
+        picture(request, plan)
     elif phase == 'render':
         write_new(Path(request['output']) / 'render-result.json', render(request, plan))
     elif phase == 'verify':
@@ -95,6 +103,21 @@ def execute(request: dict, phase: str) -> None:
         raise ValueError('Unknown long export phase')
     verify_files(request)
     print(f'SNIPER_PROGRESS {phase} 1', flush=True)
+
+
+def picture(request: dict, plan: dict) -> None:
+    """Preserve the existing checked final picture lane without nesting phase dispatch."""
+    from studio.native_motion_previews import require_motion_previews
+    require_motion_previews(request)
+    if bound_json(Path(request['output']) / 'sample-qc/result.json').get('passed') is not True:
+        raise RuntimeError('Long picture requires passed encoded seam samples')
+    with stage_span(request['output'], 'native_picture_render'):
+        if request.get('revision', {}).get('mode') == 'initial-long':
+            from studio.native_segments.assemble import revision_picture
+            revision_picture(request)
+            return
+        subprocess.run([*render_command(request, plan['canvas']), '--sdr'], check=True,
+                       timeout=request['budget']['pictureSeconds'])
 
 
 def source_process_timeout_ms(request: dict, phase: str) -> int:

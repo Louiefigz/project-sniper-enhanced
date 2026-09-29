@@ -4,8 +4,10 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  linkSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import os from "node:os";
@@ -13,6 +15,7 @@ import path from "node:path";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import { autoEditLogPath } from "../../server/auto-edit-log";
 import { autoEditJobPath, readAutoEditJob, startAutoEditJob } from "../../server/auto-edit-job-store";
+import { captureAutoEditPipeline } from "../../server/auto-edit-pipeline-authority";
 import {
   detachedWorkerInvocation,
   launchDetachedAutoEditWorker,
@@ -48,10 +51,10 @@ function fakeSpawner(capture: Capture) {
 
 async function testDetachedLaunch(tmp: string, capture: Capture): Promise<void> {
   const base = fixture(path.join(tmp, "launch"));
-  const ctx: AutoEditCtx = { ...base, pipeline: {
-    schemaVersion: 1, runId: "launch-token", digest: "a".repeat(64),
-    snapshotRoot: "/snapshot/run/files", lockPath: "/snapshot/run/pipeline-lock.json", files: [],
-  } };
+  const ctx: AutoEditCtx = {
+    ...base,
+    pipeline: captureAutoEditPipeline(base, "launch-token"),
+  };
   const job = startAutoEditJob({ ctx, token: "launch-token", snapshots: 0 });
   beginProducerRunWithToken({
     dir: ctx.dir,
@@ -62,7 +65,7 @@ async function testDetachedLaunch(tmp: string, capture: Capture): Promise<void> 
   });
   const fakeSpawn = fakeSpawner(capture);
   const pid = await launchDetachedAutoEditWorker(autoEditJobPath(ctx.dir), {
-    repoRoot: "/repo",
+    repoRoot: process.cwd(),
     nodePath: "/node",
     spawnWorker: fakeSpawn,
   });
@@ -74,13 +77,13 @@ async function testDetachedLaunch(tmp: string, capture: Capture): Promise<void> 
   assert.deepEqual(call.args, [
     "--import",
     "tsx",
-    "/repo/src/app/api/producer/auto-edit/worker.ts",
+    path.join(process.cwd(), "src/app/api/producer/auto-edit/worker.ts"),
     autoEditJobPath(ctx.dir),
     "launch-token",
   ]);
   assert.equal(call.options.detached, true);
-  assert.equal(call.options.env?.SNIPER_PIPELINE_ROOT, "/snapshot/run/files");
-  assert.equal(call.options.env?.SNIPER_RUNTIME_REPO_ROOT, "/repo");
+  assert.equal(call.options.env?.SNIPER_PIPELINE_ROOT, process.cwd());
+  assert.equal(call.options.env?.SNIPER_RUNTIME_REPO_ROOT, process.cwd());
   assert.equal(stdio[0], "ignore");
   assert.equal(typeof stdio[1], "number");
   assert.equal(readAutoEditJob(autoEditJobPath(ctx.dir))?.workerPid, 424_242);
@@ -98,7 +101,11 @@ async function testDetachedLaunch(tmp: string, capture: Capture): Promise<void> 
 }
 
 async function testLogSymlink(tmp: string, capture: Capture): Promise<void> {
-  const symlinkCtx = fixture(path.join(tmp, "log-symlink"));
+  const base = fixture(path.join(tmp, "log-symlink"));
+  const symlinkCtx = {
+    ...base,
+    pipeline: captureAutoEditPipeline(base, "symlink-token"),
+  };
   startAutoEditJob({ ctx: symlinkCtx, token: "symlink-token", snapshots: 0 });
   const sentinel = path.join(tmp, "log-sentinel.txt");
   writeFileSync(sentinel, "keep-me");
@@ -114,12 +121,66 @@ async function testLogSymlink(tmp: string, capture: Capture): Promise<void> {
   assert.equal(readFileSync(sentinel, "utf8"), "keep-me");
 }
 
+async function testUnlistedSnapshotModule(tmp: string): Promise<void> {
+  const base = fixture(path.join(tmp, "extra-module"));
+  const pipeline = captureAutoEditPipeline(base, "extra-module-token");
+  const ctx: AutoEditCtx = { ...base, pipeline };
+  const modulePath = path.join(pipeline.snapshotRoot, "scripts", "producer", "json.py");
+  mkdirSync(path.dirname(modulePath), { recursive: true });
+  writeFileSync(modulePath, "raise RuntimeError('must never execute')\n");
+  startAutoEditJob({ ctx, token: "extra-module-token", snapshots: 0 });
+  const capture: Capture = { unref: false };
+  await assert.rejects(
+    launchDetachedAutoEditWorker(autoEditJobPath(ctx.dir), {
+      repoRoot: process.cwd(),
+      nodePath: "/node",
+      spawnWorker: fakeSpawner(capture),
+    }),
+    /unlisted file: scripts\/producer\/json\.py/,
+  );
+  assert.equal(capture.call, undefined);
+}
+
+async function testHardlinkedSnapshotFile(tmp: string): Promise<void> {
+  const base = fixture(path.join(tmp, "hardlinked-file"));
+  const pipeline = captureAutoEditPipeline(base, "hardlink-token");
+  const ctx: AutoEditCtx = { ...base, pipeline };
+  const relative = "scripts/producer/plan_lint.py";
+  const captured = path.join(pipeline.snapshotRoot, ...relative.split("/"));
+  const outside = path.join(tmp, "outside-plan-lint.py");
+  writeFileSync(outside, readFileSync(captured));
+  unlinkSync(captured);
+  linkSync(outside, captured);
+  startAutoEditJob({ ctx, token: "hardlink-token", snapshots: 0 });
+  await assert.rejects(
+    launchDetachedAutoEditWorker(autoEditJobPath(ctx.dir), {
+      repoRoot: process.cwd(), nodePath: "/node",
+      spawnWorker: fakeSpawner({ unref: false }),
+    }),
+    /hardlinked file: scripts\/producer\/plan_lint\.py/,
+  );
+}
+
+function testBoundedJobJournal(tmp: string): void {
+  const oversized = path.join(tmp, "oversized-job.json");
+  writeFileSync(oversized, `{"padding":"${"x".repeat(8 * 1024 * 1024)}"}`);
+  assert.equal(readAutoEditJob(oversized), null);
+  const outside = path.join(tmp, "outside-job.json");
+  const linked = path.join(tmp, "linked-job.json");
+  writeFileSync(outside, "{}\n");
+  linkSync(outside, linked);
+  assert.equal(readAutoEditJob(linked), null);
+}
+
 async function main(): Promise<void> {
   const tmp = mkdtempSync(path.join(os.tmpdir(), "sniper-auto-edit-launcher-"));
   const capture: Capture = { unref: false };
   try {
     await testDetachedLaunch(tmp, capture);
     await testLogSymlink(tmp, capture);
+    await testUnlistedSnapshotModule(tmp);
+    await testHardlinkedSnapshotFile(tmp);
+    testBoundedJobJournal(tmp);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }

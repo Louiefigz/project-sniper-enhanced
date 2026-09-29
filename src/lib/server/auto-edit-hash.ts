@@ -65,6 +65,7 @@ export function autoEditRequestKey(ctx: AutoEditCtx): string {
   const {
     doctrine: _runtimeDoctrine,
     pipeline: _runtimePipeline,
+    visualPlanPipeline: _runtimeVisualPlanPipeline,
     templateUsage: _runtimeTemplateUsage,
     brainSessionId: _runtimeBrainSessionId,
     brainSessionEstablished: _runtimeBrainSessionEstablished,
@@ -72,6 +73,7 @@ export function autoEditRequestKey(ctx: AutoEditCtx): string {
   } = ctx;
   void _runtimeDoctrine;
   void _runtimePipeline;
+  void _runtimeVisualPlanPipeline;
   void _runtimeTemplateUsage;
   void _runtimeBrainSessionId;
   void _runtimeBrainSessionEstablished;

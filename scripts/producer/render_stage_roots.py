@@ -128,17 +128,20 @@ def manifest_stage_payloads(manifest: dict[str, Any]) -> dict[str, object]:
     sources = manifest.get("sources")
     admission = manifest.get("sourceSetAdmission")
     broll = manifest.get("broll")
+    external = manifest.get("externalMedia")
     music = manifest.get("music")
     return {
         "manifest.source": {
-            "sources": sources, "sourceSetAdmission": admission,
+            "sources": sources, "externalMedia": external,
+            "sourceSetAdmission": admission,
         },
         "manifest.base": {
-            "sources": sources, "broll": broll,
+            "sources": sources, "broll": broll, "externalMedia": external,
             "sourceSetAdmission": admission,
         },
         "manifest.final": {
-            "sources": sources, "broll": broll, "music": music,
+            "sources": sources, "broll": broll, "externalMedia": external,
+            "music": music,
             "sourceSetAdmission": admission,
         },
     }

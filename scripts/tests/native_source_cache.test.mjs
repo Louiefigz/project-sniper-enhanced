@@ -189,7 +189,7 @@ test('cache identity matches the installed SDK canonical blob for integer and ra
   }
 }));
 
-test('adapter exposes the same qualified extraction primitives in the CLI and capture library',()=>{
+test('adapter exposes the same pinned extraction primitives in the CLI and capture library',()=>{
   const manifest=JSON.parse(fs.readFileSync('scripts/producer/studio/runtime/patches.json'));
   const stock=fs.readFileSync('templates/motion/node_modules/hyperframes/dist/cli.js');
   const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -199,7 +199,7 @@ test('adapter exposes the same qualified extraction primitives in the CLI and ca
     assert.equal(hash(bytes),row.sha256);return bytes;
   };
   const cliRow=manifest.files.find(row=>row.file==='cli.js'),cli=apply(stock,cliRow);
-  assert.equal(hash(cli),'e565a6640e071d4abac38d7601e0ad0faa7cab9284abd73127f014e29b74afb9');
+  assert.equal(hash(cli),'3450ab49633e63cdff82bf6cb03a20d249ab74f62a7746a39f2cf813099255b4');
   const libraryRow=manifest.files.find(row=>row.file==='native-capture-library.mjs'),library=apply(cli,libraryRow);
   const patch=libraryRow.patches[0];assert.deepEqual(library.subarray(0,patch.offset),cli.subarray(0,patch.offset));
   assert.match(library.subarray(patch.offset).toString(),/export \{[^}]*extractAllVideoFrames, isHdrColorSpace,/);

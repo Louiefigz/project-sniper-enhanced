@@ -154,6 +154,39 @@ is pending. A broad goal supplies context or stakes; connect it to the episode's
 choice, attempt, realization or progress. Avoid imposing a how-to script's
 actionable solution requirement on every journey story.
 
+### Reuse passages across different stories
+
+For standalone Shorts, source footage is reusable material, not a set of ranges
+that each clip consumes. Different candidates may share timestamps, an intro,
+context, evidence or a payoff. The same intro can lead into different bodies
+when each assembled story develops and resolves its own promise. Preserve an
+explicit request for non-overlapping excerpts or another reuse restriction.
+
+Judge duplication by the assembled narrative, not by timestamp overlap or
+shared subject matter. A different viewer question, reasoning, perspective or
+takeaway can justify a separate candidate even when some footage is identical.
+A new title, reordered sentences or different graphics alone do not create a
+new story. Label useful variations of the same story as variants; offer them
+when requested without counting them as distinct concepts.
+
+Before closing discovery, revisit strong source passages for other supported
+narratives, including passages already used by a shortlisted clip. Record in
+the existing shortlist which ranges are shared, their job in each assembly,
+and what makes the stories different. For example, a complaint about batch
+filming could introduce a change to the recording process or a separate story
+about which creative work the speaker wants to spend time on, if the recording
+contains both developments and payoffs. The example is a selection method,
+not dialogue or evidence to insert into another source.
+
+Build the viable candidate pool before ranking favorites. Do not impose an
+unrequested small shortlist cap or derive a clip limit by dividing source
+duration by the per-clip allowance: reused ranges can contribute to multiple
+outputs. Explore a requested count in good faith; report a quality shortfall
+rather than padding the pool. Every candidate still needs understandable
+spoken context, earned development, a complete source-supported payoff and its
+own current title/script review. Reusing an approved intro does not approve a
+changed body, meaning, speaker attribution, join or title-to-payoff promise.
+
 ## Work the transcript before choosing cuts
 
 1. **Map useful story parts across the whole source.** Note goals, current state,
@@ -171,7 +204,8 @@ actionable solution requirement on every journey story.
 4. **Compare assemblies, not only source moments.** Try a different opening,
    a later realization as the ending, or an earlier goal as context when that
    improves comprehension. A weak continuous passage may become a useful
-   assembled story. Distinguish alternate versions from different takeaways.
+   assembled story. Compare reuse of strong passages in other narratives too;
+   distinguish alternate versions from different takeaways.
 5. **Check meaning across each jump.** Resolve “this,” “it,” “we” and “after
    that”; preserve their referents, dates, targets, speaker and certainty.
    Rearrangement must not make a planned action look completed, imply an
@@ -233,7 +267,7 @@ Keep a compact record in the existing shortlist or strategy:
 | Development | How the retained reasons, evidence or events earn that payoff |
 | Duration and joins | Sum of retained spans; uncertain timing or meaning at the seams |
 | Visual opportunity | What can be shown at the important explanatory moments |
-| Selection | Strength, missing material and overlaps with other assemblies |
+| Selection | Strength, missing material, shared source ranges and their narrative role; distinguish independent stories from same-story variants |
 
 If the source still cannot supply a coherent story after this assembly pass,
 keep it as a concept for a new recording or reject it. Do not manufacture a

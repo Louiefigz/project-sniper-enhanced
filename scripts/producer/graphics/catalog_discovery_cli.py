@@ -7,6 +7,7 @@ CLI (run with the project venv, from anywhere)::
         [--declared-aspect 16:9|9:16] [--status <status>] [--tag <tag>]
         [--limit N] [--format json|text]
     catalog_discovery_cli.py lookup <name|mirror:name|local:kind> [--format ...]
+    catalog_discovery_cli.py semantic-search --intent "<visual job>" [--intent ...]
     catalog_discovery_cli.py inventory
 
 Read-only: never executes catalog HTML, renders, fetches or writes. Exit 0 on
@@ -25,6 +26,9 @@ from graphics.catalog_discovery import (  # noqa: E402
     ASPECTS, DEFAULT_LIMIT, STATUSES, TYPES, SearchFilters, load_catalog,
     inventory_catalog, lookup_item, search_catalog,
 )
+from graphics.catalog_semantic_search import (  # noqa: E402
+    SemanticSearchRequest, semantic_search_catalog,
+)
 
 _TEXT_WIDTH = 110
 
@@ -41,6 +45,14 @@ def _parser() -> argparse.ArgumentParser:
     search.add_argument("--status", choices=STATUSES)
     search.add_argument("--tag")
     search.add_argument("--limit", type=int, default=DEFAULT_LIMIT)
+    semantic = commands.add_parser(
+        "semantic-search", help="bounded metadata intent search across the full catalog")
+    semantic.add_argument("--intent", action="append", required=True)
+    semantic.add_argument("--type", choices=TYPES)
+    semantic.add_argument("--declared-aspect", choices=ASPECTS)
+    semantic.add_argument("--status", choices=STATUSES)
+    semantic.add_argument("--tag")
+    semantic.add_argument("--limit", type=int, default=5)
     lookup = commands.add_parser("lookup", help="exact item by name or ref")
     lookup.add_argument("name")
     commands.add_parser("inventory", help="complete unranked strategy inventory")
@@ -81,6 +93,10 @@ def _record_lines(record: dict, position: int | None) -> list[str]:
         lines.append(f"   match: score {match['score']} · {why}"
                      + (f" · unmatched {match['unmatchedTerms']}"
                         if match["unmatchedTerms"] else ""))
+    if record.get("semanticMatch"):
+        match = record["semanticMatch"]
+        concepts = ", ".join(match["semanticConcepts"]) or "none"
+        lines.append(f"   semantic match: score {match['score']} · concepts {concepts}")
     lines.append(f"   {_clip(record['title'] + ' — ' + record['description'])}")
     if record.get("templateVariables"):
         lines.append(f"   template variables: {', '.join(sorted(record['templateVariables']))}")
@@ -125,19 +141,31 @@ def render_text(result: dict) -> str:
         lines.extend(f"{row['ref']} — {row['title']} [{row['integration']['status']}]"
                      for row in result["items"])
         return "\n".join(lines)
-    if "results" in result:
-        lines.append(f"search {result['query']!r} → {result['total']} match(es), "
+    if "results" not in result:
+        return _lookup_text(result, lines)
+    if "intents" in result:
+        lines.append(f"semantic search {result['intents']!r} → {result['total']} match(es), "
                      f"showing {result['returned']}"
-                     + (f" · ignored short terms {result['ignoredTerms']}"
-                        if result["ignoredTerms"] else "")
-                     + (" (LIMITED — raise --limit or narrow the query)"
-                        if result["limited"] else "")
-                     + (f" · exact matches excluded by filters: "
-                        f"{result['excludedExactMatches']}"
-                        if result["excludedExactMatches"] else ""))
+                     + (" (LIMITED)" if result["limited"] else ""))
         for position, record in enumerate(result["results"], start=1):
             lines.extend(_record_lines(record, position))
         return "\n".join(lines)
+    lines.append(f"search {result['query']!r} → {result['total']} match(es), "
+                 f"showing {result['returned']}"
+                 + (f" · ignored short terms {result['ignoredTerms']}"
+                    if result["ignoredTerms"] else "")
+                 + (" (LIMITED — raise --limit or narrow the query)"
+                    if result["limited"] else "")
+                 + (f" · exact matches excluded by filters: "
+                    f"{result['excludedExactMatches']}"
+                    if result["excludedExactMatches"] else ""))
+    for position, record in enumerate(result["results"], start=1):
+        lines.extend(_record_lines(record, position))
+    return "\n".join(lines)
+
+
+def _lookup_text(result: dict, lines: list[str]) -> str:
+    """Render one exact-name lookup result."""
     lines.append(f"lookup {result['name']!r} → "
                  f"{'found' if result['found'] else 'NOT FOUND'} "
                  f"({len(result['matches'])} record(s))")
@@ -156,6 +184,9 @@ def execute(args: argparse.Namespace) -> tuple[dict, int]:
         return result, 0 if result["found"] else 1
     filters = SearchFilters(type=args.type, declared_aspect=args.declared_aspect,
                             status=args.status, tag=args.tag, limit=args.limit)
+    if args.command == "semantic-search":
+        request = SemanticSearchRequest(tuple(args.intent), filters)
+        return semantic_search_catalog(catalog, request), 0
     return search_catalog(catalog, " ".join(args.query), filters), 0
 
 

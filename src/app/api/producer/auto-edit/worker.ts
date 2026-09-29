@@ -40,6 +40,8 @@ import { retainBootstrapFailure } from "@/lib/server/guided-project-bootstrap-st
 import { hasGuidedBootstrap } from "@/lib/server/guided-project-bootstrap-contract";
 import { authoredPreparationRemainingMs, withAuthoredPreparationDeadline,
   AUTHORED_PREPARATION_LIMIT_MS } from "@/lib/server/guided-project-preparation-deadline";
+import { restoreExecutableProjectAutoEditPipeline } from
+  "@/lib/server/auto-edit-pipeline-authority";
 
 const TRACKED_TREE_GRACE_MS = PROCESS_TERM_GRACE_MS - 1_000;
 
@@ -53,6 +55,8 @@ async function claimJob(jobPath: string, token: string) {
     if (job?.status === "cut_accepted" && job.token === token) { await delay(25); continue; }
     if (!job || job.status !== "running") throw new Error(`No runnable Auto Edit job at ${jobPath}`);
     if (job.token !== token) throw new Error(`Auto Edit worker token ${token} is stale`);
+    if (!job.ctx.pipeline) throw new Error("Auto Edit worker lacks pipeline authority");
+    restoreExecutableProjectAutoEditPipeline(job.ctx.dir, job.ctx.pipeline);
     if (job.workerPid === process.pid) {
       if (durableProcessAlive(job.workerPid, job.workerIdentity, job.updatedAt)) return job;
       throw new Error(`Auto Edit worker ${process.pid} does not match its durable process identity`);

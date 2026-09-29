@@ -97,11 +97,8 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("resources/references", "original reference library rendered from Sniper templates"),
 
     # --- Read-only catalog mirror (reachable: catalog_discovery_sources.py) -
-    ("vendor/hyperframes-catalog/README.md", "boundary statement"),
-    ("vendor/hyperframes-catalog/catalog-index.json", "the searchable index discovery loads"),
-    ("vendor/hyperframes-catalog/hyperframes-catalog-lock.json", "provenance lock discovery validates"),
-    ("vendor/hyperframes-catalog/compositions", "item HTML sources discovery reads for mechanism selection "
-                                                "(the media and script files inside are withheld below)"),
+    ("vendor/hyperframes-catalog", "current and future admitted metadata/source snapshot roots; "
+                                   "media and script dependencies are withheld below"),
 
     # --- B-roll lane descriptor (clips are the buyer's own) -----------------
     ("broll/README.md", "explains that the operator supplies b-roll"),
@@ -168,6 +165,12 @@ EXCLUDE_GLOBS: tuple[tuple[str, str], ...] = (
     ("vendor/hyperframes-catalog/compositions/components/*.png",
      "catalog texture images; discovery reads item HTML only and nothing renders them; "
      "their terms were not reviewed"),
+    ("vendor/hyperframes-catalog/**/assets/**",
+     "catalog snapshot media and fonts are not discovery metadata and have unreviewed terms"),
+    ("vendor/hyperframes-catalog/**/lib/**",
+     "catalog snapshot script dependencies are not executed by discovery"),
+    ("vendor/hyperframes-catalog/**/*.png",
+     "catalog snapshot texture images are not read by metadata discovery"),
     ("assets/fonts/ChunkFive-*", "ChunkFive and its licence: no longer used, the motion "
                                  "templates' display face is Bricolage Grotesque (tokens.css)"),
     ("public/file.svg", "create-next-app sample icon; nothing references it"),

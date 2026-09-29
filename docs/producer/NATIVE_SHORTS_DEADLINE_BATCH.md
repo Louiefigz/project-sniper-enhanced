@@ -1,0 +1,174 @@
+# Authorized Shorts production
+
+Implementation entry points for the maintained engine. This document describes
+wiring, not a completed end-to-end qualification. The September 28 completion
+work defers test suites and real video qualification at the operator's request.
+
+## Authorization and clock
+
+After source inspection and candidate review, the operator's approved exact title
+and transcript-bound selection become the input. Do not reopen those decisions
+or ask for the same approval again. Record each approval using the closed input
+shape in `scripts/producer/studio/production/inputs.py`, then run:
+
+```sh
+./sniper python3 -B scripts/producer/native_batch.py start --batch SESSION --clips A,B --approval A=/absolute/A.json --approval B=/absolute/B.json
+```
+
+The authorization is durable before capacity inspection, source hashing and
+engine freezing. Those steps count. Repeating the same start resumes its
+original clock and approvals. A conflicting start is refused or retained as a
+staged authorization; `staged-starts` reports it and `discard-start --name NAME
+--reason TEXT` records an explicit disposition. Earlier missed authorizations
+remain visible. Do not create a fresh batch to erase elapsed production time.
+
+Each newly authorized Short has 2,400 counted production seconds. Only intervals
+observed by the heavy-work scheduler as waiting solely for occupied render
+capacity can be excluded. Its durable `capacityClock` records settled credit,
+active owners and uncertain observation gaps. Preparation, hashing, rendering,
+encoding, review, revisions, human holds and handoff count. Other productive work
+for that Short overlapping a wait counts too. Unknown host pressure, disk
+pressure, unsupported mixes, quarantined cleanup and missing heartbeats earn no
+credit. Forecast queue delays do not themselves earn credit.
+
+The clock, launch allocations, task deadlines and status use the same settled
+credit. Owners retain their independent active-work limits and cleanup reserve.
+Retries and changed approval records preserve already spent time and counters.
+Long outputs and older saved Short authorizations retain their existing clock
+policy. A Long never borrows a Short's queue credit.
+
+## Coordinator and media execution
+
+The buyer's active agent coordinates AI authoring and independent review. The
+media dispatcher is a separate supervised process; it does not create AI workers
+or fabricate their results. Use the host capability and supervised-governance
+requirements already enforced by `production/host_contract.py` and enrollment.
+
+The coordinator enrolls its exact host handle with `native_batch.py enroll`,
+submits the dependency graph with `enqueue --tasks FILE`, claims AI/check work
+with `next`, and records real attached handles and artifacts through `attach` and
+`complete`. Every task uses immutable input identity, prerequisites and fenced
+claim epoch/token. `change-approval --approval FILE --reason TEXT` revokes stale
+work; a superseded callback cannot satisfy a current dependency.
+
+Each media request names its exact batch, task, clip, project, fresh output
+folder and allowlisted route/options (`production/media.py`). It carries no
+arbitrary shell command. Start `native_batch.py dispatch --batch SESSION` after
+submitting work. The dispatcher reconciles before claiming, queues supervisors
+at the actual host pool, and records each exporter completion. The pool still
+enforces measured capacity and FIFO order. A restarted dispatcher does not
+relaunch an uncertain claim. The outer watchdog bounds the entire exporter,
+including setup and publication, and cleans up owned process groups before
+settling the task.
+
+Use `status --batch SESSION` and `next --peek` for current work and refusal
+reasons. Per-clip status distinguishes wall elapsed, counted production,
+excluded render queue and uncertain intervals, with current forecasts and SLA
+misses. Deadline refusal is not a completed video.
+
+## Build, reviews and delivery
+
+Run `context.py --role clip-owner` with the exact plan/project and `--batch
+SESSION --clip A`. Share source/reference evidence through its evidence-draft
+and evidence-seal commands. Role packets carry current approved words and source
+identity. They assign governing instructions and generate empty observation
+structures, never reviewer findings.
+
+1. The independent plan critic receives `context.py --role plan-critic --plan
+   /absolute/plan.json --batch SESSION --clip A`. Submit actual observations
+   using the packet's `native-review.ts submit-prebuild` command, then bind a
+   passing record with `bind-prebuild` before `native-short.ts build`.
+2. Run static preflight and the preview export. The exporter runs early static
+   checks and sealed audio preparation before picture work. A motion critic
+   receives `--role motion-critic --preview /absolute/motion-previews.json`;
+   typed playback evidence and current approval identity gate a full export.
+3. Export using `--preview-reviews /absolute/MOTION-REVIEW.json`. Source capture,
+   picture, audio, encoded verification and owned cleanup remain separate gates.
+   The final critic receives `--role final-critic --export /absolute/attempt`.
+   `native-review.ts check-final` reports exactly what the record establishes.
+4. Open the delivered video and matching editable project using
+   `native_handoff.py open ATTEMPT --owner OWNER --record NEW.json`, then confirm
+   the actual browser views through its `confirm` command. Only that confirmation
+   can satisfy `native_batch.py handoff --batch SESSION --clip A --confirmation
+   /absolute/confirmation.json`. Complete the director and close the batch after
+   owned tasks settle.
+
+Every critic packet also names its author session and shared evidence when
+available. Review submissions reject stale media, changed approved words and
+unsupported inspection claims. Stills, playback and listening are distinct
+forms of evidence. Technical checks never certify that somebody watched or
+listened. Follow the existing whole-video review and title/reference duties.
+
+If a complete labeled review draft is the appropriate next artifact, use
+`native-short.ts build-draft` for a plan with pending or nonpassing review, then
+`native_export.py PROJECT NEW_ATTEMPT --review-draft`. Its receipt preserves
+pending findings and does not claim final QC. A draft from a final-eligible
+project can be promoted using `--promote-draft ATTEMPT --preview-reviews FILE`
+after current motion review; promotion preserves the exact encoded bytes and
+still runs final gates. A draft-built project cannot become final through that
+shortcut; revise the plan and create a properly reviewed final-eligible build.
+
+Build revisions into fresh directories with `--parent PREVIOUS_PROJECT` to
+preserve logical clip lineage. Studio host IDs are assigned before project
+hashing, preventing Studio opening from changing the authored package. Handoff
+holds are per project/owner and never close another clip's active view.
+
+## Repair and delegation boundaries
+
+Short revisions built with `--parent` retain verified clip lineage. The preview
+reader follows that lineage, compares content dependencies and retains unchanged
+preview judgments. Scoped compositions invalidate their affected preview windows
+with context; an unproved composition scope makes its entire content a global
+dependency. Changed source/timing/audio or global executable inputs invalidate
+all dependent work. A legacy schema-1 Short preview must be regenerated with
+typed review evidence before it admits new full-picture work. Long packet and
+section contracts retain their own route.
+
+New standard Short exports retain every picture frame through bounded native
+capture sessions. A sealed same-clip ancestor can donate unchanged frames when
+current dependency proofs isolate the changed composition. The renderer captures
+only that complete affected interval, plus sparse QC samples; copied good frames
+retain their exact bytes. It then assembles/encodes the new picture and runs final
+QC. Unchanged audio masters and source frames are independently reusable. A checked
+promotion can use its exact sealed draft's retained frames. A terminal attempt
+whose picture/audio stage completed but final QC failed may donate unfinished
+picture work only after its stage, inputs and every owner cleanup revalidate;
+its qualification stays `rendered-awaiting-final-qc`, never an inherited pass.
+Every current final check still runs. Unsupported or incomplete old evidence
+cannot donate. Proof chains exceeding the request reader's 16 MiB limit are
+refused before publishing a new attempt.
+
+New Shorts also acquire source PNGs through the same content-addressed store as
+Longs. Source bytes, exact selected range, frame clock, colour transform and
+extractor identity determine reuse, so a new staged project path alone does not
+trigger decoding. The store admits every frame digest and retains the existing
+exclusive publisher/reader leases. Historical path-keyed SDK entries are never
+adopted. Cold extraction requires the current owner's disk expansion grant.
+Default whole-composition acquisition retains SDK SDR/HDR negotiation; explicit
+sequential acquisition supports SDR only. The SDK streaming opt-out reads the
+same leased content view. None of these source changes has a rendered Short
+qualification yet.
+
+Retained frames consume disk space. Picture and draft owners reserve a conservative
+full-frame allocation plus encoding headroom before starting; copied revision
+frames also need space in the new attempt. No cache or prior attempt is deleted
+to make the new work fit. The changed default's storage and speed are not yet
+qualified by a real render.
+
+A one-frame visual defect does not itself prove a one-frame dependency: a change
+to an animation or caption can affect its whole visible interval. Changes to shared
+HTML, source/timing, geometry, unproved scopes or global executable inputs require
+a complete picture rebuild, with the reason recorded. The legacy `--sdk-streaming`
+opt-out and historical outputs without retained picture frames cannot donate
+local repairs; they need a new retained baseline. Exact completed whole stages
+still reuse their existing recovery routes when all their inputs match.
+
+This changed-region wiring has not been qualified with a rendered revision. It
+does not establish a measured speedup or replace final encoded-output review.
+
+The active coordinator creates and attaches the real planning, graphics/audio
+specialist and independent critic subagents required by the brief and doctrine.
+The task graph and role packets track those assignments and submissions; the
+media dispatcher does not itself launch AI subagents or guarantee that a separate
+specialist exists for every lane of every clip. Technical audio checks are wired
+separately and never certify listening.

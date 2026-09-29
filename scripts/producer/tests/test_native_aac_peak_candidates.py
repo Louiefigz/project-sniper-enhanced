@@ -75,6 +75,26 @@ class NativeAacPeakCandidatesTests(unittest.TestCase):
                 patch.object(delivery, "_encode", side_effect=self.encode):
             return delivery.finish_native_dialogue(self.request)
 
+    def test_each_candidate_is_charged_before_mastering(self) -> None:
+        """Codec peak correction consumes another original audio candidate before any DSP work."""
+        charged = []
+        self.request = replace(self.request, candidate_hook=lambda index: charged.append((index, len(self.master_sources))))
+        self.finish()
+        self.assertEqual(charged, [(1, 0), (2, 1)])
+
+    def test_budget_refusal_prevents_candidate_mastering_and_encoding(self) -> None:
+        """A refused candidate retains the earlier failed artifact without starting new media."""
+        def hook(index: int) -> None:
+            """Allow one candidate then simulate exhausted cumulative authority."""
+            if index == 2:
+                raise RuntimeError('TEST cumulative budget exhausted')
+        self.request = replace(self.request, candidate_hook=hook)
+        with self.assertLogs('audio.native_dialogue_delivery', level='ERROR'), self.assertRaisesRegex(RuntimeError, 'budget'):
+            self.finish()
+        self.assertEqual(len(self.master_sources), 1)
+        self.assertFalse((self.request.directory / 'attempt-02').exists())
+        self.assertTrue((self.request.directory / 'attempt-01/candidate.mp4').exists())
+
     def test_observed_codec_excess_selects_stricter_shared_profile_without_global_changes(self) -> None:
         before = NATIVE_SHORT_MASTERING_PROFILE.receipt()
         effective = corrected_peak_profile(NATIVE_SHORT_MASTERING_PROFILE, evidence(), 1)

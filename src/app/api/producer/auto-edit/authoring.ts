@@ -1,4 +1,5 @@
 import path from "path";
+import type { ChildProcess } from "node:child_process";
 import {
   brainProvider,
   claudeModelArgs,
@@ -11,10 +12,16 @@ import {
   claudeAuthoringBashPatterns,
 } from "./authoring-prompt";
 import {
+  buildVisualPlanningPrompt, visualPlanningBashPatterns,
+} from "./visual-planning-prompt";
+import { visualPlanAuthoringPaths } from "./authoring-prompt-inputs";
+import {
   buildCutAuthoringPrompt,
   claudeCutAuthoringBashPatterns,
 } from "./cut-authoring-prompt";
-import { AutoEditCtx, Send } from "./stream";
+import {
+  authoringWorkDir, ordinaryVisualPlanRequired, AutoEditCtx, Send,
+} from "./stream";
 import { authoringReasoning } from "./authoring-reasoning";
 import { AUTHORING_OUTPUT_MAX_BYTES, authoringTextState, observeCodexAuthoringError, observeAuthoringEvent, observeAuthoringText } from "./authoring-stream-contract";
 import {
@@ -22,6 +29,17 @@ import {
   runClaudeAuthoringProcess,
   type AuthoringResult,
 } from "./claude-authoring-process";
+import { prepareVisualPlanContext } from "./visual-plan-context";
+import {
+  fenceProcessTree,
+  withTrackedProcessObserver,
+} from "../../_lib/child-process-lifecycle";
+import {
+  assertAuthoringAuthorityOutsideStaging,
+  prepareInitialAuthoringStaging,
+  promoteInitialAuthoring,
+} from "./initial-authoring-staging";
+import { allocatedCreativeRoute } from "./creative-route-dispatch";
 export { buildAuthoringPrompt } from "./authoring-prompt";
 export {
   authoringPermissionDenial,
@@ -38,6 +56,7 @@ export {
 // absolute tool input. dontAsk therefore stays fail-closed outside the exact
 // plan path and pinned Bash commands.
 export type AuthoringStage = "cut" | "visual";
+export type AuthoringPassStage = AuthoringStage | "visual-plan";
 
 function claudeAuthoringEffort(): "xhigh" {
   // Operator directive (2026-07-14): run the editing brain at maximum reasoning
@@ -46,24 +65,27 @@ function claudeAuthoringEffort(): "xhigh" {
   return "xhigh";
 }
 
-function stagePrompt(ctx: AutoEditCtx, provider: BrainProvider, stage: AuthoringStage): string {
-  return stage === "cut"
-    ? buildCutAuthoringPrompt(ctx, provider)
-    : buildAuthoringPrompt(ctx, provider);
+function stagePrompt(ctx: AutoEditCtx, provider: BrainProvider, stage: AuthoringPassStage): string {
+  if (stage === "cut") return buildCutAuthoringPrompt(ctx, provider);
+  return stage === "visual-plan"
+    ? buildVisualPlanningPrompt(ctx, provider) : buildAuthoringPrompt(ctx, provider);
 }
 
-function allowedTools(ctx: AutoEditCtx, stage: AuthoringStage): string {
-  const patterns = stage === "cut"
-    ? claudeCutAuthoringBashPatterns(ctx) : claudeAuthoringBashPatterns(ctx);
+function allowedTools(ctx: AutoEditCtx, stage: AuthoringPassStage): string {
+  const patterns = stage === "cut" ? claudeCutAuthoringBashPatterns(ctx)
+    : stage === "visual-plan" ? visualPlanningBashPatterns(ctx)
+      : claudeAuthoringBashPatterns(ctx);
   const bash = patterns.map((command) => `Bash(${command})`);
+  const writable = stage === "visual-plan" ? visualPlanAuthoringPaths(ctx)
+    : [ctx.planPath, ...(stage === "visual" && !ctx.visualPlan
+      ? visualPlanAuthoringPaths(ctx) : [])];
   // No Skill(...) entry: authoring runs with no setting sources, so skills never load;
   // the prompt names the pinned doctrine files to read instead.
   return [
     ...bash,
-    `Edit(/${ctx.planPath})`,
-    `Write(/${ctx.planPath})`,
+    ...writable.flatMap((file) => [`Edit(/${file})`, `Write(/${file})`]),
     "Read",
-    ...(stage === "visual" ? ["Glob", "Grep"] : []),
+    ...(stage !== "cut" ? ["Glob", "Grep"] : []),
   ].join(",");
 }
 
@@ -80,10 +102,11 @@ function sessionArgs(ctx: AutoEditCtx, mode: AuthoringSessionMode): string[] {
 
 export function claudeArgs(
   ctx: AutoEditCtx,
-  stage: AuthoringStage = "visual",
+  stage: AuthoringPassStage = "visual",
   sessionMode: AuthoringSessionMode = "start",
 ): string[] {
   const readableDirs = [
+    authoringWorkDir(ctx),
     ctx.dir,
     ctx.transcriptsDir,
     ...(ctx.pipeline ? [ctx.pipeline.snapshotRoot] : []),
@@ -113,25 +136,30 @@ type CodexRunner = typeof runCodex;
 export interface AuthoringDependencies {
   provider?: () => BrainProvider;
   codex?: CodexRunner;
+  prepareVisualPlan?: typeof prepareVisualPlanContext;
+  /** Focused process-adapter tests may replace the filesystem promotion. */
+  promote?: typeof promoteInitialAuthoring;
 }
 
 /** Preserve explicit editor stops across final output, cancellation and timeout. */
 async function runCodexAuthoring(ctx: AutoEditCtx, send: Send,
-  codex: CodexRunner, stage: AuthoringStage): Promise<AuthoringResult> {
+  codex: CodexRunner, stage: AuthoringPassStage): Promise<AuthoringResult> {
   const started = Date.now();
   const effort = authoringReasoning(ctx);
   const state = authoringTextState(), stop = new AbortController();
+  let ownedProcess: ChildProcess | undefined;
   dlog("producer:auto-edit", "spawn codex (authoring)", {
-    dir: ctx.dir, scope: ctx.scope, ...effort,
+    dir: authoringWorkDir(ctx), scope: ctx.scope, ...effort,
   });
   send({ event: "authoring_reasoning_selected", provider: "codex", ...effort });
   try {
-    const result = await codex({
+    const result = await withTrackedProcessObserver(
+      (child) => { ownedProcess ??= child; }, () => codex({
       prompt: stagePrompt(ctx, "codex", stage),
       sandbox: "workspace-write",
       timeoutMs: AUTHORING_TIMEOUT_MS,
       reasoning: effort.reasoning,
-      cwd: ctx.dir,
+      cwd: authoringWorkDir(ctx),
       maxOutputBytes: AUTHORING_OUTPUT_MAX_BYTES,
       signal: stop.signal,
       onEvent: (event) => {
@@ -139,7 +167,8 @@ async function runCodexAuthoring(ctx: AutoEditCtx, send: Send,
         forwardCodexEvent(event, send);
         if (state.blocked || state.protocolFailure || state.providerFailure) stop.abort();
       },
-    });
+      }),
+    );
     observeAuthoringText(state, result.message);
     return {
       code: state.protocolFailure || state.providerFailure ? 1 : 0,
@@ -164,6 +193,8 @@ async function runCodexAuthoring(ctx: AutoEditCtx, send: Send,
       authored: null,
       blocked: state.blocked, protocolFailure: state.protocolFailure, providerFailure: state.providerFailure,
     };
+  } finally {
+    if (ownedProcess) await fenceProcessTree(ownedProcess);
   }
 }
 
@@ -174,7 +205,7 @@ async function runCodexAuthoring(ctx: AutoEditCtx, send: Send,
 function runClaudeAuthoring(
   ctx: AutoEditCtx,
   send: Send,
-  stage: AuthoringStage,
+  stage: AuthoringPassStage,
   sessionMode: AuthoringSessionMode,
 ): Promise<AuthoringResult> {
   return runClaudeAuthoringProcess(ctx, send, stage, claudeArgs(ctx, stage, sessionMode));
@@ -185,20 +216,74 @@ export interface AuthoringRunOptions {
   sessionMode?: AuthoringSessionMode;
 }
 
+function shouldPromote(result: AuthoringResult): boolean {
+  return result.code === 0 && !result.timedOut && !result.blocked
+    && !result.protocolFailure && !result.providerFailure;
+}
+
+function promotionFailure(result: AuthoringResult, error: unknown): AuthoringResult {
+  const message = error instanceof Error ? error.message : String(error);
+  derror("producer:auto-edit", "isolated authoring promotion failed", error);
+  return { ...result, code: 1, authored: null,
+    errTail: `Isolated authoring output was rejected: ${message}` };
+}
+
+interface AuthoringPassOptions {
+  stage: AuthoringPassStage;
+  sessionMode: AuthoringSessionMode;
+}
+
 /** Author with the configured subscription brain, then let the route render. */
-export function runAuthoring(
+async function runAuthoringPass(
+  ctx: AutoEditCtx,
+  send: Send,
+  dependencies: AuthoringDependencies = {},
+  options: AuthoringPassOptions,
+): Promise<AuthoringResult> {
+  const { stage, sessionMode } = options;
+  const staging = prepareInitialAuthoringStaging(ctx, stage);
+  try {
+    assertAuthoringAuthorityOutsideStaging(staging);
+    if (stage !== "cut") {
+      (dependencies.prepareVisualPlan ?? prepareVisualPlanContext)(staging.ctx);
+    }
+    const provider = (dependencies.provider ?? brainProvider)();
+    const result = provider === "codex"
+      ? await runCodexAuthoring(
+        staging.ctx, send, dependencies.codex ?? runCodex, stage,
+      )
+      : await runClaudeAuthoring(staging.ctx, send, stage, sessionMode);
+    if (!shouldPromote(result)) return result;
+    try {
+      (dependencies.promote ?? promoteInitialAuthoring)(staging);
+      return result;
+    } catch (error) {
+      return promotionFailure(result, error);
+    }
+  } finally {
+    staging.dispose();
+  }
+}
+
+/** Plan route-neutrally, let the controller allocate, then compile only ordinary. */
+export async function runAuthoring(
   ctx: AutoEditCtx,
   send: Send,
   dependencies: AuthoringDependencies = {},
   options: AuthoringRunOptions = {},
 ): Promise<AuthoringResult> {
   const stage = options.stage ?? "visual";
-  const sessionMode = options.sessionMode ?? "start";
-  const provider = (dependencies.provider ?? brainProvider)();
-  if (provider === "codex") {
-    return runCodexAuthoring(
-      ctx, send, dependencies.codex ?? runCodex, stage,
-    );
+  if (stage !== "visual" || !ordinaryVisualPlanRequired(ctx) || ctx.visualPlan) {
+    return runAuthoringPass(ctx, send, dependencies, {
+      stage, sessionMode: options.sessionMode ?? "start",
+    });
   }
-  return runClaudeAuthoring(ctx, send, stage, sessionMode);
+  const planned = await runAuthoringPass(ctx, send, dependencies, {
+    stage: "visual-plan", sessionMode: options.sessionMode ?? "start",
+  });
+  if (!shouldPromote(planned) || !ctx.visualPlan) return planned;
+  if (allocatedCreativeRoute(ctx, ctx.visualPlan) !== "ordinary") return planned;
+  return runAuthoringPass(ctx, send, dependencies, {
+    stage: "visual", sessionMode: "resume",
+  });
 }

@@ -1,0 +1,284 @@
+"""Durable production-budget authority, separate from best-effort stage timing.
+
+``stage_timings.jsonl`` deliberately never fails production, so it cannot hold
+a spending limit. This store is fail-closed instead: every read-modify-write
+holds the batch's private kernel lock, every read is checked against the
+closed schema (``native_budget_schema.validate_record``), writes are fsynced
+pending-replace, and each transition is appended to an fsynced event trail
+before the record changes. A change that is not itself a settlement must leave room for every open
+production task to record its widest outcome (``task_schema.settlement_reserve``), parallel to the
+event trail's reserve. Unreadable, corrupt or unwritable authority raises
+``BudgetAuthorityError``, which callers treat as "refuse new work"; it never
+touches an existing MP4.
+
+Layout under one per-user root, resolved from the account database (not
+``$HOME``) and outside every checkout::
+
+    <root>/registry.lock                      serializes batch creation, binding, archiving
+    <root>/batches/<batchId>/authority.json   the only source of truth
+    <root>/batches/<batchId>/events.jsonl     fsynced transition trail
+    <root>/archive/<batchId>/...              closed batches the operator archived
+
+Bindings live inside the records themselves; there is no separate index that
+could be deleted or disagree with them. Creation and archiving are in
+``native_budget_batches``.
+"""
+from __future__ import annotations
+
+import contextlib
+import json
+import os
+import pwd
+import re
+from collections.abc import Iterator
+from dataclasses import dataclass
+from pathlib import Path
+
+from headless.durable_files import (
+    DurableFileError, locked_private_dir, open_private_dir, open_private_file,
+    private_child_dir, read_private_file, write_all, write_pending_replace,
+)
+from studio.native_budget_schema import SCHEMA_VERSION, validate_record
+from studio.production.settlement import settlement_reserve
+
+AUTHORITY, PENDING, EVENTS, LOCK = 'authority.json', 'authority.pending.json', 'events.jsonl', 'authority.lock'
+REGISTRY_LOCK = 'registry.lock'
+MAX_RECORD_BYTES = 4 * 1024 ** 2
+MAX_EVENT_BYTES = 16 * 1024 ** 2
+# New work stops this far below the bound, so settling events normally fit inside it.
+TERMINAL_RESERVE_BYTES = 1024 ** 2
+# Outcomes, closing, draining, hand-offs and task settlement are bounded by the record's own
+# row bounds (each task acknowledges, ends and settles a bounded number of times, and a new
+# claim is not a settling event), so they are always written: a full trail can refuse new
+# work but never keep a batch open, strand a cancellation or lose a task outcome.
+TERMINAL_EVENTS = frozenset({'batch-closed', 'batch-draining', 'launch-completed', 'clip-handed-off',
+                             'batch-archived', 'commit-failed', 'commit-unsynced', 'task-attached',
+                             'task-released', 'task-completed', 'task-failed', 'task-cancel-requested',
+                             'task-cancelled', 'task-abandoned', 'task-superseded', 'task-resource-settled',
+                             'tasks-reconciled', 'capacity-settled'})
+# Commits that the settlement room never refuses: settlements, and read-only observations (status and
+# wait advance the clock and mark provably dead launches abandoned, which the room already covers).
+ROOM_EXEMPT = TERMINAL_EVENTS | {'observed', 'capacity-observed', 'capacity-heartbeat'}
+BATCH_ID = re.compile(r'[a-z0-9][a-z0-9-]{2,63}')
+CLIP_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}')
+
+
+class BudgetAuthorityError(RuntimeError):
+    """Budget authority is missing, unreadable, corrupt or unwritable: refuse new work."""
+
+
+def canonical(value: dict) -> bytes:
+    """Serialize one record deterministically; NaN/Infinity are never valid budget data."""
+    return (json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False) + '\n').encode()
+
+
+def default_root() -> Path:
+    """The per-user authority root, from the account database so HOME cannot redirect it."""
+    base = Path(pwd.getpwuid(os.getuid()).pw_dir) / '.project-sniper'
+    if not base.exists():
+        base.mkdir(mode=0o700)
+    return base.resolve(strict=True) / 'production-budgets'
+
+
+def ensure_root(root: Path) -> None:
+    """Create the private root with its batches and archive children; never loosen modes."""
+    try:
+        root.mkdir(mode=0o700, exist_ok=True)
+        root_fd = open_private_dir(str(root))
+        try:
+            _private_children(root_fd, ('batches', 'archive'))
+        finally:
+            os.close(root_fd)
+    except (OSError, DurableFileError) as error:
+        raise BudgetAuthorityError(f'Budget authority root is unusable: {root}: {error}') from error
+
+
+def _private_children(root_fd: int, names: tuple[str, ...]) -> None:
+    """Create or verify each private child directory."""
+    for name in names:
+        os.close(private_child_dir(root_fd, name))
+
+
+@contextlib.contextmanager
+def registry_lock(root: Path) -> Iterator[None]:
+    """One root-wide kernel lock around decisions that span batches."""
+    ensure_root(root)
+    try:
+        with locked_private_dir(str(root), REGISTRY_LOCK):
+            yield
+    except DurableFileError as error:
+        raise BudgetAuthorityError(f'Budget registry lock failed: {error}') from error
+
+
+def require_batch_id(batch_id: object) -> str:
+    """Batch identifiers are closed lowercase slugs."""
+    if type(batch_id) is not str or BATCH_ID.fullmatch(batch_id) is None:
+        raise ValueError('Batch id must be 3-64 lowercase letters, digits or hyphens')
+    return batch_id
+
+
+def require_clip_id(clip_id: object) -> str:
+    """Logical clip identifiers are closed short names such as A or clip-03."""
+    if type(clip_id) is not str or CLIP_ID.fullmatch(clip_id) is None:
+        raise ValueError('Clip id must be 1-64 letters, digits, underscores or hyphens')
+    return clip_id
+
+
+@dataclass
+class BatchSession:
+    """One locked read-modify-write session over a batch's authority."""
+
+    dir_fd: int
+    batch_id: str
+
+    def read(self) -> dict:
+        """Read the record and validate it against the closed schema."""
+        try:
+            raw = read_private_file(self.dir_fd, AUTHORITY, MAX_RECORD_BYTES)
+            record = json.loads(raw.decode('utf-8'))
+            lift_additive_fields(record)
+            validate_record(record)
+            if record['schemaVersion'] in (5, 6):
+                record['schemaVersion'] = SCHEMA_VERSION  # Additive lift; retain clocks and counters.
+        except (OSError, DurableFileError, UnicodeError, ValueError) as error:
+            raise BudgetAuthorityError(f'Budget authority for {self.batch_id} is unreadable or corrupt: '
+                                       f'{error}') from error
+        if record['batchId'] != self.batch_id:
+            raise BudgetAuthorityError(f'Budget authority for {self.batch_id} names another batch')
+        return record
+
+    def commit(self, record: dict, event: dict) -> None:
+        """Append the transition first, then replace the record (the record is the authority).
+
+        If the record cannot be replaced, a ``commit-failed`` event follows, so the
+        trail never shows a transition as if it had happened. If it was replaced but
+        the directory sync failed, ``commit-unsynced`` follows and the commit stands.
+        """
+        try:
+            validate_record(record)
+        except ValueError as error:
+            raise BudgetAuthorityError(f'Refusing to write invalid budget authority: {error}') from error
+        data = canonical(record)
+        if len(data) > MAX_RECORD_BYTES:
+            raise BudgetAuthorityError('Budget authority record exceeds its size bound')
+        if event.get('event') not in ROOM_EXEMPT and len(data) + settlement_reserve(record) > MAX_RECORD_BYTES:
+            raise BudgetAuthorityError('The batch record has no room left for its open tasks to record their '
+                                       'outcomes; no new work is admitted')
+        # Same-state scheduler heartbeats update the bounded authority snapshot. State
+        # transitions retain cumulative totals in the trail; polling itself is unbounded.
+        heartbeat = event.get('event') == 'capacity-heartbeat'
+        if not heartbeat:
+            self.event(event)
+        try:
+            write_pending_replace(self.dir_fd, (PENDING, AUTHORITY), data)
+        except (OSError, DurableFileError) as error:
+            self._settle_failed_write(None if heartbeat else event, data, error)
+
+    def _settle_failed_write(self, event: dict | None, data: bytes, error: BaseException) -> None:
+        """A replaced but unsynced record stands (recorded); an unreplaced one is a failed commit."""
+        try:
+            replaced = read_private_file(self.dir_fd, AUTHORITY, MAX_RECORD_BYTES) == data
+        except (OSError, DurableFileError):
+            replaced = False
+        outcome = 'commit-unsynced' if replaced else 'commit-failed'
+        if event is not None:
+            with contextlib.suppress(BudgetAuthorityError):
+                self.event({'event': outcome, 'failedEvent': event.get('event'), 'error': str(error)})
+        if not replaced:
+            raise BudgetAuthorityError(f'Budget authority for {self.batch_id} is unwritable: {error}') from error
+
+    def event(self, value: dict) -> None:
+        """Append one fsynced transition; the trail is bounded and never rewritten."""
+        line = canonical(value)
+        try:
+            fd = open_private_file(self.dir_fd, EVENTS, os.O_WRONLY | os.O_APPEND | os.O_CREAT)
+        except (OSError, DurableFileError) as error:
+            raise BudgetAuthorityError(f'Budget event trail for {self.batch_id} is unusable: {error}') from error
+        try:
+            _append(fd, line, value.get('event') in TERMINAL_EVENTS)
+        finally:
+            os.close(fd)
+
+
+def _append(fd: int, line: bytes, terminal: bool) -> None:
+    """Write one line (new work stops at the reserve; settling events always write) and flush it."""
+    try:
+        if not terminal and os.fstat(fd).st_size + len(line) > MAX_EVENT_BYTES - TERMINAL_RESERVE_BYTES:
+            raise BudgetAuthorityError('Budget event trail is full: no new work is admitted; close the batch')
+        write_all(fd, line)
+        os.fsync(fd)
+    except (OSError, DurableFileError) as error:
+        raise BudgetAuthorityError(f'Budget event trail is unwritable: {error}') from error
+
+
+def batch_directory(root: Path, batch_id: str) -> Path:
+    """A live batch's private directory path (existence is checked by callers)."""
+    return root / 'batches' / require_batch_id(batch_id)
+
+
+def archived_directory(root: Path, batch_id: str) -> Path:
+    """Where an archived batch's unchanged record and trail are kept."""
+    return root / 'archive' / require_batch_id(batch_id)
+
+
+@contextlib.contextmanager
+def _authority_lock(directory: Path, batch_id: str) -> Iterator[int]:
+    """The private kernel lock; any durable-file failure is corrupt authority."""
+    try:
+        with locked_private_dir(str(directory), LOCK) as dir_fd:
+            yield dir_fd
+    except DurableFileError as error:
+        raise BudgetAuthorityError(f'Budget authority lock for {batch_id} failed: {error}') from error
+
+
+@contextlib.contextmanager
+def locked_batch(root: Path, batch_id: str, create: bool = False, directory: Path | None = None) \
+        -> Iterator[BatchSession]:
+    """Hold the batch's exclusive kernel lock for one read-modify-write session."""
+    directory = directory or batch_directory(root, batch_id)
+    if not directory.is_dir():
+        raise BudgetAuthorityError(f'Unknown or missing budget batch: {batch_id}')
+    with _authority_lock(directory, batch_id) as dir_fd:
+        session = BatchSession(dir_fd, batch_id)
+        if not create:
+            session.read()
+        yield session
+
+
+def read_batch(root: Path, batch_id: str) -> dict:
+    """One locked, validated read of a live batch."""
+    with locked_batch(root, batch_id) as session:
+        return session.read()
+
+
+def read_any_batch(root: Path, batch_id: str) -> dict:
+    """A live or archived batch's validated record (continuity checks accept either)."""
+    directory = batch_directory(root, batch_id)
+    if not directory.is_dir():
+        directory = archived_directory(root, batch_id)
+    with locked_batch(root, batch_id, directory=directory) as session:
+        return session.read()
+
+
+def lift_additive_fields(record: object) -> None:
+    """Supply the old schema's implicit defaults before closed validation."""
+    if type(record) is not dict or record.get('schemaVersion') not in (5, 6, 7):
+        return
+    block = record.get('production')
+    if type(block) is not dict:
+        return
+    authorization = block.get('authorization')
+    if type(authorization) is dict and set(authorization) == {'identity', 'setup', 'setupElapsed'}:
+        authorization.update(prior=[], priorOmitted=0)
+    tasks = block.get('tasks')
+    if type(tasks) is dict:
+        _lift_tasks(tasks)
+
+
+def _lift_tasks(tasks: dict) -> None:
+    """Infer revocation only from the previously durable terminal/stale state."""
+    for row in tasks.values():
+        if type(row) is dict:
+            row.setdefault('owners', [])
+        if type(row) is dict and 'revoked' not in row:
+            row['revoked'] = row.get('state') == 'superseded' or (row.get('approvalStale') is True and row.get('state') != 'completed')

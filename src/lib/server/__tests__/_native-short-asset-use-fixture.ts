@@ -6,7 +6,7 @@ import { buildNativeCanvas } from "../native-short-composition";
 import { fileSha256 } from "../auto-edit-hash";
 import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
 import type { NativeAssetOriginReceipt, NativeAssetUseDecision, NativeAssetUseInput, NativeAssetUseOptions } from "../native-short-asset-use-types";
-import { nativeShortFixture } from "./_native-short-project-fixture";
+import { nativeShortFixture, refreshNativeRequestPacketFixture } from "./_native-short-project-fixture";
 
 export function assetDecision(): NativeAssetUseDecision {
   return { id: "test-use", decision: "no-insert", speech: { startFrame: 0, endFrame: 50, occurrenceIds: [0, 1], text: "Test words." },
@@ -19,7 +19,9 @@ export function assetDecision(): NativeAssetUseDecision {
 export function assetUseFixture() {
   const directory = realpathSync(mkdtempSync(path.join(os.tmpdir(), "sniper-asset-use-")));
   const input: NativeAssetUseInput = nativeShortFixture(directory);
-  const options: NativeAssetUseOptions = { required: true, expectedPolicy: { placement: "auto", sources: "local-only" } };
+  const options: NativeAssetUseOptions = { required: true, expectedPolicy: { placement: "auto", sources: "local-only" },
+    providedAssets: input.assets.filter(asset => asset.role !== "runtime")
+      .map(({ file, sha256 }) => ({ file, sha256 })) };
   const receipts = new Map<string, NativeAssetOriginReceipt>();
   input.strategy.assetUse = { schemaVersion: 1, revisionHash: "", policy: options.expectedPolicy,
     intendedUse: { use: "editorial", platform: "local-review" }, decisions: [assetDecision()] };
@@ -40,7 +42,12 @@ export function assetUseFixture() {
     saveOrigin(asset);
   };
   addOrigin(input.assets[0]);
-  const refresh = () => { input.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(input); };
+  const refresh = () => {
+    refreshNativeRequestPacketFixture(input as import("../native-short-project").NativeShortProjectInput);
+    options.providedAssets = input.assets.filter(asset => asset.role !== "runtime")
+      .map(({ file, sha256 }) => ({ file, sha256 }));
+    input.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(input);
+  };
   const addMedia = (kind: "image" | "video" = "image") => {
     const file = path.join(directory, `insert.${kind === "image" ? "png" : "mp4"}`);
     writeFileSync(file, `TEST synthetic ${kind} bytes`);

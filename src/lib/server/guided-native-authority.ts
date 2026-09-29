@@ -7,7 +7,8 @@ import { validateIntent } from "@/lib/producer/intent-presets";
 import { AUTOMATIC_SHORT_DIRECTION } from "@/lib/producer/short-direction";
 import { canonicalJsonSha256, fileSha256 } from "./auto-edit-hash";
 import type { AssetManifest } from "@/lib/producer/types";
-import { nativeShortSourceInventory, nativeShortSupportingInventory, prepareNativeShortRequest } from "./native-short-request";
+import { nativeShortExternalInventory, nativeShortSourceInventory,
+  nativeShortSupportingInventory, prepareNativeShortRequest } from "./native-short-request";
 import { readGuidedTreatmentProposal } from "./guided-proposal-store";
 import { assertNativeShortIntent, type NativeShortProjectInput } from "./native-short-project";
 import { nativeProposalPreparationAllowed } from "./guided-native-supporting";
@@ -40,7 +41,8 @@ function assertPacketManifest(packet: Record<string, unknown>, authority: Guided
         sha256: manifest.sha256, sizeBytes: current.sizeBytes })) throw new Error("Native request packet belongs to a different guided manifest");
   const admitted = manifest.value as unknown as AssetManifest;
   if (canonicalJsonSha256(packet.sources) !== canonicalJsonSha256(nativeShortSourceInventory(manifest.path, admitted))
-      || canonicalJsonSha256(packet.availableSupportingAssets) !== canonicalJsonSha256(nativeShortSupportingInventory(manifest.path, admitted))) {
+      || canonicalJsonSha256(packet.availableSupportingAssets) !== canonicalJsonSha256(nativeShortSupportingInventory(manifest.path, admitted))
+      || canonicalJsonSha256(packet.availableExternalMedia) !== canonicalJsonSha256(nativeShortExternalInventory(manifest.path, admitted))) {
     throw new Error("Native request packet substituted the guided supplied inventory");
   }
   const admission = objectValue(manifest.value.sourceSetAdmission, "guided source-set admission");

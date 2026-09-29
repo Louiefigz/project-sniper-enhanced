@@ -67,6 +67,19 @@ export function qcIdentity(context, forward) {
 function stableCaptureEvidence(context) {
   const evidence=nativeCaptureEvidence(context),acquired=evidence.sourceCacheAcquisition;
   if(!acquired)return evidence;
+  if(acquired.scope==='native-short-content-source-store'){
+    assert.equal(acquired.mode,context.request.sourceCacheMode,'Content source mode differs');
+    assert.equal(acquired.schemaVersion,2);assert.equal(acquired.status,'exact-source-caches-ready');
+    const stable={...acquired};delete stable.storage;
+    return {...evidence,sourceCacheAcquisition:stable};
+  }
+  if(acquired.scope==='native-sdk-preflight-source-cache'){
+    assert.equal(context.request.sourceCacheMode,'acquire-sdk-preflight','Preflight cache mode differs');
+    assert.equal(acquired.schemaVersion,1);assert.equal(acquired.status,'exact-source-caches-ready');
+    const stable={...acquired};delete stable.phaseBreakdown;
+    return {...evidence,sourceCacheAcquisition:stable};
+  }
+  assert.ok(Array.isArray(acquired.entries),'Source cache acquisition inventory is missing');
   const entries=acquired.entries.map(entry=>{
     const row={...entry};delete row.startedAt;delete row.sdkResult;return row;
   });

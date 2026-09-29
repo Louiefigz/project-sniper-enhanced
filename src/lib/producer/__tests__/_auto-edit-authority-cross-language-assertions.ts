@@ -117,6 +117,7 @@ export function assertPinnedTemplateResolver(ctx: AutoEditCtx): void {
       env: {
         ...process.env,
         PYTHONPATH: path.join(process.cwd(), "scripts", "producer"),
+        PYTHONDONTWRITEBYTECODE: "1",
         SNIPER_PIPELINE_ROOT: ctx.pipeline!.snapshotRoot,
         SNIPER_RUNTIME_REPO_ROOT: runtime,
       },
@@ -143,6 +144,7 @@ export function assertPinnedRuntimeAssets(ctx: AutoEditCtx): void {
     env: {
       ...process.env,
       PYTHONPATH: path.join(root, "scripts", "producer"),
+      PYTHONDONTWRITEBYTECODE: "1",
       SNIPER_PIPELINE_ROOT: root,
     },
   });
@@ -168,9 +170,9 @@ export function assertPinnedCutPermissions(
     "resume must preserve the exact immutable command spellings");
   assert.equal(cutAllowedTools(resumed), cutAllowedTools(initial));
   for (const command of resumedCommands) {
-    assert.ok(command.includes(resumed.pipeline!.snapshotRoot));
+    assert.ok(command.includes(process.env.SNIPER_RUNTIME_REPO_ROOT!));
     assert.equal(
-      command.includes(`${process.cwd()}/scripts/producer/`), false,
-      "authoring must never fall back to mutable Producer scripts");
+      command.includes(resumed.pipeline!.snapshotRoot), false,
+      "authoring must execute the identity-matched installed runtime");
   }
 }

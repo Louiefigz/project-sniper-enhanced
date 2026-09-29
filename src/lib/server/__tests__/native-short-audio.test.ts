@@ -36,6 +36,20 @@ test("unavailable presets and undeclared enhancement knobs cannot silently fall 
   }
 });
 
+test("mono is an explicit processing decision; stereo preserves the existing default", () => {
+  for (const channelMode of ["mono", "stereo"] as const) {
+    const value = { ...finishing(), channelMode }, before = structuredClone(value);
+    assert.doesNotThrow(() => assertNativeShortAudio(value, 4));
+    assert.deepEqual(value, before);
+  }
+  const channelOnly = { schemaVersion: 1 as const, rationale: "Center this recorded dialogue." };
+  assert.doesNotThrow(() => assertNativeShortAudio({ ...channelOnly, channelMode: "mono" }, 4));
+  assertRejected({ ...channelOnly, channelMode: "stereo" });
+  for (const channelMode of [null, true, 1, [], {}, "left", "MONO"]) {
+    assertRejected({ ...finishing(), channelMode });
+  }
+});
+
 test("an active decision needs a finite positive output duration", () => {
   for (const duration of [0, -1, NaN, Infinity, -Infinity]) assertRejected(finishing(), duration);
 });

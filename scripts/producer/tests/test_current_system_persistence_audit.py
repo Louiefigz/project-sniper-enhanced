@@ -12,6 +12,21 @@ from current_system_persistence_audit import (
 class CurrentSystemPersistenceAuditTests(unittest.TestCase):
     """Prove writer extraction and artifact binding remain fail-closed."""
 
+    def test_path_read_string_replace_does_not_hide_real_path_replace(self) -> None:
+        """Content replacement after an exact Path read is not filesystem mutation."""
+        from current_system_python_persistence import python_persistence_rows
+        source = '\n'.join([
+            'from pathlib import Path',
+            'source = Path("source.txt")',
+            'source.read_text().replace("old", "new")',
+            'source.read_bytes().replace(b"old", b"new")',
+            'source.replace("new.txt")',
+            'Path("other.txt").replace("moved.txt")',
+            'source.resolve().replace("resolved.txt")',
+        ])
+        rows = python_persistence_rows('example.py', source)
+        self.assertEqual(sorted(line for _name, line in rows), [5, 6, 7])
+
     def test_python_ast_distinguishes_read_and_write_open(self) -> None:
         sites = persistence_sites({
             "src/example.py": (

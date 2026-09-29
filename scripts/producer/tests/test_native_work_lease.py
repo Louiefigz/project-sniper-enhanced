@@ -1,4 +1,8 @@
-"""Real kernel-lock and durable failure-fence tests; no media or browser jobs."""
+"""Real kernel-lock and durable failure-fence tests of the exclusive lease; no media jobs.
+
+The exclusive NativeWorkLease now serves the preview-control lane; heavy and audio
+work is admitted by the host pool (test_native_work_pool.py).
+"""
 from __future__ import annotations
 
 import json
@@ -11,6 +15,8 @@ from pathlib import Path
 from unittest import mock
 
 import native_work_lease as work
+
+LANE = 'preview-control'
 
 
 class NativeWorkLeaseTests(unittest.TestCase):
@@ -27,22 +33,22 @@ class NativeWorkLeaseTests(unittest.TestCase):
 
     def acquire(self) -> work.NativeWorkLease:
         """Always close descriptors even when a regression assertion fails."""
-        lease = work.NativeWorkLease.acquire('heavy', '/TEST/project')
+        lease = work.NativeWorkLease.acquire(LANE, '/TEST/project')
         self.addCleanup(lease.close)
         return lease
 
     def test_real_subprocess_cannot_enter_held_lane(self) -> None:
         """A different interpreter/checkout cannot race through the same flock."""
         lease = self.acquire()
-        before = (self.root / 'heavy.active.json').read_bytes()
+        before = (self.root / f'{LANE}.active.json').read_bytes()
         script = ('import sys; from pathlib import Path; import native_work_lease as w; '
                   'w.state_root=lambda:Path(sys.argv[1]); '
-                  "w.NativeWorkLease.acquire('heavy','/TEST/other')")
+                  "w.NativeWorkLease.acquire('preview-control','/TEST/other')")
         result = subprocess.run([sys.executable, '-c', script, str(self.root)],
                                 capture_output=True, text=True, timeout=5)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('already active', result.stderr)
-        self.assertEqual(before, (self.root / 'heavy.active.json').read_bytes())
+        self.assertEqual(before, (self.root / f'{LANE}.active.json').read_bytes())
         lease.complete()
 
     def test_close_without_cleanup_fences_the_next_launch(self) -> None:
@@ -54,11 +60,11 @@ class NativeWorkLeaseTests(unittest.TestCase):
     def test_completed_lane_reuses_the_original_mutex_inode(self) -> None:
         """No unlink/recreate race can manufacture a second independent lock."""
         lease = self.acquire()
-        inode = (self.root / 'heavy.lock').stat().st_ino
+        inode = (self.root / f'{LANE}.lock').stat().st_ino
         lease.complete()
         lease.close()
         second = self.acquire()
-        self.assertEqual(inode, (self.root / 'heavy.lock').stat().st_ino)
+        self.assertEqual(inode, (self.root / f'{LANE}.lock').stat().st_ino)
         second.complete()
 
     def test_live_registered_child_prevents_completion(self) -> None:
@@ -69,7 +75,7 @@ class NativeWorkLeaseTests(unittest.TestCase):
         with mock.patch.object(work, '_live_identities', return_value=[23456]):
             with self.assertRaisesRegex(RuntimeError, 'live recorded'):
                 lease.complete()
-        self.assertTrue((self.root / 'heavy.active.json').exists())
+        self.assertTrue((self.root / f'{LANE}.active.json').exists())
         with mock.patch.object(work, '_live_identities', return_value=[]):
             lease.complete()
 
@@ -87,7 +93,7 @@ class NativeWorkLeaseTests(unittest.TestCase):
     def test_changed_active_record_refuses_release(self) -> None:
         """Ownership drift cannot delete another job's marker."""
         lease = self.acquire()
-        path = self.root / 'heavy.active.json'
+        path = self.root / f'{LANE}.active.json'
         path.write_text(json.dumps(dict(lease.record, nonce='different')))
         with self.assertRaisesRegex(RuntimeError, 'record changed'):
             lease.complete()
@@ -96,7 +102,7 @@ class NativeWorkLeaseTests(unittest.TestCase):
     def test_malformed_and_symlink_markers_fail_closed(self) -> None:
         """Any existing active entry is a fence, including a dangling link."""
         self.root.mkdir(mode=0o700)
-        (self.root / 'heavy.active.json').symlink_to(self.root / 'missing')
+        (self.root / f'{LANE}.active.json').symlink_to(self.root / 'missing')
         with self.assertRaisesRegex(work.NativeWorkBusy, 'cleanup is unverified'):
             self.acquire()
 
@@ -115,6 +121,14 @@ class NativeWorkLeaseTests(unittest.TestCase):
                 lease.record_processes([row])
         self.assertEqual(lease.record['processes'], [])
         lease.complete()
+
+    def test_unknown_lane_or_pool_request_is_rejected(self) -> None:
+        """The exclusive lease serves only its own lane and never takes a pool request."""
+        with self.assertRaisesRegex(ValueError, 'Unknown native work lane'):
+            work.NativeWorkLease.acquire('TEST-lane', '/TEST/project')
+        with self.assertRaisesRegex(ValueError, 'Unknown native work lane'):
+            work.NativeWorkLease.acquire(LANE, '/TEST/project', request=object())
+        self.assertFalse(self.root.exists())
 
     def test_replaced_namespace_cannot_release_old_job_as_current(self) -> None:
         """Moving the directory cannot redirect cleanup to another lock family."""

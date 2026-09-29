@@ -9,7 +9,7 @@ import os
 import sys
 from pathlib import Path
 
-from cut_preview_io import bound_json, write_new
+from cut_preview_io import MAX_JSON, bound_json, write_new
 from graphics.graphics_render import HYPERFRAMES_BIN
 from studio.native_export import active_owner_snapshot
 from studio.native_run import NativeRun
@@ -47,13 +47,13 @@ def run_inspection(worker: Path, root: Path, request: dict) -> dict:
         [sys.executable, "-B", str(worker), "--worker", str(file)], environment,
         {"output": str(root / "result.json"), "sdkSha256": digest(cli), "sandboxSha256": digest(SANDBOX)},
         deadline=4200, idle_deadline=600, capacity_wait_seconds=600, success_status=STATUS,
-        additional_pins={**request["pins"], str(file): digest(file)})
+        additional_pins={**request["pins"], str(file): digest(file)}, output_digest_limit=MAX_JSON)
     owner = NativeRun("inspection", settings)
     if not owner.execute():
         raise RuntimeError(f"Ordinary preview failed; retained {root / 'inspection.render.log'}")
-    result = {"path": str(root / "result.json"), "sha256": digest(root / "result.json"),
+    result = {"path": str(root / "result.json"), "sha256": owner.result['completedOutput']['sha256'],
               "owner": str(owner.path), "ownerSha256": digest(owner.path)}
-    read_inspection(result)
+    read_inspection(result, require_owner_digest=True)
     return result
 
 
@@ -77,8 +77,13 @@ def require_worker(file: Path, worker: Path) -> dict:
     return request
 
 
-def read_inspection(reference: dict) -> dict:
-    """Read original completed owner evidence without transferring old approval."""
+def read_inspection(reference: dict, *, require_owner_digest: bool = False) -> dict:
+    """Read completed evidence; legacy inspections may lack a digest, new calibration may not.
+
+    The default preserves historical preview inspection reads only. New rate and
+    calibration readers explicitly require owner-captured output. A present
+    malformed or mismatched pin always refuses, including on the legacy route.
+    """
     file, owner_file = Path(reference["path"]), Path(reference["owner"])
     require(owner_file == file.parent / "inspection.render.json", "Inspection result escaped its owner")
     owner = bound_json(owner_file, reference["ownerSha256"])
@@ -92,4 +97,12 @@ def read_inspection(reference: dict) -> dict:
     request_file = file.parent / "request.json"
     require(owner["additionalFilePinsBefore"].get(str(request_file)) == digest(request_file),
             "Inspection request changed after completion")
+    completed = owner.get('completedOutput')
+    present = 'completedOutput' in owner
+    require(not require_owner_digest or present, 'Inspection lacks owner-captured result digest')
+    if present:
+        require(type(completed) is dict and set(completed) == {'path', 'sha256', 'bytes'}
+                and completed['path'] == str(file) and completed['sha256'] == reference['sha256']
+                and type(completed['bytes']) is int and 0 < completed['bytes'] <= MAX_JSON
+                and completed['bytes'] == file.stat().st_size, 'Inspection owner-captured result differs')
     return bound_json(file, reference["sha256"])

@@ -1,7 +1,10 @@
 /** New-only admitted-source/existing-candidate launch through the ordinary qualified cut PAUSE. */
 import path from "node:path";
 import { lstatSync } from "node:fs";
-import { writeProjectJson } from "@/app/api/_lib/workspace";
+import {
+  CURRENT_VISUAL_PLAN_POLICY,
+  writeProjectJson,
+} from "@/app/api/_lib/workspace";
 import { savePlanTransaction } from "@/app/api/producer/save-plan/transaction";
 import { parseAutoEditIntent, type AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
@@ -59,7 +62,8 @@ function policyContext(created: ReturnType<typeof createBootstrapProject>,
 async function saveContext(created: ReturnType<typeof createBootstrapProject>, inputs: ReturnType<typeof readBootstrapInputs>): Promise<AutoEditCtx> {
   const { request, token } = created.record;
   writeProjectJson(created.root, { origin: "raw", sourceMode: "referenced", history: [],
-    requestedIntent: request.intent, resolvedIntent: request.intent, intent: request.intent, intentDecisions: [] });
+    requestedIntent: request.intent, resolvedIntent: request.intent, intent: request.intent,
+    intentDecisions: [], visualPlanPolicy: CURRENT_VISUAL_PLAN_POLICY });
   const planPath = path.join(created.dir, "edit_plan.json");
   await bootstrapServices.save({ filePath: planPath, plan: inputs.candidate.value as unknown as EditPlan, timebase: "full-plan" });
   const saved = readCutPreviewObject(planPath);
@@ -68,6 +72,7 @@ async function saveContext(created: ReturnType<typeof createBootstrapProject>, i
   assertOriginalInputs(request, inputs);
   const ctx: AutoEditCtx = { dir: created.dir, scope: request.intent.scope,
     intent: parseAutoEditIntent(request.intent as unknown as Record<string, unknown>),
+    visualPlanRequiredVersion: 1,
     deliveryPolicy: "mp4-only", workflowPolicy: "cut-first",
     workflowV2: { schemaVersion: 2, mode: "guided", afterCut: "treatment-then-intro", approvalPolicy: "explicit-human" },
     planPath, manifestPath: request.manifest.path, transcriptsDir: path.dirname(request.manifest.path),

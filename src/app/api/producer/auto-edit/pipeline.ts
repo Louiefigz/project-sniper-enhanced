@@ -29,7 +29,7 @@ import {
   qualityRoundWithRenderCheckpoint,
 } from "./pipeline-palmier-publish";
 import { MAX_QC_RENDER_ROUNDS } from "./round-policy";
-import { AutoEditError } from "./stream";
+import { AutoEditError, ordinaryVisualPlanRequired } from "./stream";
 import {
   currentPlanRefitReceipt,
   planRefitEvent,
@@ -47,16 +47,15 @@ import {
 import type { PipelineOutcome, PipelineRuntime } from "./pipeline-types";
 import { bindAutoEditDeliveryController } from "./delivery-controller";
 import { assertGuidedDelivery } from "./guided-cut-boundary";
+import { dispatchPipelineCreativeRoute } from "./pipeline-route-dispatch";
 export type { PipelineIo, PipelineRuntime } from "./pipeline-types";
 export type { PipelineDependencies } from "./pipeline-dependencies";
 function advance(run: PipelineRuntime, update: CheckpointUpdate): void {
   run.job = run.io.advance(update);
 }
-
 function resumeEvent(run: PipelineRuntime, stage: string, message: string): void {
   run.io.send({ event: "resume", stage, checkpoint: run.job.checkpoint, message });
 }
-
 function validationReusable(run: PipelineRuntime, deps: PipelineDependencies): boolean {
   if (!checkpointReached(run.job.checkpoint, "validated")) return false;
   const authority = deps.authority(run.job.ctx);
@@ -257,7 +256,8 @@ export async function runAutoEditPipeline(run: PipelineRuntime,
     workbench: delivery.policy === "mp4-only" ? "MP4" : "Palmier" });
   const refit = currentPlanRefitReceipt(run.job.ctx.dir, run.job.ctx.planPath);
   if (refit) run.io.send(planRefitEvent(refit, "reused"));
-  if (await deps.palmierPrimary(run)) {
+  const routeNeutralPlanning = ordinaryVisualPlanRequired(run.job.ctx);
+  if (!routeNeutralPlanning && await deps.palmierPrimary(run)) {
     delivery.finish();
     return { status: "completed" };
   }
@@ -268,6 +268,12 @@ export async function runAutoEditPipeline(run: PipelineRuntime,
     overusedKinds: history.overusedKinds, digest: history.digest });
   const authored = await timedStage(run.job.ctx.dir, "authoring", () => runAuthorStage(run, deps));
   if (authored.status === "awaiting_cut_approval") return authored;
+  const dispatched = dispatchPipelineCreativeRoute(run, deps);
+  if (dispatched) return dispatched;
+  if (routeNeutralPlanning && await deps.palmierPrimary(run)) {
+    delivery.finish();
+    return { status: "completed" };
+  }
   const geometry: GeometryReplanState = { attempts: 0 };
   while (true) {
     await deps.planning(run, { checkpoint: deps.checkpoint });

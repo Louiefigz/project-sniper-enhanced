@@ -92,10 +92,40 @@ test("discarded nested word endpoints cannot block a clean trim or hide a word c
     partitions: [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: 30, text: "" }], frameRate: "30/1", totalFrames: 30 });
   assert.deepEqual(mapProposalOccurrences(input(3, 4), words).occurrences, [[0, 0, 2, 0, 30, "Kept.", 0]]);
   assert.deepEqual(mapProposalOccurrences(input(1.75, 2.75), words).occurrences, [[0, 0, 0, 0, 8, "discarded", 1]]);
-  assert.throws(() => mapProposalOccurrences(input(1, 2), words), /Retained out-of-order transcript word endpoints/);
+  assert.deepEqual(mapProposalOccurrences(input(1, 2), words).occurrences,
+    [[0, 0, 0, 0, 30, "discarded", 1], [1, 0, 1, 0, 15, "nested", 0]]);
   assert.throws(() => mapProposalOccurrences(input(3, 4), speech([
     { word: "late", start: 1, end: 2 }, { word: "early", start: 0, end: 0.5 }, { word: "Kept.", start: 3, end: 4 },
   ])), /Out-of-order transcript word starts/);
+});
+
+test("admitted nested intervals retain exact enclosure, source indices and immutable speech", () => {
+  const cases = [
+    { origin: 128, words: [{ word: "is", start: 128.9, end: 129.7 }, { word: "versus", start: 129.285, end: 129.685 }], frames: [[27, 51], [38, 51]] },
+    { origin: 389, words: [{ word: "and", start: 389.18, end: 389.9 }, { word: "it", start: 389.435, end: 389.755 }], frames: [[5, 27], [13, 23]] },
+    { origin: 654, words: [{ word: "I", start: 654.845, end: 655.405 }, { word: "show", start: 655.05, end: 655.29 }], frames: [[25, 43], [31, 39]] },
+  ];
+  for (const row of cases) {
+    const source = speech(row.words), before = structuredClone(source);
+    const segments = packetCutSegments({ cutTrack: [{ sourceId: "s", start: row.origin, end: row.origin + 2 }] });
+    const partitions = [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: 60, text: "" }];
+    const result = mapProposalOccurrences({ segments, partitions, frameRate: "30/1", totalFrames: 60 }, source);
+    assert.deepEqual(result.occurrences, row.words.map((word, index) =>
+      [index, 0, index, ...row.frames[index], word.word, 0]));
+    assert.deepEqual(source, before, "Frame projection cannot normalize source clocks or word indices");
+  }
+});
+
+test("nested sentence ends stay crossed and repeated cuts preserve every original occurrence", () => {
+  const source = speech([{ word: "Outer", start: 0, end: 2 }, { word: "nested.", start: 0.5, end: 1 },
+    { word: "Done.", start: 2, end: 3 }]);
+  const segments = packetCutSegments({ cutTrack: [{ sourceId: "s", start: 0, end: 3 }, { sourceId: "s", start: 0, end: 3 }] });
+  const partitions = segments.map(segment => ({ index: segment.index, sourceId: "s", startFrame: segment.index * 90,
+    endFrameExclusive: (segment.index + 1) * 90, text: "" }));
+  const result = mapProposalOccurrences({ segments, partitions, frameRate: "30/1", totalFrames: 180 }, source);
+  assert.deepEqual(result.occurrences.map(word => [word[0], word[1], word[2], word[3], word[4]]),
+    [[0, 0, 0, 0, 60], [1, 0, 1, 15, 30], [2, 0, 2, 60, 90], [3, 1, 0, 90, 150], [4, 1, 1, 105, 120], [5, 1, 2, 150, 180]]);
+  assert.deepEqual(result.cleanEnds, [90, 180], "Nested punctuation does not establish a clean audio endpoint");
 });
 
 test("punctuation under overlapping speech cannot create a clean endpoint; half-open adjacent words can", () => {

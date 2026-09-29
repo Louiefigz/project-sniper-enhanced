@@ -2,6 +2,8 @@ import { refreshVisualSourceFixture } from "./_visual-source-fixture";
 /** Synthetic contract data only; no visual/source-quality claim. */
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
 import { writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { canonicalJson, fileSha256 } from "../auto-edit-hash";
 import { NATIVE_PREBUILD_COVERAGE, nativeShortPrebuildPlanHash, type NativePrebuildReview } from "../native-short-prebuild-review";
@@ -11,6 +13,8 @@ import { buildNativeCanvas, centeredNativeCaptionView } from "../native-short-co
 import { nativePacingBindings, nativePacingVisualWindows } from "../native-short-pacing-observations";
 import type { NativeShortProjectInput } from "../native-short-project";
 import type { NativeAssetBinding } from "../native-short-strategy";
+import { pythonInterpreter } from "../../../app/api/_lib/spawn-python";
+import { resolveVisualPlanBinding } from "../visual-plan-binding";
 
 function assets(directory: string): NativeAssetBinding[] {
   const files = ["source.mp4", "gsap.min.js", "Inter-Bold.ttf", "selected.jpg", "alternate.jpg"];
@@ -44,12 +48,31 @@ export function nativeShortFixture(directory: string): NativeShortProjectInput {
         before: "TEST opening state", action: "TEST spoken explanation", result: "TEST words retained", holdFrames: 5,
         visibleIds: ["source-0-0"], occurrenceIds: [0, 1], referenceIds: ["TEST-3"], exitReason: "TEST complete thought" }],
       review: { method: "local-editorial", findings: ["TEST binding-only fixture; no real creative review occurred"] } } };
+  bindNativeVisualPlanFixture(input, directory);
+  refreshNativeRequestPacketFixture(input);
   refreshNativePacingFixture(input);
   return input;
 }
 
+/** Keep synthetic packet inventory current after a test intentionally edits its fixture. */
+export function refreshNativeRequestPacketFixture(input: NativeShortProjectInput): void {
+  const directory = path.dirname(input.assets[0].path);
+  const packetPath = input.requestPacket?.path ?? path.join(directory, "TEST-SHORT-REQUEST.json");
+  const source = input.assets.find(asset => asset.role === "source")!;
+  const supporting = input.assets.filter(asset => ["supporting-video", "image", "reference"].includes(asset.role));
+  const packet = { schemaVersion: 1,
+    intent: { mode: "short", scope: "produced", lanes: {}, shortDirection: input.request },
+    sources: [{ path: source.path, sha256: source.sha256, transcript: null }],
+    availableSupportingAssets: supporting.map(({ path, sha256 }) => ({ path, sha256 })),
+    selectedReferences: supporting.filter(asset => asset.role === "reference")
+      .map(({ path, sha256 }) => ({ path, sha256 })), relatedStyleContext: null };
+  writeFileSync(packetPath, canonicalJson(packet));
+  input.requestPacket = { path: packetPath, sha256: fileSha256(packetPath)! };
+}
+
 /** Explicitly re-author synthetic fixture budgets after a test's intended revision. */
 export function refreshNativePacingFixture(input: NativeShortProjectInput): void {
+  if (input.requestPacket?.path.includes("TEST-SHORT-REQUEST.json")) refreshNativeRequestPacketFixture(input);
   refreshVisualSourceFixture(input);
   input.strategy.schemaVersion = 3;
   const windows = nativePacingVisualWindows(input, buildNativeCanvas(input.canvas) + (input.extension?.markup ?? ""));
@@ -86,4 +109,47 @@ export function refreshNativePrebuildReviewFixture(input: NativeShortProjectInpu
   const file = path.join(directory, `TEST-prebuild-${planHash}.json`);
   writeFileSync(file, canonicalJson(receipt));
   input.prebuildReview = { path: file, sha256: fileSha256(file)! };
+}
+
+/** Attach one fully admitted TEST visual plan and its exact executable mapping. */
+export function bindNativeVisualPlanFixture(input: NativeShortProjectInput,
+  directory: string): void {
+  const file = path.join(directory, "TEST-VISUAL-PLAN.json");
+  const source = input.assets.find(row => row.role === "source")!;
+  const code = [
+    "import json,os,sys",
+    "from _visual_plan_fixture import candidate,materialize_plan_pins,opportunity,reseal_controller_authorities,visual_plan",
+    "from planner.visual_plan_allocator import allocate_visual_plan",
+    "row=candidate('candidate:one',modality='source-footage',routeClass='native')",
+    "row['source']={'recordId':'asset:source','path':sys.argv[2],'sha256':sys.argv[3],'sourceSha256':sys.argv[3],'range':{'startFrame':0,'endFrameExclusive':50}}",
+    "opp=opportunity('opp:one',0,[row],timing={'startFrame':0,'endFrameExclusive':50})",
+    "value=visual_plan(opp)",
+    "value['project']['fps']={'numerator':25,'denominator':1}",
+    "value=reseal_controller_authorities(value)",
+    "value=materialize_plan_pins(value,os.path.join(os.path.dirname(sys.argv[1]),'TEST-visual-plan-pins'))",
+    "open(sys.argv[1],'w').write(json.dumps(allocate_visual_plan(value)))",
+  ].join("\n");
+  execFileSync(pythonInterpreter(), ["-B", "-c", code, file,
+    source.path, source.sha256], {
+    cwd: path.join(process.cwd(), "scripts/producer"),
+    env: { ...process.env, PYTHONPATH: ".:tests", PYTHONDONTWRITEBYTECODE: "1" },
+  });
+  const binding = resolveVisualPlanBinding(file);
+  if (!binding) throw new Error("TEST visual-plan fixture was not written");
+  const html = buildNativeCanvas(input.canvas);
+  const markup = html.match(/<video\b[^>]*id="source-0-0"[^>]*>[\s\S]*?<\/video>/u)?.[0];
+  if (!markup) throw new Error("TEST source execution markup is missing");
+  input.visualPlan = binding;
+  input.strategy.visualPlanApplication = { schemaVersion: 1, route: "native-short",
+    visualPlanSha256: binding.visualPlanSha256, decisions: [{
+      opportunityId: "opp:one", candidateId: "candidate:one",
+      anatomy: "split-card", development: "label-then-proof",
+      startFrame: 0, endFrameExclusive: 50, sceneIndexes: [0],
+      visibleIds: [input.strategy.scenes[0].visibleIds[0]], catalogBindings: [],
+      binding: { kind: "media", elementId: "source-0-0",
+        sourceRecordId: "asset:source", assetFile: source.file, sourceSha256: source.sha256,
+        sourceRange: { startFrame: 0, endFrameExclusive: 50 },
+        outputRange: { startFrame: 0, endFrameExclusive: 50 },
+        elementSha256: createHash("sha256").update(markup).digest("hex") },
+    }] };
 }

@@ -22,9 +22,12 @@ class IngestExecutionAuthorityTests(unittest.TestCase):
             root = Path(tmp)
             out = root / "output"
             (root / "broll").mkdir()
+            (root / "external-media").mkdir()
             (root / "music").mkdir()
             (root / "take.mp4").write_bytes(b"video")
             (root / "broll" / "shot.png").write_bytes(b"image")
+            (root / "external-media" / "licensed.mp4").write_bytes(
+                b"external video")
             (root / "music" / "bed.wav").write_bytes(b"music")
             manifest_path = out / "asset_manifest.json"
             with patch("ingest_admission.admit_external_media",
@@ -43,7 +46,7 @@ class IngestExecutionAuthorityTests(unittest.TestCase):
                 verify_execution_media_authority(
                     {"music": {"enabled": True, "assetId": music["id"]}},
                     manifest, str(manifest_path))
-            self.assertEqual(snapshot_check.call_count, 3)
+            self.assertEqual(snapshot_check.call_count, 4)
             verify_execution_media_authority(
                 {"music": {"enabled": True, "path": music["path"]}},
                 manifest, str(manifest_path))
@@ -73,6 +76,23 @@ class IngestExecutionAuthorityTests(unittest.TestCase):
             late["broll"].append({"id": "late", "path": str(outside)})
             with self.assertRaisesRegex(RuntimeError, "lacks admitted"):
                 verify_execution_media_authority({}, late, str(manifest_path))
+
+            external = manifest["externalMedia"][0]
+            self.assertEqual(external["id"], "external-1")
+            wrong_external = json.loads(json.dumps(manifest))
+            wrong_external["externalMedia"][0]["path"] = str(outside)
+            with self.assertRaisesRegex(RuntimeError, "disagrees"):
+                verify_execution_media_authority(
+                    {}, wrong_external, str(manifest_path))
+            late_external = json.loads(json.dumps(manifest))
+            late_external["externalMedia"].append({
+                "id": "late-external",
+                "path": str(outside),
+                "originalPath": str(outside),
+            })
+            with self.assertRaisesRegex(RuntimeError, "absent from its source set"):
+                verify_execution_media_authority(
+                    {}, late_external, str(manifest_path))
 
             repeated_id = json.loads(json.dumps(manifest))
             repeated_id["sources"].append(dict(repeated_id["sources"][0]))

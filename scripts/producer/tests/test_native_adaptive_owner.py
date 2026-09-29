@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch
 
 from native_render_processes import ProcessIdentity
 from native_render_resources import GIB, ResourcePolicy, ResourceSnapshot
+from _native_pool_fixture import pool_lease_double
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig
 from studio.native_runtime import digest
@@ -34,7 +35,7 @@ class NativeAdaptiveOwnerTests(unittest.TestCase):
             {'output': str(output / 'result.bin'), 'sdkSha256': digest(cli),
              'sandboxSha256': digest(sandbox)}, sandbox=sandbox)
         self.baseline = replace(policy_snapshot(), measured_at=time.time() - 20)
-        self.enterContext(patch('studio.native_run.NativeWorkLease.acquire', return_value=Mock()))
+        self.enterContext(patch('studio.native_run.NativeWorkLease.acquire', return_value=pool_lease_double()))
         self.enterContext(patch('builtins.print'))
 
     def close_owner(self, owner: NativeRun) -> None:

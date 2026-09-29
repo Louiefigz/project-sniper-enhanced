@@ -51,6 +51,26 @@ class NativeAudioFinishingContractTests(unittest.TestCase):
             render.assert_not_called()
             self.assertFalse((root / "finish").exists())
 
+    def test_channel_mode_is_explicit_and_precedes_cleanup_without_mutation(self) -> None:
+        value = {**DECISION, "channelMode": "mono"}
+        before = copy.deepcopy(value)
+        ordinary = finishing_request(value, SAMPLES / RATE)
+        mono = native.native_finishing_request(value, SAMPLES)
+        self.assertEqual(mono.enhance_chain, "pan=mono|c0=0.5*c0+0.5*c1,"
+                         + ordinary.enhance_chain + ",pan=stereo|c0=c0|c1=c0")
+        self.assertEqual(value, before)
+        self.assertEqual(native.native_finishing_request({**value, "channelMode": "stereo"}, SAMPLES),
+                         ordinary)
+        for invalid in (None, True, 1, [], {}, "left", "MONO"):
+            self.reject({**value, "channelMode": invalid})
+
+    def test_mono_alone_processes_but_stereo_alone_is_not_a_decision(self) -> None:
+        value = {"schemaVersion": 1, "rationale": "Center this recorded dialogue."}
+        request = native.native_finishing_request({**value, "channelMode": "mono"}, SAMPLES)
+        self.assertEqual(request.enhance_chain,
+                         "pan=mono|c0=0.5*c0+0.5*c1,pan=stereo|c0=c0|c1=c0")
+        self.reject({**value, "channelMode": "stereo"})
+
     def test_integer_positive_clock_is_required_even_without_processing(self) -> None:
         for samples in (0, -1, True, 4.5, float("nan"), float("inf")):
             self.reject(DECISION, samples)
@@ -199,6 +219,42 @@ class NativeAudioFinishingMediaTests(unittest.TestCase):
         self.assertGreater(receipt["removedLatencySamples"], 0)
         self.assertEqual(receipt["outputClock"]["samples"], len(original))
         np.testing.assert_allclose(processed[:, 0], processed[:, 1], atol=1e-7)
+
+    def test_explicit_mono_is_exact_average_and_preserves_source_and_clock(self) -> None:
+        time = np.arange(2 * RATE) / RATE
+        original = np.column_stack([np.sin(2 * np.pi * 440 * time) * 0.2,
+                                    np.sin(2 * np.pi * 700 * time) * 0.1]).astype(np.float32)
+        source = self.source(original)
+        before = file_hash(Path(source.path))
+        value = {"schemaVersion": 1, "rationale": "Center this recorded dialogue.", "channelMode": "mono"}
+        output = native.finish_native_audio(source, value, self.root / "mono")
+        rate, processed = wavfile.read(output)
+        self.assertEqual((rate, processed.shape), (RATE, original.shape))
+        np.testing.assert_allclose(processed[:, 0], original.mean(axis=1), atol=1e-7)
+        np.testing.assert_array_equal(processed[:, 0], processed[:, 1])
+        self.assertEqual(file_hash(Path(source.path)), before)
+        receipt = json.loads((self.root / "mono/receipt.json").read_text())
+        self.assertEqual(receipt["channelMode"], "mono")
+        self.assertEqual(receipt["removedLatencySamples"], 0)
+
+    def test_mono_rnn_has_one_processed_channel_exact_clock_and_retained_tail(self) -> None:
+        original = np.zeros((2 * RATE, 2), dtype=np.float32)
+        positions = (RATE, 2 * RATE - 60)
+        original[list(positions), 0] = 0.8
+        original[list(positions), 1] = 0.4
+        source = self.source(original)
+        before = file_hash(Path(source.path))
+        value = {**DECISION, "audioEnhance": {"preset": "voice-rnn"}, "channelMode": "mono"}
+        output = native.finish_native_audio(source, value, self.root / "mono-rnn")
+        rate, processed = wavfile.read(output)
+        self.assertEqual((rate, processed.shape), (RATE, original.shape))
+        np.testing.assert_array_equal(processed[:, 0], processed[:, 1])
+        self.assertGreater(abs(processed[positions[-1], 0]), 0.05)
+        self.assertEqual(file_hash(Path(source.path)), before)
+        receipt = json.loads((self.root / "mono-rnn/receipt.json").read_text())
+        self.assertEqual(receipt["removedLatencySamples"], 480)
+        self.assertEqual(receipt["model"]["sha256"],
+                         "ae3f7411e1e6a884f839a4a145c394408398f09854dbc1216ee02faafc98a17b")
 
 
 if __name__ == "__main__":

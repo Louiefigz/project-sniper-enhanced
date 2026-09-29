@@ -31,6 +31,7 @@ from graphics.catalog_discovery_records import (  # noqa: F401 (re-exported)
 from graphics.catalog_discovery_sources import (
     NAME_RE, CatalogSources, DiscoveryPaths, load_sources,
 )
+from graphics.catalog_discovery_metadata import searchable_metadata_text
 
 SCHEMA_VERSION = 1
 SCOPE = "discovery-evidence-not-plan-or-scene-admission"
@@ -39,7 +40,9 @@ DEFAULT_LIMIT = 10
 MAX_LIMIT = 100
 MIN_TERM_CHARS = 2
 _WEIGHTS = {"name": 6, "title": 5, "tags": 4, "description": 3,
-            "variables": 2, "mechanism": 2, "fit": 2, "port": 1}
+            "jobs": 7, "family": 5, "profile": 4, "inputs": 3,
+            "variables": 2, "mechanism": 2, "fit": 2, "sync": 2,
+            "resource": 1, "port": 1}
 _EXACT_BONUS = 1000
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 # Equal-score tie-break: items with current evidence sort before references
@@ -89,6 +92,8 @@ def _tokens(record: dict) -> dict[str, frozenset[str]]:
     """Tokenize only the recorded search fields."""
     study = record.get("study") or {}
     upstream = record.get("upstream") or {}
+    metadata = searchable_metadata_text(record.get("metadata") or {})
+    resource = record.get("resourceEvidence") or {}
     template_variables = " ".join(
         f"{key} {label}" for key, label in (record.get("templateVariables") or {}).items())
     fields = {
@@ -96,9 +101,16 @@ def _tokens(record: dict) -> dict[str, frozenset[str]]:
         "title": record["title"] + " " + upstream.get("title", ""),
         "tags": " ".join(record["tags"] + upstream.get("tags", [])),
         "description": record["description"] + " " + upstream.get("description", ""),
+        "jobs": metadata["jobs"],
+        "family": metadata["family"],
+        "profile": metadata["profile"],
+        "inputs": metadata["inputs"],
         "variables": " ".join(study.get("variables") or []) + " " + template_variables,
         "mechanism": study.get("mechanism") or "",
         "fit": (study.get("fit") or "") + " " + (study.get("quality") or ""),
+        "sync": metadata["sync"],
+        "resource": " ".join(key for key in ("domCss", "canvas", "webglGpu", "videoTexture")
+                             if resource.get(key) is True),
         "port": study.get("port") or "",
     }
     return {key: frozenset(tokenize(text)) for key, text in fields.items()}
@@ -119,6 +131,12 @@ def build_catalog(sources: CatalogSources) -> Catalog:
 def load_catalog(paths: DiscoveryPaths | None = None) -> Catalog:
     """Read every recorded source once and build the searchable catalog."""
     return build_catalog(load_sources(paths or DiscoveryPaths()))
+
+
+def catalog_from_records(records: list[dict], provenance: dict) -> Catalog:
+    """Rehydrate a frozen unified inventory for deterministic read-only search."""
+    return Catalog(records, {record["ref"]: _tokens(record) for record in records},
+                   provenance)
 
 
 def inventory_catalog(catalog: Catalog) -> dict:

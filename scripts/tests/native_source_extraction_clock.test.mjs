@@ -5,8 +5,9 @@ import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {test} from 'node:test';
-import {NATIVE_SOURCE_FRAME_CLOCK,nativeSourceFrameCount} from '../producer/studio/runtime/frame-source-transport.mjs';
+import {NATIVE_SOURCE_FRAME_CLOCK,nativeSourceFrameCount,nativeSourceFrameSelection} from '../producer/studio/runtime/frame-source-transport.mjs';
 import {nativeSourceCacheEntry,nativeSourceCacheIdentity} from '../producer/studio/native_source_cache.mjs';
+import {nativeSourceCacheIdentity as sharedSourceIdentity} from '../producer/studio/native_source_identity.mjs';
 import {batchFixture} from './native_short_batched_render_fixture.mjs';
 
 function adaptedSdk() {
@@ -77,7 +78,7 @@ class ExtractionError extends Error {
 
 function extractionFixture(settings={}) {
   const calls=[],metadata={durationSeconds:60,videoCodec:'h264',isVFR:false,...settings.metadata};
-  const sandbox={nativeSourceFrameCount,DEFAULT_CONFIG2:{ffmpegProcessTimeout:1234},
+  const sandbox={nativeSourceFrameCount,nativeSourceFrameSelection,DEFAULT_CONFIG2:{ffmpegProcessTimeout:1234},
     toFps:value=>typeof value==='number'?{num:value,den:1}:value,
     fpsToNumber:value=>value.num/value.den,fpsToFfmpegArg:value=>`${value.num}/${value.den}`,
     join13:path.join,existsSync14:()=>true,mkdirSync7:()=>{},extractMediaMetadata:async()=>metadata,
@@ -128,6 +129,44 @@ test('rational rates and subframe spans retain their exact output clock',async()
   assert.equal(argument(rational.calls[0],'-frames:v'),'57');
   const tiny=extractionFixture();await tiny.run({start:1.2,duration:.001});
   assert.equal(argument(tiny.calls[0],'-frames:v'),'1');
+});
+
+test('selected samples retain original seek and fps phase with exact bounded outputs',async()=>{
+  const fixture=extractionFixture();
+  await fixture.run({start:.113,duration:3/25},{nativeSourceFrameIndices:[0,9,27]});
+  const call=fixture.calls[0];
+  assert.equal(argument(call,'-ss'),'0.113');
+  assert.equal(argument(call,'-frames:v'),'3');
+  assert.equal(argument(call,'-fps_mode'),'passthrough');
+  assert.equal(argument(call,'-vf'),'fps=25/1:start_time=0,select=eq(n\\,0)+eq(n\\,9)+eq(n\\,27)');
+  for(const indices of [[],[2,1],[1,1],[-1],[.5],[54000],Array.from({length:2049},(_,i)=>i)]){
+    const invalid=extractionFixture();
+    await assert.rejects(invalid.run({start:0,duration:1},{nativeSourceFrameIndices:indices}));
+    assert.equal(invalid.calls.length,0);
+  }
+});
+
+test('selected source clock refuses VFR HDR unknown clock and final-frame reinterpretation',async()=>{
+  for(const settings of [{metadata:{isVFR:true}},{metadata:{isVFR:undefined}},{hdr:true}]){
+    const fixture=extractionFixture(settings);
+    await assert.rejects(fixture.run({start:0,duration:1},{nativeSourceFrameIndices:[0]}),/SDR CFR/);
+    assert.equal(fixture.calls.length,0);
+  }
+  const final=extractionFixture();
+  await assert.rejects(final.run({start:0,duration:1},{nativeSourceFrameIndices:[0],finalFrameOnly:true}),/SDR CFR/);
+});
+
+test('selected frame inventory changes cache identity even with identical duration and seek',()=>{
+  const fixture=batchFixture(10);
+  try{
+    const context={project:fixture.request.project,request:fixture.request,fps:{num:25,den:1},rate:25};
+    const one=sharedSourceIdentity(context,{...fixture.video,nativeSourceFrameIndices:[0,9]});
+    const two=sharedSourceIdentity(context,{...fixture.video,nativeSourceFrameIndices:[0,27]});
+    assert.notEqual(one.entry,two.entry);
+    assert.match(one.keyBlob.t,/selected-grid-v1:0,9$/);
+    assert.match(SDK,/nativeSourceFrameSelection\(video.nativeSourceFrameIndices\)\?\.transform/);
+    assert.match(SDK,/misses.some\(\(\{ work \}\) => work.video.nativeSourceFrameIndices !== undefined\)/);
+  }finally{fixture.cleanup();}
 });
 
 test('genuinely short decoded output fails before cache publication and cannot turn into a hold',async()=>{

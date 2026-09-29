@@ -10,6 +10,8 @@ reader's verdict — never from a name, a title or a declared canvas.
 """
 from __future__ import annotations
 
+from graphics.catalog_candidate_evidence import eligibility, resource_evidence
+from graphics.catalog_discovery_metadata import structured_metadata
 from graphics.catalog_discovery_sources import CatalogSources, reference_source
 
 STATUS_REFERENCE = "reference"
@@ -106,6 +108,7 @@ def _upstream(name: str, sources: CatalogSources) -> dict:
             "declared": _declared(_dims(record), "index-dimensions",
                                   (study or {}).get("aspectFlex")),
             "duration": record.get("duration"), "reference": reference,
+            "metadata": structured_metadata(record),
             "lockKnownMissing": sources.lock["knownMissing"].get(name),
             "study": study,
             "disagreements": _disagreements(name, reference, sources)}
@@ -114,15 +117,17 @@ def _upstream(name: str, sources: CatalogSources) -> dict:
 def mirror_record(name: str, sources: CatalogSources) -> dict:
     """A reference-only item: everything comes from the mirror + study."""
     upstream = _upstream(name, sources)
-    return {"ref": f"mirror:{name}", "id": name, "provenance": PROVENANCE_MIRROR,
+    record = {"ref": f"mirror:{name}", "id": name, "provenance": PROVENANCE_MIRROR,
             "type": upstream["type"], "title": upstream["title"],
             "description": upstream["description"], "tags": upstream["tags"],
+            "metadata": upstream["metadata"],
             "declared": upstream["declared"], "duration": upstream["duration"],
             "source": {"path": upstream["reference"]["absolutePath"],
                        "exists": upstream["reference"]["exists"]},
             "upstream": upstream, "study": upstream["study"],
             "integration": _reference_integration(upstream["reference"]),
             "disagreements": upstream["disagreements"]}
+    return _with_candidate_evidence(record, sources)
 
 
 def local_record(kind: str, sources: CatalogSources) -> dict:
@@ -130,10 +135,11 @@ def local_record(kind: str, sources: CatalogSources) -> dict:
     local = sources.local[kind]
     ported = sources.ported.get(kind)
     upstream = _upstream(ported, sources) if ported else None
-    return {"ref": f"local:{kind}", "id": kind,
+    record = {"ref": f"local:{kind}", "id": kind,
             "provenance": PROVENANCE_PORTED if ported else PROVENANCE_LOCAL,
             "type": "local", "title": kind, "description": local["header"],
-            "tags": [], "declared": _declared(
+            "tags": [], "metadata": upstream["metadata"] if upstream else structured_metadata({}),
+            "declared": _declared(
                 local["declared"], "template-data-width-height", None),
             "duration": None, "templateVariables": dict(local["variables"]),
             "source": local["source"],
@@ -141,6 +147,15 @@ def local_record(kind: str, sources: CatalogSources) -> dict:
             "study": upstream["study"] if upstream else None,
             "integration": _integration(kind, sources),
             "disagreements": upstream["disagreements"] if upstream else []}
+    return _with_candidate_evidence(record, sources)
+
+
+def _with_candidate_evidence(record: dict, sources: CatalogSources) -> dict:
+    """Attach static resource facts and explicit non-approval eligibility."""
+    resource = resource_evidence(record, sources.resources)
+    record["resourceEvidence"] = resource
+    record["eligibility"] = eligibility(record, resource)
+    return record
 
 
 def adaptation_notes(record: dict) -> list[str]:
@@ -212,6 +227,9 @@ def provenance_summary(sources: CatalogSources, records: list[dict]) -> dict:
                        "note": "recorded snapshot facts; not a fresh upstream inventory"},
             "study": {"records": len(sources.study),
                       "note": "historical annotations (2026-08-28); claims, not evidence"},
+            "snapshotId": sources.snapshot_id,
+            "resourceEvidence": {"rows": len(sources.resources),
+                                 "note": "static metadata; never capability approval"},
             "capability": {"fresh": not sources.artifact_error,
                            "error": sources.artifact_error,
                            "releaseReadyKinds": len(sources.ready),

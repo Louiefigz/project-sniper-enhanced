@@ -137,6 +137,18 @@ test("Long export uses the same complete independent review semantics and exact 
   await assert.rejects(executeNativeShortCommand(["check-long-review", file, hash]), /independent/);
 });
 
+test("scoped Long snapshot review cannot become full-project final admission", async t => {
+  const f = fixture(t), hash = "c".repeat(64);
+  reviseReceipt(f.input, review => { review.scope = "native-long-section-snapshot"; review.planHash = hash; });
+  const file = f.input.prebuildReview!.path;
+  const scoped = await executeNativeShortCommand(["check-long-section-review", file, hash]);
+  assert.equal("scope" in scoped && scoped.scope, "native-long-section-snapshot");
+  await assert.rejects(executeNativeShortCommand(["check-long-review", file, hash]), /full plan/);
+  await assert.rejects(executeNativeShortCommand(["check-long-section-review", file, "d".repeat(64)]), /stale/);
+  reviseReceipt(f.input, review => { review.scope = "native-long-full-project"; });
+  await assert.rejects(executeNativeShortCommand(["check-long-section-review", file, hash]), /full plan/);
+});
+
 test("only generated transport and review reference are normalized; pinned request remains authored", t => {
   const f = fixture(t), original = nativeShortPrebuildPlanHash(f.input), changed = structuredClone(f.input);
   changed.preparedSources = { path: "/TEST/prepared.json", sha256: "a".repeat(64) };

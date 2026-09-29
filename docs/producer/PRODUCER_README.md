@@ -47,6 +47,37 @@ first-class.
 
 ## What you can ask for
 
+Choose how we collaborate independently of how the video should look. The
+[collaboration presets](COLLABORATION_MODES.md) work through the existing
+Producer skill and command:
+
+| Preset | Your review points | Example |
+|---|---|---|
+| **Walkthrough** | Review worthwhile candidates, choose clips, review the spoken scripts, discuss each clip's treatment, then authorize production. | “Walkthrough: find the worthwhile clips in this recording. Let's review them first.” |
+| **Pick & Go** | Review the shortlist and choose clips; delegate their scripts, treatment and production within your stated scope. | “Pick & Go: show me the best candidates; once I choose, produce those.” |
+| **Auto** | Delegate candidate selection, scripts, treatment and production; review the checked video candidates. | “Auto: choose and produce the strongest clips from this recording.” |
+
+For example, use `$producer Walkthrough <source>` in Codex or
+`/produce Walkthrough <source>` in Claude Code; replace `Walkthrough` with
+`Pick & Go` or `Auto`. These are conversational choices, not shell commands or
+new render modes. Natural-language requests work too. “Fast” alone may need one
+clarification because it could mean Pick & Go or Auto.
+
+New long-recording clip discovery defaults to Walkthrough. “Only a shortlist,”
+“scripts only,” or another explicit stopping point limits every preset, including
+Auto. Existing decisions remain valid when you switch routes; additional
+delegation must be explicit. Quality checks remain required in every route.
+In Walkthrough, discussion happens here in the conversation: a file link is a
+supporting artifact, not a replacement for your review. Treatment choices follow
+candidate selection, so you do not need to choose graphics before knowing which
+clips are worth making.
+
+For an authorized clip batch, independent clips run in parallel by default with
+shared source preparation. Memory pressure, CPU/disk contention or tool conflicts
+can reduce concurrency; existing resource guards stay active. Visual storytelling
+is the default production treatment unless you request a natural, simpler or
+restricted edit. These defaults preserve your chosen review checkpoints.
+
 Three choices frame every job — an **input**, an **output**, and a **treatment
 level**. Say it in plain language; I infer the rest and ask only when it's
 genuinely unclear.
@@ -137,8 +168,11 @@ experiment and its reason can resolve a journey episode before results exist.
 Plan supporting examples and temporary presenter/detail layouts at the moments
 where seeing the board, relationship or evidence improves understanding.
 
-Reuse the admitted source manifest and its matching word-timed transcript, or
-ingest/transcribe locally once. Read the complete source before selecting; for
+Reuse the admitted source manifest and its matching transcript, or
+ingest/transcribe locally once. Provisional discovery can use a source-bound
+content transcript with honestly labeled coarse windows; edit-grade word timing
+is required before precise cuts, not before discussing ideas. Read the complete
+available transcript before selecting; for
 sources larger than context, keep a timestamped coverage map across overlapping
 sections and compare the candidates globally. A segment boundary must not hide
 the setup or payoff in its neighbor. Inspect the complete shortlisted moments
@@ -150,28 +184,39 @@ plan/review notes; it does not require another report or a new plan schema:
 
 | Decision | Evidence to retain |
 | --- | --- |
-| Source and proposed cut | Actual source IDs and word-aligned ranges; exact opening and payoff quotes; estimated duration after trimming |
+| Source and proposed cut | Actual source IDs, source-derived opening/payoff quotes and an estimated edited duration; label coarse windows and uncertain wording during discovery, then verify exact words and word-aligned ranges before cutting |
 | Cold-viewer clarity | One clear viewer question and the minimum setup needed; resolve references such as "this" or "as I said" |
 | Hook and payoff | Why the opening earns attention and which retained words/actions answer its promise |
 | Evidence and usefulness | A specific explanation, example, demonstration or actionable takeaway supported by the source |
 | Visual feasibility | What can be shown in portrait, including the speaker, screen content and existing baked text |
-| Selection | Relative rank, a concrete reason, unresolved uncertainty and any overlapping candidate it replaces |
+| Selection | Relative rank, a concrete reason, unresolved uncertainty, shared source ranges and whether an alternative is a different story or a same-story variant |
 
-**The product owner chooses the moment before production.** Present the ranked shortlist
-with source timestamps, watchable source previews, hook/payoff excerpts,
+**Apply the selected collaboration preset before production.** Walkthrough and
+Pick & Go present the ranked shortlist for the owner's selection; Auto may
+select only within the user's explicit delegation. A shortlist-only request
+stops at discovery in every route. In Walkthrough, clip selection is followed by
+script and treatment discussion before production. Present the ranked shortlist
+with source timestamps, hook/payoff excerpts,
 estimated edited length, selection rationale and a brief visual-storytelling
 idea for each. Recommend the strongest option, but wait for that choice before
-trimming or producing it. Use seekable source playback where available; create
-lightweight review excerpts only when needed for viewing, not fully treated
-candidate renders. Do not claim a timestamp or transcript is a playable preview.
+trimming or producing it. Use watchable, seekable source playback where available
+and useful. Transcript-only discovery may remain provisional without creating
+review excerpts; state when delivery and joins have not been viewed/listened to.
+If footage inspection becomes necessary to resolve a material uncertainty, use
+bounded source review, not fully treated candidate renders. Do not claim a
+timestamp or transcript is a playable preview.
 An already selected moment or an explicit instruction to choose and proceed
 satisfies this step; do not ask again. This is the product owner's default,
 not an extra approval requirement for unrelated users or delegated selections.
 
-Prefer a small, meaningful comparison over a fixed candidate quota. These are
-editorial judgments, not virality scores or measured audience-retention forecasts.
-A high-energy sentence with no answer is insufficient. Deduplicate both overlapping
-footage and repeated ideas before choosing multiple shorts. Add only the setup
+Build the viable candidate pool, then rank favorites without an unrequested
+small-count cap. These are editorial judgments, not virality scores or measured
+audience-retention forecasts. A high-energy sentence with no answer is
+insufficient. Shared footage, including the same intro with a different body,
+is allowed across independently coherent stories; deduplicate repeated
+narratives rather than overlapping timestamps. Follow the playbook's
+[source-reuse rules](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#reuse-passages-across-different-stories)
+and label same-story variants separately. Add only the setup
 needed to make the winner self-contained; reject it if that setup consumes the
 requested duration. Preserve qualifications and causal order when combining
 noncontiguous passages. Do not invent a spoken hook, result or CTA absent from
@@ -228,7 +273,9 @@ landscape cards are not prerequisites or automatically admitted assets.
 ### Complete the short and verify the result
 
 For a production request, continue through the selected cut/treatment workflow
-under the user's existing authorization after their requested moment selection.
+when the current collaboration preset's remaining review stops and the user's
+authorization allow it. Picking a clip in Walkthrough does not skip script or
+treatment review; Pick & Go can delegate those steps after selection.
 Honor the product owner's selection preference above, a requested shortlist-only or
 plan-first stopping point, and any existing explicit review gates. Shortlist
 notes add no further approval round after the moment is selected. Apply scoped

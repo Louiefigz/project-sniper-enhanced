@@ -23,6 +23,8 @@ import {
 } from "./plan-review-packet-source";
 import type { AutoEditCtx } from "./stream";
 import { AutoEditError } from "./stream";
+import type { BoundVisualPlan } from "@/lib/server/visual-plan-binding";
+import { currentBoundVisualPlan } from "./ordinary-visual-plan-authority";
 
 export const PLAN_REVIEW_PACKET_SCHEMA_VERSION = 1 as const;
 export const PLAN_REVIEW_PACKET_NAME = "plan-review-packet.json";
@@ -56,6 +58,7 @@ interface PlanReviewPacketCore {
   };
   doctrineHash: string | null;
   reference: BoundReferenceStudy | null;
+  visualPlan?: BoundVisualPlan;
   plan: BoundJsonContent;
   manifest: BoundJsonContent;
   gateDigest: string;
@@ -122,6 +125,8 @@ function boundReference(ctx: AutoEditCtx): BoundReferenceStudy | null {
     ...study.representativeFrames.map((filePath, index) =>
       referenceFile(`representative-frame-${index + 1}`, filePath)),
   ];
+  const vocabulary = path.join(path.dirname(study.deepStudyPath), "reference_style_vocabulary.json");
+  if (existsSync(vocabulary)) files.push(referenceFile("style-vocabulary", vocabulary));
   return { id: study.id, title: study.title, mode: study.mode, files };
 }
 
@@ -156,6 +161,7 @@ export function buildPlanReviewPacket(
   verifyAuthority(authority, plan, manifest);
   const segments = packetCutSegments(plan.content);
   const speech = packetSpeechEvidence(ctx, manifest.content, segments);
+  const visualPlan = currentBoundVisualPlan(ctx);
   const core: PlanReviewPacketCore = {
     schemaVersion: PLAN_REVIEW_PACKET_SCHEMA_VERSION,
     kind: "producer-plan-review-packet",
@@ -165,6 +171,7 @@ export function buildPlanReviewPacket(
     request: { scope: ctx.scope, operatorIntent: ctx.intent ?? null },
     doctrineHash: ctx.doctrine?.doctrineHash ?? null,
     reference: boundReference(ctx),
+    ...(visualPlan ? { visualPlan } : {}),
     plan,
     manifest,
     gateDigest: stableAuthorityHash(gateVerdict),
@@ -280,10 +287,12 @@ export function validatePlanReviewPacketRef(
   }
   const packet = parsePacket(ref.path);
   verifyPacketShape(packet, ref);
+  const visualPlan = currentBoundVisualPlan(ctx);
   if (packet.plan?.byteHash !== fileSha256(ctx.planPath)
       || packet.manifest?.byteHash !== fileSha256(ctx.manifestPath)
       || packet.doctrineHash !== (ctx.doctrine?.doctrineHash ?? null)
-      || stableAuthorityHash(packet.reference) !== stableAuthorityHash(boundReference(ctx))) {
+      || stableAuthorityHash(packet.reference) !== stableAuthorityHash(boundReference(ctx))
+      || stableAuthorityHash(packet.visualPlan ?? null) !== stableAuthorityHash(visualPlan)) {
     throw new AutoEditError("plan review packet no longer matches current review inputs");
   }
   return packet;

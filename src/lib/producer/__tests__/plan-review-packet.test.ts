@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import {
   mkdirSync,
   mkdtempSync,
@@ -21,6 +22,8 @@ import type { AutoEditAuthoritySnapshot } from "../../server/auto-edit-authority
 import { stableAuthorityHash } from "../../server/auto-edit-authority-snapshot";
 import { fileSha256 } from "../../server/auto-edit-hash";
 import { writeQualityJson } from "../../server/auto-edit-quality-artifacts";
+import { resolveVisualPlanBinding } from "../../server/visual-plan-binding";
+import { pythonInterpreter } from "../../../app/api/_lib/spawn-python";
 
 const PASS_GATES: GateBundleVerdict = {
   ok: true, errors: [], warnings: [],
@@ -116,6 +119,7 @@ function packetPath(ctx: AutoEditCtx): string {
 
 function testExactContentAndMapping(fix: Fixture): void {
   const packet = buildPlanReviewPacket(fix.ctx, 1, PASS_GATES, authority(fix.ctx));
+  assert.equal("visualPlan" in packet, false);
   assert.deepEqual(packet.plan.content, fix.plan);
   assert.deepEqual(packet.manifest.content, fix.manifest);
   assert.equal(packet.plan.byteHash, fileSha256(fix.ctx.planPath));
@@ -141,6 +145,54 @@ function testExactContentAndMapping(fix: Fixture): void {
     row.segmentIndex === 1 && row.edge === "out");
   assert.equal(aOut?.before?.word, "three");
   assert.equal(aOut?.after?.word, "four");
+}
+
+function writeVisualPlan(file: string): void {
+  const code = [
+    "import json,sys",
+    "from _visual_plan_fixture import candidate,materialize_plan_pins,opportunity,visual_plan",
+    "from planner.visual_plan_allocator import allocate_visual_plan",
+    "value=visual_plan(opportunity('opp:one',0,[candidate('candidate:one')]))",
+    "value=materialize_plan_pins(value,sys.argv[2])",
+    "open(sys.argv[1],'w').write(json.dumps(allocate_visual_plan(value)))",
+  ].join("\n");
+  execFileSync(pythonInterpreter(), ["-B", "-c", code, file,
+    path.join(path.dirname(file), "visual-plan-pins")], {
+    cwd: path.join(process.cwd(), "scripts/producer"),
+    env: { ...process.env, PYTHONPATH: ".:tests", PYTHONDONTWRITEBYTECODE: "1" },
+  });
+}
+
+function testVisualPlanReviewBinding(fix: Fixture): void {
+  const file = path.join(fix.ctx.dir, "VISUAL-PLAN.json");
+  writeVisualPlan(file);
+  const original = readFileSync(file);
+  const binding = resolveVisualPlanBinding(file);
+  assert.ok(binding);
+  fix.ctx.visualPlan = binding;
+  const packet = buildPlanReviewPacket(fix.ctx, 1, PASS_GATES, authority(fix.ctx));
+  assert.equal(packet.visualPlan?.byteHash, binding.byteHash);
+  assert.equal((packet.visualPlan?.content as { allocation: { status: string } })
+    .allocation.status, "allocated");
+  writeFileSync(file, `${readFileSync(file, "utf8")} `);
+  assert.throws(() => buildPlanReviewPacket(
+    fix.ctx, 1, PASS_GATES, authority(fix.ctx)), /changed after deterministic gates/);
+  writeFileSync(file, original);
+  delete fix.ctx.visualPlan;
+  const fresh = buildPlanReviewPacket(fix.ctx, 1, PASS_GATES, authority(fix.ctx));
+  assert.equal(fresh.visualPlan?.byteHash, binding.byteHash,
+    "post-authoring review must resolve a newly created visual plan fresh");
+  rmSync(file);
+  delete fix.ctx.visualPlan;
+}
+
+function testRequiredVisualPlanCannotBeOmitted(fix: Fixture): void {
+  fix.ctx.visualPlanRequiredVersion = 1;
+  assert.throws(
+    () => buildPlanReviewPacket(fix.ctx, 1, PASS_GATES, authority(fix.ctx)),
+    /required VISUAL-PLAN\.json is missing before review/,
+  );
+  delete fix.ctx.visualPlanRequiredVersion;
 }
 
 function testHashAndPathBinding(fix: Fixture): void {
@@ -221,6 +273,8 @@ const root = mkdtempSync(path.join(os.tmpdir(), "sniper-plan-review-packet-"));
 try {
   const fix = fixture(path.join(root, "main"));
   testExactContentAndMapping(fix);
+  testRequiredVisualPlanCannotBeOmitted(fix);
+  testVisualPlanReviewBinding(fix);
   testHashAndPathBinding(fix);
   testTranscriptContainment(root);
   testUnknownSourceFails(root);

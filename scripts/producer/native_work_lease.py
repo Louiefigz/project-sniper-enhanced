@@ -1,8 +1,13 @@
-"""Host-wide native job exclusion with durable unverified-cleanup fencing.
+"""Host-wide native work admission with durable unverified-cleanup fencing.
 
 The supervisor owns lifecycle actions. Closing a lease does not assert cleanup;
 only complete() clears its active marker after recorded identities are absent.
 All checkouts use the same private per-user namespace, not a per-project lock.
+The 'heavy' and 'audio' classes are admitted by the bounded host pool
+(native_work_pool.py); 'preview-control' keeps this exclusive kernel-lock lease.
+A record holds at most MAX_RECORDED_IDENTITIES identities at once; an owner retires
+rows whose processes the process table shows absent (retire_processes), so the bound
+limits simultaneously recorded processes, not lifetime churn.
 """
 from __future__ import annotations
 
@@ -21,14 +26,26 @@ from headless.durable_files import (
 from native_render_processes import ProcessIdentity, identity_matches, process_table
 
 
+MAX_RECORDED_IDENTITIES = 4096
+
+
 class NativeWorkBusy(RuntimeError):
     """Another job is active or a previous job has unverified cleanup."""
 
 
-def state_root() -> Path:
-    """Return one host-local namespace shared by every checkout for this user."""
+class ProcessRegistryOverflow(ValueError):
+    """More identities than MAX_RECORDED_IDENTITIES would have to stay recorded at once."""
+
+
+def default_state_root() -> Path:
+    """Return the canonical host namespace, shared with the legacy lease layout."""
     parent = Path('/private/tmp') if Path('/private/tmp').is_dir() else Path('/tmp')
     return parent / f'sniper-native-work-{os.geteuid()}'
+
+
+def state_root() -> Path:
+    """Return one host-local namespace shared by every checkout for this user."""
+    return default_state_root()
 
 
 def _open_root() -> tuple[Path, int]:
@@ -49,6 +66,38 @@ def _live_identities(identities: list[dict]) -> list[int]:
             if identity_matches(table, ProcessIdentity(**row))]
 
 
+def _key(row: dict) -> str:
+    """One recorded row's exact identity key."""
+    return json.dumps(row, sort_keys=True)
+
+
+def merged_rows(recorded: list[dict], identities: list[dict]) -> list[dict]:
+    """Add validated identities to a record's rows without exceeding the shared bound."""
+    if not isinstance(identities, list) or len(identities) > MAX_RECORDED_IDENTITIES:
+        raise ProcessRegistryOverflow('Native process registry must be a bounded list')
+    rows = {_key(row): row for row in recorded}
+    for row in identities:
+        NativeWorkLease._validate_identity(row)
+        rows[_key(row)] = dict(row)
+    if len(rows) > MAX_RECORDED_IDENTITIES:
+        raise ProcessRegistryOverflow('Native process registry exceeds its bound')
+    return list(rows.values())
+
+
+def split_retired(recorded: list[dict], retire: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Drop requested rows only once the process table shows them absent.
+
+    Returns the remaining record rows and the requested rows kept because a process
+    with that PID still matches (a shared PID keeps every requested row with it).
+    """
+    keys = {_key(row) for row in retire}
+    requested = [row for row in recorded if _key(row) in keys]
+    live = set(_live_identities(requested))
+    dropped = {_key(row) for row in requested if row['pid'] not in live}
+    return ([row for row in recorded if _key(row) not in dropped],
+            [row for row in requested if row['pid'] in live])
+
+
 class NativeWorkLease:
     """One never-unlinked kernel lock plus a durable cleanup obligation."""
 
@@ -61,9 +110,18 @@ class NativeWorkLease:
         self.root = state_root()
 
     @classmethod
-    def acquire(cls, lane: str, project: str) -> NativeWorkLease:
-        """Refuse concurrent work immediately; never reclaim an active marker."""
-        if lane not in {'heavy', 'preview-control'}:
+    def acquire(cls, lane: str, project: str, request: object | None = None) -> NativeWorkLease:
+        """Admit immediately or refuse; never reclaim an active marker.
+
+        Pool classes return a native_work_pool_lease.PoolLease with the same
+        record_processes/complete/close protocol. Pass the same PoolRequest on every
+        retry to keep one FIFO position; without it each call is a single attempt.
+        """
+        from native_work_pool_policy import POOL_CLASSES
+        if lane in POOL_CLASSES:
+            from native_work_pool import admit
+            return admit(lane, project, request)
+        if lane != 'preview-control' or request is not None:
             raise ValueError('Unknown native work lane')
         _root, directory = _open_root()
         lock = None
@@ -116,19 +174,22 @@ class NativeWorkLease:
         write_pending_replace(self.dir_fd, names, data)
 
     def record_processes(self, identities: list[dict]) -> None:
-        """Retain all identities ever observed, including reparented children."""
+        """Retain every observed identity, including reparented children, until retired."""
         self._assert_owner()
-        if not isinstance(identities, list) or len(identities) > 4096:
-            raise ValueError('Native process registry must be a bounded list')
-        rows = dict((json.dumps(row, sort_keys=True), row) for row in self.record['processes'])
-        for row in identities:
-            self._validate_identity(row)
-            rows[json.dumps(row, sort_keys=True)] = dict(row)
-        if len(rows) > 4096:
-            raise ValueError('Native process registry exceeds its bound')
-        updated = dict(self.record, processes=list(rows.values()))
+        updated = dict(self.record, processes=merged_rows(self.record['processes'], identities))
         self._write(updated)
         self.record = updated
+
+    def retire_processes(self, identities: list[dict]) -> list[dict]:
+        """Drop recorded rows the process table shows absent; return those still live."""
+        self._assert_owner()
+        remaining, live = split_retired(self.record['processes'], identities)
+        self._assert_owner()
+        if remaining != self.record['processes']:
+            updated = dict(self.record, processes=remaining)
+            self._write(updated)
+            self.record = updated
+        return live
 
     @staticmethod
     def _validate_identity(row: dict) -> None:

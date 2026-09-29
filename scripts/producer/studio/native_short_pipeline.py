@@ -12,8 +12,15 @@ from stage_timing import stage_span
 from studio.native_run import NativeRun, utc
 from studio.native_run_config import NativeRunConfig
 from studio.native_runtime import digest
+from studio.native_budget_owner import (
+    budget_owner_settings, record_budget_outcome, long_owner_disk, section_disk_bytes,
+)
+from studio.native_budget_sections import SectionBudgetOwner
 from studio.native_short_resume import copy_completed_media, media_result
 from studio.native_short_capture_resume import copy_completed_capture, complete_capture, capture_artifacts, CAPTURE_STATUS
+from studio.native_visual_usage_registration import (
+    VisualUsageRegistrationError, register_completed_visual_usage,
+)
 from studio.native_stage_evidence import (
     StageEvidence, read_native_capture_receipt, read_stage, seal_stage, require,
 )
@@ -43,6 +50,7 @@ class NativeShortPipeline:
     unused_ram_advisory: bool = False
     stages: list[dict] = field(default_factory=list)
     evidence: dict[str, str] = field(default_factory=dict)
+    owner_deadline: float | None = None
 
     @property
     def root(self) -> Path:
@@ -73,10 +81,29 @@ class NativeShortPipeline:
         if self.is_long or label.startswith('preview-'):
             from dataclasses import replace
             settings = replace(settings, deadline=deadline + 600, idle_deadline=budget.get('idleSeconds', 120),
-                               capacity_wait_seconds=600)
+                               capacity_wait_seconds=600, queue_work_seconds=None if self.is_long else deadline)
+        if self.owner_deadline is not None:
+            from dataclasses import replace
+            remaining = self.owner_deadline - time.monotonic()
+            require(remaining > 0, 'inherited section picture deadline expired')
+            settings = replace(settings, deadline=min(settings.deadline, remaining),
+                               capacity_wait_seconds=min(settings.capacity_wait_seconds, remaining))
+        if self.is_long:
+            settings = long_owner_disk(settings, self.request, label)
+        if not self.is_long:
+            from studio.native_owner_queue import pipeline_owner
+            from studio.native_budget_owner import short_owner_disk
+            settings = short_owner_disk(pipeline_owner(settings, label), self.request, label)
+        settings = budget_owner_settings(self.request, settings)
+        budget_owner = SectionBudgetOwner(self.request, child[-1], (output, status))
+        if self.request.get('productionBudget') and (label.startswith('segment-picture-')
+                or self.request['productionBudget'].get('familyInvocation')):
+            from dataclasses import replace
+            settings = replace(settings, before_launch=budget_owner.before_launch)
         owner = NativeRun(label, settings)
         with stage_span(str(self.root), f'native_owner_{label}'):
             passed = owner.execute()
+        budget_owner.complete(owner.result)
         self.stages.append({'phase': label, 'receipt': str(owner.path),
                             'sha256': digest(owner.path), 'status': owner.result['status'],
                             'elapsedSeconds': owner.result['elapsedSeconds']})
@@ -100,7 +127,11 @@ class NativeShortPipeline:
             from studio.native_long_recovery import ensure_picture
             ensure_picture(self)
         status = 'native-long-rendered-awaiting-qc' if self.is_long else RENDER_STATUS
-        self.supervise('pipeline', self.worker('render'), 'review.mp4', status)
+        if not self.is_long and not self.request.get('pictureDonor') and not self.request.get('promoteDraft'):
+            from studio.native_budget_binding import charge_request
+            charge_request(self.request, 'pictureGeneration')
+        phase = 'promote' if self.request.get('promoteDraft') else 'render'
+        self.supervise('pipeline', self.worker(phase), 'review.mp4', status)
         artifacts = {'picture': self.root / 'picture.mp4', 'review': self.root / 'review.mp4',
                      'audio': self.root / 'audio/receipt.json', 'media': self.root / 'render-result.json'}
         spec = StageEvidence('render', Path(self.request['project']), self.root,
@@ -138,7 +169,11 @@ class NativeShortPipeline:
                 'native reference checks did not pass')
         self.evidence[str(file)] = sha
         if not self.request.get('verifyStage'):
-            self.evidence.update({str(path): digest(path) for path in capture_artifacts(self.root, self.request).values()})
+            if self.is_long:
+                self.evidence.update({str(path): digest(path) for path in capture_artifacts(self.root, self.request).values()})
+            else:
+                from studio.native_capture_reuse import seal_standalone_capture
+                self.evidence.update(seal_standalone_capture(self.root, self.request))
             return  # This same checked full-context capture gates the master.
         render_stage = Path(self.request.get('verifyStage') or self.root / 'render-stage.json')
         _receipt, pins = complete_capture(self.root, render_stage)
@@ -157,6 +192,12 @@ class NativeShortPipeline:
 
     def execute(self, render_only: bool = False, invocation: tuple[float, str] | None = None) -> bool:
         """Record the whole invocation, including failed stages and reused media."""
+        if self.request.get('reviewDraft') and not self.is_long:
+            from studio.native_short_draft import execute_review_draft
+            return execute_review_draft(self, invocation)
+        if self.request.get('sectionScope'):
+            from studio.native_long_scope_pipeline import execute_scope
+            return execute_scope(self, invocation)
         phase_start = time.monotonic()
         started, began = invocation or (phase_start, utc())
         result = {'status': 'failed', 'startedAt': began, 'renderReused': bool(self.request.get('verifyStage')),
@@ -164,35 +205,50 @@ class NativeShortPipeline:
                   'preparationSeconds': phase_start - started,
                   'timingScope': 'This export invocation including preparation and all owners; editorial authoring is separate.'}
         try:
-            if not self.request.get('verifyStage'):
-                self.capture()
-                previews = self.preview()
-                if self.request.get('previewOnly'):
-                    result.update(status='native-motion-previews-complete',
-                                  output=str(self.root / 'motion-previews.json'),
-                                  previews=previews, editorialReview='pending',
-                                  nextStep='Inspect the moving previews, record independent region reviews, then rerun with --preview-reviews.')
-                    return self.complete(result, started)
+            if self.prepare_inputs(result):
+                return self.complete(result, started)
             record, receipt = self.render()
-            result['renderStage'] = str(receipt)
-            expected = record['artifacts']['review']['sha256']
-            if render_only:
-                result.update(status=RENDER_STATUS, sha256=expected)
-            else:
-                self.evidence[str(self.root / 'review.mp4')] = expected
-                if not self.request.get('verifyStage'):
-                    _receipt, pins = complete_capture(self.root, receipt)
-                    self.evidence.update(pins)
-                else:
-                    self.capture()
-                result['captureStage'] = str(self.request.get('captureStage') or self.root / 'capture-stage.json')
-                result.update(self.verify(expected), status='native-long-checked-for-review' if self.is_long else FINAL_STATUS)
+            self.finish_media(result, (record, receipt), render_only)
         except (Exception, KeyboardInterrupt) as error:
             result.update(status='failed', errorType=type(error).__name__, error=str(error),
                           failureCategory='cancelled' if isinstance(error, KeyboardInterrupt)
                           else getattr(error, 'category', 'renderer-failure'),
                           failedPhase=getattr(error, 'phase', None))
         return self.complete(result, started)
+
+    def prepare_inputs(self, result: dict) -> bool:
+        """Run normal early checks, returning true only for the explicit preview terminal."""
+        if self.request.get('verifyStage'):
+            return False
+        from studio.native_early_stage import run_early_checks, capture_diagnostics_gate
+        run_early_checks(self)
+        self.capture()
+        capture_diagnostics_gate(self)
+        previews = self.preview()
+        if not self.request.get('previewOnly'):
+            return False
+        result.update(status='native-motion-previews-complete', output=str(self.root / 'motion-previews.json'),
+                      previews=previews, editorialReview='pending',
+                      nextStep='Inspect the moving previews, record independent region reviews, then rerun with --preview-reviews.')
+        return True
+
+    def finish_media(self, result: dict, media: tuple[dict, Path], render_only: bool) -> None:
+        """Keep encoded capture and final verification mandatory after full media assembly."""
+        record, receipt = media
+        result['renderStage'] = str(receipt)
+        expected = record['artifacts']['review']['sha256']
+        if render_only:
+            result.update(status=RENDER_STATUS, sha256=expected)
+            return
+        self.evidence[str(self.root / 'review.mp4')] = expected
+        if not self.request.get('verifyStage'):
+            from studio.native_short_capture_resume import bind_final_capture
+            _receipt, pins = bind_final_capture(self.root, receipt, self.request)
+            self.evidence.update(pins)
+        else:
+            self.capture()
+        result['captureStage'] = str(self.request.get('captureStage') or self.root / 'capture-stage.json')
+        result.update(self.verify(expected), status='native-long-checked-for-review' if self.is_long else FINAL_STATUS)
 
     def preview(self) -> dict:
         """Retain continuous picture/audio checks before any full picture owner starts."""
@@ -205,12 +261,43 @@ class NativeShortPipeline:
         require(previews.get('status') == STATUS, 'Continuous preview preparation failed')
         self.evidence[str(file)] = digest(file)
         self.evidence.update({row['path']: row['sha256'] for row in previews['clips']})
+        if self.request.get('sectionProduction'):
+            from studio.production.sections import materialize_section_reviews
+            previews['sectionTasks'] = materialize_section_reviews(self.request, 'early')
         return previews
 
     def complete(self, result: dict, started: float) -> bool:
         """Publish exactly one terminal receipt for successful and failed invocations."""
         result.update(completedAt=utc(), elapsedSeconds=time.monotonic() - started, stages=self.stages)
-        write_new(self.root / 'delivery.json', result)
-        print(json.dumps(result), flush=True)
+        self.publish_delivery(result)
+        reported = dict(result)
+        budget_error = record_budget_outcome(self.request, result)
+        if budget_error:
+            reported.update(status='failed', failureCategory='budget-authority', error=budget_error)
+            print(json.dumps(reported), flush=True)
+            return False
+        if result['status'] in {FINAL_STATUS, 'native-long-checked-for-review'} and not self.register_usage(reported):
+            return False
+        print(json.dumps(reported), flush=True)
         return result['status'] in {RENDER_STATUS, FINAL_STATUS, 'native-long-checked-for-review',
                                     'native-motion-previews-complete'}
+
+    def register_usage(self, reported: dict) -> bool:
+        """Report exact usage registration without changing an immutable checked delivery."""
+        try:
+            usage = register_completed_visual_usage(self.request, self.environment)
+            if usage:
+                reported['visualUsageRegistration'] = {key: usage[key] for key in
+                    ('status', 'humanApprovalClaim', 'receipt', 'digest', 'registration')}
+        except VisualUsageRegistrationError as error:
+            reported.update(status='failed', checkedDeliveryStatus=reported['status'],
+                failureCategory='visual-usage-registration', errorType=type(error).__name__, error=str(error),
+                recovery='Rerun visual-plan-usage.ts register with the exact producer, project and checked export.')
+            print(json.dumps(reported), flush=True)
+            return False
+        return True
+
+    def publish_delivery(self, result: dict) -> None:
+        """Recheck current section generation/QC under registration's lock before successful publication."""
+        from studio.production.section_publication import publish_delivery
+        publish_delivery(self.request, result)

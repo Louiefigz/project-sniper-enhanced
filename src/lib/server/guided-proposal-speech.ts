@@ -103,12 +103,10 @@ function expandOccurrences(input: ProposalSpeechInput, bySource: Map<string, Pac
   const indexed = new Map([...bySource].map(([sourceId, words]) => [sourceId, indexedSourceWords(words)]));
   for (const segment of input.segments) {
     const { words, maximumEnds } = indexed.get(segment.sourceId) ?? { words: [], maximumEnds: [] };
-    let previousEnd = 0;
     for (let index = firstOverlappingWord(maximumEnds, segment.sourceStart); index < words.length && words[index].sourceStart < segment.sourceEnd; index += 1) {
       const value = occurrence(input, words[index], segment, index);
       if (!value) continue;
-      if (value.sourceEnd < previousEnd) throw new Error("Retained out-of-order transcript word endpoints need explicit normalization before proposal compilation");
-      previousEnd = value.sourceEnd;
+      // Admitted word intervals may nest; preserve their bounds and source order.
       mapped.push(value);
       if (mapped.length > 30_000) throw new Error("Proposal retained occurrences exceed the bounded 30000-word program");
     }

@@ -10,8 +10,10 @@ description: >
   the silences and bad takes" (clean-cut = edit only, no graphics), "pull the
   best N shorts from this recording", "break this recording into segments", "turn
   these clips into a short", or feedback on a previous render ("the hook card is
-  too wordy", "let 0:31 breathe"). Do NOT trigger for building/modifying the
-  SNIPER app itself, or for script WRITING (that is outside this product).
+  too wordy", "let 0:31 breathe"). Also use for clip discovery and source-based
+  script walkthroughs with Walkthrough, Pick & Go or Auto collaboration presets.
+  Do NOT trigger for building/modifying the SNIPER app itself, or for writing
+  new recorded scripts (source-based paper edits are part of this skill).
 ---
 ## Current visual source rule
 
@@ -34,6 +36,34 @@ in **Visual storytelling** below. Operator manual: `docs/producer/PRODUCER_READM
 
 The safe publishing paths are the exact audited MP4 and its approved one-clip
 flat mirror. The complete short/long product is not yet P7/P8-qualified.
+
+## Collaboration preset before dependent work
+
+Read [Producer collaboration presets](../../../docs/producer/COLLABORATION_MODES.md)
+when starting or resuming clip discovery or when the operator selects a
+collaboration preset. **Walkthrough** (alias **Review**) shows worthy ideas,
+waits for selection, reviews selected scripts in the conversation, discusses
+each treatment, then produces after the agreed go-ahead. **Pick & Go** waits
+for clip selection, then delegates the remaining unheld decisions. **Auto**
+delegates selection too. A request for **Fast** needs a brief clarification
+between the latter two unless context already resolves it.
+
+These presets control conversation checkpoints, separately from visual scope
+and pace. Preserve the current request's ceiling: analysis/scripts-only work
+does not become production under any preset. Default new long-source discovery
+to Walkthrough when selection has not been delegated; reuse accepted decisions
+on resume. Record route, stage, per-clip choices, versions and the next stop in
+the existing brief/notes. Present Director-reviewed title-card wording alongside
+candidate paper scripts; do not defer copy selection to visual treatment.
+Do not defer requested script discussion until after editing.
+Consume the operator's standing title/reference preference from existing project
+instructions and the accepted brief. Inspect the actual reference images and
+sequence before designing its card; a creator or catalog name is not evidence
+of a match. Preserve the chosen backing, hierarchy and authorized reveal, with
+observed behavior distinguished from deliberate adaptation. Follow the
+collaboration reference for durable evidence and encoded comparison.
+The discovery and held checkpoints precede the production steps below;
+the treatment question round belongs after clip/script selection in Walkthrough.
 
 ## Executable readiness before ordinary rendering
 
@@ -147,6 +177,13 @@ Preserve segment-only and graphics-disabled scope. Do not hand known damaged spe
 listening note after rendering.
 
 Before choosing templates, read the kept speech and inspect available footage.
+Establish who speaks each retained passage and who is visible from actual source
+playback or reliable source information. A transcript or still alone cannot
+prove lip synchronization. Preserve uncertain attribution in discovery; resolve
+the picture strategy before assembly. Off-camera dialogue normally uses
+purposeful supporting visuals. An intentional listener reaction needs an
+editorial reason and must not imply that the listener is speaking. Recheck brief
+replies, retained joins and the actual encoded picture/dialogue relationship.
 In the existing scene plan/review notes, connect the viewer's question, what
 appears now, the evidence or change that develops the idea, and its source-backed
 payoff. A standalone story Short needs a matching resolution before the CTA;
@@ -231,7 +268,21 @@ do not rewrite it to fit a formula or attach a false hook anchor. Check the narr
 title-to-speech/visual promise and actual readability. See
 [native title copy and layout](../../../docs/producer/NATIVE_TITLE_CARD_TEMPLATE_2026-09-10.md).
 
-**Use the Director's template flow before native scene planning.** It reads the
+**Use the Director's template flow for candidate titles and before native scene
+planning.** Candidate and paper-script review includes recommended on-screen
+title wording, meaningful same-pattern alternatives, and why the title agrees
+with the target viewer, retained spoken opening and source-supported payoff.
+Follow the full editorial selection, slot/disqualifier audit and separate critic
+flow below before recommending copy. During discovery, exact quoted slots and
+honest coarse source pointers can support a provisional editorial decision;
+never invent occurrence IDs, native Director records or passing receipts.
+Record what is known or proposed about the first picture; text-level channel and
+readability assessment does not certify actual picture, timing or phone-size
+legibility. Those remain pending until selected-treatment execution. No title
+asset generation is needed to review copy. Recheck affected titles after script
+revisions and preserve the exact user-title exception above.
+
+The flow reads the
 packaged [Director library](../../../resources/director/README.md): its format
 library, hook anchors, R/T reference and training pairs, and the
 formula/slot/disqualification index. The native backend now runs
@@ -337,6 +388,54 @@ explanation. Review actual scene changes and audio before claiming success.
 
 **Plan the visual story before rendering.**
 For Shorts and long-form edits, apply the [standing directing requirements](../../../docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md#standing-directing-requirements-september-16-2026) within the requested treatment and enabled lanes. Do not confine this correction to one video or presenter.
+For each new `produced` or `full` edit, prepare the shared
+[visual plan](../../../docs/producer/VISUAL_PLAN.md) from the complete retained
+program before authoring route-specific graphics. Create semantic opportunities
+only where the viewer benefits from a visual decision; include source footage,
+supplied B-roll, authorized external media, catalog graphics, text, presenter,
+custom native work, transitions and explicit restraint/omit as applicable. Search
+the complete pinned catalog metadata for each distinct job and inspect a bounded
+three-to-five finalist set. After saving the accepted cut, first run
+`./sniper node --import tsx scripts/producer/visual-plan-context.ts <producer-dir>`
+and copy its project and authority fields exactly. Use
+`ordinary_visual_plan_search.py` as documented in `VISUAL_PLAN.md`; do not
+replace the complete authority with a remembered shortlist. Save paths, IDs and
+hashes rather than source or preview bytes. Bind the exact printed search
+authority into the plan. For every opportunity, account for each result the
+controller marks credible, in rank order, as a bound candidate or a concrete
+rejection; weak matches never justify filler. Validate the pending artifact with
+`./sniper python3 scripts/producer/planner/visual_plan_cli.py validate
+<VISUAL-PLAN.pending.json>`, allocate it with the same CLI's `allocate` command,
+or use `catalog_receipt_issuer_cli.py` to satisfy required static source
+inspection and freeze dependency findings for catalog candidates. It does not execute catalog HTML or clear runtime
+qualification. Its successful output is already allocated; preserve the printed receipt authority
+and pass `--receipt-authority` to later validate, fingerprints and binding
+commands. Save the canonical allocated output as `VISUAL-PLAN.json`, then run
+`fingerprints`. The
+allocated route applies to the whole edit: an admitted native winner selects
+Native Short or Native Long; otherwise use the ordinary route. The allocator is
+planning evidence, not render or quality approval. Existing projects and bounded
+revisions without this artifact retain their current path; do not regenerate it
+for an unrelated copy-only or timing-only repair.
+External-media manifest and request rows are controller inventory, not a
+publication-rights grant. Canonical ingest must deeply validate the sibling
+`ASSET.json`/`ASSET-ORIGIN.json` and seal its pin in the hashed source-set entry;
+an agent-authored manifest pin has no authority. Plain files stay prerequisites.
+Public-web discovery does not bridge into that inventory. Identify the need,
+capture and preserve origin evidence inside `external-media/<attempt>/`,
+re-ingest, materialize a fresh visual-plan context, and re-plan before selecting
+it. `needs-review` may authorize the declared local editorial review while
+retaining that disposition; it does not authorize publication.
+A successful native exporter automatically registers visual usage after its
+final machine-checked-for-review status and before reporting workflow success.
+If it reports a `visual-usage-registration` failure, preserve the checked export
+and recover or backfill with `./sniper node --import tsx
+scripts/producer/visual-plan-usage.ts register <producer-dir> <native-project>
+<checked-export>`. Both routes record machine-checked usage with
+`humanApprovalClaim: false`; neither replaces playback, Studio handoff or human
+approval. The next visual-plan context run automatically loads the newest eight
+current receipts for the same mode. It streams receipt names, revalidates at
+most 128 globally newest mode-compatible candidates, and never reads media.
 Scout a sufficiently varied real footage pool before committing to the shot map;
 matching a noun or repeatedly using one action is not visual storytelling. Plan
 smooth presenter/layout handoffs, deliberate presenter removal, left/right and
@@ -516,6 +615,22 @@ reference-derived graphic/transition/punch to its `referenceGrammarId` and run
 `reference_style_pack_lint.py` in addition to `reference_profile_lint.py`.
 Aggregate profile rates never override the pack's twice-reviewed window grammar.
 
+When `reference_style_vocabulary.json` exists, follow
+[Reference style vocabulary](../../../docs/producer/REFERENCE_STYLE_VOCABULARY.md).
+For every ordinary graphic or native treatment that claims vocabulary use,
+choose viewer need → purpose family → inspected contender → content-specific
+configuration and development. The vocabulary is not a closed catalog allowlist.
+An ordinary measured catalog choice outside its families may coexist when its
+supplemental application binds the exact catalog kind and records a coherent
+relationship or justified exception with evidence.
+Give each native treatment a stable choice ID; one scene may use several choices
+when it combines distinct graphic mechanisms. Record alternatives, executable
+bindings, and deliberate repeat reasons in the route's `styleApplication`. Use a shared frozen allocation for concurrently planned
+related Shorts or exact completed predecessor applications for serialized work.
+Never use global mutable history, random rotation, a cosmetic ID swap, or a
+fixed diversity quota. This vocabulary does not weaken exact style-pack grammar
+bindings or qualify verified mimicry.
+
 - `mimic` is a legacy identifier for reference-inspired mechanics guidance on
   this edit only; never report it as a verified style match.
 - `extend` may extend only the selected closed Restrained/Punch/Slideware short grammar;
@@ -557,9 +672,14 @@ star, NO overlay graphics (own-screen cutaways only); talking head = graphics
 AROUND the face (never covering, bbox + margin excluded), text proportionate to
 framing. render.py runs through `./sniper python3` (PIL/cv2 deps).
 
-**MANDATORY OPERATOR QUESTION ROUND (operator directive 2026-07-24, BOTH
-formats).** Every NEW video request — short OR longform — opens with ONE
-question round BEFORE any paid or expensive step, covering ALL of:
+**Production treatment round (both formats).** Resolve these choices before
+dependent production, honoring the selected
+[collaboration preset](../../../docs/producer/COLLABORATION_MODES.md). Discovery
+and paper-script review do not require a visual-treatment interview. Walkthrough
+settles clip selection and scripts first, then discusses treatment per clip;
+Pick & Go and Auto delegate unheld choices within their authorized scope.
+For choices the operator retains, use one focused round covering the missing
+items below. Reuse stored or conversational answers; do not re-ask them:
 1. **Style** — simple/trim · light · punch · restrained · slideware · (or another
    named grammar) · **auto** (brain + advisor pick from content).
 2. **Graphics involvement** — none · lean (only beats that earn it) · full
@@ -672,16 +792,35 @@ candidate. Judge the assembled message and its truthful joins, not whether a
 single uninterrupted section already contains the complete Short.
 Rank source-bound candidates by cold-viewer clarity, hook/payoff, useful evidence,
 context cost and portrait feasibility; retain the rationale in existing review
-notes. Inspect actual shortlisted footage, deduplicate overlapping ideas, then
-compile the winner directly from original source ranges. A topic boundary or a
+notes. Apply the playbook's source-reuse rules: shared timestamps and intros may
+serve different complete narratives; deduplicate repeated stories, not footage.
+Explore the viable pool before ranking favorites without an unrequested small
+count cap. Inspect actual shortlisted footage, then compile selected candidates
+directly from original source ranges. A topic boundary or a
 high-energy sentence alone does not establish a suitable short.
 
-**Selection before production:** show the ranked strongest moments before
-trimming or producing a short. Include source timestamps and watchable source
-previews, exact hook/payoff excerpts, estimated edited length, why each works,
-and a brief visual-storytelling idea. Recommend a favorite, then
-wait for the operator's selection. Reuse a moment the operator already chose; an
-explicit request to choose and proceed overrides this default. Ranking alone is not selection.
+**Selection before production:** follow the
+[collaboration preset](../../../docs/producer/COLLABORATION_MODES.md) and show
+the strongest distinct ideas with source references, hook/development/payoff,
+rough spoken assemblies where useful, Director-reviewed title-card wording and
+same-pattern alternatives, estimated lengths, reasons and weaknesses.
+For authorized clip production, use purposeful visual storytelling by default
+unless the request chooses a simpler/restricted treatment. Produce independent
+clips in parallel by default, sharing source preparation and respecting resource
+supervision; reduce concurrency when memory, CPU/disk or tool conflicts require it.
+These defaults never skip retained selection/script/treatment checkpoints.
+Group same-story variants under their idea; keep distinct narratives separately
+selectable even when they reuse footage. Record shared ranges and the different
+role they serve, and review each complete assembly. Reuse watchable source previews where
+available and useful; transcript-only discovery may remain provisional with
+coarse source pointers and an honest note that delivery/joins are unreviewed.
+It does not require edited preview exports or edit-grade timing before discussion.
+In Walkthrough and Pick & Go, recommend favorites, then wait for selection;
+ranking alone is not selection. Reuse moments already selected or selection
+explicitly delegated under Auto. Walkthrough then reviews full selected scripts
+in the conversation and settles treatment before the agreed production go-ahead.
+If the operator requests full scripts for any or all candidates before choosing,
+show that requested batch with source references and keep selection open.
 
 Finished-source repurposing refines the generic raw-footage steps below: review
 pause/retake proposals before applying them, preserve deliberate callbacks and
@@ -689,9 +828,10 @@ natural speed unless retiming is warranted and supported, and account for baked
 captions, graphics and music. Select the short before spending on visual treatment.
 Apply **Visual storytelling** to the selected cut: source-backed promise, visual
 evidence/development and a complete payoff. Continue through the requested Studio
-and MP4 route with actual full-output review. Analysis-only requests stop at the
-shortlist; a request to make the short continues under existing authorization and
-applicable gates. This is an agent-directed workflow, not a released batch-ranking
+and MP4 route with actual full-output review when production is authorized.
+Analysis-only requests stop at the requested analysis or paper scripts; a request
+to make the short continues within its preset's delegated or settled checkpoints
+and applicable gates. This is an agent-directed workflow, not a released batch-ranking
 endpoint or a measured retention/turnaround guarantee.
 
 ## The workflow (branches on TREATMENT LEVEL)
@@ -826,21 +966,32 @@ that lane on); only the engaging lanes differ.
      animation receipts, and the benchmark camera-motion ceiling.
    - **Catalog-first discovery — search the WHOLE recorded catalog BEFORE
      choosing forms**, reusing suitable catalog mechanics before hand-building
-     equivalents. Run
+     equivalents. Start with bounded semantic intent search across every metadata
+     row:
+     `./sniper python3 scripts/producer/graphics/catalog_discovery_cli.py
+     --format text semantic-search --intent "<viewer need>" --intent
+     "<alternate phrasing>" --declared-aspect <9:16|16:9> --limit 5`.
+     Use one to four intent phrasings and inspect the returned evidence rather
+     than selecting by name. Exact search remains available when the mechanism
+     is already known. Run
      `./sniper python3 scripts/producer/graphics/catalog_discovery_cli.py
      --format text search "<what the beat needs>" --declared-aspect <9:16|16:9>`
      (add `--status integrated-measured` to see only kinds proposable today),
      then `… lookup <name>` for the selected candidates. Declared aspect is a
      discovery filter, not measured compatibility. Read
-     `integration.status` honestly: only `integrated-measured` kinds enter the
-     plan, through the existing adapters (they are the same fresh matrix rows
-     the predicates below read); `integrated-unmeasured` means there is no valid
-     current measured row (see its stated reason) — not proposable; `reference` and
-     `reference-missing-source` are porting-contract work — name the item, its
-     source path and its listed adaptation notes in your report so the
-     operator can request the port. Discovery output is evidence, not
-     admission: a search hit never makes a mirror item plannable, never
-     approves copy/dimensions/duration/FPS, and never replaces this step's gates.
+     `integration.status` and `eligibility` honestly. `integrated-measured` may
+     compile through the ordinary adapters after the current capability checks.
+     `integrated-unmeasured` remains blocked until measurement is refreshed.
+     A source-present `reference` may win selection as an adaptation candidate.
+     Stage a distinct project-owned adaptation and route the complete edit
+     through Native Short or Native Long, where static preflight, browser/seek
+     capture, moving preview and final review qualify the exact implementation.
+     Required source-inspection receipts only freeze static dependency findings;
+     unresolved findings remain adaptation work and do not prove execution.
+     Do this creative-director work without asking the
+     operator to pick a component. `reference-missing-source` remains blocked.
+     Discovery output is evidence, not admission: a search hit never executes
+     mirror HTML, approves copy/dimensions/duration/FPS or replaces route gates.
    - **Comp physics — read `templates/motion/comp_capabilities.json` BEFORE
      choosing forms** (also re-check in step 4's graphics pass). The matrix is
      MEASURED data (`graphics/comp_catalog_probe.py`, one real render per
@@ -1144,9 +1295,12 @@ that lane on); only the engaging lanes differ.
      gates are green AND the critic returns no MATERIAL gap (a clean round). If you
      hit the round cap with open items, surface them to the operator in step 5 — do
      NOT silently ship past them (no dead-end).
-5. **Show the operator the plan** (default; skip only if they said "just
-   render"): chosen moments + why, predicted duration, hook text, what got cut, plus
-   any residual items the critic flagged that you chose not to resolve.
+5. **Show the operator the plan within the collaboration preset:** chosen
+   moments + why, predicted duration, hook text, what got cut, and any unresolved
+   critic findings. Walkthrough's script/treatment checkpoints already happened
+   before production planning; do not substitute this late summary for them.
+   Pick & Go/Auto may continue through delegated decisions without another
+   operator approval, retaining any expressly held checkpoint and all gates.
 5.5 **Draft mode (interactive jobs only).** After deterministic gates pass,
    `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts
    <producer_dir> --draft` grants separate draft admission. Then run

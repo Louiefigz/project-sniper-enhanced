@@ -1,5 +1,8 @@
 import { randomUUID } from "crypto";
-import { lstatSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import {
+  closeSync, constants as fsConstants, fstatSync, openSync, readFileSync,
+  renameSync, rmSync, writeFileSync,
+} from "fs";
 import path from "path";
 import { autoEditRequestKey } from "./auto-edit-hash";
 import { validAutoEditPipelineAuthority } from "./auto-edit-pipeline-authority";
@@ -16,10 +19,29 @@ import { validCutApprovalRequest, validCutPreviewPointer } from "@/lib/producer/
 import { validHumanCutAcceptancePointer, validHumanCutAcceptanceAttempt } from "@/lib/producer/contracts/human-cut-acceptance";
 import { validGuidedWorkflowV2, validGuidedHandoffPointerV2 } from "@/lib/producer/contracts/guided-workflow-v2";
 import { hasGuidedBootstrap, validExistingCutContext } from "./guided-project-bootstrap-contract";
+import { validNativeRouteHandoffPointer } from
+  "@/lib/producer/contracts/native-route-handoff";
 
 export const AUTO_EDIT_JOB_FILE = ".sniper-auto-edit-job.json";
+const MAX_AUTO_EDIT_JOB_BYTES = 8 * 1024 * 1024;
 
 export class StaleAutoEditWorkerError extends Error {}
+
+function readJobBytes(jobPath: string): Buffer | null {
+  let fd: number | null = null;
+  try {
+    fd = openSync(jobPath, fsConstants.O_RDONLY | fsConstants.O_NOFOLLOW);
+    const stat = fstatSync(fd);
+    if (!stat.isFile() || stat.nlink !== 1 || stat.size < 2
+        || stat.size > MAX_AUTO_EDIT_JOB_BYTES) return null;
+    const bytes = readFileSync(fd);
+    return bytes.length === stat.size ? bytes : null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== null) closeSync(fd);
+  }
+}
 
 export function autoEditJobPath(dir: string): string {
   return path.join(dir.replace(/\/$/, ""), AUTO_EDIT_JOB_FILE);
@@ -57,7 +79,7 @@ function validJob(value: unknown): value is AutoEditJob {
     && job.requestKey === autoEditRequestKey(job.ctx)
     && AUTO_EDIT_CHECKPOINTS.includes(job.checkpoint as AutoEditCheckpoint)
     && ["running", "failed", "interrupted", "complete", "awaiting_cut_approval", "cut_accepted",
-      "awaiting_treatment_brief", "treatment_admitted"].includes(String(job.status))
+      "awaiting_treatment_brief", "treatment_admitted", "awaiting_native_author"].includes(String(job.status))
     && (job.ctx.workflowPolicy === undefined || (job.ctx.workflowPolicy === "cut-first" && job.ctx.deliveryPolicy === "mp4-only"))
     && (job.ctx.workflowV2 === undefined || (validGuidedWorkflowV2(job.ctx.workflowV2)
       && job.ctx.workflowPolicy === "cut-first" && job.ctx.deliveryPolicy === "mp4-only" && !job.cutAcceptance && !job.cutAcceptanceAttempt))
@@ -80,6 +102,12 @@ function validJob(value: unknown): value is AutoEditJob {
     && (job.status !== "awaiting_cut_approval" || (job.ctx.workflowPolicy === "cut-first"
       && job.checkpoint === "cut_reviewed" && job.cutApprovalRequest !== undefined))
     && (job.reviewSavedPlan === undefined || job.reviewSavedPlan === true)
+    && (job.nativeHandoff === undefined
+      || validNativeRouteHandoffPointer(job.nativeHandoff))
+    && (job.status !== "awaiting_native_author"
+      || (job.checkpoint === "route_dispatched" && job.nativeHandoff !== undefined
+        && job.workerPid === undefined && job.workerIdentity === undefined))
+    && (job.status !== "complete" || job.nativeHandoff === undefined)
     && typeof job.activeEventStartId === "number"
     && (!job.ctx?.doctrine || (
       typeof job.ctx.doctrine.runId === "string"
@@ -88,6 +116,8 @@ function validJob(value: unknown): value is AutoEditJob {
       && typeof job.ctx.doctrine.files === "object"
     ))
     && (!job.ctx?.pipeline || validAutoEditPipelineAuthority(job.ctx.pipeline))
+    && (!job.ctx?.visualPlanPipeline
+      || validAutoEditPipelineAuthority(job.ctx.visualPlanPipeline))
     && (!job.ctx?.templateUsage || validTemplateUsageAuthority(job.ctx.templateUsage))
     && (job.workerIdentity === undefined || validProcessIdentity(job.workerIdentity))
     && (job.orphanedWorkerIdentity === undefined
@@ -97,8 +127,9 @@ function validJob(value: unknown): value is AutoEditJob {
 
 export function readAutoEditJob(jobPath: string): AutoEditJob | null {
   try {
-    if (!lstatSync(jobPath).isFile()) return null;
-    const value: unknown = JSON.parse(readFileSync(jobPath, "utf8"));
+    const bytes = readJobBytes(jobPath);
+    if (!bytes) return null;
+    const value: unknown = JSON.parse(bytes.toString("utf8"));
     return validJob(value) ? value : null;
   } catch {
     return null;

@@ -54,7 +54,7 @@ export type ProducerRunPhase =
   | "quality_check"
   | "repairing";
 export type ProducerRunStatus = "running" | "failed" | "interrupted" | "awaiting_cut_approval" | "cut_accepted"
-  | "awaiting_treatment_brief" | "treatment_admitted";
+  | "awaiting_treatment_brief" | "treatment_admitted" | "awaiting_native_author";
 
 export interface ProducerRunEvent {
   at: string;
@@ -136,6 +136,10 @@ export function projectPhaseCopy(stages: StageFlags, run?: ProducerRunState | nu
   }
   if (run?.status === "awaiting_cut_approval") {
     return { label: "Cut ready for your review", detail: "Play the reviewed cut before the visual treatment stage. This is not a finished video.", tone: "ready" };
+  }
+  if (run?.status === "awaiting_native_author") {
+    return { label: "Native edit ready for authoring", detail: run.message,
+      tone: "ready" };
   }
   if (run?.status === "running") {
     return { label: runPhaseLabel(run.phase), detail: run.message, tone: "running" };

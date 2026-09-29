@@ -1203,12 +1203,13 @@ class LessonWireTests(unittest.TestCase):
         self.assertIn('...graphicsProposalSteps(ctx)', ts)
         self.assertIn('Inspect the whole HyperFrames catalog', ts)
         self.assertIn('compatibleKinds is empty', ts)
-        self.assertIn('native-project migration required', ts)
+        self.assertIn('Native allocation creates an exact resumable native-author handoff', ts)
         self.assertIn('never substitute an old kind', ts)
         skill = (_REPO / '.claude/skills/producer/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('search the WHOLE recorded catalog', skill)
-        self.assertIn('only `integrated-measured` kinds enter the', skill)
-        self.assertIn('a search hit never makes a mirror item plannable', skill)
+        self.assertIn('`integrated-measured` may\n     compile through the ordinary adapters', skill)
+        self.assertIn('A source-present `reference` may win selection', skill)
+        self.assertIn('a search hit never executes\n     mirror HTML', skill)
 
 
 if __name__ == "__main__":

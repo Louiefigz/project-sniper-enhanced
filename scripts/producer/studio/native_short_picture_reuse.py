@@ -11,12 +11,18 @@ from studio.native_stage_evidence import require, verify_pins, verify_supervised
 from studio.native_selected_sources import prepared_source_pins
 
 STUDIO = Path(__file__).resolve().parent
-PICTURE_CODE = ('native_short_batched_render.mjs', 'native_short_capture_context.mjs',
+PICTURE_CODE = ('native_short_batched_render.mjs', 'native_short_revision_frames.mjs', 'native_short_capture_context.mjs',
+                'native_retained_frames.mjs',
                 'native_short_capture_checks.mjs', 'native_short_capture.mjs',
                 'native_source_cache.mjs', 'native_original_media.mjs', 'native_forward_qc.mjs',
+                'native_long_sources.mjs', 'native_source_view.mjs', 'native_source_acquisition.mjs',
+                'native_source_identity.mjs', 'native_source_store.mjs', 'native_source_store_collection.mjs',
+                'native_source_store_entry.mjs', 'native_source_store_publisher.mjs',
+                'runtime/frame-source-transport.mjs', 'runtime/native-export-guard.mjs',
                 'native_run_config.py', 'native_runtime.py', 'native_localhost_only.sb')
 RUNTIME_FILES = ('cli.js', 'native-capture-library.mjs', 'hyperframe.runtime.iife.js',
-                 'hyperframe.manifest.json', 'frame-source-transport.mjs')
+                 'hyperframe.manifest.json', 'frame-source-transport.mjs',
+                 'native-render-sdk.mjs', 'native-export-guard.mjs')
 DONOR_FILES = ('export-request.json', 'pipeline.render.json', 'batched-picture.json', 'picture.mp4')
 MODE = 'cached-native-batches'
 MAX_RECEIPT_BYTES = 32 * 1024 * 1024
@@ -53,6 +59,19 @@ def project_dependencies(project: Path) -> dict[str, str]:
                          for row in packet['sources'] if row.get('transcript')})
         expected.update({row['path']: row['sha256']
                          for row in packet.get('availableSupportingAssets', [])})
+        expected.update({row['path']: row['sha256']
+                         for row in packet.get('selectedReferences', [])})
+        if packet.get('relatedStyleContext'):
+            related = packet['relatedStyleContext']['source']
+            expected[related['path']] = related['sha256']
+    application = plan.get('strategy', {}).get('styleApplication')
+    if application:
+        expected[application['vocabulary']['path']] = application['vocabulary']['sha256']
+        if application.get('relatedContext'):
+            expected[application['relatedContext']['path']] = application['relatedContext']['sha256']
+    visual_plan = plan.get('visualPlan')
+    if visual_plan:
+        expected[visual_plan['path']] = visual_plan['byteHash']
     for asset in plan['assets']:
         if asset.get('webCapture'):
             expected.update({asset['webCapture'][key]: digest(Path(asset['webCapture'][key]))
@@ -97,10 +116,7 @@ def verify_inventory(donor: Path, receipt: dict, canvas: dict) -> dict[str, str]
         frames = list(range(index * maximum, min((index + 1) * maximum, count)))
         require(bool(frames) and batch.get('frames') == frames and batch.get('index') == index,
                 'picture batch inventory is incomplete')
-        require(batch.get('status') == 'captured-and-disposed' and batch.get('transport', {}).get('errors') == 0,
-                'picture batch capture did not complete')
-        require(all(batch.get(key) is True for key in ('sessionClosed', 'browserPoolDrained', 'serverClosed')),
-                'picture batch disposal was not verified')
+        verify_batch_origin(batch, receipt.get('pictureRevision'))
         observed += frames
     require(observed == list(range(count)), 'picture batch coverage is incomplete')
     for row in receipt['frames']:
@@ -114,6 +130,25 @@ def verify_inventory(donor: Path, receipt: dict, canvas: dict) -> dict[str, str]
             and compiled.resolve(strict=True).is_relative_to(donor), 'compiled picture evidence missing')
     pins[str(compiled)] = receipt['compiledSha256']
     return pins
+
+
+def verify_batch_origin(batch: dict, revision: dict | None) -> None:
+    """A revision batch has exact preserved frames and independently disposed real captures."""
+    if revision is not None:
+        captured, reused = batch.get('capturedFrames'), batch.get('reusedFrames')
+        require(isinstance(captured, list) and isinstance(reused, list)
+                and sorted(captured + reused) == batch['frames'], 'invalid revision batch partition')
+        intervals = revision.get('unchangedRanges', [])
+        require(all(any(start <= frame < end for start, end in intervals) for frame in reused),
+                'revision batch reuses changed frames')
+        if batch.get('status') == 'reused-and-verified':
+            require(not captured, 'reused batch contains unverified captures')
+            return
+        require(bool(captured), 'captured revision batch is empty')
+    require(batch.get('status') == 'captured-and-disposed' and batch.get('transport', {}).get('errors') == 0,
+            'picture batch capture did not complete')
+    require(all(batch.get(key) is True for key in ('sessionClosed', 'browserPoolDrained', 'serverClosed')),
+            'picture batch disposal was not verified')
 
 
 def batch_size(receipt: dict) -> int:
@@ -136,6 +171,7 @@ def verify_picture(project: Path, donor: Path, previous: dict, receipt: dict) ->
     require(receipt.get('project') == str(project) and receipt.get('output') == str(donor / 'picture.mp4'),
             'picture receipt belongs to another project or output')
     require(receipt.get('referenceEncoding') == 'jpeg95-matching-opaque-render', 'unexpected picture mode')
+    require(receipt.get('pictureRevision') == previous.get('pictureRevision'), 'picture revision proof differs')
     encoder = receipt.get('encoder', {})
     require(encoder.get('command') == previous['tools']['ffmpeg']
             and receipt.get('encodeResult', {}).get('exitCode') == 0, 'picture encoder did not complete')

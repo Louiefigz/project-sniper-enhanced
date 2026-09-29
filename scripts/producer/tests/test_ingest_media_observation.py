@@ -47,6 +47,7 @@ class IngestMediaObservationTests(unittest.TestCase):
         for row in result.snapshots:
             self.assertEqual(row.stat_identity, snapshot_stat_identity(Path(row.path).lstat()))
         self.assertTrue(all(len(entry) == 8 for entry in entries))
+        self.assertTrue(all("authorizationEvidence" not in entry for entry in entries))
 
     def test_result_entries_are_fresh_copies_not_mutable_retained_json(self) -> None:
         """A consumer cannot change the retained initial entry bytes through its copy."""

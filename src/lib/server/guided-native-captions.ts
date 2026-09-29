@@ -15,7 +15,8 @@ export function nativeCaptionGroupEnd(input: {
   occurrences: NativeShortDirection["occurrences"]; captionGroups: NativeCaptionGroups; totalFrames: number;
 }, index: number): number {
   const group = input.captionGroups[index], next = input.captionGroups[index + 1];
-  return Math.min(input.occurrences[group.at(-1)!][4], next ? input.occurrences[next[0]][3] : input.totalFrames);
+  const groupEnd = group.reduce((end, id) => Math.max(end, input.occurrences[id][4]), 0);
+  return Math.min(groupEnd, next ? input.occurrences[next[0]][3] : input.totalFrames);
 }
 
 /** Grouping must preserve each occurrence exactly once, in order, within its source cut. */

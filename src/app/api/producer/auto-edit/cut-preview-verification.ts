@@ -2,7 +2,8 @@ import path from "node:path";
 import type { AutoEditJob } from "@/lib/server/auto-edit-job-types";
 import type { CutApprovalRequestV1 } from "@/lib/producer/contracts/cut-approval-request";
 import type { ProjectMutationLease } from "@/lib/server/project-mutation-lease";
-import { pipelineAuthorityPath } from "@/lib/server/auto-edit-pipeline-authority";
+import { executablePipelineRoot, pipelineAuthorityPath } from
+  "@/lib/server/auto-edit-pipeline-authority";
 import { stageTimingEnv, withStageTimingFallback } from "@/lib/server/stage-timing-context";
 import { timedStage } from "@/lib/server/stage-timing";
 import { generationChildTimeout } from "@/lib/server/generation-attempt-clock";
@@ -43,7 +44,8 @@ export async function verifyCutPreviewSources(input: CutPreviewVerificationInput
     const result = await runCutPreviewProcess({ command: pythonInterpreter(),
       args: [script, path.join(directory, "input.json"), "--verify-sources"], cwd: path.dirname(script),
       env: { ...stageTimingEnv(), PYTHONPATH: path.dirname(script),
-        ...(input.job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT: input.job.ctx.pipeline.snapshotRoot } : {}) },
+        ...(input.job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT:
+          executablePipelineRoot(input.job.ctx.dir, input.job.ctx.pipeline) } : {}) },
       timeoutMs: generationChildTimeout(120_000, input.remainingMs) });
     const event = JSON.parse(result.stdout.trim());
     if (event.status !== "cut_preview_sources_current" || event.requestHash !== input.request.requestHash

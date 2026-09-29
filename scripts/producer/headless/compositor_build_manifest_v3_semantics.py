@@ -12,6 +12,7 @@ COMPOSITOR_BUILD_V3_POLICY = "sniper-prebound-compositor-build-v3"
 COMPOSITOR_BUILD_V3_DIGEST_DOMAIN = b"sniper-prebound-compositor-build-v3\0"
 COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS = (
     *COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS,
+    "scripts/producer/headless/windows_process_runner.py",
     "scripts/producer/graphics/scene_contract.py",
     "scripts/producer/graphics/visual_source_policy.py",
     "scripts/producer/graphics/visual_source_receipt.py",

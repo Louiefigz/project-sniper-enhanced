@@ -30,6 +30,36 @@ def review_input_pins(file: Path, project: str) -> dict[str, str]:
     return pins
 
 
+def require_typed_short_reviews(file: Path, project: Path) -> None:
+    """Cheap pre-reservation check for a native Short: every row is typed and, when rows exist, one approves motion.
+
+    Runs in option validation, before the production budget reserves (and charges) the launch, so a bundle recorded
+    before typed review evidence, or a picture-only pass, is refused without cost. A route-canary TEST fixture
+    declaration never admits a project a production batch budgets. The TS reader still decides the full admission
+    (coverage, bytes, provenance, the fixture layout, and an empty bundle) after reservation.
+    """
+    bundle = bound_json(file)
+    rows = bundle.get('reviews') if isinstance(bundle, dict) else None
+    require(isinstance(rows, list), 'Native motion review bundle has no review list')
+    if not rows:
+        return
+    fixtures = [index for index, row in enumerate(rows) if isinstance(row, dict) and isinstance(row.get('inspection'), dict)
+                and row['inspection'].get('fixture') is not None]
+    if fixtures:
+        from studio.native_budget_registry import resolve_binding
+        from studio.native_budget_store import default_root
+        require(resolve_binding(default_root(), project) is None,
+                f'motion review rows {fixtures} are route-canary TEST fixture declarations, and a production batch '
+                'budgets this project; a fixture never admits production work. Refused before any budget reservation')
+    untyped = [index for index, row in enumerate(rows) if not isinstance(row, dict) or not isinstance(row.get('inspection'), dict)]
+    require(not untyped, f'motion review rows {untyped} carry no typed inspection (recorded before typed review '
+            'evidence); a native Short needs a typed motion review from context.py --role motion-critic. Refused '
+            'before any budget reservation')
+    require(any('motion' in (row['inspection'].get('approves') or []) for row in rows),
+            'no row approves motion (typed normal-speed playback of every window); stills-only reviews admit no full '
+            'picture. Refused before any budget reservation')
+
+
 def require_preview_review(request: dict, packet: dict) -> None:
     """Full picture cannot run on generated-but-unreviewed or stale preview evidence."""
     file = request.get('previewReviews')

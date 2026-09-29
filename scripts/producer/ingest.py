@@ -64,6 +64,7 @@ from transcript_source_authority import (
 MANIFEST_NAME = "asset_manifest.json"
 BROLL_DIRNAME = "broll"
 MUSIC_DIRNAME = "music"
+EXTERNAL_DIRNAME = "external-media"
 
 
 def fail(msg: str) -> None:
@@ -92,6 +93,7 @@ class Inputs:
     raw_files: list[Path]
     broll_dir: Optional[Path]
     music_dir: Optional[Path]
+    external_dir: Optional[Path]
 
 
 @dataclass
@@ -108,17 +110,21 @@ class TranscribeCtx:
 def classify_inputs(input_path: Path) -> Inputs:
     """Split the input into raw sources + ``broll/``/``music/`` folders."""
     if input_path.is_file():
-        return Inputs(raw_files=[input_path], broll_dir=None, music_dir=None)
+        return Inputs(raw_files=[input_path], broll_dir=None, music_dir=None,
+                      external_dir=None)
     broll = input_path / BROLL_DIRNAME
     music = input_path / MUSIC_DIRNAME
-    if broll.is_symlink() or music.is_symlink():
-        raise RuntimeError("project broll/music ingress directories cannot be symlinks")
+    external = input_path / EXTERNAL_DIRNAME
+    if broll.is_symlink() or music.is_symlink() or external.is_symlink():
+        raise RuntimeError(
+            "project broll/music/external-media ingress directories cannot be symlinks")
     raw = sorted(p for p in input_path.iterdir()
                  if p.is_file() and p.suffix.lower() in MEDIA_EXTS)
     return Inputs(
         raw_files=raw,
         broll_dir=broll if broll.is_dir() else None,
         music_dir=music if music.is_dir() else None,
+        external_dir=external if external.is_dir() else None,
     )
 
 
@@ -200,7 +206,8 @@ def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool,
     if retained is not None:
         inputs.raw_files = retained_primary_files(retained)
     candidates = collect_ingest_candidates(
-        inputs.raw_files, inputs.broll_dir, inputs.music_dir)
+        inputs.raw_files, inputs.broll_dir, inputs.music_dir,
+        inputs.external_dir)
     candidates = include_retained_ingress(candidates, retained)
     admission = admit_ingest_candidates(candidates, manifest_dir)
     verify_source_set_binding(
@@ -220,6 +227,10 @@ def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool,
         inputs.raw_files, source_context, admission.media_by_original)
     broll = catalog_admitted_broll(
         inputs.broll_dir, extra_broll, admission.media_by_original)
+    external = catalog_admitted_broll(
+        inputs.external_dir, [], admission.media_by_original)
+    external = [{**row, "id": row["id"].replace("broll-", "external-", 1)}
+                for row in external]
     music = scan_admitted_music(inputs.music_dir, admission.media_by_original)
     # Repo-bundled starter beds (assets/music/*) register AFTER the project's
     # own tracks so plan.music.assetId resolves out of the box (additive; ids
@@ -228,11 +239,15 @@ def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool,
     if retained is not None:
         broll = merge_retained_lane(broll, retained.manifest["broll"], admission.media_by_original, "broll")
         music = merge_retained_lane(music, retained.manifest["music"], admission.media_by_original, "music")
+        external = merge_retained_lane(
+            external, retained.manifest.get("externalMedia", []),
+            admission.media_by_original, "external")
     return {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "input": str(input_path),
         "sources": sources,
         "broll": broll,
+        "externalMedia": external,
         "music": music,
         "sourceSetAdmission": admission.binding,
     }
@@ -275,6 +290,7 @@ def main() -> None:
     status(status="done", manifest=str(out_path),
            sources=len(manifest["sources"]),
            broll=len(manifest["broll"]),
+           externalMedia=len(manifest.get("externalMedia", [])),
            music=len(manifest["music"]))
 
 

@@ -14,7 +14,12 @@ import json
 import os
 import sys
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+from graphics.catalog_discovery import load_catalog
+from graphics.reference_style_vocabulary import read_checked_vocabulary
+from reference_style_application_lint import VocabularyContext, lint_style_application
 
 
 STRATEGIES = ("mimic", "new-style")
@@ -253,6 +258,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mode", required=True, choices=("short", "longform"))
     parser.add_argument("--strategy", required=True, choices=STRATEGIES)
     parser.add_argument("--target-style", choices=("restrained", "punch", "slideware"))
+    parser.add_argument("--vocabulary")
     return parser.parse_args()
 
 
@@ -263,8 +269,17 @@ def main() -> int:
         if args.target_style is not None:
             raise ValueError("--target-style is retired; use the actual selected reference")
         expected = Expected(args.reference_id, args.mode, args.strategy, args.target_style)
-        verdict = lint(load_object(args.plan), load_object(args.profile), expected)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        plan = load_object(args.plan)
+        verdict = lint(plan, load_object(args.profile), expected)
+        snapshot = read_checked_vocabulary(Path(args.vocabulary), load_catalog()) \
+            if args.vocabulary else None
+        context = VocabularyContext(snapshot['record'], snapshot['path'],
+            snapshot['sha256'], args.reference_id) if snapshot else None
+        style = lint_style_application(plan, context)
+        verdict['errors'] += style['errors']
+        verdict['metrics']['styleApplication'] = style['metrics']
+        verdict['ok'] = verdict['ok'] and style['ok']
+    except (OSError, RuntimeError, ValueError, json.JSONDecodeError) as exc:
         verdict = {"ok": False, "errors": [str(exc)], "warnings": [], "metrics": {}}
     print(json.dumps(verdict))
     return 0 if verdict["ok"] else 1

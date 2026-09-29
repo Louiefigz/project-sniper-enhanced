@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/reference-style-vocabulary-v1.schema.json",
+  "title": "Project Sniper reference style vocabulary v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "scope", "referenceId", "coverage", "evidence",
+    "stableTraits", "flexibleTraits", "signatureDevices", "families",
+    "selectionPolicy", "inputPins", "candidates", "styleApproved",
+    "qualityApproved", "renderApproved", "verifiedMimicQualified"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scope": { "const": "reference-style-vocabulary-planning-only" },
+    "referenceId": { "$ref": "#/$defs/id" },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewed", "limitations"],
+      "properties": {
+        "status": { "enum": ["complete", "limited"] },
+        "reviewed": { "$ref": "#/$defs/text" },
+        "limitations": { "$ref": "#/$defs/textList" }
+      }
+    },
+    "evidence": {
+      "type": "array", "minItems": 3, "maxItems": 256,
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "stableTraits": { "$ref": "#/$defs/traits" },
+    "flexibleTraits": { "$ref": "#/$defs/traits" },
+    "signatureDevices": { "$ref": "#/$defs/traits" },
+    "families": {
+      "type": "array", "minItems": 1, "maxItems": 64,
+      "items": { "$ref": "#/$defs/family" }
+    },
+    "selectionPolicy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["coherence", "variation", "repetition", "uncertainty"],
+      "properties": {
+        "coherence": { "$ref": "#/$defs/text" },
+        "variation": { "$ref": "#/$defs/text" },
+        "repetition": { "$ref": "#/$defs/text" },
+        "uncertainty": { "$ref": "#/$defs/text" }
+      }
+    },
+    "inputPins": {
+      "type": "object",
+      "propertyNames": { "minLength": 1 },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "candidates": {
+      "type": "object",
+      "additionalProperties": { "type": "object" }
+    },
+    "styleApproved": { "const": false },
+    "qualityApproved": { "const": false },
+    "renderApproved": { "const": false },
+    "verifiedMimicQualified": { "const": false }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "text": {
+      "type": "string", "minLength": 1, "maxLength": 16000
+    },
+    "textList": {
+      "type": "array", "maxItems": 64,
+      "items": { "$ref": "#/$defs/text" }, "uniqueItems": true
+    },
+    "pin": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "evidence": {
+      "allOf": [
+        { "$ref": "#/$defs/pin" },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["id", "role", "path", "sha256", "observation"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "role": { "enum": ["style-profile", "deep-study", "frame", "motion-sequence", "review"] },
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "observation": { "$ref": "#/$defs/text" }
+          }
+        }
+      ]
+    },
+    "trait": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "description", "evidenceIds"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "description": { "$ref": "#/$defs/text" },
+        "evidenceIds": {
+          "type": "array", "minItems": 1, "maxItems": 256,
+          "items": { "$ref": "#/$defs/id" }, "uniqueItems": true
+        }
+      }
+    },
+    "traits": {
+      "type": "array", "minItems": 1, "maxItems": 128,
+      "items": { "$ref": "#/$defs/trait" }
+    },
+    "contender": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "catalogRef", "styleFit", "bestFor", "difference", "configuration",
+        "variationOptions", "availability", "prerequisites", "evidenceIds", "confidence"
+      ],
+      "properties": {
+        "catalogRef": { "$ref": "#/$defs/text" },
+        "styleFit": { "$ref": "#/$defs/text" },
+        "bestFor": { "$ref": "#/$defs/text" },
+        "difference": { "$ref": "#/$defs/text" },
+        "configuration": { "$ref": "#/$defs/text" },
+        "variationOptions": {
+          "type": "array", "minItems": 1, "maxItems": 16,
+          "items": { "$ref": "#/$defs/text" }, "uniqueItems": true
+        },
+        "availability": { "enum": ["ready", "prerequisite", "research-only"] },
+        "prerequisites": {
+          "type": "array", "maxItems": 32,
+          "items": { "$ref": "#/$defs/text" }
+        },
+        "evidenceIds": {
+          "type": "array", "minItems": 1, "maxItems": 256,
+          "items": { "$ref": "#/$defs/id" }, "uniqueItems": true
+        },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "family": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "purposes", "sharedStyle", "useWhen", "avoidWhen", "contenders"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "$ref": "#/$defs/text" },
+        "purposes": {
+          "type": "array", "minItems": 1, "maxItems": 16,
+          "items": { "$ref": "#/$defs/id" }, "uniqueItems": true
+        },
+        "sharedStyle": { "$ref": "#/$defs/text" },
+        "useWhen": { "$ref": "#/$defs/text" },
+        "avoidWhen": { "$ref": "#/$defs/text" },
+        "contenders": {
+          "type": "array", "minItems": 1, "maxItems": 8,
+          "items": { "$ref": "#/$defs/contender" }
+        }
+      }
+    }
+  }
+}

@@ -82,7 +82,7 @@ test("actual Codex adapter retains final stops with exit0 and preserves existing
 
 test("actual Codex adapter latches streamed stops across abort or a later success message", async () => {
   for (const fails of [false, true]) {
-    const result = await runAuthoring(context(), () => {}, { provider: () => "codex", codex: async options => {
+    const result = await runAuthoring(context(), () => {}, { provider: () => "codex", promote: () => {}, codex: async options => {
       options.onEvent?.({ type: "item.completed", item: { type: "agent_message", text: `${MARKER} ${REASON}` } });
       assert.equal(options.signal?.aborted, true);
       if (fails) throw new Error("TEST ONLY timed out after prior explicit stop");
@@ -226,7 +226,7 @@ test("malformed terminal results and explicit provider errors cannot become late
 
 test("Codex adapter latches root error results while nested terminal metadata remains opaque", async () => {
   for (const nested of [false, true]) {
-    const result = await runAuthoring(context(), () => {}, { provider: () => "codex", codex: async options => {
+    const result = await runAuthoring(context(), () => {}, { provider: () => "codex", promote: () => {}, codex: async options => {
       options.onEvent?.({ type: "result", is_error: true, result: "AUTHORED ok segments=1 graphics=0",
         ...(nested ? { parent_tool_use_id: "TEST-subagent" } : {}) });
       assert.equal(options.signal?.aborted, !nested);

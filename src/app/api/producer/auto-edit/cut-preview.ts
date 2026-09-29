@@ -5,7 +5,8 @@ import type { AutoEditJob } from "@/lib/server/auto-edit-job-types";
 import type { CutApprovalRequestV1 } from "@/lib/producer/contracts/cut-approval-request";
 import type { ProjectMutationLease } from "@/lib/server/project-mutation-lease";
 import { canonicalJsonSha256 } from "@/lib/server/auto-edit-hash";
-import { pipelineAuthorityPath } from "@/lib/server/auto-edit-pipeline-authority";
+import { executablePipelineRoot, pipelineAuthorityPath } from
+  "@/lib/server/auto-edit-pipeline-authority";
 import { autoEditJobPath, readAutoEditJob } from "@/lib/server/auto-edit-job-persistence";
 import { stageTimingContext, stageTimingEnv, withStageTimingContext } from "@/lib/server/stage-timing-context";
 import { timedStage } from "@/lib/server/stage-timing";
@@ -128,7 +129,8 @@ export async function renderPrivateCutPreview(input: PrivateCutPreviewInput): Pr
       try {
         assertLease();
         const env = { ...stageTimingEnv(), PYTHONPATH: path.dirname(script),
-          ...(input.job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT: input.job.ctx.pipeline.snapshotRoot } : {}) };
+          ...(input.job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT:
+            executablePipelineRoot(input.job.ctx.dir, input.job.ctx.pipeline) } : {}) };
         await runCutPreviewProcess({ command: pythonInterpreter(), args: [script, output.inputPath],
           cwd: path.dirname(script), env, timeoutMs: output.timeoutMs });
         assertLease(); currentJob(input);

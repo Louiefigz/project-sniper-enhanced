@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import tempfile
 import unittest
 from dataclasses import replace
@@ -9,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from studio.native_run import NativeRun
-from studio.native_run_config import NativeRunConfig
+from studio.native_run_config import NativeRunConfig, local_environment
 from studio.native_runtime import digest
 
 
@@ -118,6 +119,19 @@ class NativeRunConfigTests(unittest.TestCase):
         self.admission.clear()
         self.settings.validate_admission()
         self.assertIn('sandboxSha256', self.settings.admission)
+
+    def test_closed_environment_retains_only_explicit_python_selection(self) -> None:
+        """Export children retain runtime authority without inheriting credentials."""
+        tools = {'node': '/private/tools/node', 'ffmpeg': '/private/tools/ffmpeg',
+                 'ffprobe': '/private/tools/ffprobe', 'browser': '/private/tools/browser'}
+        key = 'SNIPER_PYTHON_VENV_ROOT'
+        for selection in ({}, {key: ''}, {key: '/private/installed/.venv'}):
+            inherited = {'UNRELATED_API_KEY': 'TEST-NOT-A-SECRET', **selection}
+            with self.subTest(selection=selection), patch.dict(os.environ, inherited, clear=True), \
+                    patch('studio.native_run_config.resolve_tools', return_value=tools):
+                _tools, environment = local_environment()
+            self.assertNotIn('UNRELATED_API_KEY', environment)
+            self.assertEqual({name: value for name, value in environment.items() if name == key}, selection)
 
     def test_owner_revalidates_metadata_before_hashing_project_files(self) -> None:
         """A mutable config cannot bypass admission by changing after construction."""

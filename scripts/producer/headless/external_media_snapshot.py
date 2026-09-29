@@ -117,7 +117,7 @@ def _verify_snapshot(path: str, expected_hash: str, expected_size: int,
         named = snapshot_stat_identity(os.lstat(path))
         if before != named or before[6] != expected_size:
             raise RuntimeError(
-                "content-addressed external media snapshot changed before verification; "
+                "content-addressed external media snapshot is corrupt or changed before verification; "
                 f"descriptor={before!r}; named={named!r}; expectedSize={expected_size}")
         observed_hash, size = _hash_descriptor(fd, expected_size, runtime)
         check_verification_clock(runtime)

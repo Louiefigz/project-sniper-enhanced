@@ -21,7 +21,27 @@ Claude and no Sniper sign-in; the Auto Edit controller that spawned the provider
 guided checkpoint/Native Director routes belong to the retired web app and are not buyer
 routes. Where this document or another describes them, the agent route below governs.
 
-The agent route, which every Short and long-form edit now takes:
+Before advancing an interactive job, apply the
+[collaboration presets](producer/COLLABORATION_MODES.md): **Walkthrough**,
+**Pick & Go**, or **Auto**. They control which editorial decisions the operator
+retains, separately from visual treatment and execution mode. New long-source
+clip discovery defaults to Walkthrough unless the current request delegates
+more. Show candidates and scripts in the conversation at the applicable review
+stops; a saved file alone is not that discussion. A plan-only or scripts-only
+request remains limited to that deliverable in every preset. Discovery can use
+an honestly labeled content transcript; precise cuts and captions still need
+the existing source/timing admission. Do not begin dependent editing, asset
+production or rendering before the selected preset and current request permit
+it. Preserve decisions and the next review stop in the existing brief/notes.
+These are agent workflow instructions, not new engine admission receipts.
+
+For authorized multi-clip production, independent clips run in parallel by
+default, sharing source preparation and respecting the existing resource
+supervisor/leases. Reduce concurrency when memory, CPU/disk or tool conflicts
+require it. Purposeful visual storytelling is the default clip treatment unless
+the operator requests a simpler or restricted edit; review checkpoints still apply.
+
+The production route, after the applicable editorial decisions, is:
 
 1. Every engine command runs through the platform launcher from the Sniper folder: `./sniper`
    on macOS or `sniper.cmd` on Windows (its own tools, settings and maintenance lock). The

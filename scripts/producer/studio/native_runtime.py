@@ -31,6 +31,14 @@ WRAPPER = ("#!/usr/bin/env node\nimport { admitNativeCommand } from './native-ex
            "if (admitNativeCommand()) await import('./native-render-sdk.mjs');\n")
 
 
+def runtime_identity(cli: str) -> str | None:
+    """Read the content-addressed identity of a managed native runtime path."""
+    parts = Path(cli).parts
+    if len(parts) < 5 or parts[-5] != '.sniper-native-runtime' or parts[-3:] != ('hyperframes', 'dist', 'cli.js'):
+        return None
+    return parts[-4]
+
+
 def digest(file: Path) -> str:
     """Hash files without loading source recordings into memory."""
     with file.open('rb') as handle:
@@ -133,7 +141,8 @@ def _with_notice(runtime: Path) -> Path:
     return runtime
 
 
-def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
+def install_runtime(repair: bool = False, repo: Path | None = None,
+                    build_wait: float = BUILD_WAIT_SECONDS) -> Path:
     """Materialize a content-addressed runtime beside the installed dependencies.
 
     Args:
@@ -147,6 +156,9 @@ def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
             process kept the runtime-build lock for longer than the wait.
         ValueError: The stock SDK or the built runtime does not verify.
     """
+    import math
+    if not math.isfinite(build_wait) or build_wait <= 0:
+        raise ValueError('Runtime construction needs a finite positive wait allowance')
     root = repo or REPO
     LAST_ACTION["action"] = "built"
     manifest, identity = _runtime_manifest()
@@ -159,7 +171,7 @@ def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
     if found:
         return _with_notice(found)
     build_lock = sniper_lock.lock_file(sniper_lock.state_dir(root), sniper_lock.RUNTIME_BUILD)
-    with sniper_lock.held(build_lock, 'exclusive', 'render runtime construction', BUILD_WAIT_SECONDS):
+    with sniper_lock.held(build_lock, 'exclusive', 'render runtime construction', min(BUILD_WAIT_SECONDS, build_wait)):
         found = _verified_or_none(parent / 'hyperframes', manifest, repair)
         return _with_notice(found or _construct(stock, parent, manifest))
 

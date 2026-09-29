@@ -14,6 +14,7 @@ RENDER_BUILD_V4_POLICY = "sniper-headless-render-build-v5"
 RENDER_BUILD_V4_DIGEST_DOMAIN = b"sniper-render-build-v5\0"
 RENDER_BUILD_V4_IMPLEMENTATION_PATHS = (
     *RENDER_BUILD_V3_IMPLEMENTATION_PATHS,
+    "scripts/producer/headless/windows_process_runner.py",
     "scripts/producer/graphics/scene_contract.py",
     "scripts/producer/graphics/visual_source_policy.py",
     "scripts/producer/graphics/visual_source_receipt.py",

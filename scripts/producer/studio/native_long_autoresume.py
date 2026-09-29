@@ -7,6 +7,7 @@ from cut_preview_io import bound_json
 from studio.native_long_recovery import prepare_picture_recovery, prepare_render_recovery, picture_audio_reuse
 from studio.native_stage_evidence import require
 from studio.native_export_history import candidate_attempts
+from studio.native_visual_plan import same_audio_reuse_identity
 
 
 def resume_request(current: dict, attempt: Path) -> dict:
@@ -27,7 +28,8 @@ def matching_attempt(current: dict, attempt: Path) -> tuple[int, str] | None:
         return None
     require(original.get('output') == str(attempt), 'Recovery attempt has moved; select a preserved original explicitly')
     inputs = original.get('renderInputs', original.get('pictureInputs', original['pins']))
-    if any(inputs.get(file) != sha for file, sha in current['pins'].items()):
+    exact_inputs = not any(inputs.get(file) != sha for file, sha in current['pins'].items())
+    if not exact_inputs and not same_audio_reuse_identity(current, original):
         return None
     if any(original.get(key) != current.get(key) for key in ('runtime', 'tools', 'audioProfile', 'cache')):
         return None
@@ -37,9 +39,9 @@ def matching_attempt(current: dict, attempt: Path) -> tuple[int, str] | None:
         return None  # Preview discovery owns these; they have no final-media owner.
     require(delivery.get('status') in {'failed', 'native-long-checked-for-review'}
             and isinstance(delivery.get('completedAt'), str), 'Compatible recovery attempt has no terminal delivery state')
-    if (attempt / 'render-stage.json').exists() or original.get('verifyStage'):
+    if exact_inputs and ((attempt / 'render-stage.json').exists() or original.get('verifyStage')):
         return 3, delivery['completedAt']
-    if (attempt / 'picture-stage.json').exists() or original.get('pictureStage'):
+    if exact_inputs and ((attempt / 'picture-stage.json').exists() or original.get('pictureStage')):
         return 2, delivery['completedAt']
     audio = attempt / 'audio-preparation/receipt.json'
     if audio.is_file() and bound_json(audio).get('status') in {

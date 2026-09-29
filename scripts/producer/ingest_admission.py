@@ -20,6 +20,7 @@ from ingest_admission_contract import (
     verify_source_set_binding,
 )
 from ingest_probe import AUDIO_EXTS, MEDIA_EXTS, reject_unsupported_ingest_media
+from ingest_external_origins import external_authorization
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,7 @@ class AdmittedMedia:
     media_kind: str
     receipt_path: str
     receipt_sha256: str
+    authorization_evidence: dict | None
 
 
 @dataclass(frozen=True)
@@ -149,6 +151,7 @@ def collect_ingest_candidates(
     raw_files: list[Path],
     broll_dir: Path | None,
     music_dir: Path | None,
+    external_dir: Path | None = None,
 ) -> list[IngressCandidate]:
     """Enumerate exactly the external files consumed by ``ingest.py``."""
     candidates = [_candidate(path, "source") for path in raw_files]
@@ -156,6 +159,8 @@ def collect_ingest_candidates(
         candidates += _tree_candidates(broll_dir, "broll", MEDIA_EXTS)
     if music_dir:
         candidates += _tree_candidates(music_dir, "music", AUDIO_EXTS)
+    if external_dir:
+        candidates += _tree_candidates(external_dir, "external", MEDIA_EXTS)
     return candidates
 
 
@@ -182,13 +187,16 @@ def _admit_one(
     receipt = runner(str(candidate.original_path), str(store))
     path, sha256, size, kind = receipt_snapshot(receipt, store)
     receipt_path, receipt_sha256 = _store_receipt(receipt, manifest_dir)
+    authorization = external_authorization(
+        str(candidate.original_path), sha256, size) \
+        if candidate.lane == "external" else None
     return AdmittedMedia(
         str(candidate.original_path), candidate.lane, path, sha256, size,
-        kind, receipt_path, receipt_sha256)
+        kind, receipt_path, receipt_sha256, authorization)
 
 
 def _entry(media: AdmittedMedia) -> dict:
-    return {
+    entry = {
         "lane": media.lane,
         "originalPath": media.original_path,
         "snapshotPath": media.snapshot_path,
@@ -198,6 +206,9 @@ def _entry(media: AdmittedMedia) -> dict:
         "admissionReceiptPath": media.receipt_path,
         "admissionReceiptSha256": media.receipt_sha256,
     }
+    if media.lane == "external":
+        entry["authorizationEvidence"] = media.authorization_evidence
+    return entry
 
 
 def admit_ingest_candidates(

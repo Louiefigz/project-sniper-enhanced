@@ -17,6 +17,7 @@ import {
   type PlanningGateProcessResult,
   type PlanningGateVerdict,
 } from "./planning-gate-contract";
+import { visualPlanApplicationCommand } from "./ordinary-visual-plan-authority";
 
 export { PLANNING_GATE_IDS } from "./planning-gate-contract";
 export {
@@ -80,6 +81,7 @@ function referenceCommand(input: GateBundleInput): PlanningGateCommand | null {
     "--mode", intent.mode,
     "--strategy", intent.strategy,
   ];
+  if (input.reference.vocabularyPath) args.push("--vocabulary", input.reference.vocabularyPath);
   return { gate: "reference_lint", script: gateScript("reference_profile_lint.py"), args };
 }
 
@@ -115,9 +117,11 @@ export function transcriptCutCommand(
 /** Commands for every controller-owned pre-render gate, in stable order. */
 export function planningGateCommands(input: GateBundleInput): PlanningGateCommand[] {
   const shared = [input.planPath, input.transcriptsDir, input.manifestPath];
+  const visualPlan = visualPlanApplicationCommand(input);
   const commands: PlanningGateCommand[] = [
     operatorIntentCommand(input),
     transcriptCutCommand(input),
+    ...(visualPlan ? [visualPlan] : []),
     {
       gate: "plan_lint",
       script: gateScript("plan_lint.py"),
@@ -175,6 +179,7 @@ export function combinePlanningGateVerdicts(
   const byGate = new Map(verdicts.map((verdict) => [verdict.gate, verdict]));
   const operatorIntent = requiredVerdict(byGate, "operator_intent");
   const transcriptCut = requiredVerdict(byGate, "transcript_cut");
+  const visualPlanApplication = byGate.get("visual_plan_application") ?? null;
   const planLint = requiredVerdict(byGate, "plan_lint");
   const hookContract = requiredVerdict(byGate, "hook_contract");
   const templateUsage = requiredVerdict(byGate, "template_usage");
@@ -182,10 +187,11 @@ export function combinePlanningGateVerdicts(
   const compSize = requiredVerdict(byGate, "comp_size");
   const geometryFeasibility = requiredVerdict(byGate, "geometry_feasibility");
   const referenceLint = byGate.get("reference_lint") ?? null;
-  const gates = { operatorIntent, transcriptCut, planLint,
+  const gates = { operatorIntent, transcriptCut, visualPlanApplication, planLint,
     hookContract, templateUsage, claimsContract, compSize,
     geometryFeasibility, referenceLint };
-  const completed = [operatorIntent, transcriptCut, planLint, hookContract,
+  const completed = [operatorIntent, transcriptCut,
+    ...(visualPlanApplication ? [visualPlanApplication] : []), planLint, hookContract,
     templateUsage, claimsContract, compSize, geometryFeasibility,
     ...(referenceLint ? [referenceLint] : [])];
   const findings = (kind: "errors" | "warnings") => completed.flatMap((verdict) =>
@@ -231,7 +237,9 @@ async function runGateWave(commands: PlanningGateCommand[], runtime: {
   const settled = await Promise.allSettled(commands.map(async (command) => {
     let invoked = false;
     try {
-      const env = runtime.dependencies.env?.(command.gate), timeoutMs = runtime.remaining();
+      const env = { ...(runtime.dependencies.env?.(command.gate) ?? {}),
+        ...(command.env ?? {}) };
+      const timeoutMs = runtime.remaining();
       if (runtime.cancellation.signal.aborted) throw new Error("Planning gate bundle cancelled before spawn");
       invoked = true;
       const result = await run(command, { env, timeoutMs, signal: runtime.cancellation.signal });

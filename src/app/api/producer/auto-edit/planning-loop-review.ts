@@ -23,6 +23,8 @@ import type { ProducerMaterialIssue, ProducerReview } from "./review-contract";
 import { AutoEditError } from "./stream";
 import { cutApprovalPath } from "./cut-approval";
 import { templateUsageHistoryPath } from "@/lib/server/template-usage-history";
+import { currentReferenceStyleVocabulary } from "@/lib/server/longform-reference-inputs";
+import { ordinaryVisualPlanGateAuthority } from "./ordinary-visual-plan-authority";
 
 interface PlanningRoundArtifactInput {
   job: AutoEditJob;
@@ -52,8 +54,11 @@ export function requiredPlanningHash(hash: string | undefined, label: string): s
 export function planningGateInput(job: AutoEditJob): GateBundleInput {
   const { ctx } = job;
   if (!ctx.templateUsage) throw new AutoEditError("template usage authority is missing");
+  const visualPlan = ordinaryVisualPlanGateAuthority(ctx);
+  const vocabulary = currentReferenceStyleVocabulary(ctx.referenceStudy);
   const reference = ctx.intent?.reference && ctx.referenceStudy
-    ? { profilePath: ctx.referenceStudy.profilePath, intent: ctx.intent.reference }
+    ? { profilePath: ctx.referenceStudy.profilePath, intent: ctx.intent.reference,
+      ...(vocabulary ? { vocabularyPath: vocabulary.path } : {}) }
     : undefined;
   return {
     planPath: ctx.planPath,
@@ -63,6 +68,7 @@ export function planningGateInput(job: AutoEditJob): GateBundleInput {
     templateUsagePath: templateUsageHistoryPath(ctx),
     templateUsageDigest: ctx.templateUsage.digest,
     operatorIntent: gateBundleOperatorIntent(ctx.scope, ctx.intent),
+    ...visualPlan,
     reference,
   };
 }

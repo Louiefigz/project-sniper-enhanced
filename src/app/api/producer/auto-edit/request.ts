@@ -48,6 +48,12 @@ export function guardPendingCutApproval(dir: string): void {
       409,
     );
   }
+  if (job?.status === "awaiting_native_author") {
+    throw new RequestFailure(
+      "This edit has a frozen native-author handoff. Continue that exact native route; a fresh Auto Edit cannot replace it or fall back to ordinary.",
+      409,
+    );
+  }
 }
 
 /** Only the connected MP4 cut-first path may opt in to the new pause contract. */

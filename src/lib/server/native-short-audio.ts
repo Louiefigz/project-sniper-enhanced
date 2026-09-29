@@ -5,6 +5,8 @@ import type { AudioGainEntry } from "@/lib/producer/edit-plan";
 export interface NativeShortAudio {
   schemaVersion: 1;
   rationale: string;
+  /** Mono averages the observed stereo dialogue before cleanup; stereo is unchanged. */
+  channelMode?: "stereo" | "mono";
   audioEnhance?: { preset: "voice" | "voice-strong" | "voice-rnn" };
   audioGain?: Array<Pick<AudioGainEntry, "outStart" | "outEnd" | "dB">>;
 }
@@ -14,11 +16,14 @@ export function assertNativeShortAudio(value: NativeShortAudio | undefined, dura
   if (value === undefined) return;
   if (!Number.isFinite(duration) || duration <= 0) throw new Error("Native audio requires a finite positive duration");
   const row = objectValue(value, "native audio finishing");
-  exactKeys(row, ["schemaVersion", "rationale", "audioEnhance", "audioGain"],
+  exactKeys(row, ["schemaVersion", "rationale", "channelMode", "audioEnhance", "audioGain"],
     ["schemaVersion", "rationale"], "native audio finishing");
   if (value.schemaVersion !== 1 || typeof value.rationale !== "string"
       || value.rationale.trim().length < 3 || value.rationale.length > 2400 || value.rationale.includes("\0")) {
     throw new Error("Native audio finishing requires a source-specific rationale");
+  }
+  if (value.channelMode !== undefined && value.channelMode !== "mono" && value.channelMode !== "stereo") {
+    throw new Error("Native audio channel mode must be mono or stereo");
   }
   if (value.audioEnhance !== undefined) {
     const enhance = objectValue(value.audioEnhance, "native audio enhancement");
@@ -28,7 +33,9 @@ export function assertNativeShortAudio(value: NativeShortAudio | undefined, dura
     }
   }
   if (value.audioGain !== undefined) assertGain(value.audioGain, duration);
-  if (!value.audioEnhance && !value.audioGain?.length) throw new Error("Native audio finishing has no processing decision");
+  if (!value.audioEnhance && !value.audioGain?.length && value.channelMode !== "mono") {
+    throw new Error("Native audio finishing has no processing decision");
+  }
 }
 
 function assertGain(windows: NativeShortAudio["audioGain"], duration: number): void {

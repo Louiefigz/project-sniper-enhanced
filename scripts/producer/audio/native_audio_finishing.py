@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 
 from audio.dialogue_cleanup import (DialogueSource, cleanup_model_binding,
@@ -18,7 +19,7 @@ def native_finishing_request(value: object, samples: int) -> FinishRequest | Non
         raise ValueError("Native finishing requires a positive integer sample clock")
     if value is None:
         return None
-    keys = {"schemaVersion", "rationale", "audioEnhance", "audioGain"}
+    keys = {"schemaVersion", "rationale", "channelMode", "audioEnhance", "audioGain"}
     if type(value) is not dict or set(value) - keys:
         raise ValueError("Malformed native audio finishing object")
     rationale = value.get("rationale")
@@ -27,7 +28,7 @@ def native_finishing_request(value: object, samples: int) -> FinishRequest | Non
             or len(rationale) > 2400 or "\0" in rationale:
         raise ValueError("Native audio finishing requires a source-specific rationale")
     _validate_fields(value)
-    request = finishing_request(value, samples / 48000)
+    request = _channel_request(finishing_request(value, samples / 48000), value, samples)
     if request is None:
         raise ValueError("Native audio finishing has no processing decision")
     if any(window.out_end > samples / 48000 for window in request.gain):
@@ -37,8 +38,23 @@ def native_finishing_request(value: object, samples: int) -> FinishRequest | Non
     return request
 
 
+def _channel_request(request: FinishRequest | None, value: dict,
+                     samples: int) -> FinishRequest | None:
+    """Process one equal-weight mono bus, then duplicate it without pan-law gain."""
+    if value.get("channelMode", "stereo") != "mono":
+        return request
+    request = request or FinishRequest(samples / 48000, None, None, (), ())
+    filters = ["pan=mono|c0=0.5*c0+0.5*c1"]
+    if request.enhance_chain:
+        filters.append(request.enhance_chain)
+    filters.append("pan=stereo|c0=c0|c1=c0")
+    return replace(request, enhance_chain=",".join(filters))
+
+
 def _validate_fields(value: dict) -> None:
     """Keep the native contract closed without duplicating shared gain arithmetic."""
+    if "channelMode" in value and value["channelMode"] not in ("mono", "stereo"):
+        raise ValueError("Native audio channel mode must be mono or stereo")
     if "audioEnhance" in value:
         enhance = value["audioEnhance"]
         if type(enhance) is not dict or set(enhance) != {"preset"} \
@@ -62,6 +78,8 @@ def finish_native_audio(source: DialogueSource, value: object, directory: Path) 
     model = cleanup_model_binding(request.enhance_chain)
     record = dict(schemaVersion=1, status="incomplete", humanListeningApproved=False,
                   settings=finishing_settings(request), rationale=value["rationale"],
+                  channelMode=value.get("channelMode", "stereo"),
+                  processingFilter=request.enhance_chain,
                   sourceSha256=file_hash(Path(source.path)), model=model)
     try:
         output, latency = render_clean_dialogue(source, request, directory)

@@ -35,6 +35,16 @@ import { MODES, SCOPES } from "../intent-presets";
 const ctx: AutoEditCtx = {
   dir: "/tmp/sniper job/producer",
   scope: "produced",
+  visualPlanRequiredVersion: 1,
+  visualPlan: {
+    schemaVersion: 1,
+    path: "/tmp/sniper job/producer/VISUAL-PLAN.json",
+    byteHash: "1".repeat(64),
+    visualPlanSha256: "2".repeat(64),
+    pictureInputSha256: "3".repeat(64),
+    catalogPinSha256: "4".repeat(64),
+    upstreamAuthoritySha256: "5".repeat(64),
+  },
   intent: { mode: "longform", lanes: {} },
   planPath: "/tmp/sniper job/producer/edit_plan.json",
   manifestPath: "/tmp/sniper job/source/asset_manifest.json",
@@ -207,7 +217,8 @@ assert.ok(legacyPrompt.includes("cutTrack and cutDecisions are controller-approv
 assert.ok(legacyPrompt.indexOf("CUT AUTHORITY CHECK") < legacyPrompt.indexOf("3. Lanes"));
 assert.ok(legacyAllowed.includes("Bash(/"), "safe absolute tokens use canonical minimal quoting");
 const visualCommands = claudeAuthoringBashPatterns(ctx);
-const [speechCommand] = visualCommands;
+const speechCommand = visualCommands.find((command) =>
+  command.includes("transcript_cut_contract.py"))!;
 assert.ok(visualCommands.every((command) => !command.endsWith(" *")),
   "visual authoring permissions must use exact commands, never wildcard script args");
 for (const command of visualCommands) {
@@ -229,6 +240,22 @@ assert.ok(
 );
 assert.ok(legacyAllowed.includes(`Edit(/${ctx.planPath})`));
 assert.ok(legacyAllowed.includes(`Write(/${ctx.planPath})`));
+for (const name of ["VISUAL-SEARCH.json", "VISUAL-PLAN.pending.json", "VISUAL-PLAN.json"]) {
+  const file = path.join(ctx.dir, name);
+  assert.equal(legacyAllowed.includes(`Edit(/${file})`), false);
+  assert.equal(legacyAllowed.includes(`Write(/${file})`), false);
+}
+assert.equal(legacyAllowed.includes(`Write(/${path.join(ctx.dir, "VISUAL-SEARCH-RESULTS.json")})`), false,
+  "the fixed search command owns its result file; writer permission stays query-only");
+assert.doesNotMatch(legacyPrompt, /visual_plan_cli\.py allocate/);
+assert.match(legacyPrompt, /visual_plan_cli\.py binding/);
+assert.match(legacyPrompt, /visual_plan_cli\.py catalog-authority/);
+assert.match(legacyPrompt, /ordinary_visual_plan_search\.py/);
+assert.match(legacyPrompt, /VISUAL-SEARCH\.json/);
+assert.match(legacyPrompt, /VISUAL-SEARCH-RESULTS\.json/);
+assert.match(legacyPrompt, /VISUAL-PLAN-CONTEXT\.json/);
+assert.match(legacyPrompt, /CATALOG-AUTHORITY\.json/);
+assert.match(legacyPrompt, /ordinary_visual_plan_lint\.py/);
 assert.equal(legacyAllowed.includes(`Edit(${ctx.planPath})`), false);
 assert.equal(legacyAllowed.includes(`Write(${ctx.planPath})`), false);
 assert.equal(legacyAllowed.split(",").includes("Edit"), false);
@@ -249,6 +276,8 @@ assert.equal(cutPrompt.includes('"scope":"clean|produced"'), false);
 assert.equal(cutPrompt.includes("graphics_planner.py"), false);
 assert.ok(cutAllowed.includes(`Bash(${cutSpeech})`));
 assert.ok(cutAllowed.includes(`Bash(${cutGate})`));
+assert.equal(cutAllowed.includes("VISUAL-PLAN"), false,
+  "cut authoring cannot mutate visual-direction files");
 assert.equal((cutAllowed.match(/Bash\(/g) ?? []).length, 2);
 assert.equal(cutAllowed.includes("Glob"), false);
 assert.equal(cutAllowed.includes("Grep"), false);
@@ -285,20 +314,25 @@ assert.equal(authoringPermissionDenial(JSON.stringify({
 async function testCodexAuthoring(): Promise<void> {
   const events: Record<string, unknown>[] = [];
   let codexCalled = false;
-  const authored = await runAuthoring(ctx, (event) => events.push(event), {
+  const authored = await runAuthoring(
+    { ...ctx, visualPlan: undefined, visualPlanRequiredVersion: undefined },
+    (event) => events.push(event), {
     provider: () => "codex",
+    prepareVisualPlan: () => null,
+    promote: () => {},
     codex: async (options) => {
       codexCalled = true;
       assert.equal(options.sandbox, "workspace-write");
       assert.equal(options.reasoning, "xhigh");
-      assert.equal(options.cwd, ctx.dir);
+      assert.notEqual(options.cwd, ctx.dir);
+      assert.ok(options.cwd?.includes("sniper-plan-authoring-"));
       assert.equal(options.addDirs, undefined);
-      assert.ok(options.prompt.includes(ctx.planPath));
+      assert.ok(options.prompt.includes(path.join(options.cwd!, "edit_plan.json")));
       assert.ok(options.prompt.includes(`${process.cwd()}/.agents/skills/producer/SKILL.md`));
       assert.ok(options.prompt.includes(`${process.cwd()}/.venv/bin/python3`));
       assert.ok(options.prompt.includes(`${process.cwd()}/scripts/producer/graphics_planner.py`));
       assert.ok(options.prompt.includes(`${process.cwd()}/scripts/producer/planner/pacing.py`));
-      assert.ok(options.prompt.includes(`${ctx.dir}/graphics_proposal.json`));
+      assert.ok(options.prompt.includes(path.join(options.cwd!, "graphics_proposal.json")));
       assert.equal(options.prompt.includes("run graphics_planner.py"), false);
       options.onEvent?.({ type: "item.completed", item: { type: "agent_message", text: "AUTHORED ok segments=7 graphics=3" } });
       return {
@@ -307,7 +341,7 @@ async function testCodexAuthoring(): Promise<void> {
         ms: 42,
       };
     },
-  });
+    });
   assert.equal(codexCalled, true);
   assert.equal(authored.provider, "codex");
   assert.deepEqual(authored.authored, { segments: 7, graphics: 3 });

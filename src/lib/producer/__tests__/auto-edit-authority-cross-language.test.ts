@@ -4,6 +4,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -232,8 +233,10 @@ function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
 
 function main(): void {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-authority-cross-language-"));
+  const priorRuntime = process.env.SNIPER_RUNTIME_REPO_ROOT;
   try {
     const fix = fixture(root);
+    process.env.SNIPER_RUNTIME_REPO_ROOT = realpathSync(fix.repo);
     const ctx = pinned(fix, "golden-run");
     const ts = assertAuthorityParity(fix, ctx);
     const sourceDigest = ts.snapshot.pipelineDigest;
@@ -241,13 +244,16 @@ function main(): void {
     assert.equal(autoEditAuthoritySnapshot(ctx).pipelineDigest, sourceDigest);
     const execution = spawnSync(path.join(process.cwd(), ".venv", "bin", "python3"), [
       path.join(ctx.pipeline!.snapshotRoot, "scripts", "producer", "probe.py"),
-    ], { encoding: "utf8" });
+    ], { encoding: "utf8", env: {
+      ...process.env, PYTHONDONTWRITEBYTECODE: "1",
+    } });
     assert.equal(execution.stdout.trim(), "PINNED-PIPELINE");
     assertPinnedPythonResolver(ctx);
     assertPinnedTemplateResolver(ctx);
     assertPinnedRuntimeAssets(ctx);
     const next = pinned(fix, "next-run");
     assert.notEqual(next.pipeline?.digest, ctx.pipeline?.digest);
+    writeFileSync(fix.probe, "print('PINNED-PIPELINE')\n");
     const sourceModel = path.join(fix.repo, ...MODEL_PATH.split("/"));
     const modelBytes = readFileSync(sourceModel);
     writeFileSync(sourceModel, "tampered model");
@@ -265,6 +271,8 @@ function main(): void {
     assertInputFreshness(fix, ctx, ts.snapshot.digest);
     assertSnapshotTamper(ctx);
   } finally {
+    if (priorRuntime === undefined) delete process.env.SNIPER_RUNTIME_REPO_ROOT;
+    else process.env.SNIPER_RUNTIME_REPO_ROOT = priorRuntime;
     rmSync(root, { recursive: true, force: true });
   }
   console.log("auto-edit-authority-cross-language.test.ts: all assertions passed");

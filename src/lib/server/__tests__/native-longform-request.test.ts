@@ -5,10 +5,10 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync,
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { prepareNativeLongformRequest, checkNativeLongformRequest } from "../native-longform-request";
+import { prepareNativeLongformRequest, checkNativeLongformRequest, longformCatalogInventory } from "../native-longform-request";
 import { executeNativeShortCommand } from "../../../../scripts/producer/native-short";
 import { longformInputPin, readLongformPacket, writeLongformPacket } from "../longform-strategy-packet";
-import { longformReferenceInputs } from "../longform-reference-inputs";
+import { longformReferenceInputs, nativeReferenceInputs } from "../longform-reference-inputs";
 import { loadReferenceStrategyLibrary } from "../reference-strategy-library";
 import { LONGFORM_LIBRARY } from "../reference-library-paths";
 import { pythonInterpreter, SCRIPTS_DIR } from "@/app/api/_lib/spawn-python";
@@ -24,7 +24,8 @@ function fixture() {
   const pin = longformInputPin(receipt), receiptPath = `.sniper-source-sets/${pin.sha256}.json`;
   writeFileSync(path.join(source, receiptPath), readFileSync(receipt));
   const intent = { mode: "longform", scope: "produced", lanes: { graphics: "off" }, brief: "A restrained vlog with real actions." };
-  writeFileSync(path.join(directory, "project.json"), JSON.stringify({ origin: "raw", history: [], intent }));
+  writeFileSync(path.join(directory, "project.json"), JSON.stringify({ origin: "raw", history: [], intent,
+    visualPlanPolicy: { schemaVersion: 1, ordinaryAutoEdit: "required" } }));
   const manifest = { sources: [{ id: "test", path: video, sourceSha256: longformInputPin(video).sha256,
     duration: 900, resolution: [1920, 1080], fps: 30, transcriptPath: "transcript.json" }], broll: [], music: [],
     sourceSetAdmission: { schemaVersion: 1, receiptPath, receiptSha256: pin.sha256, sourceSetDigest: "a".repeat(64), entryCount: 1 } };
@@ -37,8 +38,15 @@ test("15-minute long-form handoff reuses the complete library, catalog and origi
   const f = fixture();
   try {
     const result = await executeNativeShortCommand(["prepare-longform", f.producerDir]);
-    assert.ok("directory" in result);
+    assert.ok("directory" in result); assert.ok("projectDirectory" in result);
     const directory = String(result.directory), packet = readLongformPacket(directory);
+    assert.equal(result.projectDirectory, path.join(directory, "project"));
+    const policy = JSON.parse(readFileSync(path.join(result.projectDirectory, "NATIVE-LONG-POLICY.json"), "utf8"));
+    const scaffold = JSON.parse(readFileSync(path.join(result.projectDirectory, "LONG-PROJECT.json"), "utf8"));
+    assert.equal(policy.requirement, "required-for-new-native-long");
+    assert.equal(scaffold.schemaVersion, 2); assert.deepEqual(scaffold.requestPacket, policy.requestPacket);
+    assert.equal((packet.visualPlanPolicy as { requirement: string }).requirement,
+      "required-for-new-native-long");
     assert.deepEqual(packet.target, { mode: "longform", aspect: "16:9", width: 1920, height: 1080 });
     assert.deepEqual(packet.intent, f.intent);
     const library = JSON.parse(readFileSync(path.join(directory, "REFERENCE-LIBRARY.json"), "utf8"));
@@ -53,12 +61,17 @@ test("15-minute long-form handoff reuses the complete library, catalog and origi
     assert.ok(catalog.items.length > 100);
     assert.ok(catalog.items.every((row: { executionApproved: boolean }) => row.executionApproved === false));
     assert.equal(checkNativeLongformRequest(directory).renderApproved, false);
+    writeFileSync(path.join(result.projectDirectory, "LONG-PROJECT.json"), JSON.stringify({
+      ...scaffold, canvas: { width: 1920, height: 1080, frameRate: "30/1", totalFrames: 1 },
+    }));
     assert.deepEqual(prepareNativeLongformRequest(f.producerDir, process.cwd()), result);
     const brief = readFileSync(path.join(directory, "AGENT-BRIEF.md"), "utf8");
     assert.match(brief, /entire proposed output/); assert.match(brief, /experimental library/);
     assert.match(brief, /preserving callbacks/); assert.match(brief, /Portrait references/);
     assert.match(brief, /lane ownership/); assert.match(brief, /existing keyframes/);
     assert.match(brief, /opening its own promise/); assert.match(brief, /screen-share-led/);
+    assert.match(brief, /native_program_audio\.py/); assert.match(brief, /assets\/program\.wav/);
+    assert.match(brief, /visual-plan-usage\.ts register/);
     writeFileSync(f.transcript, "changed words");
     assert.throws(() => checkNativeLongformRequest(directory), /input changed/);
   } finally { f.cleanup(); }
@@ -68,7 +81,9 @@ test("long-form mode is explicit and intent changes cannot reuse an old request"
   const f = fixture();
   try {
     const result = prepareNativeLongformRequest(f.producerDir, process.cwd());
-    writeFileSync(path.join(f.directory, "project.json"), JSON.stringify({ origin: "raw", intent: { ...f.intent, mode: "short" } }));
+    writeFileSync(path.join(f.directory, "project.json"), JSON.stringify({ origin: "raw",
+      intent: { ...f.intent, mode: "short" },
+      visualPlanPolicy: { schemaVersion: 1, ordinaryAutoEdit: "required" } }));
     assert.throws(() => checkNativeLongformRequest(result.directory), /intent changed/);
     assert.throws(() => prepareNativeLongformRequest(f.producerDir, process.cwd()), /requires stored longform/);
   } finally { f.cleanup(); }
@@ -158,6 +173,64 @@ function saveTestBinding(f: ReturnType<typeof fixture>, study: ReturnType<typeof
   execFileSync(pythonInterpreter(), [cli, "save-study", map, "--output", output]);
   return output;
 }
+
+function saveTestVocabulary(f: ReturnType<typeof fixture>, study: ReturnType<typeof selectedReference>) {
+  const frame = path.join(f.directory, "reviewed-frame.jpg"), draft = path.join(f.directory, "vocabulary-draft.json");
+  const output = path.join(f.directory, "reference_style_vocabulary.json");
+  writeFileSync(frame, "TEST reviewed visual evidence; no visual-quality claim");
+  const evidence = (id: string, role: string, file: string) => {
+    const pin = longformInputPin(file);
+    return { id, role, path: pin.path, sha256: pin.sha256, observation: `TEST inspected ${role} evidence` };
+  };
+  const inventory = longformCatalogInventory() as { items: Array<{ ref: string; source?: { exists?: boolean } }> };
+  const refs = inventory.items.filter(row => row.source?.exists).slice(0, 2).map(row => row.ref);
+  assert.equal(refs.length, 2);
+  const contender = (catalogRef: string, difference: string) => ({ catalogRef,
+    styleFit: "TEST compact reference-compatible comparison", bestFor: "TEST compare two states",
+    difference, configuration: "TEST replace copy and retime for narration",
+    variationOptions: ["TEST stage result second"], availability: "ready", prerequisites: [],
+    evidenceIds: ["frame"], confidence: 0.8 });
+  const trait = (id: string, description: string) => ({ id, description, evidenceIds: ["profile", "frame"] });
+  writeFileSync(draft, JSON.stringify({ referenceId: study.id,
+    coverage: { status: "limited", reviewed: "TEST profile, events and one frame",
+      limitations: ["TEST motion phases were not qualified"] },
+    evidence: [evidence("profile", "style-profile", study.profilePath),
+      evidence("deep", "deep-study", study.deepStudyPath), evidence("frame", "frame", frame)],
+    stableTraits: [trait("compact-hierarchy", "TEST compact hierarchy")],
+    flexibleTraits: [trait("panel-direction", "TEST panel direction may vary")],
+    signatureDevices: [trait("result-accent", "TEST result accent may repeat")],
+    families: [{ id: "comparison", name: "TEST comparison family", purposes: ["comparison"],
+      sharedStyle: "TEST compact hierarchy and staged emphasis", useWhen: "TEST two states need comparison",
+      avoidWhen: "TEST only one state exists", contenders: [contender(refs[0], "TEST emphasizes amount"),
+        contender(refs[1], "TEST emphasizes result")] }],
+    selectionPolicy: { coherence: "TEST preserve hierarchy", variation: "TEST vary for the viewer need",
+      repetition: "TEST repeat only as a signature or callback",
+      uncertainty: "TEST inspect more evidence or use the conservative supported option" } }));
+  const cli = path.join(SCRIPTS_DIR, "producer/graphics/reference_style_vocabulary_cli.py");
+  execFileSync(pythonInterpreter(), [cli, "prepare", draft, output]);
+  return { output, frame };
+}
+
+test("checked style vocabulary reaches both native planning formats with exact evidence", () => {
+  const f = fixture();
+  try {
+    const study = selectedReference(f), vocabulary = saveTestVocabulary(f, study);
+    const long = longformReferenceInputs(study);
+    assert.equal(long.selected?.styleVocabularyAvailable, true);
+    assert.equal(long.selected?.styleVocabularyCoverage, "limited");
+    assert.equal(long.selected?.styleFamilyCount, 1); assert.equal(long.selected?.styleContenderCount, 2);
+    assert.ok(long.files["SELECTED-REFERENCE-VOCABULARY.json"]);
+    assert.ok(long.pins.some(pin => pin.path === vocabulary.output));
+    writeFileSync(path.join(f.directory, "reference.json"), JSON.stringify({ schemaVersion: 1,
+      referenceId: study.id, mode: "short", strategy: "mimic", targetStyle: null,
+      candidateStyleName: null, decidedAt: "2026-09-16T00:00:00.000Z" }));
+    const short = nativeReferenceInputs({ ...study, mode: "short" });
+    assert.equal(short.selected?.styleVocabularyAvailable, true);
+    assert.ok(short.files["SELECTED-REFERENCE-VOCABULARY.json"]);
+    writeFileSync(vocabulary.frame, "TEST changed reviewed evidence");
+    assert.throws(() => nativeReferenceInputs({ ...study, mode: "short" }));
+  } finally { f.cleanup(); }
+});
 
 test("saved catalog matches from a Short study reach long-form planning with original evidence", () => {
   const f = fixture();

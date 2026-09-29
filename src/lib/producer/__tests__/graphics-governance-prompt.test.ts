@@ -3,6 +3,8 @@ import { test } from "node:test";
 
 import { buildAuthoringPrompt } from
   "../../../app/api/producer/auto-edit/authoring-prompt";
+import { buildVisualPlanningPrompt } from
+  "../../../app/api/producer/auto-edit/visual-planning-prompt";
 import type { AutoEditCtx } from
   "../../../app/api/producer/auto-edit/stream";
 import { visualStorytellingInstructions } from "../visual-storytelling";
@@ -11,6 +13,7 @@ function context(scope: AutoEditCtx["scope"] = "produced"): AutoEditCtx {
   return {
     dir: "/tmp/sniper-graphics-governance/producer",
     scope,
+    visualPlanRequiredVersion: 1,
     intent: { mode: "longform", lanes: {} },
     planPath: "/tmp/sniper-graphics-governance/producer/edit_plan.json",
     manifestPath: "/tmp/sniper-graphics-governance/source/asset_manifest.json",
@@ -23,11 +26,22 @@ function context(scope: AutoEditCtx["scope"] = "produced"): AutoEditCtx {
   };
 }
 
+function allocatedContext(scope: AutoEditCtx["scope"] = "produced"): AutoEditCtx {
+  const ctx = context(scope);
+  ctx.visualPlan = {
+    schemaVersion: 1, path: "/tmp/project/VISUAL-PLAN.json",
+    byteHash: "a".repeat(64), visualPlanSha256: "b".repeat(64),
+    pictureInputSha256: "c".repeat(64), catalogPinSha256: "d".repeat(64),
+    upstreamAuthoritySha256: "e".repeat(64),
+  };
+  return ctx;
+}
+
 test("produced longform uses catalog sources before planning and rejects retired selection", () => {
-  const ctx = context(), prompt = buildAuthoringPrompt(ctx, "codex");
+  const ctx = allocatedContext(), prompt = buildAuthoringPrompt(ctx, "codex");
   const source = prompt.indexOf("target.graphicsStyle=catalog-first");
   assert.ok(source >= 0 && source < prompt.indexOf("3. Lanes"));
-  for (const phrase of ["whole HyperFrames catalog", "native-project migration required",
+  for (const phrase of ["whole HyperFrames catalog", "exact resumable native-author handoff",
     "never substitute an old kind", "Bind source evidence", "TRANSITION SOURCE",
     "transitions[] preset lane is retired", "INTRO SEAM MAP", "adjacent moving picture"])
     assert.ok(prompt.includes(phrase), phrase);
@@ -36,11 +50,37 @@ test("produced longform uses catalog sources before planning and rejects retired
 });
 
 test("waived transitions do not demand a transition deliverable", () => {
-  const waived = context();
+  const waived = allocatedContext();
   waived.intent = { mode: "longform", lanes: { transitions: "off" } };
   const prompt = buildAuthoringPrompt(waived, "codex");
   assert.equal(prompt.includes("TRANSITION SOURCE"), false);
   assert.equal(prompt.includes("INTRO SEAM MAP"), false);
+});
+
+test("new produced edits must create and compile shared visual direction", () => {
+  const absent = buildVisualPlanningPrompt(context(), "codex");
+  const ctx = allocatedContext();
+  const prompt = buildAuthoringPrompt(ctx, "codex");
+  assert.match(absent, /route-neutral CREATIVE DIRECTOR/);
+  assert.match(absent, /VISUAL-PLAN\.pending\.json/);
+  assert.doesNotMatch(absent, /visual_plan_cli\.py allocate/);
+  assert.match(absent, /visual_plan_cli\.py catalog-authority/);
+  assert.match(absent, /frozen 372-item authority/);
+  assert.match(absent, /READ and GREP .*CATALOG-AUTHORITY\.json/);
+  assert.match(absent, /ordinary_visual_plan_search\.py/);
+  assert.match(absent, /one bounded semantic query for every meaningful visual opportunity/);
+  assert.match(absent, /Ranking is discovery evidence, not execution approval/);
+  assert.match(absent, /Copy project, catalogPin, transcriptAuthority/);
+  assert.match(absent, /controller will relocate authority pins, issue catalog receipts, allocate/);
+  assert.doesNotMatch(absent, /ordinary_visual_plan_lint\.py/);
+  const finalWrite = absent.indexOf("6. WRITE the same pending schemaVersion 1 plan");
+  assert.ok(absent.indexOf("asset_manifest.json") < finalWrite);
+  assert.ok(absent.indexOf("ordinary_visual_plan_search.py") < finalWrite);
+  assert.match(absent, /Write only .*VISUAL-PLAN\.pending\.json, .*VISUAL-PLAN\.json/);
+  assert.match(prompt, /MANDATORY VISUAL DIRECTION/);
+  assert.match(prompt, /Do not copy catalog source or preview bytes/);
+  assert.match(prompt, new RegExp(ctx.visualPlan!.pictureInputSha256));
+  assert.match(prompt, /visual_plan_cli\.py binding/);
 });
 
 test("waived or inactive graphics do not demand graphic governance", () => {
@@ -50,12 +90,13 @@ test("waived or inactive graphics do not demand graphic governance", () => {
     const prompt = buildAuthoringPrompt(ctx, "codex");
     assert.equal(prompt.includes("GRAPHICS STYLE AUTHORITY"), false);
     assert.equal(prompt.includes("INTRO SEMANTIC DECISIONS"), false);
+    assert.equal(prompt.includes("MANDATORY VISUAL DIRECTION"), false);
   }
 });
 
 test("short and long writers share explanatory decisions while preserving format and lanes", () => {
   for (const mode of ["short", "longform"] as const) {
-    const ctx = context();
+    const ctx = allocatedContext();
     ctx.intent = { mode, lanes: { broll: "off" } };
     const prompt = buildAuthoringPrompt(ctx, "codex");
     const direction = visualStorytellingInstructions(mode);

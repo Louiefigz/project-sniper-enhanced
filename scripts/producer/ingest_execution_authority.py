@@ -63,6 +63,9 @@ def _verify_admitted_row(
         "admissionReceiptPath": entry["admissionReceiptPath"],
         "admissionReceiptSha256": entry["admissionReceiptSha256"],
     }
+    if lanes == {"external"}:
+        expected["authorizationEvidence"] = entry.get(
+            "authorizationEvidence")
     if any(row.get(key) != value for key, value in expected.items()):
         raise RuntimeError(f"{label} manifest row disagrees with admission authority")
     return path
@@ -108,6 +111,7 @@ def _verify_manifest_projection(
     projected: set[str] = set()
     source_ids: set[str] = set()
     broll_ids: set[str] = set()
+    external_ids: set[str] = set()
     music_ids: set[str] = set()
     for index, row in enumerate(manifest.get("sources") or []):
         label = f"sources[{index}]"
@@ -119,6 +123,11 @@ def _verify_manifest_projection(
         _verify_admitted_row(
             row, {"source", "broll"}, authority, label)
         _record_asset_id(row, broll_ids, label)
+        _record_projection(row, projected, label)
+    for index, row in enumerate(manifest.get("externalMedia") or []):
+        label = f"externalMedia[{index}]"
+        _verify_admitted_row(row, {"external"}, authority, label)
+        _record_asset_id(row, external_ids, label)
         _record_projection(row, projected, label)
     for index, row in enumerate(manifest.get("music") or []):
         if type(row) is not dict:

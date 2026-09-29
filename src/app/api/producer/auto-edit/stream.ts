@@ -6,6 +6,7 @@ import {
   mimicLaneConflicts,
   PACES,
   validateLaneOverrides,
+  resolveLanes,
   validateReferenceIntent,
   type Lane,
   type LaneDirective,
@@ -21,6 +22,7 @@ import type { GuidedWorkflowV2 } from "@/lib/producer/contracts/guided-workflow-
 import type { AuthoredCutPolicy, ExistingCutCandidatePolicy } from "@/lib/server/guided-project-bootstrap-contract";
 import type { AutoEditDeliveryPolicy } from
   "@/lib/producer/auto-edit-delivery-policy";
+import type { VisualPlanBinding } from "@/lib/server/visual-plan-binding";
 
 export const AUTO_EDIT_SCOPES = ["trim", "light", "produced", "full"] as const;
 export type AutoEditScope = (typeof AUTO_EDIT_SCOPES)[number];
@@ -142,6 +144,10 @@ export function parseAutoEditIntent(body: Record<string, unknown>): AutoEditInte
 
 export interface AutoEditCtx {
   dir: string; // the producer dir (holds edit_plan.json / base_final.mp4)
+  /** Disposable initial-writer root. Runtime-only and never persisted; the
+   * controller keeps `dir` as the authority root while provider writes are
+   * confined here until validation and promotion finish. */
+  authoringDir?: string;
   scope: AutoEditScope;
   /** Closed delivery authority. New runs persist this explicitly; omission is
    * accepted only for legacy journals and resolves to Palmier-hybrid. */
@@ -156,6 +162,10 @@ export interface AutoEditCtx {
   authoredCut?: AuthoredCutPolicy;
   intent?: AutoEditIntent;
   referenceStudy?: ResolvedReferenceStudy;
+  /** Optional at launch; new automatic produced/full jobs must create it before review. */
+  visualPlan?: VisualPlanBinding;
+  /** Persisted project-policy marker. Absence identifies an explicit legacy project. */
+  visualPlanRequiredVersion?: 1;
   planPath: string;
   manifestPath: string;
   transcriptsDir: string; // dirname(manifestPath) — transcripts live beside it
@@ -165,6 +175,10 @@ export interface AutoEditCtx {
   /** Immutable renderer/gate/template bytes used by this run. Runtime-only:
    * request identity deliberately excludes this field. */
   pipeline?: AutoEditPipelineAuthority;
+  /** Historical controller-owned pipeline that admitted a retained visual plan.
+   * Saved-plan review may execute on a newer pipeline while validating the
+   * immutable plan against the exact snapshot that authored its catalog pin. */
+  visualPlanPipeline?: AutoEditPipelineAuthority;
   /** Approved-project graphic-form memory captured before the writer launches. */
   templateUsage?: TemplateUsageAuthority;
   /** Stable Claude Code conversation used by cut authoring, visual authoring,
@@ -172,6 +186,28 @@ export interface AutoEditCtx {
   brainSessionId?: string;
   /** True only after Claude stream output proved that this UUID exists. */
   brainSessionEstablished?: boolean;
+}
+
+/** Resolve the only directory an initial authoring provider may write. */
+export function authoringWorkDir(
+  ctx: Pick<AutoEditCtx, "dir" | "authoringDir">,
+): string {
+  return ctx.authoringDir ?? ctx.dir;
+}
+
+/** Whether ordinary graphics are active for this request, independent of project age. */
+export function ordinaryVisualPlanActive(
+  ctx: Pick<AutoEditCtx, "scope" | "intent">,
+): boolean {
+  if (ctx.scope !== "produced" && ctx.scope !== "full") return false;
+  return resolveLanes(ctx.scope, ctx.intent?.lanes).graphics === "auto";
+}
+
+/** New marked automatic produced/full ordinary edits require shared visual direction. */
+export function ordinaryVisualPlanRequired(
+  ctx: Pick<AutoEditCtx, "scope" | "intent" | "visualPlanRequiredVersion">,
+): boolean {
+  return ctx.visualPlanRequiredVersion === 1 && ordinaryVisualPlanActive(ctx);
 }
 
 export interface AutoEditDoctrineAuthority {

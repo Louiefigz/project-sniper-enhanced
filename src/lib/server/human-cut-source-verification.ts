@@ -2,7 +2,7 @@ import path from "node:path";
 import type { AutoEditJob } from "./auto-edit-job-types";
 import type { ProjectMutationLease } from "./project-mutation-lease";
 import { autoEditAuthoritySnapshot } from "./auto-edit-authority-snapshot";
-import { pipelineAuthorityPath } from "./auto-edit-pipeline-authority";
+import { executablePipelineRoot, pipelineAuthorityPath } from "./auto-edit-pipeline-authority";
 import { stageTimingContext, stageTimingEnv, withStageTimingContext } from "./stage-timing-context";
 import { timedStage } from "./stage-timing";
 import { activeHumanCutAcceptance, assertHumanCutContext } from "./human-cut-acceptance-store";
@@ -42,7 +42,8 @@ export async function verifyHumanAcceptedSourceBytes(input: { job: AutoEditJob; 
       args: ["-c", VERIFY_CURRENT_SOURCES, job.ctx.planPath, before.planHash!, job.ctx.manifestPath, fact.preview.manifestHash],
       cwd: path.dirname(sourceModule), timeoutMs: 120_000,
       env: { ...stageTimingEnv(), PYTHONPATH: path.dirname(sourceModule),
-        ...(job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT: job.ctx.pipeline.snapshotRoot } : {}) } });
+        ...(job.ctx.pipeline ? { SNIPER_PIPELINE_ROOT:
+          executablePipelineRoot(job.ctx.dir, job.ctx.pipeline) } : {}) } });
     const observed = JSON.parse(result.stdout.trim());
     if (Object.keys(observed).sort().join(",") !== "manifestHash,planHash,sourceSetDigest,sourceSetReceiptHash,status"
         || observed.status !== "accepted_cut_sources_current" || observed.planHash !== before.planHash

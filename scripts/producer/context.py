@@ -191,6 +191,46 @@ def candidate_lines(scan: dict[str, Any]) -> list[str]:
     return lines
 
 
+def role_main(args: argparse.Namespace) -> int:
+    """Resolve and publish one role packet; 2 when an input is missing, stale or unbindable."""
+    from role_packet_text import render_role_packet
+    from role_packets import ArtifactError, RoleRequest, SectionError, resolve_role_packet
+    request = RoleRequest(role=args.role, plan=args.plan, native_project=args.native_project,
+                          preview=args.preview, export=args.export, project=args.project,
+                          author_session=args.author_session, prior_reviews=args.prior_reviews,
+                          packet_out=args.packet_out, shared_evidence=args.shared_evidence,
+                          batch=args.batch, clip=args.clip)
+    try:
+        result = resolve_role_packet(request, REPO)
+    except (ArtifactError, SectionError, OSError, ValueError, RuntimeError, KeyError) as error:
+        print(json.dumps({"status": "role-packet-unavailable", "errorType": type(error).__name__,
+                          "error": str(error)[:2048]}), file=sys.stderr)
+        return 2
+    print(json.dumps(result, indent=2) if args.format == "json"
+          else render_role_packet(result["packet"], result["published"]))
+    return 0
+
+
+def role_arguments(parser: argparse.ArgumentParser) -> None:
+    """Explicit inputs for versioned owner/critic packets and shared evidence; nothing is chosen by recency."""
+    from role_packet_catalog import ROLES
+    from role_packet_evidence import evidence_arguments
+    from role_packet_given_check import given_arguments
+    evidence_arguments(parser)
+    given_arguments(parser)
+    parser.add_argument("--role", choices=ROLES,
+                        help="Publish a versioned role packet (a new packet file, plus an observations draft for critics)")
+    parser.add_argument("--plan", help="Native Short plan under review (plan-critic, clip-owner)")
+    parser.add_argument("--native-project", help="Staged native Short project (clip-owner)")
+    parser.add_argument("--preview", help="Completed motion-previews.json under review (motion-critic, clip-owner)")
+    parser.add_argument("--export", help="Checked export attempt under review (final-critic, clip-owner)")
+    parser.add_argument("--author-session", help="Record the author's session identity; critics must differ")
+    parser.add_argument("--prior-reviews", help="Earlier MOTION-REVIEW record whose rows cover reused units")
+    parser.add_argument("--packet-out", help="New packet path; default is the next unused version beside the subject")
+    parser.add_argument("--batch", help="Deadline batch whose authority holds this clip's approved title and script")
+    parser.add_argument("--clip", help="That batch's clip id (required with --batch whenever a batch holds the source)")
+
+
 def main(argv: list[str] | None = None) -> int:
     """Return 2 for an inaccessible selected project; capability gaps remain inventory."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -198,7 +238,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workflow", choices=("auto", *ROUTE_READS), default="auto")
     parser.add_argument("--format", choices=("text", "json"), default="text")
     parser.add_argument("--probe-tools", action="store_true", help="Run bounded local version probes; no installs")
+    role_arguments(parser)
     args = parser.parse_args(argv)
+    if args.evidence_draft or args.evidence_seal or args.evidence_check:
+        from role_packet_evidence import evidence_main
+        return evidence_main(args)
+    if args.given_check or args.review_submitted:
+        from role_packet_given_check import given_main
+        return given_main(args)
+    if args.role:
+        return role_main(args)
     try:
         report = build_context(args)
     except (OSError, ValueError) as error:

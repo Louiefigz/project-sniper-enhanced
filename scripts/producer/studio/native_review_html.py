@@ -12,6 +12,9 @@ from studio.native_short_delivery import clock
 from studio.native_stage_evidence import require
 
 AUDIO_ID = 'studio-dialogue-master'
+# Pinned Studio stamps any element lacking data-hf-id and rewrites the served file, so the one node
+# this adaptation inserts carries its own id (unique: AUDIO_ID, a substring, is absent from the source).
+AUDIO_HF_ID = 'hf-' + AUDIO_ID
 
 
 class AudioSpans(HTMLParser):
@@ -129,8 +132,9 @@ def adapt_html(source: str, canvas: dict, native_long: bool = False) -> tuple[st
         require((native_long or 'clip' in attrs.get('class', '').split()) and bool(attrs.get('src')), 'invalid native dialogue node')
         require(all(abs(Fraction(attrs.get(key, '-1')) - value) <= Fraction(1, 10**9) for key, value in expected.items()),
                 'HTML dialogue differs from the admitted canvas')
-    node = (f'<audio id="{AUDIO_ID}" class="clip" src="assets/studio-dialogue.m4a" data-start="0" '
-            f'data-duration="{decimal_text(duration)}" data-media-start="0" data-track-index="10" data-volume="1"></audio>')
+    node = (f'<audio id="{AUDIO_ID}" data-hf-id="{AUDIO_HF_ID}" class="clip" src="assets/studio-dialogue.m4a" '
+            f'data-start="0" data-duration="{decimal_text(duration)}" data-media-start="0" data-track-index="10" '
+            'data-volume="1"></audio>')
     result = source
     for index in reversed(range(len(spans))):
         start, _attrs, end = spans[index]
@@ -140,12 +144,13 @@ def adapt_html(source: str, canvas: dict, native_long: bool = False) -> tuple[st
     visibility = {'mode': 'preserved-native-long-visuals', 'unrelatedBytesIdentical': True}
     if not native_long:
         result, visibility = adapt_visibility(result, canvas)
-    return result, {'audio': {'removedIds': ids, 'newId': AUDIO_ID, 'nonAudioBytesIdentical': True,
-                    'nonAudioSha256': hashlib.sha256(rest.encode()).hexdigest()}, 'visibility': visibility}
+    audio = {'removedIds': ids, 'newId': AUDIO_ID, 'studioSelectionId': AUDIO_HF_ID, 'nonAudioBytesIdentical': True,
+             'nonAudioSha256': hashlib.sha256(rest.encode()).hexdigest()}
+    return result, {'audio': audio, 'visibility': visibility, 'mounts': mounts}
 
 
 def frame_points(plan: dict) -> list[dict]:
-    """Select exact opening, closing, scene, cut and caption checkpoints."""
+    """Select exact opening, closing, scene, cut, caption and caption-suppression checkpoints."""
     canvas = plan['canvas']; timeline, _duration = canvas_clock(canvas)
     total = canvas['totalFrames']; values = {0, total - 1}
     if canvas.get('titleCard'):
@@ -157,5 +162,7 @@ def frame_points(plan: dict) -> list[dict]:
     for view in canvas.get('captionViews', []):
         words = [row for row in canvas.get('occurrences', []) if view['startFrame'] <= row[3] < view['endFrame']]
         values.update(row[3] + min(2, row[4] - row[3] - 1) for row in words[:2])
+    for window in canvas.get('captionSuppressions') or []:  # expected absence, then resumed captions
+        values.update((window['startFrame'], window['endFrame'] - 1, window['endFrame']))
     return [{'frame': frame, 'seconds': decimal_text(Fraction(frame, 1) / timeline.fps.fraction)}
             for frame in sorted(values) if 0 <= frame < total]

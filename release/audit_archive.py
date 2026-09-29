@@ -19,6 +19,8 @@ import sys
 import zipfile
 from pathlib import Path
 
+from release.audit_catalog_authority import audit_catalog_authority
+
 REQUIRED = (
     "AGENTS.md", "CLAUDE.md", "sniper", "sniper.cmd", "sniper.ps1", "docs/PIPELINE.md",
     "install/install.command", "install/doctor.command", "install/uninstall.command",
@@ -32,7 +34,14 @@ REQUIRED = (
     "scripts/producer/studio/studio_review.py",
     "scripts/producer/audio/models/bd.rnnn",
     "scripts/producer/selftest.py",
+    "scripts/producer/planner/visual_plan_allocator_ranking.py",
+    "scripts/producer/planner/visual_plan_source_identity.py",
+    "scripts/producer/planner/visual_plan_media_authority.py",
+    "src/app/api/producer/auto-edit/visual-plan-media-authority.ts",
+    "src/app/api/producer/auto-edit/visual-plan-media-receipt.ts",
     "vendor/hyperframes-catalog/catalog-index.json",
+    "vendor/hyperframes-catalog/catalog-resource-index-v1.json",
+    "vendor/hyperframes-catalog/catalog-snapshots-v1.json",
     "install/diagnostics.command", "install/clean-caches.command",
     "install/sniper_doctor.py", "install/requirements.lock.txt",
     "install/lib/common.sh", "install/lib/platform.sh",
@@ -203,6 +212,7 @@ def audit_closure(root: Path) -> None:
     audit_pipeline_capture(app)
     audit_composition_sources(app)
     audit_capability_matrix(app)
+    audit_catalog_authority(app, check)
     segment_paths = [f"docs/producer/command-driven-editing/contracts/{name}" for name in (
         "render-effect-registry-v1.json", "program-audio-mix-registry-v1.json",
         "external-ingress-registry-v1.json", "current-render-codec-floor-calibration-v1.json",

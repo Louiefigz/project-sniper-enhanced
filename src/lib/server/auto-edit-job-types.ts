@@ -4,16 +4,18 @@ import type { ProcessIdentity } from "./process-liveness";
 import type { CutApprovalRequestV1, CutPreviewPointer } from "@/lib/producer/contracts/cut-approval-request";
 import type { HumanCutAcceptanceAttempt, HumanCutAcceptancePointer } from "@/lib/producer/contracts/human-cut-acceptance";
 import type { GuidedHandoffPointerV2 } from "@/lib/producer/contracts/guided-workflow-v2";
+import type { NativeRouteHandoffPointer } from
+  "@/lib/producer/contracts/native-route-handoff";
 
 export const AUTO_EDIT_CHECKPOINTS = [
   "queued", "authoring", "cut_reviewed", "plan_authored", "planning_review", "plan_reviewed",
   "validating", "validated", "rendering", "rendered", "quality_check",
-  "repairing", "complete",
+  "repairing", "route_dispatched", "complete",
 ] as const;
 
 export type AutoEditCheckpoint = (typeof AUTO_EDIT_CHECKPOINTS)[number];
 export type AutoEditJobStatus = "running" | "failed" | "interrupted" | "complete" | "awaiting_cut_approval" | "cut_accepted"
-  | "awaiting_treatment_brief" | "treatment_admitted";
+  | "awaiting_treatment_brief" | "treatment_admitted" | "awaiting_native_author";
 
 export interface AutoEditJobEvent {
   id: number;
@@ -46,6 +48,8 @@ export interface AutoEditJob {
   cutAcceptance?: HumanCutAcceptancePointer;
   /** V2 cut/treatment authority; never interprets a v1 human acceptance as a new brief. */
   guidedHandoffV2?: GuidedHandoffPointerV2;
+  /** Controller-owned route result; never proof of a finished edit. */
+  nativeHandoff?: NativeRouteHandoffPointer;
   /** Explicit GUI/API saved-plan review; preserves a complete plan through cut authority. */
   reviewSavedPlan?: true;
   /** Bootstrap-only exact process-quiescence fact; never a human acceptance. */
@@ -120,4 +124,5 @@ export interface CheckpointUpdate {
   candidateHash?: string;
   unresolvedFindingIds?: string[];
   finalHash?: string;
+  nativeHandoff?: NativeRouteHandoffPointer;
 }

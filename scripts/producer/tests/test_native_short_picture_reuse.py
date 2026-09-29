@@ -36,6 +36,7 @@ class NativeShortPictureReuseTests(unittest.TestCase):
         for filename in self.tools.values():
             Path(filename).write_bytes(b'TEST ONLY executable identity')
         for filename in reuse.PICTURE_CODE:
+            (self.studio / filename).parent.mkdir(parents=True, exist_ok=True)
             (self.studio / filename).write_text('TEST ONLY picture implementation')
         for filename in reuse.RUNTIME_FILES:
             (self.runtime / 'dist' / filename).write_text('TEST ONLY SDK bytes')
@@ -60,7 +61,7 @@ class NativeShortPictureReuseTests(unittest.TestCase):
     def make_request(self) -> None:
         """Retain old audio pins as well as the renderer and source pins."""
         paths = list(self.project.iterdir()) + [self.source, self.audio]
-        paths += list((self.runtime / 'dist').iterdir()) + list(self.studio.iterdir())
+        paths += list((self.runtime / 'dist').iterdir()) + [path for path in self.studio.rglob('*') if path.is_file()]
         paths += [Path(value) for value in self.tools.values()]
         self.previous = {'schemaVersion': 1, 'project': str(self.project), 'output': str(self.donor),
                          'runtime': str(self.runtime), 'tools': self.tools, 'captureMode': reuse.MODE,

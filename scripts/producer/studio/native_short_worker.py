@@ -15,11 +15,12 @@ from stage_timing import stage_span
 from cut_preview_io import bound_json, write_new
 from studio.native_preflight import preflight
 from studio.native_runtime import digest
+from studio.native_source_store import prepare_source_view, source_view_path
 from studio.native_short_delivery import finish_dialogue, native_srgb_delivery, prepare_dialogue, qualify_picture, run
 
 
 def render_command(request: dict, canvas: dict) -> list[str]:
-    """Use the qualified full-quality single-worker file-backed native route."""
+    """Keep native delivery SDR even when extracted source metadata carries HDR."""
     mode = request.get('captureMode', 'sdk-streaming')
     if mode == 'cached-native-batches':
         return [request['tools']['node'], str(Path(__file__).with_name('native_short_batched_render.mjs')),
@@ -28,8 +29,8 @@ def render_command(request: dict, canvas: dict) -> list[str]:
         raise ValueError('Unsupported native capture mode')
     return [request['tools']['node'], str(Path(request['runtime']) / 'dist/cli.js'),
             'render', request['project'], '--fps', canvas['frameRate'], '--quality', 'high',
-            '--crf', '15', '--workers', '1', '--low-memory-mode', '--no-browser-gpu',
-            '--video-frame-format', 'png', '--no-best-effort', '--frames-cache-dir', request['cache'],
+            '--crf', '15', '--sdr', '--workers', '1', '--low-memory-mode', '--no-browser-gpu',
+            '--video-frame-format', 'png', '--no-best-effort', '--frames-cache-dir', str(source_view_path(request)),
             '--output', str(Path(request['output']) / 'picture.mp4')]
 
 
@@ -141,14 +142,16 @@ def render_media(request: dict, plan: dict) -> dict:
     from studio.native_picture_references import check_samples
     check_samples(request, {**plan, 'canvas': {'width': 1080, 'height': 1920, **canvas}})
     with stage_span(str(root), 'native_static_preflight'):
-        options = {'reference_map': Path(request['referenceMap'])} if request.get('referenceMap') else {}
-        static = preflight(project, root / 'static', **options)
+        from studio.native_early_stage import worker_static_result
+        static = worker_static_result(request)
         if static['status'] != 'static-checks-pass':
             raise RuntimeError('Native static preflight blocked export')
     with stage_span(str(root), 'native_dialogue_preparation'):
         from studio.native_motion_previews import prepare_audio
         prepared_audio = prepare_audio(request, plan)
     verify_files(request)
+    from studio.native_short_revision_reuse import verify_picture_revision
+    revision = verify_picture_revision(request)
     picture_stage = 'native_picture_reuse' if request.get('pictureDonor') else 'native_picture_render'
     with stage_span(str(root), picture_stage):
         # Stream SDK output into the supervisor log, preserving cache-hit/failure evidence.
@@ -159,7 +162,10 @@ def render_media(request: dict, plan: dict) -> dict:
                 json.dump(reuse, handle, indent=2)
         else:
             import subprocess
-            subprocess.run(render_command(request, canvas), check=True, timeout=480)
+            from studio.native_budget_clock import stage_allowance
+            if request.get('captureMode', 'sdk-streaming') == 'sdk-streaming':
+                prepare_source_view(request)
+            subprocess.run(render_command(request, canvas), check=True, timeout=stage_allowance(request, 480))
     verify_files(request)
     with stage_span(str(root), 'native_dialogue_delivery'):
         audio = finish_dialogue(request, canvas, plan.get('audioFinishing'), prepared_audio)
@@ -171,6 +177,7 @@ def render_media(request: dict, plan: dict) -> dict:
             'audioReviewRequired': audio['audioReviewRequired'], 'audioQuality': audio['audioQuality'],
             'color': color, 'humanApproved': False,
             'additionalPictureEncodes': 0 if request.get('pictureDonor') else 1,
+            'pictureRevision': revision,
             'sourceCurrent': True, 'providerCalls': 0}
 
 
@@ -193,6 +200,9 @@ def verify_media(request: dict, plan: dict) -> dict:
 
 def execute(request: dict, request_file: Path, phase: str = 'all') -> dict:
     """Keep legacy callers while exposing independently supervised execution phases."""
+    from studio.native_short_draft_worker import DRAFT_PHASES, execute_draft_phase
+    if phase in DRAFT_PHASES:
+        return execute_draft_phase(request, phase)
     from studio.native_preview_sections import section_phase, execute_section
     if phase not in {'all', 'render', 'capture', 'preview', 'verify'} and not section_phase(phase):
         raise ValueError('Unsupported native export phase')

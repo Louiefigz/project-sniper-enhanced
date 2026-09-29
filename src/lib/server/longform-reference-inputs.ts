@@ -10,6 +10,30 @@ import { canonicalJson } from "./auto-edit-hash";
 import { strategyFile, type StrategyFilePin } from "./reference-strategy-library";
 import { longformInputPin } from "./longform-strategy-packet";
 
+function checkedPythonArtifact(script: string, command: string, file: string, label: string) {
+  const raw = execFileSync(pythonInterpreter(), [path.join(SCRIPTS_DIR, script), command, file],
+    { encoding: "utf8", timeout: 45_000, maxBuffer: 16 * 1024 * 1024 });
+  return objectValue(JSON.parse(raw), label);
+}
+
+function checkedInputPins(value: unknown, label: string): StrategyFilePin[] {
+  return Object.entries(objectValue(value, label)).map(([file, hash]) => {
+    const pin = longformInputPin(file);
+    if (pin.sha256 !== hash) throw new Error(`${label} changed`);
+    return pin;
+  });
+}
+
+function uniquePins(pins: StrategyFilePin[]): StrategyFilePin[] {
+  const found = new Map<string, StrategyFilePin>();
+  for (const pin of pins) {
+    const previous = found.get(pin.path);
+    if (previous && previous.sha256 !== pin.sha256) throw new Error(`Conflicting selected reference pin: ${pin.path}`);
+    found.set(pin.path, pin);
+  }
+  return [...found.values()];
+}
+
 function savedBindings(study: ResolvedReferenceStudy, evidence: StrategyFilePin[]) {
   const file = path.join(path.dirname(study.deepStudyPath), "reference_catalog_matches.json");
   if (!existsSync(file)) return null;
@@ -42,6 +66,37 @@ function savedPack(study: ResolvedReferenceStudy, deep: StrategyFilePin) {
   return pack;
 }
 
+function savedVocabulary(study: ResolvedReferenceStudy, profile: StrategyFilePin, deep: StrategyFilePin) {
+  const file = path.join(path.dirname(study.deepStudyPath), "reference_style_vocabulary.json");
+  if (!existsSync(file)) return null;
+  const held = strategyFile(file), content = objectValue(JSON.parse(held.text), "reference style vocabulary");
+  const evidence = content.evidence;
+  if (content.referenceId !== study.id || !Array.isArray(evidence)) {
+    throw new Error("Reference style vocabulary belongs to another reference");
+  }
+  const bound = (role: string, pin: StrategyFilePin) => evidence.some(row => row?.role === role
+    && row?.path === pin.path && row?.sha256 === pin.sha256);
+  if (!bound("style-profile", profile) || !bound("deep-study", deep)) {
+    throw new Error("Reference style vocabulary does not bind the selected study");
+  }
+  const checked = checkedPythonArtifact("producer/graphics/reference_style_vocabulary_cli.py", "check", file,
+    "checked reference style vocabulary");
+  if (checked.status !== "style-vocabulary-current" || checked.sha256 !== held.pin.sha256
+      || checked.referenceId !== study.id) throw new Error("Reference style vocabulary changed");
+  return { path: file, sha256: held.pin.sha256, text: held.text,
+    pins: [held.pin, ...checkedInputPins(checked.inputPins, "style vocabulary inputs")],
+    coverage: checked.coverage, familyCount: checked.familyCount, contenderCount: checked.contenderCount };
+}
+
+/** Reuse the same current vocabulary check for the ordinary Producer plan route. */
+export function currentReferenceStyleVocabulary(study?: ResolvedReferenceStudy) {
+  if (!study) return null;
+  const file = path.join(path.dirname(study.deepStudyPath), "reference_style_vocabulary.json");
+  if (!existsSync(file)) return null;
+  const profile = strategyFile(study.profilePath), deep = strategyFile(study.deepStudyPath);
+  return savedVocabulary(study, profile.pin, deep.pin);
+}
+
 /** Raw per-frame arrays stay on disk; every event, word timing and interpretation is retained. */
 export function nativeReferenceInputs(study?: ResolvedReferenceStudy) {
   const files: Record<string, string> = {}, pins: StrategyFilePin[] = [];
@@ -72,8 +127,15 @@ export function nativeReferenceInputs(study?: ResolvedReferenceStudy) {
   if (pack) { pins.push(pack.pin); files["SELECTED-REFERENCE-PACK.json"] = pack.text; }
   const bindings = savedBindings(study, [profile.pin, deep.pin]);
   if (bindings) { files["SELECTED-REFERENCE-MATCHES.json"] = bindings.text; pins.push(...bindings.pins); }
-  return { files, pins, selected: { id: study.id, title: study.title,
+  const vocabulary = savedVocabulary(study, profile.pin, deep.pin);
+  if (vocabulary) {
+    files["SELECTED-REFERENCE-VOCABULARY.json"] = vocabulary.text;
+    pins.push(...vocabulary.pins);
+  }
+  return { files, pins: uniquePins(pins), selected: { id: study.id, title: study.title,
     eventCount: value.events.length, eventsTruncated: false, packAvailable, catalogBindingsAvailable: bindings !== null,
+    styleVocabularyAvailable: vocabulary !== null, styleVocabularyCoverage: vocabulary?.coverage ?? null,
+    styleFamilyCount: vocabulary?.familyCount ?? 0, styleContenderCount: vocabulary?.contenderCount ?? 0,
     catalogBlockedMatches: bindings?.blockedMatches ?? [],
     representativeFrames: study.representativeFrames,
     editorialStudy: packAvailable ? "saved-pack-requires-current-evidence-review" : "whole-video-editorial-study-required",

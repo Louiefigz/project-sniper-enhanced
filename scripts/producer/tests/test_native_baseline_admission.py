@@ -16,6 +16,7 @@ from native_render_processes import ProcessRequest, ResourceMeasurementError
 from native_work_lease import NativeWorkBusy
 from native_render_resources import GIB, ResourcePolicy, admission_reasons, parse_snapshot
 from studio.native_measurement_retry import MeasurementWindow
+from _native_pool_fixture import pool_lease_double
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, policy_for_baseline
 from studio.native_runtime import digest
@@ -40,7 +41,7 @@ class NativeBaselineAdmissionTests(unittest.TestCase):
             sandbox=sandbox, success_status='TEST mocked lifecycle completed')
         self.run = NativeRun('baseline', self.settings)
         self.snapshot = parse_snapshot(raw_sample(), ProcessRequest(), 40 * GIB)
-        self.lease = Mock()
+        self.lease = pool_lease_double()
         self.acquire = self.enterContext(patch('studio.native_run.NativeWorkLease.acquire', return_value=self.lease))
         for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
             self.addCleanup(signal.signal, number, signal.getsignal(number))

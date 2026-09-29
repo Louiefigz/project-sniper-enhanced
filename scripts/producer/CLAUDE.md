@@ -92,6 +92,14 @@ Follow
 `docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md` for the complete brief,
 asset/transition plan, independent critique and conditional worker assignments.
 
+September 26 related Short groups: `native-short.ts prepare-related-group`
+accepts one bounded draft for two to four producer targets, freezes one shared
+allocation and prepares every request with its current-output projection.
+`native-related-style-group.ts` owns orchestration;
+`native-style-executable-signature.ts` derives completed sibling usage from
+staged catalog bytes and mounted HTML instead of accepting variation prose as
+execution evidence. See `docs/producer/NATIVE_SHORTS_WORKFLOW.md`.
+
 September 15 export recovery: `native_short_pipeline.py` coordinates sequential
 render, native-capture and encoded-verification owners. Each retains the existing
 600-second owner limit and shared heavy lane. `native_short_resume.py` admits an
@@ -310,6 +318,30 @@ should slot into the same gate (graphics / broll / motion family).
 
 - `planner/motion_triggers.py` — deterministic candidate detector (the shared
   trigger vocabulary all lanes read).
+- `planner/visual_plan_contract.py` / `visual_plan_fields.py` /
+  `visual_plan_validation.py` — bounded route-neutral `VISUAL-PLAN.json`
+  authority. `visual_plan_allocator.py` allocates the whole program with hard
+  density/repetition constraints and source identity tracking;
+  `visual_plan_layering.py` validates explicit concurrent pairs and preserves
+  every active visual window without relaxing density or repetition caps;
+  `visual_plan_allocator_ranking.py` applies 0.05 quality-equivalence bands so
+  variation beats noise but not materially better candidates.
+  `visual_plan_media_authority.py` grounds eligible source/B-roll/external
+  path+hash identities in a bounded controller-verified source-set receipt and
+  controller-frozen manifest metadata without reading media;
+  `visual_plan_cli.py` is the buyer-agent
+  validate/allocate/fingerprint boundary. It is planning-only and never opens
+  media, executes catalog HTML or launches render workers. Tests:
+  `test_visual_plan.py` and `test_visual_plan_layering.py`.
+  The manifest `externalMedia` projection and Native Short request inventory
+  preserve exact external-lane path/hash/admission identities, but those rows
+  remain prerequisites until canonical ingest deeply validates a sibling
+  `ASSET.json`/`ASSET-ORIGIN.json` and seals that origin pin in the hashed
+  source-set entry. Admission is not publication permission. Public-web
+  discovery has no automatic bridge: identify the need, capture with origin
+  evidence inside `external-media/<attempt>/`, re-ingest, materialize a fresh
+  context, and re-plan. A preserved `needs-review` disposition permits only the
+  declared local editorial review; publication clearance remains separate.
 - Lanes: `graphics_planner_receipts.py` (b-roll receipts), `_sequences.py`,
   `_boundaries.py` (section markers), `_gauge.py` (milestone gauges),
   `_illustration.py` (concept b-roll), `_zoom.py` (punch/aliveness carpet),
@@ -336,6 +368,16 @@ should slot into the same gate (graphics / broll / motion family).
   `inventory` returns the entire recorded inventory with source hashes and full
   annotations for strategy, without ranking/limit or native execution approval.
   `test_catalog_inventory.py` covers completeness and source drift.
+- `graphics/catalog_semantic_search.py` — bounded 1–4-intent retrieval over
+  every catalog metadata row. Direct language ranks above controlled
+  job/family synonym expansion; a 1–20 result cap never truncates the rows
+  considered. It returns paths, hashes and metadata only, never source/preview
+  bytes or execution approval. `catalog_resource_index.py` supplies the
+  digest-bound static DOM/canvas/WebGL/video-texture/media/dependency/repeat
+  signals used to require guarded probes. `catalog_snapshot_registry.py` keeps
+  current and historical metadata roots immutable; prepared future snapshots
+  must pass `catalog_snapshot_admission.py` against an exact upstream commit.
+  Tests: `test_catalog_semantic_foundation.py`.
 - `graphics/reference_reuse_map.py` / `reference_reuse_validation.py` — explicit
   reference-shot/style planning shared by Short and Long. Existing catalog search
   freezes shot candidates and source bytes; authored inspections choose reuse,
@@ -781,3 +823,33 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   catalogs and comments are exempt.
 
 Long-form research OCR: `study/study_deep.py --text-scope states` retains every motion event and transcript word-lock while reading all visual state representatives. Per-event OCR timing is explicitly unmeasured; the default full text scope is unchanged. `test_study_text_scope.py` covers this boundary. See `study/DEEP_SCHEMA.md`.
+
+## Authorized Short orchestration (September 28 integration)
+
+`native_batch.py` routes typed commands through `studio/production/cli.py`.
+Approval files and task submissions are parsed by `inputs.py`; approval changes
+and staged-start disposition live in `handover_commands.py`. `dispatch.py`
+claims media tasks; `media.py`, `process_watch.py` and `process_settle.py` bind
+and settle the exact supervised exporter. The coordinator remains responsible
+for AI work under the existing host governance contract.
+
+`production/queue_clock.py` owns the versioned Short counted clock;
+`queue_authority.py` binds grants and commits scheduler observations.
+`native_queue_accounting.py` connects `NativeRun` to the typed capacity reasons
+from `native_work_pool.py`. Only settled idle render-capacity time changes
+Short deadlines. Other productive tasks suppress credit. Historical Short and
+Long clocks do not opt into this policy.
+
+`context.py --role` uses `role_packet_*` to freeze exact author/critic inputs.
+`native-review.ts` publishes typed reviews through `native-review-*` and
+`native-final-review-*`; gate readers recheck current approved content.
+`native-short-draft.ts` and `native_short_draft*` preserve pending findings,
+separate draft eligibility from final eligibility, and gate exact-byte promotion.
+Early static/audio checks and reusable capture evidence live in
+`native_early_stage.py` and `native_capture_reuse.py`.
+
+`native_handoff.py`/`native_handoff_*` bind the checked encoded video to its
+matching live Studio view. Managed preview holds are per owner/project;
+`production/handoff.py` consumes a verified visible-handoff confirmation.
+The executable route and deferred qualification boundary are documented in
+`docs/producer/NATIVE_SHORTS_DEADLINE_BATCH.md`.

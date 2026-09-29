@@ -4,7 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { assembleNativeShortHtml, readNativeShortProject, writeNativeShortProject } from "../native-short-project";
-import { nativeShortFixture, refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
+import { bindNativeVisualPlanFixture, nativeShortFixture, refreshNativePacingFixture,
+  refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "../auto-edit-hash";
 import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
 import { nativeShortPacingReport } from "../native-short-pacing";
@@ -101,10 +102,34 @@ test("canonical JSON key order cannot change executable motion on cold reconstru
       box: [20, 500, 100, 100], fill: "#ffffff", border: "#111111", borderWidth: 1, radius: 8 }];
     f.input.canvas.motion = [{ id: "test-object", startFrame: 5, durationFrames: 5,
       from: { y: 20, scale: .8, opacity: 0 }, to: { y: 0, scale: 1, opacity: 1 }, ease: "power2.out" }];
+    const packetFile = f.input.requestPacket!.path;
+    const packet = JSON.parse(readFileSync(packetFile, "utf8")); packet.intent.scope = "produced";
+    writeFileSync(packetFile, canonicalJson(packet)); f.input.requestPacket!.sha256 = fileSha256(packetFile)!;
+    bindNativeVisualPlanFixture(f.input, f.directory);
     refreshNativePacingFixture(f.input);
     assert.equal(assembleNativeShortHtml(f.input), assembleNativeShortHtml(JSON.parse(canonicalJson(f.input))));
     const { directory } = writeNativeShortProject(f.input, path.join(f.directory, "project"));
     assert.deepEqual(readNativeShortProject(directory), f.input);
+  } finally { f.cleanup(); }
+});
+
+test("request omission cannot downgrade a current native Short build or cold read", () => {
+  const f = fixture();
+  try {
+    const requestless = structuredClone(f.input); delete requestless.requestPacket;
+    const destination = path.join(f.directory, "requestless");
+    assert.throws(() => writeNativeShortProject(requestless, destination), /controller-prepared request packet/);
+    assert.equal(existsSync(destination), false);
+    const built = writeNativeShortProject(f.input, path.join(f.directory, "current"));
+    const projectFile = path.join(built.directory, "SHORT-PROJECT.json");
+    const manifestFile = path.join(built.directory, "PROJECT-MANIFEST.json");
+    const project = JSON.parse(readFileSync(projectFile, "utf8")); delete project.requestPacket;
+    writeFileSync(projectFile, canonicalJson(project));
+    const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+    manifest.projectHash = canonicalJsonSha256(project);
+    manifest.files.find((row: { file: string }) => row.file === "SHORT-PROJECT.json").sha256 = fileSha256(projectFile);
+    writeFileSync(manifestFile, canonicalJson(manifest));
+    assert.throws(() => readNativeShortProject(built.directory), /no historical read lane/);
   } finally { f.cleanup(); }
 });
 
@@ -198,5 +223,26 @@ test("v1 and v2 frozen projects cold-read unchanged while current writer require
       assert.throws(() => writeNativeShortProject(restored, path.join(f.directory, `new-${version}`)), /version 3/);
       assert.equal(existsSync(path.join(f.directory, `new-${version}`)), false);
     }
+  } finally { f.cleanup(); }
+});
+
+test("requestless historical Short cold-read needs exact external provenance", () => {
+  const f = fixture();
+  try {
+    const built = writeNativeShortProject(f.input, path.join(f.directory, "historical"));
+    legacyFixture(built.directory, 1);
+    const projectFile = path.join(built.directory, "SHORT-PROJECT.json");
+    const manifestFile = path.join(built.directory, "PROJECT-MANIFEST.json");
+    const project = JSON.parse(readFileSync(projectFile, "utf8")); delete project.requestPacket;
+    writeFileSync(projectFile, canonicalJson(project));
+    const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+    manifest.projectHash = canonicalJsonSha256(project);
+    manifest.files.find((row: { file: string }) => row.file === "SHORT-PROJECT.json").sha256 = fileSha256(projectFile);
+    writeFileSync(manifestFile, canonicalJson(manifest));
+    assert.throws(() => readNativeShortProject(built.directory), /external controller-owned/);
+    const authority = { schemaVersion: 1 as const, scope: "legacy-native-short-cold-read" as const,
+      projectPath: realpathSync(built.directory), projectSha256: fileSha256(projectFile)!,
+      manifestSha256: fileSha256(manifestFile)! };
+    assert.equal(readNativeShortProject(built.directory, {}, authority).strategy.schemaVersion, 1);
   } finally { f.cleanup(); }
 });

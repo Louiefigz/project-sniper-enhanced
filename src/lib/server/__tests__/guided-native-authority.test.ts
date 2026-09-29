@@ -11,7 +11,8 @@ import { writeNativeShortProject } from "../native-short-project";
 import { nativeShortFixture, refreshNativePacingFixture } from "./_native-short-project-fixture";
 import type { ProjectIntent } from "@/lib/producer/intent-presets";
 
-function fixture(extra: Partial<ProjectIntent> = {}, externalManifest = false) {
+function fixture(extra: Partial<ProjectIntent> = {}, externalManifest = false,
+  withExternalMedia = false) {
   const directory = realpathSync(mkdtempSync(path.join(os.tmpdir(), "guided-native-authority-")));
   const root = path.join(directory, "project"), producerDir = path.join(root, "producer");
   const source = externalManifest ? path.join(directory, "admitted-media") : path.join(root, "source");
@@ -21,9 +22,18 @@ function fixture(extra: Partial<ProjectIntent> = {}, externalManifest = false) {
   const receipt = path.join(source, "admission.json"), transcript = path.join(source, "transcript.json");
   writeFileSync(receipt, "TEST source admission"); writeFileSync(transcript, '{"words":[]}');
   const picture = path.join(source, "provided.png"); writeFileSync(picture, "TEST supplied picture");
+  const external = path.join(source, "external.media");
+  const externalReceipt = path.join(source, "external-admission.json");
+  writeFileSync(external, "TEST admitted external media");
+  writeFileSync(externalReceipt, "TEST external admission receipt");
   const manifest = { sources: [{ id: "test", path: asset.path, sourceSha256: asset.sha256,
     duration: 2, resolution: [1920, 1080], fps: 25, transcriptPath: "transcript.json" }],
     broll: [{ id: "supplied", path: "provided.png", sourceSha256: fileSha256(picture)! }], music: [],
+    ...(withExternalMedia ? { externalMedia: [{ id: "external-1", path: external,
+      originalPath: external, sourceSha256: fileSha256(external)!,
+      sourceSizeBytes: readFileSync(external).byteLength,
+      admissionReceiptPath: externalReceipt,
+      admissionReceiptSha256: fileSha256(externalReceipt)! }] } : {}),
     sourceSetAdmission: { schemaVersion: 1, receiptPath: "admission.json", receiptSha256: fileSha256(receipt)!,
       sourceSetDigest: "a".repeat(64), entryCount: 1 } };
   // Source-set intake requires content-addressed receipt names.
@@ -120,6 +130,17 @@ test("rehashing a substituted or incomplete supplied inventory does not make it 
       assert.throws(() => assertGuidedNativeAuthority(f.plan, f.authority), /substituted the guided supplied inventory/);
     } finally { f.cleanup(); }
   }
+});
+
+test("guided authority binds exact external-media prerequisite inventory", () => {
+  const f = fixture({}, false, true);
+  try {
+    mutatePacket(f, packet => {
+      (packet.availableExternalMedia as Array<Record<string, unknown>>)[0].sourceSha256 = "b".repeat(64);
+    });
+    assert.throws(() => assertGuidedNativeAuthority(f.plan, f.authority),
+      /substituted the guided supplied inventory/);
+  } finally { f.cleanup(); }
 });
 
 test("another frozen manifest cannot substitute for the actual guided source manifest", () => {

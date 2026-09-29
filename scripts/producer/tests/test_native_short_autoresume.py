@@ -12,7 +12,7 @@ from unittest.mock import patch
 from _native_short_pipeline_fixture import ShortPipelineFixture, write_json
 from studio.native_export_history import candidate_attempts, register_attempt, known_attempts
 from studio.native_runtime import digest
-from studio.native_short_autoresume import recover_automatically
+from studio.native_short_autoresume import STUDIO, recover_automatically
 from studio.native_short_export import execute, prepare, select_and_publish
 from studio.native_short_pipeline import NativeShortPipeline
 
@@ -166,6 +166,56 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
         (receipt.parent / 'program-master.wav').write_bytes(b'TEST changed master')
         with self.assertRaisesRegex(ValueError, 'master changed'):
             recover_automatically(self.f.current())
+
+    def test_visual_plan_change_reuses_only_compatible_audio(self) -> None:
+        """A new picture allocation cannot inherit picture media, but can retain exact audio authority."""
+        self.f.request['visualPlanReuse'] = {
+            'pictureInputSha256': '1' * 64,
+            'upstreamAuthoritySha256': '2' * 64,
+            'audioReuseSha256': '3' * 64,
+        }
+        self.f.write_request(self.f.request)
+        self.f.partial_audio()
+        current = self.f.current()
+        current['pins'] = {**current['pins'], str(self.f.source): '4' * 64}
+        current['visualPlanReuse'] = {
+            **self.f.request['visualPlanReuse'], 'pictureInputSha256': '5' * 64}
+        result = recover_automatically(current)
+        self.assertEqual(result['recoverySelection']['reused'], 'audio')
+        self.assertIsNone(result['pictureDonor'])
+        current['visualPlanReuse']['audioReuseSha256'] = '6' * 64
+        self.assertEqual(recover_automatically(current)['recoverySelection']['mode'], 'fresh')
+
+    def test_audio_identity_does_not_reuse_changed_engine_implementation(self) -> None:
+        """A render repair starts fresh rather than selecting an unverifiable old owner."""
+        worker = str(STUDIO / 'native_short_worker.py')
+        self.f.inputs[worker] = digest(Path(worker))
+        self.f.request['visualPlanReuse'] = {
+            'pictureInputSha256': '1' * 64,
+            'upstreamAuthoritySha256': '2' * 64,
+            'audioReuseSha256': '3' * 64,
+        }
+        self.f.write_request(self.f.request)
+        self.f.partial_audio()
+        current = self.f.current()
+        current['pins'] = {**current['pins'], worker: '4' * 64}
+        result = recover_automatically(current)
+        self.assertEqual(result['recoverySelection']['mode'], 'fresh')
+        self.assertNotIn('preparedMaster', result)
+        self.assertIsNone(result['pictureDonor'])
+
+    def test_review_gate_rejection_cannot_claim_renderer_owned_partial_audio(self) -> None:
+        """A preview master remains valid preview work after an unlaunched final renderer."""
+        receipt = self.f.partial_audio()
+        file = self.f.root / 'pipeline.render.json'
+        owner = json.loads(file.read_text())
+        write_json(file, {**owner, 'pid': None, 'exitCode': None,
+                          'ownerIdentities': None,
+                          'cleanup': {'childNeverLaunched': True, 'verified': True}})
+        result = recover_automatically(self.f.current())
+        self.assertEqual(result['recoverySelection']['mode'], 'fresh')
+        self.assertNotIn('preparedMaster', result)
+        self.assertTrue(receipt.is_file())
 
     def test_failed_audio_or_unproven_picture_is_not_reused(self) -> None:
         """Incomplete files never acquire success authority merely by being on disk."""

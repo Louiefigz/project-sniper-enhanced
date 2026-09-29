@@ -25,8 +25,11 @@ export function captionTextWithinLimit(
     && captionCodePointLength(value) <= maximum;
 }
 
+/** Bidirectional marks, embeddings, overrides and isolates: they can reorder what a reviewer reads. */
+export const CAPTION_DIRECTIONAL_CONTROLS = /[\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u;
+
 /** Shared display-token limits exclude caption escapes and directional controls. */
 export function captionDisplayTextWithinLimit(value: unknown, maximum: number): value is string {
   return captionTextWithinLimit(value, maximum)
-    && !/[\\\r\n\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(value);
+    && !/[\\\r\n]/u.test(value) && !CAPTION_DIRECTIONAL_CONTROLS.test(value);
 }

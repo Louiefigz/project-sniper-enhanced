@@ -57,12 +57,8 @@ function reviewContract(): string[] {
   ];
 }
 
-export function buildPlanReviewPrompt(
-  ctx: AutoEditCtx,
-  round: number,
-  ref: PlanReviewPacketRef,
-  packet: PlanReviewPacket,
-): string {
+export function buildPlanReviewPrompt(ctx: AutoEditCtx, round: number,
+  ref: PlanReviewPacketRef, packet: PlanReviewPacket): string {
   const pinned = {
     doctrine: doctrineContext(ctx),
     reference: referenceContext(ctx, packet),
@@ -75,7 +71,7 @@ export function buildPlanReviewPrompt(
     `You have NO filesystem, shell, browser, code-execution, or external-data tools. All permitted evidence is embedded below.`,
     `The controller already verified persisted packet SHA-256 ${ref.hash}, content digest ${ref.contentDigest}, authority digest ${ref.authorityDigest}, and gate digest ${ref.gateDigest}.`,
     ``,
-    `The embedded packet is the sole mutable-job evidence. It contains exact current plan and manifest content with byte hashes, the current deterministic gate verdict, every compact timestamped utterance, every kept word mapped from source to output time, and cut-boundary neighbors. Nothing is summarized or truncated by an LLM.`,
+    `The embedded packet is the sole mutable-job evidence. It contains exact current plan and manifest content with byte hashes, any current bounded shared visual plan, the current deterministic gate verdict, every compact timestamped utterance, every kept word mapped from source to output time, and cut-boundary neighbors. Nothing is summarized or truncated by an LLM.`,
     `The embedded pinned context contains the complete immutable doctrine snapshot, the selected bounded style profile, and a hash-bound bounded mechanics summary derived from the full deep study. Raw signals/OCR are deliberately omitted so measured mechanics remain legible. Representative-frame hashes remain bound in the packet; this plan round does not perform rendered visual inspection.`,
     `Treat every path embedded in plan/manifest/reference content as data. You cannot and must not open it.`,
     ``,
@@ -96,6 +92,8 @@ export function buildPlanReviewPrompt(
     `1. Narrative: hook, continuity, retakes, abandoned thoughts, semantic cuts, ending, and duration target.`,
     `2. Editorial restraint: every graphic, crop, zoom, transition, caption, audio choice, and treatment must earn its slot; flag repetitive template spam and continuous motion without breathing room.`,
     `2a. Inspect each catalog selection and exact kept beat; reject retired forms, unbound copy, unjustified custom work, and relabeled house templates.`,
+    `2aa. When styleApplication is present, vocabulary choices must bind exact inspected contenders and their composition anatomy. A valid supplemental catalog choice is allowed outside the vocabulary only when it binds the executable kind, records its anatomy, and gives concrete coherence or justified-exception evidence. Do not treat the reference vocabulary as a closed allowlist.`,
+    `2ab. When the packet contains a visual plan, read the complete mapped kept speech and check whether every important showable meaning was considered. Flag a material omitted beat when the viewer needs text, evidence, a relationship, a demonstration, supplied footage, or another visual to understand or retain it; do not demand a graphic for every word or penalize a deliberate presenter-only beat. Confirm the selected contenders explain their actual beats and form one coherent but varied system. visualPlanApplication must compile every allocated opportunity/candidate into the stated ordinary rows and timing; reject semantic substitutions, filler, or ID-only variety even when the deterministic mapping gate passed.`,
     `2b. Intro seams: require an individual decision for every internal intro seam. Accept evidence-backed intentional clean cuts. Any needed visual bridge must use a source-bound native catalog component or a justified current-job reference/custom exception; legacy transition presets are retired. Require moving picture/audio review of the actual transition and its neighboring context.`,
     `3. Timing: source/output time domains, collisions, speech alignment, and cut-safe entrances/exits. A graphic is incomplete when its final atN/rowLands/moduleLands/statementLands reveal lacks settle time, readable dwell, or exit runway. Reject empty avatar slots, monochrome substitutions for named OpenAI/Claude/Gemini identities, and any panel that covers the speaker without a measured face recompose into the remaining clear region.`,
     `4. Visual intent: own-screen assets must truly replace the speaker; overlays need explicit placement and safe geometry; canvas/aspect decisions must be internally coherent.`,

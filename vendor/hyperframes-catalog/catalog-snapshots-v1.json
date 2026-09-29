@@ -1,0 +1,15 @@
+{
+  "current": "registry-cli-0.7.33-2026-08-28",
+  "schemaVersion": 1,
+  "snapshots": {
+    "registry-cli-0.7.33-2026-08-28": {
+      "indexSha256": "e814987f6fd3876217a840c503ae041198a32346cf141a4485a1e4b9bdff8e67",
+      "items": 372,
+      "lockSha256": "692b8898545c598f7e1ce736018e88883734825db49321034b0f905b129455f4",
+      "mirroredAt": "2026-08-28",
+      "resourceSha256": "7d84c5227768810a9aea7123fd117ac0a3740e62911a44a2d0c7a92b55c9a55e",
+      "root": ".",
+      "source": "heygen-com/hyperframes registry via CLI 0.7.33"
+    }
+  }
+}

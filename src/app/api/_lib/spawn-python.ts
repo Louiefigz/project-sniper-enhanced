@@ -32,6 +32,24 @@ export function explicitVenvPython(root: string): string {
 
 export const SCRIPTS_DIR = scriptsDir();
 
+/** Installed controller tree; historical pipeline snapshots are data only. */
+export function runtimeRepositoryRoot(): string {
+  const configured = process.env.SNIPER_RUNTIME_REPO_ROOT ?? process.cwd();
+  if (!path.isAbsolute(configured) || path.normalize(configured) !== configured) {
+    throw new Error("Runtime repository root must be an absolute normalized path");
+  }
+  const root = realpathSync(configured);
+  if (root !== configured || !lstatSync(root).isDirectory()) {
+    throw new Error("Runtime repository root must be one canonical directory");
+  }
+  return root;
+}
+
+/** Trusted installed scripts, excluding the historical data snapshot. */
+export function runtimeScriptsDir(): string {
+  return path.join(runtimeRepositoryRoot(), "scripts");
+}
+
 /** Immutable run tree in detached Auto Edit workers; live repo elsewhere. */
 export function pipelineRepositoryRoot(): string {
   const pinned = process.env.SNIPER_PIPELINE_ROOT;

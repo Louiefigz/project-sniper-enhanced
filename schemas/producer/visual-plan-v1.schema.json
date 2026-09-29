@@ -1,0 +1,578 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/visual-plan-v1.schema.json",
+  "title": "Project Sniper route-neutral visual plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "scope", "planId", "project", "catalogPin",
+    "transcriptAuthority", "mediaAuthority", "relatedUsageAuthority", "searchAuthority", "direction", "bounds",
+    "relatedUsage", "opportunities", "allocation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scope": { "const": "visual-plan-planning-evidence" },
+    "planId": { "$ref": "#/$defs/id" },
+    "project": { "$ref": "#/$defs/project" },
+    "catalogPin": { "$ref": "#/$defs/catalogPin" },
+    "transcriptAuthority": { "$ref": "#/$defs/authorityPin" },
+    "mediaAuthority": { "$ref": "#/$defs/authorityPin" },
+    "relatedUsageAuthority": { "$ref": "#/$defs/authorityPin" },
+    "searchAuthority": { "$ref": "#/$defs/authorityPin" },
+    "direction": { "$ref": "#/$defs/direction" },
+    "bounds": { "$ref": "#/$defs/bounds" },
+    "relatedUsage": {
+      "type": "array",
+      "maxItems": 128,
+      "items": { "$ref": "#/$defs/relatedUse" }
+    },
+    "opportunities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/opportunity" }
+    },
+    "allocation": { "$ref": "#/$defs/allocation" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": ".*\\S.*"
+    },
+    "textList": {
+      "type": "array",
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/text" },
+      "uniqueItems": true
+    },
+    "idList": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/id" },
+      "uniqueItems": true
+    },
+    "pin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "authorityPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "path", "sha256", "digest"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "referencePin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "sha256"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode", "aspect", "durationFrames", "fps", "intentSha256",
+        "acceptedProgramSha256", "transcriptSha256"
+      ],
+      "properties": {
+        "mode": { "enum": ["short", "long"] },
+        "aspect": { "enum": ["9:16", "16:9", "1:1", "4:5"] },
+        "durationFrames": { "type": "integer", "minimum": 1, "maximum": 1000000000 },
+        "fps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": { "type": "integer", "minimum": 1 },
+            "denominator": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "intentSha256": { "$ref": "#/$defs/sha256" },
+        "acceptedProgramSha256": { "$ref": "#/$defs/sha256" },
+        "transcriptSha256": { "$ref": "#/$defs/sha256" },
+        "relatedOutputGroup": { "$ref": "#/$defs/id" }
+      }
+    },
+    "catalogPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogId", "version", "registryPath", "registrySha256",
+        "snapshotIndexPath", "snapshotIndexSha256", "snapshotLockPath",
+        "snapshotLockSha256", "snapshotResourcePath", "snapshotResourceSha256",
+        "capabilityPath", "capabilitySha256", "studyPath", "studySha256",
+        "indexPath", "indexSha256", "resourceIndexPath", "resourceIndexSha256",
+        "sourceRootPath", "sourceSetSha256"
+      ],
+      "properties": {
+        "catalogId": { "$ref": "#/$defs/id" },
+        "version": { "$ref": "#/$defs/text" },
+        "registryPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "registrySha256": { "$ref": "#/$defs/sha256" },
+        "snapshotIndexPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "snapshotIndexSha256": { "$ref": "#/$defs/sha256" },
+        "snapshotLockPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "snapshotLockSha256": { "$ref": "#/$defs/sha256" },
+        "snapshotResourcePath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "snapshotResourceSha256": { "$ref": "#/$defs/sha256" },
+        "capabilityPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "capabilitySha256": { "$ref": "#/$defs/sha256" },
+        "studyPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "studySha256": { "$ref": "#/$defs/sha256" },
+        "indexPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "indexSha256": { "$ref": "#/$defs/sha256" },
+        "resourceIndexPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "resourceIndexSha256": { "$ref": "#/$defs/sha256" },
+        "sourceRootPath": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sourceSetSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "direction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rationale", "palette", "typography", "motionFamily",
+        "transitionFamily", "density", "repetition", "referencePins",
+        "unresolvedAmbiguity"
+      ],
+      "properties": {
+        "rationale": { "$ref": "#/$defs/text" },
+        "palette": { "$ref": "#/$defs/textList" },
+        "typography": { "$ref": "#/$defs/textList" },
+        "motionFamily": { "$ref": "#/$defs/text" },
+        "transitionFamily": { "$ref": "#/$defs/text" },
+        "density": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxVisualsPerSection", "minBreathingFrames"],
+          "properties": {
+            "maxVisualsPerSection": { "type": "integer", "minimum": 0, "maximum": 64 },
+            "minBreathingFrames": { "type": "integer", "minimum": 0, "maximum": 100000 }
+          }
+        },
+        "repetition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxConsecutiveFamily", "maxIdenticalDevelopment"],
+          "properties": {
+            "maxConsecutiveFamily": { "type": "integer", "minimum": 1, "maximum": 16 },
+            "maxIdenticalDevelopment": { "type": "integer", "minimum": 1, "maximum": 16 }
+          }
+        },
+        "referencePins": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/referencePin" }
+        },
+        "unresolvedAmbiguity": { "$ref": "#/$defs/textList" }
+      }
+    },
+    "bounds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxOpportunities", "maxCandidatesPerOpportunity",
+        "maxEvidencePerCandidate", "allocatorBeamWidth"
+      ],
+      "properties": {
+        "maxOpportunities": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "maxCandidatesPerOpportunity": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "maxEvidencePerCandidate": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "allocatorBeamWidth": { "type": "integer", "minimum": 1, "maximum": 64 }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "transcriptEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "wordIds"],
+      "properties": {
+        "text": { "$ref": "#/$defs/text" },
+        "wordIds": { "$ref": "#/$defs/idList" }
+      }
+    },
+    "seamSide": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sceneId", "motion", "composition", "color", "audio", "narrative"],
+      "properties": {
+        "sceneId": { "$ref": "#/$defs/id" },
+        "motion": { "$ref": "#/$defs/text" },
+        "composition": { "$ref": "#/$defs/text" },
+        "color": { "$ref": "#/$defs/text" },
+        "audio": { "$ref": "#/$defs/text" },
+        "narrative": { "$ref": "#/$defs/text" }
+      }
+    },
+    "seamContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["left", "right", "relationship"],
+      "properties": {
+        "left": { "$ref": "#/$defs/seamSide" },
+        "right": { "$ref": "#/$defs/seamSide" },
+        "relationship": { "$ref": "#/$defs/text" }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["visibleSubjects", "quantities", "relationships", "actions"],
+      "properties": {
+        "visibleSubjects": { "$ref": "#/$defs/textList" },
+        "quantities": { "$ref": "#/$defs/textList" },
+        "relationships": { "$ref": "#/$defs/textList" },
+        "actions": { "$ref": "#/$defs/textList" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "path", "sha256", "status", "observation"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["catalog-record", "source-range", "preview", "motion-inspection", "reference-family", "attachment"] },
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "status": { "enum": ["inspected", "limited", "unavailable"] },
+        "observation": { "$ref": "#/$defs/text" }
+      }
+    },
+    "sourceRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordId", "path", "sha256"],
+      "properties": {
+        "recordId": { "$ref": "#/$defs/id" },
+        "path": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sourceSha256": { "$ref": "#/$defs/sha256" },
+        "range": { "$ref": "#/$defs/timing" }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["familyId", "anatomy", "development", "motionFamily"],
+      "properties": {
+        "familyId": { "$ref": "#/$defs/id" },
+        "anatomy": { "$ref": "#/$defs/text" },
+        "development": { "$ref": "#/$defs/text" },
+        "motionFamily": { "$ref": "#/$defs/text" }
+      }
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validity", "semanticFit", "readability", "feasibility",
+        "coherence", "variation", "recentReusePenalty"
+      ],
+      "properties": {
+        "validity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "semanticFit": { "type": "number", "minimum": 0, "maximum": 1 },
+        "readability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "feasibility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "coherence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "variation": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recentReusePenalty": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "repeatIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "reason", "priorOpportunityId", "priorCandidateId"],
+      "properties": {
+        "classification": { "enum": ["signature", "callback", "necessary"] },
+        "reason": { "$ref": "#/$defs/text" },
+        "priorOpportunityId": { "$ref": "#/$defs/id" },
+        "priorCandidateId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "catalogAdmission": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalogRecordSha256", "executionStatus", "resourceClass",
+        "runtimeQualificationRequired", "sourceInspectionEvidence"
+      ],
+      "properties": {
+        "catalogRecordSha256": { "$ref": "#/$defs/sha256" },
+        "executionStatus": {
+          "enum": [
+            "integrated-measured", "integrated-unmeasured", "reference",
+            "reference-missing-source"
+          ]
+        },
+        "resourceClass": { "enum": ["dom-css", "canvas", "gpu-video", "unknown"] },
+        "runtimeQualificationRequired": { "type": "boolean" },
+        "sourceInspectionEvidence": {
+          "oneOf": [{ "$ref": "#/$defs/pin" }, { "type": "null" }]
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "modality", "eligibility", "routeClass", "source",
+        "catalogAdmission",
+        "composition", "evidence", "dependencyPins", "authorization",
+        "scores", "adaptationEstimate",
+        "prerequisites", "exclusionReasons", "decisionReason", "confidence",
+        "unresolvedAmbiguity", "limitations", "expectedVisibleResult", "reviewTarget"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "modality": { "$ref": "#/$defs/modality" },
+        "eligibility": { "enum": ["eligible", "prerequisite", "blocked"] },
+        "routeClass": { "enum": ["compatibility", "native", "no-render"] },
+        "source": { "oneOf": [{ "$ref": "#/$defs/sourceRef" }, { "type": "null" }] },
+        "catalogAdmission": {
+          "oneOf": [{ "$ref": "#/$defs/catalogAdmission" }, { "type": "null" }]
+        },
+        "composition": { "$ref": "#/$defs/composition" },
+        "evidence": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "dependencyPins": {
+          "type": "array",
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/pin" }
+        },
+        "authorization": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["basis", "evidence"],
+              "properties": {
+                "basis": { "$ref": "#/$defs/text" },
+                "evidence": { "$ref": "#/$defs/pin" }
+              }
+            }
+          ]
+        },
+        "scores": { "$ref": "#/$defs/scores" },
+        "adaptationEstimate": { "enum": ["none", "small", "medium", "large", "unknown"] },
+        "prerequisites": { "$ref": "#/$defs/textList" },
+        "exclusionReasons": { "$ref": "#/$defs/textList" },
+        "decisionReason": { "$ref": "#/$defs/text" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unresolvedAmbiguity": { "$ref": "#/$defs/textList" },
+        "limitations": { "$ref": "#/$defs/textList" },
+        "expectedVisibleResult": { "$ref": "#/$defs/text" },
+        "reviewTarget": { "$ref": "#/$defs/text" },
+        "repeatIntent": { "$ref": "#/$defs/repeatIntent" }
+      }
+    },
+    "modality": {
+      "enum": [
+        "source-footage", "supplied-broll", "external-media", "catalog",
+        "text", "presenter", "custom-native", "omit", "transition"
+      ]
+    },
+    "opportunity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "beatId", "kind", "sectionId", "timing", "transcriptEvidence",
+        "viewerQuestion", "explanatoryJob", "sectionRole", "attentionState",
+        "evidenceSensitivity", "importance", "maxUsefulHoldFrames", "requirements",
+        "allowedModalities", "prohibitedModalities", "callbackTo", "continuityWith",
+        "confidence", "unresolvedAmbiguity", "searchReview", "candidates"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "beatId": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["beat", "seam", "chapter", "persistent", "callback"] },
+        "sectionId": { "$ref": "#/$defs/id" },
+        "timing": { "$ref": "#/$defs/timing" },
+        "transcriptEvidence": { "$ref": "#/$defs/transcriptEvidence" },
+        "viewerQuestion": { "$ref": "#/$defs/text" },
+        "explanatoryJob": { "$ref": "#/$defs/text" },
+        "sectionRole": { "$ref": "#/$defs/text" },
+        "attentionState": { "$ref": "#/$defs/text" },
+        "evidenceSensitivity": { "enum": ["low", "medium", "high"] },
+        "importance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "maxUsefulHoldFrames": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "allowedModalities": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/modality" }
+        },
+        "prohibitedModalities": {
+          "type": "array", "uniqueItems": true,
+          "items": { "$ref": "#/$defs/modality" }
+        },
+        "callbackTo": { "$ref": "#/$defs/idList" },
+        "continuityWith": { "$ref": "#/$defs/idList" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unresolvedAmbiguity": { "$ref": "#/$defs/textList" },
+        "searchReview": { "$ref": "#/$defs/searchReview" },
+        "seamContext": { "$ref": "#/$defs/seamContext" },
+        "layering": { "$ref": "#/$defs/layering" },
+        "candidates": {
+          "type": "array", "minItems": 1, "maxItems": 5,
+          "items": { "$ref": "#/$defs/candidate" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "kind": { "const": "seam" } } },
+          "then": { "required": ["seamContext"] },
+          "else": { "not": { "required": ["seamContext"] } }
+        }
+      ]
+    },
+    "layering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["withOpportunityIds", "reason"],
+      "properties": {
+        "withOpportunityIds": {
+          "type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/id" }
+        },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 4000, "pattern": "\\S" }
+      }
+    },
+    "searchOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["recordId", "outcome", "candidateId", "reason"],
+      "properties": {
+        "recordId": { "$ref": "#/$defs/id" },
+        "outcome": { "enum": ["candidate", "rejected"] },
+        "candidateId": {
+          "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }]
+        },
+        "reason": { "$ref": "#/$defs/text" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "rejected" } } },
+          "then": { "properties": { "candidateId": { "type": "null" } } },
+          "else": { "properties": { "candidateId": { "$ref": "#/$defs/id" } } }
+        }
+      ]
+    },
+    "searchReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["searchDigest", "outcomes"],
+      "properties": {
+        "searchDigest": { "$ref": "#/$defs/sha256" },
+        "outcomes": {
+          "type": "array", "maxItems": 5,
+          "items": { "$ref": "#/$defs/searchOutcome" }
+        }
+      }
+    },
+    "relatedUse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "modality", "sourceRecordId", "sourceSha256", "familyId", "anatomy", "development", "planSha256"],
+      "properties": {
+        "candidateId": { "$ref": "#/$defs/id" },
+        "modality": { "$ref": "#/$defs/modality" },
+        "sourceRecordId": {
+          "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }]
+        },
+        "sourceSha256": {
+          "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+        },
+        "familyId": { "$ref": "#/$defs/id" },
+        "anatomy": { "$ref": "#/$defs/text" },
+        "development": { "$ref": "#/$defs/text" },
+        "planSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "alternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "outcome", "reason"],
+      "properties": {
+        "candidateId": { "$ref": "#/$defs/id" },
+        "outcome": { "enum": ["lower-ranked", "ineligible", "budget-conflict"] },
+        "reason": { "$ref": "#/$defs/text" }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "opportunityId", "candidateId", "modality", "executionRoute",
+        "decisionReason", "confidence", "unresolvedAmbiguity",
+        "repeatClassification", "repeatReason", "alternatives"
+      ],
+      "properties": {
+        "opportunityId": { "$ref": "#/$defs/id" },
+        "candidateId": { "$ref": "#/$defs/id" },
+        "modality": { "$ref": "#/$defs/modality" },
+        "executionRoute": { "enum": ["ordinary", "native-short", "native-long"] },
+        "decisionReason": { "$ref": "#/$defs/text" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "unresolvedAmbiguity": { "$ref": "#/$defs/textList" },
+        "repeatClassification": { "enum": ["none", "varied", "signature", "callback", "necessary"] },
+        "repeatReason": { "type": "string", "maxLength": 4000 },
+        "alternatives": {
+          "type": "array", "maxItems": 4,
+          "items": { "$ref": "#/$defs/alternative" }
+        }
+      }
+    },
+    "allocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "allocatorVersion", "route", "decisions", "unresolvedAmbiguity"],
+      "properties": {
+        "status": { "enum": ["pending", "allocated"] },
+        "allocatorVersion": { "const": "visual-plan-allocator-v1" },
+        "route": { "enum": ["pending", "ordinary", "native-short", "native-long"] },
+        "decisions": {
+          "type": "array", "maxItems": 256,
+          "items": { "$ref": "#/$defs/decision" }
+        },
+        "unresolvedAmbiguity": { "$ref": "#/$defs/textList" }
+      }
+    }
+  }
+}

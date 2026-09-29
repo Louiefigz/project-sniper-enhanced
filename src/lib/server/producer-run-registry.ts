@@ -58,7 +58,7 @@ function validStoredRun(value: unknown): value is StoredRun {
   return typeof run.token === "string"
     && typeof run.ownerPid === "number"
     && (run.ownerIdentity === undefined || validProcessIdentity(run.ownerIdentity))
-    && ["running", "failed", "interrupted", "awaiting_cut_approval", "cut_accepted", "awaiting_treatment_brief", "treatment_admitted"].includes(String(run.status))
+    && ["running", "failed", "interrupted", "awaiting_cut_approval", "cut_accepted", "awaiting_treatment_brief", "treatment_admitted", "awaiting_native_author"].includes(String(run.status))
     && Array.isArray(run.events);
 }
 function readRun(dir: string): StoredRun | null {
@@ -240,9 +240,8 @@ export function updateProducerRun(
   phase: ProducerRunPhase,
   message: string,
 ): void {
-  changeRun(dir, token, "running", phase, message);
+  changeRun({ dir, token, status: "running", phase, message });
 }
-
 /** Refresh current status without turning a periodic heartbeat into run history. */
 export function heartbeatProducerRun(
   dir: string,
@@ -250,46 +249,44 @@ export function heartbeatProducerRun(
   phase: ProducerRunPhase,
   message: string,
 ): void {
-  changeRun(dir, token, "running", phase, message, false);
+  changeRun({ dir, token, status: "running", phase, message, appendEvent: false });
 }
-
 export function appendProducerRunEvent(dir: string, token: string, message: string): void {
   const current = storedRun(dir);
   if (!current || current.token !== token) return;
-  changeRun(dir, token, current.status, current.phase, message);
+  changeRun({ dir, token, status: current.status, phase: current.phase, message });
 }
-
 export function failProducerRun(dir: string, token: string, message: string): void {
   const current = storedRun(dir);
-  changeRun(dir, token, "failed", current?.phase ?? "authoring", message);
+  changeRun({ dir, token, status: "failed",
+    phase: current?.phase ?? "authoring", message });
 }
-
 export function interruptProducerRun(dir: string, token: string, message: string): void {
   const current = storedRun(dir);
-  changeRun(dir, token, "interrupted", current?.phase ?? "authoring", message);
+  changeRun({ dir, token, status: "interrupted",
+    phase: current?.phase ?? "authoring", message });
 }
-
 export function completeProducerRun(dir: string, token: string): void {
   const key = cleanDir(dir);
   if (storedRun(key)?.token !== token) return;
   store().delete(key);
   rmSync(statePath(key), { force: true });
 }
-
 export function clearProducerRun(dir: string): void {
   const key = cleanDir(dir);
   store().delete(key);
   rmSync(statePath(key), { force: true });
 }
-
-function changeRun(
+interface ChangeRunArgs {
   dir: string,
   token: string,
   status: ProducerRunStatus,
   phase: ProducerRunPhase,
   message: string,
-  appendEvent = true,
-): void {
+  appendEvent?: boolean,
+}
+function changeRun(args: ChangeRunArgs): void {
+  const { dir, token, status, phase, message, appendEvent = true } = args;
   const key = cleanDir(dir);
   const current = storedRun(key);
   if (!current || current.token !== token) return;

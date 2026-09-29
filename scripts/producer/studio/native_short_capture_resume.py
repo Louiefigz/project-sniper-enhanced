@@ -98,6 +98,16 @@ def complete_capture(root: Path, render_stage: Path) -> tuple[Path, dict[str, st
     return receipt, pins
 
 
+def bind_final_capture(root: Path, render_stage: Path, request: dict) -> tuple[Path, dict[str, str]]:
+    """After a fresh render, bind this attempt's own capture or re-verify its adopted seal."""
+    if not request.get('captureStage'):
+        return complete_capture(root, render_stage)
+    from studio.native_capture_reuse import capture_for_render
+    receipt = Path(request['captureStage'])
+    _record, pins = capture_for_render(receipt, render_stage)
+    return receipt, pins
+
+
 def seal_capture(root: Path, render_stage: Path) -> Path:
     """Expose the legacy path result through the same complete capture admission."""
     receipt, _pins = complete_capture(root, render_stage)
@@ -167,7 +177,8 @@ def prepare_capture_reuse(request: dict, render_stage: Path, attempt: Path) -> d
     receipt = Path(source) if source else capture_candidate(attempt, render_stage)
     if receipt is None:
         return request
-    record, pins = read_capture(receipt, render_stage)
+    from studio.native_capture_reuse import capture_for_render
+    record, pins = capture_for_render(receipt, render_stage)
     if source:
         require(all(selected['pins'].get(file) == sha for file, sha in pins.items()),
                 'resume attempt omitted capture pins')
@@ -176,13 +187,17 @@ def prepare_capture_reuse(request: dict, render_stage: Path, attempt: Path) -> d
             'resume output must preserve the capture donor')
     require(all(file not in request['pins'] or request['pins'][file] == sha for file, sha in pins.items()),
             'capture and render dependency hashes differ')
-    return {**request, 'captureStage': str(receipt), 'pins': {**request['pins'], **pins}}
+    adopted = {'captureDependencySha256': selected['captureDependencySha256']} \
+        if source and selected.get('captureDependencySha256') else {}
+    return {**request, 'captureStage': str(receipt), **adopted, 'pins': {**request['pins'], **pins}}
 
 
 def copy_completed_capture(request: dict) -> tuple[dict, dict[str, str]]:
     """Copy only the native JSON and retain exact original JPEG paths for normal final QC."""
+    from studio.native_capture_reuse import capture_for_render, read_standalone_capture
     receipt = Path(request['captureStage'])
-    record, pins = read_capture(receipt, Path(request['verifyStage']))
+    record, pins = capture_for_render(receipt, Path(request['verifyStage'])) if request.get('verifyStage') \
+        else read_standalone_capture(receipt, request)
     require(all(request['pins'].get(file) == sha for file, sha in pins.items()),
             'capture evidence was not pinned')
     native = record['artifacts']['native']

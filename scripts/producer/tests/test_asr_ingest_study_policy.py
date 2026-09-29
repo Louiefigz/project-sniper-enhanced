@@ -30,7 +30,7 @@ class IngestPolicyTests(unittest.TestCase):
         admission = types.SimpleNamespace(binding={}, media_by_original={})
         with mock.patch.dict(os.environ, {"DEEPGRAM_API_KEY": "TEST-only"}, clear=True), \
                 mock.patch.object(ingest, "load_deepgram_key", side_effect=AssertionError("NO KEY DISCOVERY")) as keys, \
-                mock.patch.object(ingest, "classify_inputs", return_value=ingest.Inputs([], None, None)), \
+            mock.patch.object(ingest, "classify_inputs", return_value=ingest.Inputs([], None, None, None)), \
                 mock.patch.object(ingest, "collect_ingest_candidates", return_value=[]), \
                 mock.patch.object(ingest, "admit_ingest_candidates", return_value=admission), \
                 mock.patch.object(ingest, "verify_source_set_binding"), \

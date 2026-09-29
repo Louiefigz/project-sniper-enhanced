@@ -29,13 +29,16 @@ def _admitted(path: Path, mapping: dict[str, AdmittedMedia]) -> AdmittedMedia:
 
 
 def _proof_fields(media: AdmittedMedia) -> dict:
-    return {
+    fields = {
         "originalPath": media.original_path,
         "sourceSha256": media.sha256,
         "sourceSizeBytes": media.size_bytes,
         "admissionReceiptPath": media.receipt_path,
         "admissionReceiptSha256": media.receipt_sha256,
     }
+    if media.lane == "external":
+        fields["authorizationEvidence"] = media.authorization_evidence
+    return fields
 
 
 def _broll_paths(broll_dir: Path) -> list[Path]:

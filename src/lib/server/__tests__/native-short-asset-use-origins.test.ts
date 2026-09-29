@@ -4,7 +4,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { readNativeAssetOrigin } from "../native-short-asset-use-origins";
 import { fileSha256 } from "../auto-edit-hash";
-import { assertNativeShortAssetUse, nativeShortAssetUseReport } from "../native-short-asset-use";
+import { assertNativeShortAssetUse, nativeAssetUseRevisionHash, nativeShortAssetUseReport } from "../native-short-asset-use";
 import { withAssetUse, type AssetUseFixture } from "./_native-short-asset-use-fixture";
 
 const check = (f: AssetUseFixture) => assertNativeShortAssetUse(f.input, f.html(), f.options);
@@ -59,7 +59,10 @@ test("web source receipts retain stronger checks and all native-export pins", ()
 
 test("prepared requests independently constrain assets labeled as provided", () => withAssetUse(f => {
   const asset = f.addMedia();
-  f.input.requestPacket = { path: path.join(f.directory, "request.json"), sha256: "a".repeat(64) }; f.refresh();
+  f.refresh();
+  f.input.requestPacket = { path: path.join(f.directory, "request.json"), sha256: "a".repeat(64) };
+  f.input.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(f.input);
+  f.options.providedAssets = undefined;
   assert.throws(() => check(f), /supplied media inventory/);
   f.options.providedAssets = [{ file: f.input.canvas.sourceFile, sha256: f.input.assets[0].sha256 }];
   assert.throws(() => check(f), /absent from the prepared request/);

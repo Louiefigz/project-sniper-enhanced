@@ -52,6 +52,14 @@ planning; it does not replace the detailed visual study or qualify a style match
   proposed improvements distinct. A split needs readable content and deliberate
   presenter framing as well as two pane jobs. Include counterexamples and
   limitations rather than treating every reference decision as a quality target.
+  When the deliverable is a reusable family of close style options, also follow
+  [Reference style vocabulary](../../../docs/producer/REFERENCE_STYLE_VOCABULARY.md).
+  Inspect the actual candidate sources and save a separate
+  `reference_style_vocabulary.json` with evidence-cited stable/flexible traits,
+  signature devices, and purpose-based families. Normally keep several strong
+  contenders when they exist; retain an honest smaller family otherwise. This
+  planning artifact never substitutes for a shot reuse map or the twice-reviewed
+  release-ready pack.
 - **Learn only:** reference → meticulous study → evidence-bound templates →
   study pack.
 - **Apply existing:** study pack + new source → reference-inspired Producer
@@ -205,6 +213,13 @@ Run both reference gates before unlocking Palmier:
 ./sniper python3 scripts/producer/reference_style_pack_lint.py \
   <PLAN> <STYLE_PACK> --reference-id <ID>
 ```
+
+When `reference_style_vocabulary.json` exists, read it as planning research and
+follow [its selection and variation workflow](../../../docs/producer/REFERENCE_STYLE_VOCABULARY.md).
+Choose by the new beat's viewer need, compare family contenders, and record the
+actual style application. Purposeful vocabulary variation does not loosen any
+exact `referenceGrammarId` binding required by a release-ready style pack. Pass
+`--vocabulary <REFERENCE_STYLE_VOCABULARY>` to `reference_profile_lint.py`.
 
 Render and audit the exact MP4 through the producer contract. If the operator
 explicitly requests the editable Palmier experiment, use only an isolated

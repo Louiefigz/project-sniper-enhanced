@@ -23,9 +23,11 @@ from graphics.comp_capability_artifact import (
     load_artifact,
 )
 
+_PIPELINE_ROOT = os.environ.get(
+    "SNIPER_PIPELINE_ROOT",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 _MATRIX_PATH = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "..", "..", "..", "templates", "motion", "comp_capabilities.json")
+    _PIPELINE_ROOT, "templates", "motion", "comp_capabilities.json")
 _ASPECTS = ("9:16", "16:9")
 
 _matrix_cache: dict | None = None

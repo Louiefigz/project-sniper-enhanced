@@ -6,6 +6,7 @@ import type {
 export const PLANNING_GATE_IDS = [
   "operator_intent",
   "transcript_cut",
+  "visual_plan_application",
   "plan_lint",
   "hook_contract",
   "template_usage",
@@ -21,6 +22,8 @@ export interface PlanningGateCommand {
   gate: PlanningGateId;
   script: string;
   args: string[];
+  /** Controller-owned data root for a gate; never author supplied. */
+  env?: Record<string, string>;
 }
 
 export interface PlanningGateProcessResult {
@@ -74,6 +77,7 @@ export interface GateBundleVerdict {
   gates: {
     operatorIntent: PlanningGateVerdict;
     transcriptCut: PlanningGateVerdict;
+    visualPlanApplication?: PlanningGateVerdict | null;
     planLint: PlanningGateVerdict;
     hookContract: PlanningGateVerdict;
     templateUsage: PlanningGateVerdict;
@@ -86,6 +90,7 @@ export interface GateBundleVerdict {
 
 export interface GateBundleReference {
   profilePath: string;
+  vocabularyPath?: string;
   intent: ReferenceIntent;
 }
 
@@ -102,6 +107,28 @@ export interface GateBundleInput {
   templateUsageDigest: string;
   /** Controller-supplied authority, validated against project.json at launch. */
   operatorIntent?: GateBundleOperatorIntent;
+  /** Fresh bounded binding resolved after authoring, never prompt-cached. */
+  visualPlan?: {
+    path: string;
+    byteHash: string;
+    visualPlanSha256: string;
+    catalogReceiptAuthority?: { path: string };
+  };
+  /** New produced/full automatic-graphics runs fail closed without the binding. */
+  visualPlanRequired?: boolean;
+  /** Controller-recomputed upstream authority; absent only for explicit legacy projects. */
+  visualPlanProject?: {
+    mode: "short" | "long";
+    aspect: "9:16" | "16:9";
+    durationFrames: number;
+    fps: { numerator: 30; denominator: 1 };
+    intentSha256: string;
+    acceptedProgramSha256: string;
+    transcriptSha256: string;
+  };
+  visualPlanCatalogPinSha256?: string;
+  visualPlanControllerAuthoritySha256?: string;
+  visualPlanPipelineRoot?: string;
   reference?: GateBundleReference;
 }
 

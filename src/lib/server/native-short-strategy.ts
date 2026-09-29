@@ -6,6 +6,8 @@ import { assertNativeWebCaptureRange, type NativeWebCaptureBinding } from "./nat
 import type { NativeShortPacing } from "./native-short-pacing";
 import type { NativeAssetOriginBinding, NativeShortAssetUsePlan } from "./native-short-asset-use-types";
 import type { NativeShortStory } from "./native-short-story";
+import type { NativeStyleApplication } from "./native-style-application";
+import type { NativeVisualPlanApplication } from "./native-visual-plan-application";
 
 export interface NativeAssetBinding {
   file: string; path: string; sha256: string;
@@ -27,6 +29,10 @@ export interface NativeShortStrategy {
   assetUse?: NativeShortAssetUsePlan;
   /** Optional authored whole-story obligations; absence never implies story qualification. */
   story?: NativeShortStory;
+  /** Required when the prepared request carries an analyzed style vocabulary. */
+  styleApplication?: NativeStyleApplication;
+  /** Exact allocation-to-executable mapping for a bound route-neutral visual plan. */
+  visualPlanApplication?: NativeVisualPlanApplication;
   selectedTreatment: string; selectionReason: string; rejectedTreatment: string;
   viewerBenefit: string; hookReasonToWatch: string; payoff: string;
   references: Array<{ assetFile: string; referenceId: string; observed: string; adaptation: string }>;

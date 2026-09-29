@@ -27,11 +27,58 @@ def ensure_picture(pipeline: NativeShortPipeline) -> None:
         pipeline.evidence.update(pins)
         pipeline.evidence[str(root / 'picture.mp4')] = picture['sha256']
         return
+    if request.get('revision', {}).get('mode') == 'initial-long':
+        from studio.native_segments.owners import run_revision_windows
+        from studio.native_segments.reviews import assembly_snapshot
+        from studio.native_motion_previews import require_motion_previews
+        require_motion_previews(request)
+        run_revision_windows(pipeline)
+        assembly_snapshot(request)
     pipeline.supervise('picture', pipeline.worker('picture'), 'picture.mp4', PICTURE_STATUS)
+    artifacts = {'picture': root / 'picture.mp4'}
+    if request.get('revision', {}).get('mode') == 'initial-long':
+        artifacts['sections'] = root / 'revision-picture.json'
     seal_stage(StageEvidence('picture', Path(request['project']), root, root / 'export-request.json',
-        root / 'picture.render.json', request['pins'], {'picture': root / 'picture.mp4'}, PICTURE_STATUS))
+        root / 'picture.render.json', request['pins'], artifacts, PICTURE_STATUS))
     _record, pins = read_stage(root / 'picture-stage.json', request['pins'], 'picture')
     pipeline.evidence.update(pins)
+
+
+def prepare_section_recovery(current: dict, attempt: Path) -> dict:
+    """Preserve admitted preview/audio policy for an exact registered initial-section resume."""
+    from studio.native_export_history import known_attempts
+    from studio.native_stage_evidence import verify_pins
+    require(attempt in known_attempts(current), 'section resume requires a registered original attempt')
+    original = bound_json(attempt / 'export-request.json')
+    require(original.get('adapter') == 'native-long'
+            and original.get('revision', {}).get('mode') == 'initial-long',
+            'section resume requires the original Long section plan')
+    for key in ('project', 'runtime', 'tools'):
+        require(current[key] == original[key], f'section recovery changed {key}')
+    require(all(original['pins'].get(key) == sha for key, sha in current['pins'].items()),
+            'section recovery changed current project or implementation inputs')
+    verify_pins(original['pins'])
+    retained = section_recovery_plan(current, original)
+    fields = ('audioProfile', 'cache', 'preparedMaster', 'audioDonor', 'previewOnly',
+              'previewReviews', 'previewFrom', 'sectionProduction', 'sectionScope',
+              'sectionIntegrations', 'sectionPreviewWindows', 'sectionChunks')
+    inherited = {key: original[key] for key in fields if key in original}
+    result = {**current, **inherited, **retained, 'pins': {**original['pins'], **current['pins']}}
+    from studio.production.section_recovery import retain_section_reviews
+    return retain_section_reviews(result, original)
+
+
+def section_recovery_plan(current: dict, original: dict) -> dict:
+    """Retain a repaired generation only after its original compatibility relation still holds."""
+    if not original.get('sectionRepair'):
+        require(original['revision']['identity'] == current['revision']['identity'],
+                'section resume changed its shared plan; begin a newly reviewed plan')
+        return {'revision': dict(original['revision'])} if original.get('sectionIntegrations') else {}
+    from studio.native_segments.compatibility import validate_repair
+    validate_repair(original)
+    require(current.get('sectionImplementationPins') == original.get('sectionImplementationPins'),
+            'section resume changed its implementation partition')
+    return {'revision': dict(original['revision']), 'sectionRepair': dict(original['sectionRepair'])}
 
 
 def prepare_picture_recovery(current: dict, attempt: Path) -> dict:

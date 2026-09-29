@@ -37,6 +37,46 @@ export interface ProjectJson {
   resolvedIntent?: ProjectIntent;
   /** Human-readable, deterministic changes or blockers applied to the request. */
   intentDecisions?: IntentCapabilityDecision[];
+  /** Current executable visual-plan policy. */
+  visualPlanPolicy?: {
+    schemaVersion: 1;
+    ordinaryAutoEdit: "required";
+  };
+  /** Historical metadata only; it never grants executable or review authority. */
+  visualPlanLegacy?: {
+    schemaVersion: 1;
+    ordinaryAutoEdit: "legacy-read-only";
+    planSha256: string;
+    adoptedAt: string;
+  };
+}
+
+export const CURRENT_VISUAL_PLAN_POLICY = {
+  schemaVersion: 1 as const,
+  ordinaryAutoEdit: "required" as const,
+};
+
+/** Return a valid persisted marker while preserving explicit legacy absence. */
+export function projectVisualPlanPolicyVersionIfPresent(
+  projectRoot: string,
+): 1 | undefined {
+  const project = readProjectJson(projectRoot);
+  const policy = project?.visualPlanPolicy;
+  if (policy === undefined) return undefined;
+  if (policy.schemaVersion !== 1 || policy.ordinaryAutoEdit !== "required"
+      || Object.keys(policy).sort().join("\0") !== "ordinaryAutoEdit\0schemaVersion") {
+    throw new Error("project.json has an invalid visualPlanPolicy marker");
+  }
+  return 1;
+}
+
+/** Require the current persisted marker for new visual-plan workflows. */
+export function projectVisualPlanPolicyVersion(projectRoot: string): 1 {
+  const version = projectVisualPlanPolicyVersionIfPresent(projectRoot);
+  if (version === undefined) {
+    throw new Error("project.json lacks visual-plan policy; set a current intent before Auto Edit or review");
+  }
+  return version;
 }
 
 const CONFIG_DIR = path.join(os.homedir(), ".project-sniper");
@@ -125,13 +165,16 @@ export function writeProjectJson(projectRoot: string, data: ProjectJson): void {
 export function setProjectIntent(projectRoot: string, intent: ProjectIntent): void {
   const current = readProjectJson(projectRoot);
   if (!current) throw new Error(`no project.json in ${projectRoot}`);
-  writeProjectJson(projectRoot, {
+  const next: ProjectJson = {
     ...current,
     intent,
     requestedIntent: intent,
     resolvedIntent: intent,
     intentDecisions: [],
-  });
+    visualPlanPolicy: CURRENT_VISUAL_PLAN_POLICY,
+  };
+  delete next.visualPlanLegacy;
+  writeProjectJson(projectRoot, next);
 }
 
 /** Persist requested and effective intent separately; blockers clear execution authority. */
@@ -154,6 +197,8 @@ function resolvedProjectIntent(
   if (resolution.resolvedIntent) {
     next.intent = resolution.resolvedIntent;
     next.resolvedIntent = resolution.resolvedIntent;
+    next.visualPlanPolicy = CURRENT_VISUAL_PLAN_POLICY;
+    delete next.visualPlanLegacy;
     return next;
   }
   delete next.intent;
@@ -170,6 +215,8 @@ export function recordProjectIntentResolution(
   const current = readProjectJson(projectRoot);
   if (!current) throw new Error(`no project.json in ${projectRoot}`);
   const next = resolvedProjectIntent(current, resolution);
+  if (resolution.resolvedIntent) next.visualPlanPolicy = CURRENT_VISUAL_PLAN_POLICY;
+  delete next.visualPlanLegacy;
   next.history = [...next.history, { stage, at: new Date().toISOString() }];
   writeProjectJson(projectRoot, next);
 }

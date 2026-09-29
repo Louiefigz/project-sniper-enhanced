@@ -22,6 +22,8 @@ import { inspectExternalMediaOrigin } from "../../src/lib/server/external-media-
 import { assertNativeBuildAuthority, nativeDraftCheck } from "../../src/lib/server/native-short-draft";
 import { nativeShortLineage } from "../../src/lib/server/native-short-lineage";
 import { stampStudioHostIds } from "../../src/lib/server/native-studio-host-stamp";
+import { assertNativeRevealDeclarations } from "../../src/lib/server/native-reveal-declarations";
+import { nativeCatalogFiles } from "../../src/lib/server/native-catalog-files";
 
 const USAGE = "Usage: native-short.ts prepare <producer-directory> [--manifest <canonical asset_manifest.json>] | prepare-guided|prepare-longform <producer-directory> | prepare-related <producer-directory> <related-context.json> | prepare-related-group <group-draft.json> <new-group-directory> | check-longform <request-directory> | inspect-origin <external-media/ASSET.json> | prepare-media <plan.json> <new-media-directory> | build-guided <producer-dir> <visual-plan.json> | measure <plan.json> | build|build-draft <plan.json> <new-project> [--parent <project>] | check|check-export|check-draft <project> | check-long-review <review.json> <plan-hash> | check-long-section-review <review.json> <scope-hash> | origin|origin-web <input.json> <new-receipt.json> | studio-ids <authored.html> <new.html>";
 /** Fixed in-process test seam only; parsed input cannot replace a service. */
@@ -62,7 +64,8 @@ function executeOperation(operation: string, input: string, destination: string,
     return { status: "observations-awaiting-editorial-pacing", ...nativePacingBindings(plan),
       prebuildPlanHash: nativeShortPrebuildPlanHash(plan), assetUseRevisionHash: nativeAssetUseRevisionHash(plan),
       storyRevisionHash: nativeStoryRevisionHash(plan), observations: measureNativeShortPacing(plan.canvas),
-      visualWindows: nativePacingVisualWindows(plan, buildNativeCanvas(plan.canvas) + (plan.extension?.markup ?? "")) };
+      visualWindows: nativePacingVisualWindows(plan, buildNativeCanvas(plan.canvas) + (plan.extension?.markup ?? "")),
+      revealDeclarations: assertNativeRevealDeclarations(plan, nativeCatalogFiles(plan.catalogFiles)) };
   } else if (operation === "origin" || operation === "origin-web") {
     const record = JSON.parse(readFileSync(path.resolve(input), "utf8"));
     return operation === "origin" ? writeNativeAssetOrigin(record, destination) : bindNativeWebOrigin(record, destination);

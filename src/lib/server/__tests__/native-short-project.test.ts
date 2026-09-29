@@ -101,7 +101,7 @@ test("canonical JSON key order cannot change executable motion on cold reconstru
   try {
     f.input.canvas.shapes = [{ id: "test-object", startFrame: 0, endFrame: 50,
       box: [20, 500, 100, 100], fill: "#ffffff", border: "#111111", borderWidth: 1, radius: 8 }];
-    f.input.canvas.motion = [{ id: "test-object", startFrame: 5, durationFrames: 5,
+    f.input.canvas.motion = [{ id: "test-object", startFrame: 0, durationFrames: 5,
       from: { y: 20, scale: .8, opacity: 0 }, to: { y: 0, scale: 1, opacity: 1 }, ease: "power2.out" }];
     const packetFile = f.input.requestPacket!.path;
     const packet = JSON.parse(readFileSync(packetFile, "utf8")); packet.intent.scope = "produced";

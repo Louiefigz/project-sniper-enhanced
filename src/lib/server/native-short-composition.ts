@@ -5,6 +5,7 @@ import type { ProposalWordOccurrence } from "./guided-proposal-speech";
 import { renderNativeTitleCard, type NativeTitleCard } from "./native-title-card";
 import { assertNativeCaptionPresentation, nativeCaptionDisplayMap, nativeCaptionSuppressions,
   type NativeCaptionDisplayCorrection, type NativeCaptionSuppression } from "./native-caption-display";
+import { NativeCheckError } from "./native-check-error";
 
 export type NativeBox = [number, number, number, number];
 export interface NativeWindow { startFrame: number; endFrame: number }
@@ -158,6 +159,8 @@ function validate(input: NativeCanvasInput): void {
       if (![pose.y, pose.scale, pose.opacity].every(Number.isFinite) || Math.abs(pose.y) > 1920
           || pose.scale < .1 || pose.scale > 2 || pose.opacity < 0 || pose.opacity > 1) throw new Error("Native pose exceeds finite bounds");
     }
+    if (motion.from.opacity === 0 && motion.startFrame > target.startFrame) throw new NativeCheckError("motion-cue-premature-reveal",
+      `Native motion ${motion.id} fades in from opacity 0 at frame ${motion.startFrame} but its clip is visible from frame ${target.startFrame}; start the cue on the clip's first frame`);
   }
 }
 

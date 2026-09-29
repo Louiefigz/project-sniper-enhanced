@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildNativeCanvas, nativeVisualExit, type NativeCanvasInput, type NativeTypeStyle } from "../native-short-composition";
+import { NativeCheckError } from "../native-check-error";
 import { missingStudioHostIds } from "../native-studio-host-ids";
 
 function fixture(): NativeCanvasInput {
@@ -69,6 +70,18 @@ test("motion must remain inside its actual visible clip and use finite supported
   assert.throws(() => buildNativeCanvas(input), /visible target/);
   input.motion[0].startFrame = 0; input.motion[0].from.scale = Infinity;
   assert.throws(() => buildNativeCanvas(input), /finite bounds/);
+});
+
+test("a motion cue fading in from 0 after its clip starts is refused", () => {
+  const input = fixture(); input.motion = [{ id: "opening", startFrame: 5, durationFrames: 6,
+    from: { y: 24, scale: .82, opacity: 0 }, to: { y: 0, scale: 1, opacity: 1 }, ease: "power2.out" }];
+  assert.throws(() => buildNativeCanvas(input), (error: unknown) => error instanceof NativeCheckError
+    && error.code === "motion-cue-premature-reveal" && error.message === "[motion-cue-premature-reveal] Native motion opening "
+    + "fades in from opacity 0 at frame 5 but its clip is visible from frame 0; start the cue on the clip's first frame");
+  input.motion[0].from.opacity = .2;
+  assert.match(buildNativeCanvas(input), /immediateRender:false/);
+  input.motion[0].from.opacity = 0; input.motion[0].startFrame = 0;
+  assert.match(buildNativeCanvas(input), /immediateRender:false/);
 });
 
 test("outgoing source, title and caption layers receive explicit exact-frame visual exits", () => {

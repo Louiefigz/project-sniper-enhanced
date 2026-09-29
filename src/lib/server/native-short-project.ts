@@ -26,6 +26,7 @@ import { assertCurrentNativeShortAuthority, assertNativeShortReadAuthority, nati
 import { deriveNativeReviewRegions, NATIVE_REVIEW_REGIONS_FILE, type NativeReviewRegionMap } from "./native-review-regions";
 import { assertNativeShortLineage, nativeShortLineage } from "./native-short-lineage";
 import { assertStudioHostIds } from "./native-studio-host-ids";
+import { assertNativeRevealDeclarations } from "./native-reveal-declarations";
 export { assertNativeShortIntent } from "./native-short-request-binding";
 export interface NativeSceneExtension { markup: string; css: string; motion: string }
 export interface NativeShortProjectInput {
@@ -86,6 +87,7 @@ export function assembleNativeShortHtml(input: NativeShortProjectInput): string 
   for (const file of Object.keys(catalogFiles)) {
     if (!html.includes(`data-composition-src="${file}"`)) throw new Error("Catalog file must be mounted in the authored scene");
   }
+  assertNativeRevealDeclarations(input, catalogFiles);
   assertNativeVisualPlanApplication({ binding: input.visualPlan,
     application: input.strategy.visualPlanApplication, scenes: input.strategy.scenes,
     html, catalogFiles: input.catalogFiles, assets: input.assets,

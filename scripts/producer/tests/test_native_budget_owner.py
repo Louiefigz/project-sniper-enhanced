@@ -34,9 +34,11 @@ class BudgetedPipelineTests(unittest.TestCase):
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
         self.clock = self.enterContext(fake_clock(FakeClock()))
         self.charges = []
-        self.enterContext(mock.patch('studio.native_budget_binding.charge_request',  # P0 adapt: lazy import
-                                     side_effect=lambda request, kind: self.charges.append(kind)))
+        # P0 (X118, M-033): patch the preview sections first. Its module-level import binds charge_request when it is
+        # first imported; importing it under the binding patch would leave that mock in place after this test.
         self.enterContext(mock.patch('studio.native_preview_sections.charge_request',
+                                     side_effect=lambda request, kind: self.charges.append(kind)))
+        self.enterContext(mock.patch('studio.native_budget_binding.charge_request',  # P0 adapt: lazy import
                                      side_effect=lambda request, kind: self.charges.append(kind)))
         self.outcomes = []
         self.enterContext(mock.patch('studio.native_short_pipeline.record_budget_outcome',

@@ -14,6 +14,7 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from _native_short_pipeline_fixture import ShortPipelineFixture, write_json
+from studio.native_digest_memo import TELEMETRY_NAME
 from studio import resume_final_qc as recovery
 from studio.native_runtime import digest
 from studio.native_short_pipeline import NativeShortPipeline, FINAL_STATUS
@@ -59,7 +60,9 @@ class FinalQcResumeTests(unittest.TestCase):
 
     def test_seals_every_occurrence_and_never_requires_deleted_png_payloads(self) -> None:
         """The complete forward/reverse frame inventory is reusable without source cache."""
-        before = {file: digest(file) for file in self.f.root.rglob('*') if file.is_file()}
+        # Evidence files only: the best-effort integrity timing journal is appended at every boundary.
+        before = {file: digest(file) for file in self.f.root.rglob('*')
+                  if file.is_file() and file.name != TELEMETRY_NAME}
         receipt = self.seal()
         record, pins = recovery.read_capture(receipt, self.render)
         self.assertEqual(len(record['artifacts']), 5)

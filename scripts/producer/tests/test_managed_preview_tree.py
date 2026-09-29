@@ -17,7 +17,7 @@ class PreviewTreeTests(unittest.TestCase):
 
     def test_inspection_permission_error_is_not_process_absence(self) -> None:
         """Empty stdout alone cannot turn denied ps into verified cleanup."""
-        denied = mock.Mock(returncode=1, stdout='', stderr='Operation not permitted')
+        denied = mock.Mock(returncode=1, stdout=b'', stderr=b'Operation not permitted')  # ps output is read as bytes
         with mock.patch.object(state.subprocess, 'run', return_value=denied):
             with self.assertRaisesRegex(StudioServerError, 'Cannot inspect'):
                 state.process_identity(24500)

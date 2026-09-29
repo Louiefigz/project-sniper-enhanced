@@ -24,6 +24,9 @@ from studio.production.host_conformance.stub_model import (
     StubModel, StubScript, _blocks, _has_tool_result, _message, _sse_events)
 
 SLEEP = {"command": "/bin/sleep 5", "description": "probe"}
+# An empty proxy map: urlopen's macOS system-proxy lookup leaves two native threads in the test process,
+# which a later single-thread measurement (test_native_proof_io) would inherit (X126).
+LOOPBACK = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
 class StubModelTests(unittest.TestCase):
@@ -62,12 +65,15 @@ class StubModelTests(unittest.TestCase):
         try:
             request = urllib.request.Request(stub.base_url + "/v1/messages?beta=true",
                                              data=json.dumps({"stream": True, "messages": []}).encode())
-            text = urllib.request.urlopen(request, timeout=5).read().decode()
+            with LOOPBACK.open(request, timeout=5) as response:
+                text = response.read().decode()
             with self.assertRaises(urllib.error.HTTPError) as refused:
-                urllib.request.urlopen(stub.base_url + "/v1/models", timeout=5)
+                LOOPBACK.open(stub.base_url + "/v1/models", timeout=5)
             refused.exception.close()
         finally:
             stub.stop()
+            stub.thread.join(timeout=5)
+        self.assertFalse(stub.thread.is_alive())
         self.assertIn('"text": "OK"', text)
         self.assertTrue(stub.base_url.startswith("http://127.0.0.1:"))
         self.assertEqual([r["method"] for r in stub.requests()], ["POST", "GET"])

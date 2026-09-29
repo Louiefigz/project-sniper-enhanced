@@ -20,6 +20,29 @@ import native_proof_io as io
 from native_work_service_cache import logical_bytes, physical_bytes
 
 
+MEASURE_IN_CHILD = '''import json, sys
+sys.path.insert(0, sys.argv[2])
+import native_proof_io as io
+pin = json.loads(sys.argv[1])
+print(json.dumps([io.measure_read_pass([pin]), io.measure_read_pass([pin, pin])]))
+'''
+
+
+def measured_in_fresh_process(case: unittest.TestCase, pin: dict) -> list[dict]:
+    """The first and repeated read passes, measured by a fresh single-threaded Python child.
+
+    The collector refuses a process with more than one kernel thread. In a whole-suite process an
+    earlier module can leave native threads behind (X126), so the real counters are read in a
+    child that starts with none. The child inherits this process's environment, so the T0 child
+    tripwire arms it and its report fails the run. It imports only native_proof_io (no owner).
+    """
+    producer = str(Path(io.__file__).resolve().parent)
+    child = subprocess.run([sys.executable, '-B', '-c', MEASURE_IN_CHILD, json.dumps(pin), producer],
+                           capture_output=True, text=True, timeout=60, check=False)
+    case.assertEqual(child.returncode, 0, child.stderr)
+    return json.loads(child.stdout)
+
+
 def kernel_sample() -> dict:
     """Provide a clearly synthetic successful snapshot for refusal arithmetic."""
     return {'pid': os.getpid(), 'result': 0, 'errno': 0, 'status': 'measured',
@@ -206,8 +229,7 @@ class ProofIOTests(unittest.TestCase):
     @unittest.skipUnless(sys.platform == 'darwin', 'macOS public libproc counters only')
     def test_actual_small_local_first_and_repeated_reads(self) -> None:
         """Exercise real kernel counters without assuming cold IO or positive deltas."""
-        first = io.measure_read_pass([self.pin])
-        second = io.measure_read_pass([self.pin, self.pin])
+        first, second = measured_in_fresh_process(self, self.pin)
         self.assertEqual(first['status'], 'measured', json.dumps(first))
         self.assertEqual(second['status'], 'measured', json.dumps(second))
         self.assertEqual(first['before']['processStart'], second['after']['processStart'])

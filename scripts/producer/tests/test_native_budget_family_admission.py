@@ -32,9 +32,11 @@ class FamilyAdmissionTests(unittest.TestCase):
         self.enterContext(patch('studio.native_budget_forecast.heavy_lane_capacity', return_value=1))
         self.engine = {'root': str(self.h.budget.base), 'identity': 'e' * 64, 'files': 1}
         self.enterContext(patch('studio.native_budget_family.engine_identity', return_value=self.engine))
-        for module in ('native_budget_launch', 'native_budget_family_reservation'):
+        # P0 (X118): the preparation module binds both names when it is first imported, so it is patched
+        # directly; otherwise this test passed only when it happened to import that module under these patches.
+        for module in ('native_budget_launch', 'native_budget_family_reservation', 'native_budget_family_preparation'):
             self.enterContext(patch(f'studio.{module}.own_identity', return_value=SUPERVISOR))
-        for module in ('native_budget_launch', 'native_budget_family_state'):
+        for module in ('native_budget_launch', 'native_budget_family_state', 'native_budget_family_preparation'):
             self.enterContext(patch(f'studio.{module}._process_table', return_value={7001: (1, 7001, 'TEST supervisor')}))
         record = self.h.budget.record()
         record['clips']['A']['attempts'] = []

@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from _native_short_pipeline_fixture import ShortPipelineFixture
+from _native_short_pipeline_fixture import ShortPipelineFixture, isolate_early_checks
 from _native_current_source_fixture import bind_test_project_sources
 from _reference_reuse_fixture import ReuseFixture
 from cut_preview_io import file_hash
@@ -25,6 +25,7 @@ class NativeReferenceReuseTests(ReuseFixture):
     def setUp(self) -> None:
         """Keep the real discovery/core on test-owned files and replace no validator."""
         super().setUp()
+        isolate_early_checks(self)
         self.project = Path(self.body['project'])
         self.project.mkdir()
         (self.project / 'index.html').write_text('<p>TEST ONLY inert native source</p>')

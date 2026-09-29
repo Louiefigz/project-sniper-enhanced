@@ -3,9 +3,9 @@
 ``@pending(owner, reason)`` marks a restored donor test that cannot pass until the named area (P1–P6) lands its
 change. It applies ``unittest.expectedFailure``, so the suite stays green while the behaviour is missing and turns
 red (an unexpected success) the moment the owner's fix lands, which forces the owner to remove the marker.
-Every marker is also listed in the durable registry ``master-plan-2026-09-28/evidence/pending.json``, written by
-``p0-records/bin/pending_registry.py`` from a static scan of the tests. A marker still present when the
-qualification candidate is cut is a blocker (X38), never a silent expected failure.
+Every marker is also listed in a durable registry written from a static scan of the tests, and
+``test_pending_registry.py`` checks that each one is registered with an owner and a reason. A marker still present
+when the qualification candidate is cut is a blocker (X38), never a silent expected failure.
 """
 from __future__ import annotations
 

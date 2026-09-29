@@ -1,0 +1,52 @@
+{
+  "contract": "role packet `given` block (scripts/producer/role_packet_given.py; requirement revision approved-content-production-2026-09-27)",
+  "rules": [
+    "status is 'bound' or 'not-supplied'; only 'bound' carries the fields below it.",
+    "title.status is 'exact', 'normalization-only' (NFC and collapsed/trimmed whitespace) or 'different'; title.material is true exactly for 'different'; an approval without a title reads 'different' (material): the plan's own title never stands in for the given one.",
+    "bound blocks come only from the one current active or draining batch (authorityStatus active or draining).",
+    "selection, captionText and timing are each {matches, details}; any false matches is a material departure; a declared display correction is listed in captionText.details.displayCorrections and is never a mismatch.",
+    "planChecked false (an owner packet without a plan) leaves selection, captionText and timing null and title only {given}."
+  ],
+  "examples": {
+    "bound": {
+      "status": "bound",
+      "readFrom": "studio.production.api.read_approval",
+      "requirementRevision": "approved-content-production-2026-09-27",
+      "batchId": "batch-test",
+      "clipId": "Q1",
+      "authorityStatus": "active",
+      "identity": "0000000000000000000000000000000000000000000000000000000000000001",
+      "scriptSha256": "0000000000000000000000000000000000000000000000000000000000000002",
+      "titleSha256": "0000000000000000000000000000000000000000000000000000000000000003",
+      "planChecked": true,
+      "title": {"given": "TEST given title", "planned": "TEST given title", "status": "exact", "material": false},
+      "selection": {"matches": true, "details": {"sourceMatches": true, "transcriptMatches": true, "missingWords": [],
+                    "extraWords": [], "outOfRangeWords": [], "repeatedWords": [], "otherOrder": false}},
+      "captionText": {"matches": true, "details": {"mismatchedOccurrences": [], "displayCorrections": [
+        {"occurrenceId": 1, "sourceWord": 11, "sourceText": "given", "givenText": "given", "displayText": "Given",
+         "reason": "TEST operator spelling", "changesGivenSpelling": true}]}},
+      "timing": {"matches": true, "details": {"cutSecondsMatchGivenSeconds": true, "segmentMismatches": [], "frameMismatches": []}}
+    },
+    "boundMaterialTitle": {
+      "status": "bound",
+      "readFrom": "studio.production.api.read_approval",
+      "requirementRevision": "approved-content-production-2026-09-27",
+      "batchId": "batch-test",
+      "clipId": "Q1",
+      "authorityStatus": "active",
+      "identity": "0000000000000000000000000000000000000000000000000000000000000001",
+      "scriptSha256": "0000000000000000000000000000000000000000000000000000000000000002",
+      "titleSha256": "0000000000000000000000000000000000000000000000000000000000000003",
+      "planChecked": true,
+      "title": {"given": "TEST given title", "planned": "TEST other title", "status": "different", "material": true},
+      "selection": {"matches": true, "details": {"sourceMatches": true, "transcriptMatches": true, "missingWords": [],
+                    "extraWords": [], "outOfRangeWords": [], "repeatedWords": [], "otherOrder": false}},
+      "captionText": {"matches": true, "details": {"mismatchedOccurrences": [], "displayCorrections": []}},
+      "timing": {"matches": true, "details": {"cutSecondsMatchGivenSeconds": true, "segmentMismatches": [], "frameMismatches": []}}
+    },
+    "notSupplied": {
+      "status": "not-supplied",
+      "meaning": "No live batch holds this plan's source recording; no given title or script applies. This is not a refusal of any approval."
+    }
+  }
+}

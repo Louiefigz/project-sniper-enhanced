@@ -21,11 +21,14 @@ DECOY = ('the children install the isolation over decoy account and pool roots, 
          'their own budget root to a private one')
 
 REVIEWED: dict[str, str] = {
+    '_approved_content_fixture.py': OWN_ROOTS,  # gate(): node _isolated_review.ts gets this test's private budget/pool roots
+    '_dispatch_fixture.py': OWN_ROOTS,  # launcher()/enter(): every child calls isolate(root) before any engine import
     '_guided_longform_check.py': NO_OWNER,
     '_guided_longform_treatment_check.py': NO_OWNER,
     '_native_current_source_fixture.py': OWN_ROOTS,  # isolated_gates: the gate child runs _isolated_context.py on the test's private roots
     '_native_pool_fixture.py': OWN_ROOTS,
     '_native_service_rate_fixture.py': NO_CHILD,
+    '_native_short_draft_fixture.py': NO_CHILD,  # sys.executable only as a pinned path value (7dde85ba blob c80451b)
     '_native_short_pipeline_fixture.py': NO_CHILD,
     '_p2_candidate_qc_fixture.py': NO_CHILD,
     '_p2_row10_lifecycle_fixture.py': STDLIB,
@@ -78,6 +81,8 @@ REVIEWED: dict[str, str] = {
     'test_palmier_live_acceptance_harness.py': NO_OWNER,
     'test_palmier_native_qc_contract.py': STDLIB,
     'test_palmier_sync_lock.py': NO_OWNER,
+    'test_pending_registry.py': ('importlib.import_module of the test modules that use _pending; each installs the '
+                                 'test isolation itself (import closure checked)'),
     'test_pool_qualification.py': OWN_ROOTS,
     'test_process_runner.py': NO_OWNER,
     'test_process_runner_bounded.py': NO_OWNER,

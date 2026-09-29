@@ -19,6 +19,7 @@ from test_native_budget_registry import ns
 from test_production_add_clip_clock import AddClipCase, row, script
 import native_batch
 from studio.native_budget_store import BatchSession, BudgetAuthorityError
+from studio.production.duplication_check import duplication_check
 
 FULL = 'Budget event trail is full: no new work is admitted; close the batch'
 
@@ -39,6 +40,9 @@ class RecordedCheckTests(AddClipCase):
         self.assertEqual(added['duplicationCheck'], [row('A', 58.874, 'different', 'different'),
                                                      row('K', 56.937, 'different', 'different'),
                                                      row('Z', 57.874, 'different', 'different')])
+        record = self.record()                                     # the store reads clips back in key order,
+        record['clips'] = dict(reversed(list(record['clips'].items())))   # so the order is pinned in memory too
+        self.assertEqual(duplication_check(record, 'Q', record['clips']['Q']), added['duplicationCheck'])
 
     def test_a_replay_answers_the_recorded_check_never_a_fresh_one(self) -> None:
         """X144 minor 2: U is added after T and overlaps it; T's replay still answers T's recorded check."""

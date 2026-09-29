@@ -259,6 +259,8 @@ class ReplayTests(AddClipCase):
             self.add('C', approval('C', title='TEST another title'))
         with self.assertRaisesRegex(TaskConflict, 'Output A already exists with a different authorization'):
             self.add('A', approval('Q'))                                    # a declared clip is never re-added
+        with self.assertRaisesRegex(registry.BudgetRefused, 'Adding a clip records its reason'):   # a replay too
+            api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip(' ', approval('C')))
 
     def test_a_new_script_is_admitted(self) -> None:
         """A script no clip overlaps is admitted with a null check and no decision."""

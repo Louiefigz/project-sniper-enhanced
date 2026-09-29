@@ -1,9 +1,9 @@
 """The child tripwire holds against a crafted cache file, a broken stderr, a fork and an AF_UNIX bind.
 
-C1FIX-REVIEW delta D2, D3, D4 and D7. Every child here is armed like any test child, but its refused prefixes also
-hold a decoy folder of this test's own, so the only paths a child tries to write are decoy paths; reports go to
-this test's own folder. The one deliberately unguarded child (the D2 control, with no bytecode prefix) writes a
-decoy file only.
+C1FIX-REVIEW delta D2, D3, D4 and D7, and CS4-REVIEW mi5. Every child here is armed like any test child, but its
+refused prefixes also hold a decoy folder of this test's own, so the only paths a child tries to write are decoy
+paths; reports go to this test's own folder. The deliberately unguarded children (the D2 control, with no
+bytecode prefix, and the mi5 control, with a crafted inherited prefix) write a decoy file only.
 """
 from __future__ import annotations
 
@@ -68,6 +68,28 @@ class ChildHardeningTests(unittest.TestCase):
         self.assertEqual(self.child(code, control).returncode, 0, 'the crafted pyc no longer bypasses; the test is stale')
         (decoy / 'written').unlink()
         self.assertTrue(Path(environ['PYTHONPYCACHEPREFIX']).is_dir())
+        self.assert_refused(self.child(code, environ), decoy, reports)
+
+    def test_an_inherited_bytecode_prefix_is_replaced_never_trusted(self) -> None:
+        """(CS4-REVIEW mi5) A prefix holding a crafted sitecustomize pyc: effective until arm() replaces it."""
+        environ, decoy, reports = self.armed()
+        crafted = self.folder('p0-crafted-prefix-')
+        source_dir = Path(isolation.CHILD_TRIPWIRE)
+        cache = crafted / str(source_dir).lstrip('/') / f'sitecustomize.{sys.implementation.cache_tag}.pyc'
+        cache.parent.mkdir(parents=True)
+        empty = crafted / 'empty.py'
+        empty.write_text('')
+        mode = py_compile.PycInvalidationMode.UNCHECKED_HASH
+        py_compile.compile(str(empty), cfile=str(cache), invalidation_mode=mode)
+        code = f'open({str(decoy / "written")!r}, "w").write("x")\nprint("wrote")\n'
+        environ['PYTHONPYCACHEPREFIX'] = str(crafted)
+        stale = 'the crafted prefix no longer bypasses; the test is stale'
+        self.assertEqual(self.child(code, environ).returncode, 0, stale)
+        (decoy / 'written').unlink()
+        children.arm(paths, environ)
+        self.addCleanup(shutil.rmtree, environ['PYTHONPYCACHEPREFIX'], True)
+        self.assertNotEqual(environ['PYTHONPYCACHEPREFIX'], str(crafted))
+        self.assertEqual(os.listdir(environ['PYTHONPYCACHEPREFIX']), [])
         self.assert_refused(self.child(code, environ), decoy, reports)
 
     def test_a_refusal_with_no_stderr_still_exits_97_with_a_report(self) -> None:

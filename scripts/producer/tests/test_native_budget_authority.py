@@ -10,10 +10,10 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from studio.production.approvals import ApprovalChange  # P0 adapt: src takes one typed change (WAVES:186)
 from _budget_fixture import (
     CHANGE_REASON, ENGINE, FakeClock, approval, fake_clock, make_project, private_root, source_sha,
 )
+from studio.production.approvals import ApprovalChange  # P0 adapt: src takes one typed change (WAVES:186)
 from studio import native_budget_binding as binding
 from studio import native_budget_exporter as exporter
 from studio import native_budget_registry as registry

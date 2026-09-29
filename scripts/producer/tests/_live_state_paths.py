@@ -35,11 +35,13 @@ LIVE_POOL_RECORDS = ACCOUNT_STATE / 'native-pool'
 LIVE_POOL_ROOT = native_work_lease.default_state_root()
 DATA_VOLUME = '/system/volumes/data'
 PRIVATE_ALIASES = ('/private/tmp/', '/private/var/', '/private/etc/')
-# Audit events whose listed argument positions are file-system paths.
+# Audit events whose listed argument positions are file-system paths. Not covered: os.mkfifo and os.mknod raise
+# no audit event in CPython 3.14 (checked with a bare hook), so neither layer can refuse them (like ctypes and
+# os.posix_spawn file actions); the engine never calls either.
 PATH_EVENTS = {
     **dict.fromkeys(('open', 'os.remove', 'os.mkdir', 'os.listdir', 'os.scandir', 'os.chmod',
                      'os.chown', 'os.utime', 'os.truncate', 'os.rmdir', 'os.walk', 'os.fwalk',
-                     'os.chflags', 'os.lchflags', 'os.lchmod', 'os.mkfifo', 'os.mknod', 'os.chdir',
+                     'os.chflags', 'os.lchflags', 'os.lchmod', 'os.chdir',
                      'os.listxattr', 'os.getxattr', 'os.setxattr', 'os.removexattr', 'glob.glob',
                      'pathlib.Path.glob', 'pathlib.Path.rglob', 'shutil.rmtree', 'shutil.chown',
                      'shutil.copystat', 'shutil.copymode', 'tempfile.mkdtemp', 'tempfile.mkstemp',
@@ -50,7 +52,7 @@ PATH_EVENTS = {
 }
 # For events that carry them: path position -> position of that path's directory descriptor.
 DIR_FDS = {'os.mkdir': {0: 2}, 'os.remove': {0: 1}, 'os.rmdir': {0: 1}, 'os.chmod': {0: 2},
-           'os.chown': {0: 3}, 'os.utime': {0: 3}, 'os.mkfifo': {0: 2}, 'os.mknod': {0: 3},
+           'os.chown': {0: 3}, 'os.utime': {0: 3},
            'os.rename': {0: 2, 1: 3}, 'os.link': {0: 2, 1: 3}, 'os.symlink': {1: 2},
            'shutil.rmtree': {0: 1}, 'glob.glob/2': {0: 3}}
 # Path events that only read; every other path event (and an open with write flags) mutates.

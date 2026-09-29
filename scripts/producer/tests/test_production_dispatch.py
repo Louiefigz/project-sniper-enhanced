@@ -80,32 +80,68 @@ class DispatchCase(TaskCase):
 class LaunchTests(DispatchCase):
     """Least deadline first, at most the pool slots, only with the exact kept request."""
 
+    def settle_delivered(self, task_id: str, exporter: dict) -> None:
+        """TEST: the task's exporter reserved and delivered; its watchdog settles it (the run-media still runs)."""
+        from contextlib import ExitStack
+        from studio import native_budget_binding as binding
+        from studio.production.process import TaskClaim
+        from studio.production.process_settle import Ending, settle
+        task = self.task(task_id)
+        ref = ClaimRef(task_id, task['claim']['epoch'], task['claim']['token'])
+        sha = media.stored_request(self.root, BATCH, task_id)[1]   # the kept request's SHA-256 the claim names
+        own = {key: exporter[key] for key in ('pid', 'pgid', 'started')}
+        with ExitStack() as stack:
+            for target in (binding, launch):
+                stack.enter_context(mock.patch.object(target, 'own_identity', return_value=own))
+            stack.enter_context(mock.patch.object(launch, '_process_table', return_value=table(DISPATCHER, exporter)))
+            stack.enter_context(mock.patch.object(binding, 'launch_fingerprint', return_value=task['inputFingerprint']))
+            launched = binding.TaskLaunch(self.project, self.work / f'o-{task_id}', 'draft', {}, BATCH, ref, sha)
+            grant = binding.reserve_task_launch(launched)
+        binding.record_request_outcome({'productionBudget': grant}, {
+            'status': 'native-short-review-draft', 'output': f'/TEST/{task_id}.mp4', 'sha256': 'b' * 64})
+        settle(TaskClaim(BATCH, task_id, ref.epoch, ref.token, sha), Ending(exporter['pid'], None, (), None))
+
     def test_the_most_urgent_media_task_launches_first_within_the_pool_slots(self) -> None:
         self.media('draft-a', 'A', 1800.0)
         self.media('draft-b', 'B', 1700.0)
         runner = self.dispatcher()
-        self.assertIsNone(runner.step())                                   # P0 adapt (B-19): both launch at once
+        self.assertIsNone(runner.step())
+        # P0 adapt (B-19): both claims launch at once, the most urgent first; the host pool orders capacity.
         self.assertEqual([command[command.index('--task') + 1] for command in self.spawned], ['draft-b', 'draft-a'])
         self.assertEqual(self.task('draft-b')['claim']['claimer'], DISPATCHER)
         self.assertIsNone(runner.step())                                   # every clip claimed: nothing more
+        self.assertEqual(len(self.spawned), 2)
         claim = self.task('draft-b')['claim']
         ref = ClaimRef('draft-b', claim['epoch'], claim['token'])
         api.attach_task(self.root, BATCH, ref, CHILD)                       # the exporter acknowledged
-        self.rows = table(DISPATCHER, CHILD)
-        with self.assertRaisesRegex(TaskRefused, 'acknowledged media; its export watchdog must'):  # X93, B-1
+        # P0 adapt (X93, B-1): acknowledged media completes only through its export watchdog, never complete_task.
+        with self.assertRaisesRegex(TaskRefused, 'acknowledged media; its export watchdog must confirm cleanup'):
             api.complete_task(self.root, BATCH, ref, TaskResult(({'path': '/TEST/b.mp4', 'sha256': 'e' * 64,
                                                                     'bytes': None},)))
-        self.assertEqual((len(self.spawned), sorted(runner.children)), (2, ['draft-a', 'draft-b']))  # X93, B-19
-        self.children[0].returncode = 0                                     # draft-b's run-media ended
+        # P0 adapt (E-006, B-19): the bound is min(16, clips) minus live run-media children. The watchdog settles
+        # draft-a while its run-media still runs, so a new draft-a2 stays ready; reaping that child frees its place.
+        claim = self.task('draft-a')['claim']
+        api.attach_task(self.root, BATCH, ClaimRef('draft-a', claim['epoch'], claim['token']), OTHER)
+        self.rows = table(DISPATCHER, CHILD, OTHER)
+        self.settle_delivered('draft-a', OTHER)
+        self.assertEqual((self.state('draft-a'), sorted(runner.children)), ('completed', ['draft-a', 'draft-b']))
+        self.media('draft-a2', 'A', 1750.0)
         self.assertIsNone(runner.step())
-        self.assertEqual((sorted(runner.children), len(self.spawned), self.state('draft-b')), (['draft-a'], 2, 'running'))
+        self.assertEqual([command[command.index('--task') + 1] for command in self.spawned], ['draft-b', 'draft-a'])
+        self.assertEqual(self.state('draft-a2'), 'ready')                  # both places are live run-media children
+        self.children[1].returncode = 0                                     # draft-a's run-media ended
+        self.assertIsNone(runner.step())
+        self.assertEqual([command[command.index('--task') + 1] for command in self.spawned],
+                         ['draft-b', 'draft-a', 'draft-a2'])                # the freed place is used
+        self.assertEqual(self.state('draft-b'), 'running')  # the watchdog, not the dispatcher, settles it
 
     def test_least_deadline_is_the_only_order(self) -> None:
         # Minor 13: no forecast fallback on this branch; ready media launch least task deadline first.
         self.media('draft-a', 'A', 1700.0)
         self.media('draft-b', 'B', 1800.0)
         self.assertFalse(hasattr(dispatch, 'launch_order'))
-        self.dispatcher().step()                                            # P0 adapt (B-19): both launch at once
+        self.dispatcher().step()
+        # P0 adapt (B-19): both launch at once; least task deadline first is still the only order.
         self.assertEqual([command[command.index('--task') + 1] for command in self.spawned], ['draft-a', 'draft-b'])
 
     def test_a_running_launch_no_task_owns_takes_a_pool_slot(self) -> None:
@@ -117,8 +153,10 @@ class LaunchTests(DispatchCase):
             self.reserve(self.project)
         self.media('draft-b', 'B')
         self.assertEqual(dispatch.busy_slots(self.record()), 1)
-        self.dispatcher().step()                        # P0 adapt (B-19): an untasked launch holds no claim slot
-        self.assertEqual((self.state('draft-b'), [c[c.index('--task') + 1] for c in self.spawned]), ('claimed', ['draft-b']))
+        self.dispatcher().step()
+        # P0 adapt (B-19): an untasked launch no longer holds a claim slot; the host pool bounds capacity.
+        self.assertEqual((self.state('draft-b'), [c[c.index('--task') + 1] for c in self.spawned]),
+                         ('claimed', ['draft-b']))
 
     def test_an_existing_output_directory_is_refused_at_enqueue(self) -> None:
         # Probes p1/p1b (BLOCKER 1): a request naming an existing attempt directory (a stale delivery, or the

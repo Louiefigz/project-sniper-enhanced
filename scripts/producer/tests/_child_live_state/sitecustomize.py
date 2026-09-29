@@ -18,9 +18,10 @@ test, at the end of its run, and the suite wrappers check it again after the pro
 malformed variable also exits 97 (fail closed) and, when the reports folder is usable, leaves an install-failure
 report. The interpreter's own ``sitecustomize`` (Homebrew's) is chained after installation. Not covered: a child
 started with ``-I``, ``-S`` or ``-E``, or whose environment drops ``PYTHONPATH``; a non-Python child; a ``ctypes``
-call (no audit event); ``os.posix_spawn`` file actions; an open through a symlink that already existed. The report
-file is written before stderr, and exit 97 follows whatever either write does. A forked child gets a fresh gate.
-The arming sets ``PYTHONPYCACHEPREFIX`` to an empty folder, so no ``__pycache__`` beside this file is ever read.
+call (no audit event); ``os.mkfifo`` and ``os.mknod`` (no audit event in CPython 3.14); ``os.posix_spawn`` file
+actions; an open through a symlink that already existed. The report file is written before stderr, and exit 97
+follows whatever either write does. A forked child gets a fresh gate. Each arming sets ``PYTHONPYCACHEPREFIX``
+to a new empty folder, so no ``__pycache__`` beside this file or in an inherited prefix is ever read.
 Nothing in the product imports it.
 
 The path matching mirrors ``_live_state_paths`` (``test_live_state_child_tripwire`` checks that both refuse the

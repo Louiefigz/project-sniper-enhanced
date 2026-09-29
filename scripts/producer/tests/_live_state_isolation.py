@@ -223,7 +223,7 @@ def _exit_check() -> None:
     """Fail the process when a touch outside test methods was never reported by a runner."""
     STATE.scopes[0].close()
     STATE.unreported.extend(children.new_reports())
-    children.remove_own_directory()
+    children.announce_own_directory()
     if not STATE.unreported:
         return
     sys.stdout.flush()

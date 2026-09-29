@@ -7,16 +7,18 @@
   from ``_live_state_paths`` (the child imports no engine code and computes nothing itself);
 - ``SNIPER_TEST_CHILD_REPORTS``: a directory where a refused child writes one report file before it exits 97;
 - ``PYTHONDONTWRITEBYTECODE=1``, so children never write bytecode into the checkout;
-- ``PYTHONPYCACHEPREFIX`` set to an empty private folder (an inherited one is kept), so children never read a
-  ``__pycache__`` in the tree: a crafted cached ``sitecustomize`` cannot replace the tripwire (C1FIX-REVIEW D2).
+- ``PYTHONPYCACHEPREFIX`` set to a new empty private folder on every call (an inherited one is never trusted), so
+  children never read a ``__pycache__`` in the tree or in a prepared prefix: a crafted cached ``sitecustomize``
+  cannot replace the tripwire (C1FIX-REVIEW D2, CS4-REVIEW mi5).
 
 An inherited reports directory and inherited prefixes are kept (a child that imports the isolation over decoy
 roots refuses both sets); a malformed inherited prefix value exits 97. ``set_current`` names the running test in
 ``SNIPER_TEST_CURRENT`` so a child's report says which test started it. ``new_reports`` returns the report lines
 this process has not reported yet, so the isolation fails the test run even when the child's caller swallowed
-its exit status. Reports are never moved, so every ancestor sees them, and a suite wrapper that passes its own
-kept folder checks it again after the process exits (a late child's report). Standard library only; nothing in
-the product imports this module.
+its exit status. Reports are never moved or removed, so every ancestor sees them; a suite wrapper that passes its
+own kept folder checks it again after the process exits (a late child's report), and a run without a wrapper
+names the folder it made on stderr at exit, so a report written after it exits can still be found. Standard
+library only; nothing in the product imports this module.
 
 Not covered: a child started with ``-I``, ``-S`` or ``-E``, or with an environment that drops ``PYTHONPATH``,
 never loads the tripwire.
@@ -74,9 +76,7 @@ def arm(paths: object, environ: dict = os.environ) -> None:
     environ[CONFIG] = json.dumps(child_config(paths, environ), sort_keys=True)
     environ[REPORTS] = _reports_directory(environ)
     environ['PYTHONDONTWRITEBYTECODE'] = '1'
-    prefix = environ.get('PYTHONPYCACHEPREFIX', '')
-    environ['PYTHONPYCACHEPREFIX'] = prefix if os.path.isabs(prefix) and os.path.isdir(prefix) \
-        else tempfile.mkdtemp(prefix='sniper-pycache-')
+    environ['PYTHONPYCACHEPREFIX'] = tempfile.mkdtemp(prefix='sniper-pycache-')  # never an inherited one
 
 
 def set_current(label: str, environ: dict = os.environ) -> None:
@@ -102,8 +102,7 @@ def new_reports(environ: dict = os.environ) -> list[str]:
     return list(fresh.values())
 
 
-def remove_own_directory() -> None:
-    """At exit, remove the reports directory this process made, when no child ever wrote a report there."""
-    directory = _OWN['created']
-    if directory and os.path.isdir(directory) and not os.listdir(directory):
-        os.rmdir(directory)
+def announce_own_directory() -> None:
+    """At exit, name the reports directory this process made (it is kept: a late child may still report there)."""
+    if _OWN['created']:
+        os.write(2, f'live-state isolation: child refusal reports are kept in {_OWN["created"]}\n'.encode())

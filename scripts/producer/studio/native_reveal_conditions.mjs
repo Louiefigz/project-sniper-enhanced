@@ -77,7 +77,9 @@ function cueFrame(value) {
  * Root frames the probe seeks for one mount. Local frames sampled: 0, 1, 2; K-2..K+1 for each declared cue
  * frame K; a 15-frame grid over [0, max K); all clipped to the mount's active range. `forward` ascends from the
  * inactive neighbour `first - 1`; `reverse` descends from local `max K + 2` to `first`; each `cold` entry is a
- * fresh-session seek sequence: `[first, first + 1]`, and `[first + K - 1, first + K]` for each K > 1.
+ * fresh-session seek sequence: `[first, first + 1]`, and `[first + K - 1, first + K, first + K + 1]` for each K > 0
+ * (coordinator ruling X60(3): the before-cue neighbour and C2(b) inside one session), clipped to the active range;
+ * a clipped sequence equal to an earlier one is dropped.
  * @param {{first: number, endExclusive: number}} mount active root frames (P2-03 `RevealProbeManifest.mounts`)
  * @param {Array<{cueLocalFrame: number}>} declarations declared reveals of this mount
  * @param {number} rate frames per second; validated only, since the grid is counted in frames
@@ -95,8 +97,8 @@ export function probeFramePlan(mount, declarations, rate) {
   for (let k = 0; k < last; k += GRID_FRAMES) local.add(k);
   const sampled = [...local].filter(active).sort((a, b) => a - b);
   const reverse = [...new Set([...sampled, last + 2])].filter(active).sort((a, b) => b - a);
-  const cold = [[0, 1], ...cues.filter(k => k > 1).map(k => [k - 1, k])].map(pair => pair.filter(active))
-    .filter(pair => pair.length);
+  const clipped = [[0, 1], ...cues.filter(k => k > 0).map(k => [k - 1, k, k + 1])].map(frames => frames.filter(active));
+  const cold = [...new Map(clipped.filter(frames => frames.length).map(frames => [frames.join(), frames])).values()];
   const root = (/** @type {number[]} */ frames) => frames.map(k => first + k);
   return {forward: [...(first > 0 ? [first - 1] : []), ...root(sampled)], reverse: root(reverse), cold: cold.map(root)};
 }

@@ -84,7 +84,13 @@ test('mountFrameRange matches the runtime snap', () => {
   assert.ok([745 + 15, 745 + 79, 745 + 80, 745 + 81, 745 + 82].every(frame => plan.forward.includes(frame)));
   assert.equal(plan.reverse[0], 745 + 83);
   assert.equal(plan.reverse.at(-1), 745);
-  assert.deepEqual(plan.cold, [[745, 746], [825, 826]]);
+  assert.deepEqual(plan.cold, [[745, 746], [825, 826, 827]]);
+  // K + 1 outside the mount: local frames 0..81 are active, so every order and the cold sequence stop at K.
+  const edge = probeFramePlan({first, endExclusive: first + 82}, [{cueLocalFrame: 81}, {cueLocalFrame: 1}], 30);
+  assert.deepEqual(edge.cold, [[745, 746], [745, 746, 747], [825, 826]]);
+  assert.equal(edge.forward.at(-1), 826);
+  assert.equal(edge.reverse[0], 826);
+  assert.ok([...edge.forward, ...edge.reverse, ...edge.cold.flat()].every(frame => frame >= 744 && frame < first + 82));
 });
 
 test('malformed series fails closed', () => {

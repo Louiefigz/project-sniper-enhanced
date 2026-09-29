@@ -29,6 +29,59 @@ Use it in whichever surface fits the job:
 | **Palmier Pro** | Reviewing an approved flat mirror or exercising an isolated editable candidate | A visually exact one-clip mirror, or experimental stable-ID timeline operations |
 | **Headless CLIs** | Automation, debugging, CI, and deterministic stage-by-stage execution | The same manifests, plans, renders, audits, and revision receipts |
 
+## Current state of `main` — read this first
+
+`main` is the **rc4 reconciled engine** (Phase 0 of the rc4 remediation, committed 2026-09-29).
+It is the most complete working state of the engine and passes its test suites apart from the
+known failures listed below. It is **not yet tagged final**: the last review fixes and the final
+full verification are still in progress, and the next phases are being built on separate
+`rc4/lanes/*` branches that are merged step by step. Branch `rc4/p0-reconciled-engine` tracks
+the same engine work.
+
+### Developer quick start (macOS)
+
+```bash
+git clone https://github.com/Louiefigz/project-sniper-enhanced.git
+cd project-sniper-enhanced
+npm install
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+brew install ffmpeg whisper-cpp tesseract yt-dlp
+cp .env.local.example .env.local        # no API key is needed for editing
+```
+
+Put a whisper.cpp model at `~/.cache/hyperframes/whisper/models/ggml-small.en.bin` (or set
+`WHISPER_CPP_MODEL`), and have the `claude` CLI on your PATH with a subscription login.
+Then either open the folder in Claude Code desktop ([Start here](#start-here-the-easy-path))
+or run the optional web GUI with `npm run dev:local` and open http://localhost:3000.
+Full details: [Requirements](#requirements) and [Setup](#setup).
+
+### Running the tests
+
+```bash
+# Python suite (about an hour on one core; isolates itself from your real ~/.project-sniper state)
+cd scripts/producer && ../../.venv/bin/python3 -B selftest.py
+
+# Node and TypeScript
+npm run type-check
+npm test                                # stops at the first failing file
+node --import tsx src/lib/server/__tests__/<file>.test.ts   # run one TS test file
+```
+
+**Known failures on a fresh checkout** (none is a regression in this branch):
+
+- **Python, 8 retained-evidence checks** (`test_comp_rate_matrix`, `test_current_system_inventory_revision`,
+  `test_p0_adversarial_ingress_artifact`, `test_p0_render_effect_parity_artifact`,
+  `test_p2_visual_lip_sync_artifact`, `test_p4_exit_closure_artifact`, `test_p5_compositor_artifact`,
+  `test_p5_review_repair_artifact`): they check retained evidence files that are not in git, or the
+  current-system inventory record, which later steps refresh.
+- **Python, host-sensitive:** `test_pool_qualification`, `test_native_pool_owners`,
+  `test_native_work_pool_interop` and `test_studio_player_view` admit work through real host checks
+  and fail while macOS reports memory pressure. Run them on a quiet machine.
+- **TypeScript, 4 pre-existing files:** `current-system-inventory-revision`, `guided-project-author-guard`,
+  `guided-project-preparation-worker`, `guided-source-color-pipeline-pins`. Because `npm test` stops at the
+  first failure, run the remaining files individually if you hit one of these.
+
 ## Choose the destination first
 
 The requested destination determines the workflow; these are intentionally

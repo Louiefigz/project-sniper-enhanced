@@ -1,8 +1,12 @@
 /** Shared-evidence schema version 2 readers (P2-07, X53): typed speaker facts and caption phrases from a sealed
  * record, the read-only version 1 mapping, and the unchanged submission re-check for either version.
- * TEST records only; nothing here was heard, watched or attributed, and the engine check is a TEST double. */
+ * TEST records only; nothing here was heard, watched or attributed, and the engine check is a TEST double. The Python
+ * vocabulary is read as text (no child process) to pin the TypeScript mirror to the one definition (X53). */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { test } from "node:test";
+import { SCRIPTS_DIR } from "@/app/api/_lib/spawn-python";
 import {
   evidenceCheck, recheckSharedEvidence, sharedCaptionPhrases, sharedSpeakerFacts, SPEAKER_BASES, SPEAKER_CERTAINTIES,
 } from "../native-review-shared-evidence";
@@ -39,9 +43,19 @@ function v1Record(listening: boolean) {
     intervals: [interval("S1"), interval(null)] } };
 }
 
-test("X53: the vocabulary is P2-07's, verbatim", () => {
+/** The strings of one `NAME = (...)` tuple in the Python module that defines the vocabulary, read as text. */
+function pythonTuple(name: string): string[] {
+  const source = readFileSync(path.join(SCRIPTS_DIR, "producer", "role_packet_evidence_speakers.py"), "utf8");
+  const tuple = source.match(new RegExp(`^${name} = \\(([^)]*)\\)$`, "m"));
+  assert.ok(tuple, `role_packet_evidence_speakers.py defines ${name} as one tuple`);
+  return [...tuple[1].matchAll(/"([^"]*)"/g)].map(match => match[1]);
+}
+
+test("X53: the vocabulary is P2-07's, verbatim, and the TS mirror equals the Python definition", () => {
   assert.deepEqual([...SPEAKER_CERTAINTIES], ["established", "probable", "unresolved"]);
   assert.deepEqual([...SPEAKER_BASES], ["listening", "operator-statement", "visual-and-stereo", "transcript-only"]);
+  assert.deepEqual([...SPEAKER_CERTAINTIES], pythonTuple("CERTAINTIES"));
+  assert.deepEqual([...SPEAKER_BASES], pythonTuple("BASES"));
 });
 
 test("a version 2 record reads its people, intervals, coverage and observations reference verbatim", () => {
@@ -57,6 +71,18 @@ test("a version 2 record reads its people, intervals, coverage and observations 
     [{ source: "raw-1", sourceWordIndexes: [10, 11], display: "TEST given", decidedBy: "operator" }]);
   const without = sharedSpeakerFacts(v2Record({ coverage: null }));
   assert.deepEqual([without.clips, without.observations], [null, null]);
+});
+
+test("the observations reference and covered script identities must be SHA-256 digests", () => {
+  const record = v2Record(), coverage = record.coverage;
+  for (const key of ["sha256", "ownerSha256"] as const) {
+    const reference = { ...REFERENCE, [key]: "TEST-not-a-digest" };
+    assert.throws(() => sharedSpeakerFacts({ ...record, coverage: { ...coverage, observations: { reference } } }),
+      new RegExp(`reference.${key} must be a lowercase SHA-256`));
+  }
+  const clips = [{ ...coverage.clips[0], scriptIdentity: "TEST" }];
+  assert.throws(() => sharedSpeakerFacts({ ...record, coverage: { ...coverage, clips } }),
+    /coverage.clips\[0\].scriptIdentity must be a lowercase SHA-256/);
 });
 
 test("a version 1 record maps certainty read-only and carries no phrases or coverage", () => {

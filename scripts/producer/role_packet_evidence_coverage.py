@@ -8,13 +8,17 @@ each retained word must lie in exactly one speaker interval of its source; inter
 
 The bound ``speaker-observations`` file is the completed inspection reference P2-06 publishes
 (``SPEAKER-OBSERVATIONS.json``: ``{path, sha256, owner, ownerSha256}``; X59). Its record is read with
-``read_inspection(..., require_owner_digest=True)``. It must describe the approvals' source, and the transcript
-of every approval (X68), and hold exactly the covered scripts in ``clipId`` order (X59).
+``read_inspection(..., require_owner_digest=True)``. The record's source must be one this evidence admits, and it
+is this record's source. The record covers the listed clips (X127): the batch's clips approved on that source.
+Clips approved on another source are outside this record, and another record may cover them; a batch drawn from
+two sources is never refused. The observations must be measured on each listed clip's approved transcript (X68)
+and hold exactly the listed scripts in ``clipId`` order (X59).
 
 Faces map to people through ``faceRegion``: a face belongs to the one person whose ``xRange`` holds its centre x
-(a centre in no region, or in two, belongs to nobody). P2-06's stop is enforced here (X59(7)). The seal is refused
-when a person with a face region on the observed source has a face in fewer than 90% of the measured frames,
-because face boxes then cannot drive the in-crop and exit checks. The refusal reports every person's numbers.
+(a centre in no region, or in two, belongs to nobody). This is the measurement P2-06's 90% stop needs (X59(7)).
+Per person with a region on the observed source the record keeps the sampled frames holding that person's face,
+the sampled frames (the denominator, P2:666) and their ratio. Nothing here refuses on those numbers: the stop is
+a one-time plan stop on IMG_5954, read at M-071v/M-077v (X127).
 
 The authority and inspection readers are imported where they are used. Version 1 checks never reach them, so they
 load exactly the modules they load today.
@@ -32,7 +36,6 @@ from role_packet_transcript import Transcript, exact
 OBSERVATIONS_KEY = "speaker-observations"
 OBSERVATIONS_KIND = "sniper-speaker-observations"
 REFERENCE_KEYS = frozenset({"path", "sha256", "owner", "ownerSha256"})
-FACE_FLOOR = Fraction(9, 10)
 LIVE = ("active", "draining")
 FORM = CANONICAL_FORM.split(":", 1)[0] + ":"
 
@@ -91,15 +94,6 @@ def sealed_approvals(batch: object, clips: list[str]) -> list[dict]:
     return [clip_approval(native_budget_store.require_batch_id(batch), clip, False) for clip in clips]
 
 
-def approval_source(approval: dict, words: dict) -> tuple[str, Transcript]:
-    """(source id, observed transcript) of the admitted source an approval is on."""
-    found = words.get(approval.get("source"))
-    if found is None:
-        raise EvidenceError(f"clip {approval['clipId']}'s approved script is on source {str(approval.get('source'))[:12]}, "
-                            "which this evidence's manifest does not admit with a transcript")
-    return found
-
-
 def uncovered(clip: str, bounds: list[tuple[Fraction, Fraction]], transcript: Transcript, ranges: list) -> None:
     """Refuse the first retained word whose midpoint lies in two intervals, or the first run it lies in none of."""
     run: list[int] = []
@@ -124,19 +118,19 @@ def coverage(value: object, approvals: list[dict], words: dict) -> dict:
 
     Args:
         value: The validated version 2 speaker intervals.
-        approvals: ``{clipId, **approval row}`` per clip.
+        approvals: ``{clipId, **approval row}`` per listed clip (``listed_approvals``).
         words: ``{sourceSha256: (source id, observed Transcript)}`` for the sources the approvals are on.
 
     Returns:
         ``{"clips": [{clipId, scriptIdentity, wordRanges}]}`` in clipId order; each identity is recomputed.
 
     Raises:
-        EvidenceError: A clip on a source this evidence does not admit, a gap or an overlap.
+        EvidenceError: A gap or an overlap.
         ApprovalError: An approval that does not recompute against the observed transcript.
     """
     clips = []
     for approval in sorted(approvals, key=lambda row: row["clipId"]):
-        source, transcript = approval_source(approval, words)
+        source, transcript = words[approval["source"]]
         row = verified_row(approval, transcript, derived_seconds=False)
         bounds = [(exact(item["startSeconds"]), exact(item["endSeconds"])) for item in value if item["source"] == source]
         uncovered(approval["clipId"], bounds, transcript, approval["wordRanges"])
@@ -175,47 +169,73 @@ def face_owner(face: dict, regions: dict) -> str | None:
     return owners[0] if len(owners) == 1 else None
 
 
-def face_coverage(record: dict, people: list[dict], source: str) -> list[dict]:
-    """Per person with a face region on the observed source: the measured frames that hold that person's face.
+def face_row(person: str, frames: list[dict], regions: dict) -> dict:
+    """One person's measurement: sampled frames holding their face, all sampled frames, and the ratio (or null)."""
+    found = sum(1 for frame in frames if person in {face_owner(face, regions) for face in frame["faces"]})
+    return {"person": person, "framesWithFace": found, "framesSampled": len(frames),
+            "ratio": found / len(frames) if frames else None}
 
-    Raises:
-        EvidenceError: P2-06's stop. A person's face is in fewer than 90% of the measured frames, or none was measured.
+
+def face_coverage(record: dict, people: list[dict], source: str) -> list[dict]:
+    """Per person with a face region on the observed source, P2-06's measurement (X59(7)); it never refuses.
+
+    The denominator is every sampled frame of the record, including frames where no face was found (P2:666).
+    M-071v/M-077v compare these numbers with 90% on IMG_5954 and stop the plan below it (X127, ST-4).
     """
     regions = {row["id"]: tuple(row["faceRegion"]["xRange"]) for row in people
                if (row.get("faceRegion") or {}).get("source") == source}
-    frames = record["faces"]
-    rows = [{"person": person, "found": sum(1 for frame in frames
-                                            if person in {face_owner(face, regions) for face in frame["faces"]}),
-             "frames": len(frames)} for person in sorted(regions)]
-    low = [row for row in rows if not frames or Fraction(row["found"], len(frames)) < FACE_FLOOR]
-    if low:
-        numbers = ", ".join(f"{row['person']} in {row['found']} of {row['frames']}" for row in rows)
-        raise EvidenceError(f"P2-06 stop: face detection finds {numbers} measured frames, below 90% for "
-                            f"{[row['person'] for row in low]}; face boxes cannot drive the in-crop and exit checks "
-                            "(report these numbers)")
-    return rows
+    return [face_row(person, record["faces"], regions) for person in sorted(regions)]
+
+
+def measured_source(record: dict, sources: list[dict]) -> tuple[str, str]:
+    """(sourceSha256, admitted source id) of the source the speaker observations measured.
+
+    Raises:
+        EvidenceError: The observations describe a source this evidence does not admit.
+    """
+    observed = record.get("source") if isinstance(record.get("source"), dict) else {}
+    measured = str(observed.get("sourceSha256"))
+    source = {row["sourceSha256"]: row["id"] for row in sources}.get(measured)
+    if source is None:
+        raise EvidenceError(f"speaker observations describe source {measured[:12]}, which this evidence does not admit")
+    return measured, source
+
+
+def listed_approvals(context: dict) -> list[dict]:
+    """The clips this record covers (X127): the batch's clips approved on the source the observations measured.
+
+    Args:
+        context: ``bound`` (key to observed file row), ``sources`` and ``approvals`` (the batch's clips).
+
+    Returns:
+        The listed approvals. Clips on any other source are outside this record, never a refusal.
+
+    Raises:
+        EvidenceError: Observations of a source this evidence does not admit, or no clip on the measured source.
+    """
+    _reference, record = observation_record(context["bound"])
+    measured, _source = measured_source(record, context["sources"])
+    listed = [row for row in context["approvals"] if row.get("source") == measured]
+    if not listed:
+        raise EvidenceError(f"no clip of the batch is approved on source {measured[:12]}, which the speaker "
+                            "observations measured; nothing for this record to cover")
+    return listed
 
 
 def observations_binding(context: dict, coverage: dict) -> dict:
-    """The bound speaker observations must measure exactly the covered scripts on the approvals' source and transcript.
+    """The bound speaker observations must measure exactly the covered scripts, on their approved transcripts.
 
     Args:
-        context: ``bound`` (key to observed file row), ``sources``, ``approvals`` (as covered) and ``people``.
-        coverage: What ``coverage`` returned.
+        context: ``bound`` (key to observed file row), ``sources``, ``approvals`` (the listed clips) and ``people``.
+        coverage: What ``coverage`` returned for those clips.
 
     Returns:
         ``{reference, faceCoverage}``: the published inspection reference and ``face_coverage``'s rows.
     """
     reference, record = observation_record(context["bound"])
-    observed = record.get("source") if isinstance(record.get("source"), dict) else {}
-    measured, heard = str(observed.get("sourceSha256")), str(observed.get("transcriptSha256"))
-    source = {row["sourceSha256"]: row["id"] for row in context["sources"]}.get(measured)
-    if source is None:
-        raise EvidenceError(f"speaker observations describe source {measured[:12]}, which this evidence does not admit")
+    _measured, source = measured_source(record, context["sources"])
+    heard = str((record.get("source") or {}).get("transcriptSha256"))
     for approval in context["approvals"]:
-        if approval["source"] != measured:
-            raise EvidenceError(f"speaker observations describe source {measured[:12]}, not clip "
-                                f"{approval['clipId']}'s approved source {str(approval['source'])[:12]}")
         if approval["transcript"] != heard:
             raise EvidenceError(f"speaker observations were measured on transcript {heard[:12]}, not clip "
                                 f"{approval['clipId']}'s approved transcript {str(approval['transcript'])[:12]}")

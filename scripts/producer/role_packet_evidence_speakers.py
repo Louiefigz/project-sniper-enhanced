@@ -3,8 +3,10 @@
 Each speaker interval gains a ``certainty`` and a ``basis``. The vocabulary is defined once, here (X53). P3a
 imports ``CERTAINTIES`` and ``BASES``; there is no second definition and no mapping table. The rules:
 - ``unresolved`` exactly when ``speaker`` is null;
-- ``established`` only with basis ``listening`` (and ``speakers.listening`` true), or ``operator-statement`` with
-  at least one bound-file citation in ``evidence``;
+- a ``listening`` basis needs ``speakers.listening`` true, at any certainty: a basis is a claim about the evidence
+  source (X127);
+- ``established`` only with basis ``listening``, or ``operator-statement`` with at least one bound-file citation
+  in ``evidence``;
 - a ``transcript-only`` basis is never ``established``.
 Each refusal is an ``EvidenceError`` naming the row. People may carry a ``faceRegion`` in source pixels. Speaker
 observations map faces to people through it (X59(7); role_packet_evidence_coverage).
@@ -63,21 +65,23 @@ def people_v2(value: object, context: dict) -> list[dict]:
 
 
 def grounds(row: dict, label: str, context: dict) -> None:
-    """``evidence`` lists 0-64 citations; established needs listening that happened, or a filed operator statement."""
+    """``evidence`` lists 0-64 citations; listening must have happened; established needs it or a filed statement."""
     evidence = row["evidence"]
     if not isinstance(evidence, list) or len(evidence) > LIST_LIMIT:
         raise EvidenceError(f"{label}.evidence must list 0-{LIST_LIMIT} citations")
     if evidence:
         citations(evidence, f"{label}.evidence", context)
+    if row["basis"] == "listening" and context["listening"] is not True:
+        raise EvidenceError(f"{label}: basis listening needs speakers.listening true (the record says nobody listened)")
     if row["certainty"] != "established":
         return
     if row["basis"] == "transcript-only":
         raise EvidenceError(f"{label}: a transcript-only basis is never established")
-    if row["basis"] == "listening" and context["listening"] is True:
+    if row["basis"] == "listening":
         return
     if row["basis"] == "operator-statement" and any(set(item) == {"file"} for item in evidence):
         return
-    raise EvidenceError(f"{label}: established needs basis listening with speakers.listening true, or "
+    raise EvidenceError(f"{label}: established needs basis listening (with speakers.listening true), or "
                         "operator-statement citing at least one bound file in evidence")
 
 

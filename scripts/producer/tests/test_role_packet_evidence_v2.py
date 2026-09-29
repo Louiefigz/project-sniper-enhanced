@@ -60,7 +60,7 @@ class SpeakerRuleTests(SpeakerEvidenceFixture):
     def test_v2_established_requires_listening_or_operator_statement(self) -> None:
         """Listening needs speakers.listening true; an operator statement needs a bound-file citation."""
         listened = edit(SPEAKERS, 0, certainty="established", basis="listening")
-        self.refused(listened, r"intervals\[0\]: established needs basis listening with speakers.listening true")
+        self.refused(listened, r"intervals\[0\]: basis listening needs speakers.listening true")
         self.refused(edit(SPEAKERS, 1, evidence=[{"source": "raw-1", "atSeconds": 9}]),
                      r"intervals\[1\]: established needs .*operator-statement citing at least one bound file")
         self.refused(edit(SPEAKERS, 0, certainty="established"), r"intervals\[0\]: established needs")
@@ -72,6 +72,18 @@ class SpeakerRuleTests(SpeakerEvidenceFixture):
         record = json.loads(self.sealed_v2(heard).read_text())
         self.assertEqual([row["certainty"] for row in record["speakers"]["intervals"]],
                          ["established", "established", "unresolved"])
+
+    def test_listening_basis_needs_listening_at_any_certainty(self) -> None:
+        """X127 (D-Q-8): a probable or unresolved interval cannot claim a listening basis nobody performed."""
+        for index in (0, 2):
+            self.refused(edit(SPEAKERS, index, basis="listening"),
+                         rf"intervals\[{index}\]: basis listening needs speakers.listening true")
+
+        def heard(value: dict) -> None:
+            """The record says the audio was heard."""
+            edit(SPEAKERS, 0, basis="listening")(value)
+            value["speakers"]["listening"] = True
+        self.assertTrue(self.sealed_v2(heard).is_file())
 
     def test_unresolved_requires_null_speaker(self) -> None:
         """Unresolved exactly when the speaker is null, both ways."""
@@ -96,6 +108,7 @@ class SpeakerRuleTests(SpeakerEvidenceFixture):
         self.refused(lambda value: value["speakers"]["intervals"][0].pop("basis"), "exactly")
         people = ("speakers", "people")
         self.refused(edit(people, 0, faceRegion={"source": "raw-1", "xRange": [900, 0]}), r"people\[0\]\.faceRegion")
+        self.refused(edit(people, 0, faceRegion={"source": "raw-1", "xRange": [400, 400]}), r"people\[0\]\.faceRegion")
         self.refused(edit(people, 1, faceRegion={"source": "raw-9", "xRange": [0, 9]}), r"people\[1\]\.faceRegion")
         self.refused(edit(people, 0, faceRegion={"source": "raw-1", "xRange": [0, 9], "y": 1}), "exactly")
 
@@ -129,6 +142,9 @@ class CaptionPhraseTests(SpeakerEvidenceFixture):
         with self.assertRaisesRegex(EvidenceError, "at most 64 phrases"):
             self.phrases(*({"sourceWordIndexes": [index % 12 * 2, index % 12 * 2 + 1]} for index in range(65)))
         self.assertTrue(self.phrases({"sourceWordIndexes": [10, 11]}, {"sourceWordIndexes": [12, 13]}).is_file())
+        self.second_source()
+        self.assertTrue(self.phrases({"sourceWordIndexes": [10, 11]},
+                                     {"source": "raw-2", "sourceWordIndexes": [10, 11]}).is_file())
 
 
 class LegacyVersionOneTests(SpeakerEvidenceFixture):
@@ -145,8 +161,8 @@ class LegacyVersionOneTests(SpeakerEvidenceFixture):
             self.assertEqual(evidence_check(str(record))["version"], value["version"])
             self.assertEqual(self.packet(record)["packet"]["sharedEvidence"]["version"], value["version"])
             mapped = mapped_intervals(value["schemaVersion"], value["speakers"])
-            self.assertEqual([(row["certainty"], row["basis"]) for row in mapped],
-                             [(certainty, basis), ("unresolved", basis)])
+            self.assertEqual([(row["certainty"], row["basis"], row["evidence"]) for row in mapped],
+                             [(certainty, basis, []), ("unresolved", basis, [])])
 
     def test_v1_drafts_keep_version_1_rules(self) -> None:
         """A v1 draft carries no v2 fields and takes no --batch; a v1 record relabelled v2 is refused."""
@@ -186,6 +202,8 @@ class DraftAndCliTests(SpeakerEvidenceFixture):
         self.assertEqual((draft["schemaVersion"], draft["captionPhrases"], draft["coverage"]), (2, [], None))
         self.assertIn("--batch B", draft["guide"]["coverage"])
         self.assertIn("transcript-only is never established", draft["guide"]["speakers"])
+        with self.assertRaisesRegex(EvidenceError, "is not a shared-evidence draft"):
+            seal(str(self.draft_v2(lambda value: value.update(schemaVersion=3))), BATCH)
 
     def test_cli_lists_unresolved_intervals_and_seals_with_batch(self) -> None:
         """--evidence-unresolved lists probable and unresolved rows; --evidence-seal needs --batch for intervals."""

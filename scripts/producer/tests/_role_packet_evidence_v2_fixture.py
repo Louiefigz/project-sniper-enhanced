@@ -96,17 +96,30 @@ class SpeakerEvidenceFixture(EvidenceFixture):
             (BATCH, {"clips": {clip: {} for clip in self.clips}})]))
         self.observations = self.observe()
 
-    def approval(self, word_ranges: list, status: str = "active") -> dict:
-        """A clip's TEST approval-v2 row as the authority's reader returns it."""
+    def approval(self, word_ranges: list, status: str = "active", media: Path | None = None) -> dict:
+        """A clip's TEST approval-v2 row as the authority's reader returns it (on raw-1 unless ``media`` is given)."""
         transcript = observe_transcript(str(self.transcript), 60.0)
-        row = approvals.approval_row("TEST title", approvals.derive_script(sha(self.media), transcript, word_ranges))
+        script = approvals.derive_script(sha(media or self.media), transcript, word_ranges)
+        row = approvals.approval_row("TEST title", script)
         return {"batchId": BATCH, "status": status, "current": {**row, "recordedBy": "TEST"}, "history": [row],
                 "canonicalForm": approvals.CANONICAL_FORM}
 
     def scripts(self) -> list[dict]:
-        """The observation rows the current approvals give, in clipId order."""
+        """The observation rows the current approvals on raw-1 give, in clipId order."""
         return [{"clipId": clip, "scriptIdentity": self.approved[clip]["current"]["script"],
-                 "wordRanges": self.approved[clip]["current"]["wordRanges"]} for clip in sorted(self.approved)]
+                 "wordRanges": self.approved[clip]["current"]["wordRanges"]} for clip in sorted(self.approved)
+                if self.approved[clip]["current"]["source"] == sha(self.media)]
+
+    def second_source(self, admitted: bool = True) -> Path:
+        """A TEST second recording raw-2 with the same transcript bytes; ``admitted`` adds it to the manifest."""
+        other = self.write("source/raw-2.media", "TEST second recording")
+        self.write("source/raw-2.transcript.json", self.transcript.read_text())
+        if admitted:
+            manifest = json.loads(self.manifest.read_text())
+            manifest["sources"].append({**manifest["sources"][0], "id": "raw-2", "path": str(other),
+                                        "sourceSha256": sha(other), "transcriptPath": "raw-2.transcript.json"})
+            self.manifest.write_text(json.dumps(manifest))
+        return other
 
     def observe(self, name: str = "observe", missing: dict | None = None, captured: bool = True,
                 **change: object) -> Path:

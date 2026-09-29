@@ -6,7 +6,7 @@ decoded is written to disk. Detection runs on a copy scaled to at most ``DETECTI
 wide. ``face_rows`` maps every box back to source pixels and keeps only faces at or above the
 ``FACE_TRACK`` score threshold. Contact-sheet tiles are cut from the full-resolution frame.
 
-The selection also holds decode-only keepalive frames (``native_speaker_sampling.keepalive_frames``).
+The selection also holds decode-only keepalive frames (``native_speaker_media.keepalive_frames``).
 Each decoded frame, keepalive or sampled, prints one advancing ``SNIPER_PROGRESS speaker-frames <n>``
 line for the inspection owner's idle watchdog. A keepalive frame is never measured.
 
@@ -32,7 +32,7 @@ from cut_preview_io import real_directory
 from producer_config import FACE_TRACK
 from studio.native_runtime import digest as file_digest
 from studio.native_selected_frames import compare_selected_frames
-from studio.native_speaker_sampling import KEEPALIVE_FRAMES, frame_selection
+from studio.native_speaker_media import KEEPALIVE_FRAMES, frame_selection
 from studio.native_stage_evidence import require
 
 DETECTION_WIDTH = 1280
@@ -277,7 +277,7 @@ def measure_frames(request: dict, source: dict, sampling: dict, root: Path) -> t
     Args:
         request: The inspection request (``model`` path and ``scoreThreshold`` from FACE_TRACK).
         source: The manifest source row; its bytes were checked against ``sourceSha256``.
-        sampling: ``observation_plan``'s result plus ``clock`` (``native_speaker_media.stream_clock``).
+        sampling: The packet-clock ``frame_plan`` plus ``clock`` (``native_speaker_media.stream_clock``).
         root: The inspection directory (the filter script and ``sheets/`` live here).
 
     Returns:

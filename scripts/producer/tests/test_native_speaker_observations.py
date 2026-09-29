@@ -24,9 +24,9 @@ IDENTITY = 'a' * 64
 CAP = 'Speaker observation sampling exceeds 6000 frames'
 
 
-def _tone(seconds: float, amplitude: float) -> np.ndarray:
-    """A 1 kHz sine (inside the 120-3400 Hz speech band) sampled at RATE."""
-    return amplitude * np.sin(2 * np.pi * 1000.0 * np.arange(round(seconds * RATE)) / RATE)
+def _tone(seconds: float, amplitude: float, frequency: float = 1000.0) -> np.ndarray:
+    """A sine inside the 120-3400 Hz speech band (1 kHz by default) sampled at RATE."""
+    return amplitude * np.sin(2 * np.pi * frequency * np.arange(round(seconds * RATE)) / RATE)
 
 
 def _words(bounds: list[tuple[float, float]]) -> list[dict]:
@@ -79,6 +79,18 @@ class StereoTests(unittest.TestCase):
         self.assertEqual([row['lrDb'] for row in observations.stereo_rows(dual, words, RATE)], [None, None])
         self.assertIn('Identical channels', observations.stereo_limits(dual, [], RATE)[0])
         self.assertEqual(self._word_dropout(), (True, [1.94, None, 1.94], ['Dead channel on source words 1 (']))
+        for floor in (np.zeros(RATE), 10 ** (-90 / 20) * np.sqrt(2) * _tone(1.0, 1.0, 2000.0)):
+            self.assertEqual(self._quiet_dropout(floor), (True, [True, False, True], ['Dead channel on source words 1 (']))
+
+    def _quiet_dropout(self, floor: np.ndarray) -> tuple:
+        """Review probes P1/P1b: a -40 dBFS word while the right channel is digital zero or a -90 dBFS floor."""
+        left = np.concatenate([_tone(2.0, 0.5), _tone(1.0, 0.0141), _tone(2.0, 0.5)])
+        right = np.concatenate([_tone(2.0, 0.4, 700.0), floor, _tone(2.0, 0.4, 700.0)])
+        samples = np.stack([left, right], axis=1)
+        rows = observations.stereo_rows(samples, _words([(0.5, 0.9), (2.3, 2.7), (3.5, 3.9)]), RATE)
+        limits = observations.stereo_limits(samples, rows, RATE)
+        return (observations.stereo_cue(samples, RATE) is None, [row['lrDb'] is not None for row in rows],
+                [limit[:len('Dead channel on source words 1 (')] for limit in limits])
 
     def _word_dropout(self) -> tuple:
         """Right channel digitally dead for one word inside healthy stereo (review probe D2)."""

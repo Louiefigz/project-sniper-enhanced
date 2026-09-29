@@ -4,9 +4,12 @@ The levels come from ``audit.dialogue_consistency._window_rms``. That function d
 band-pass at ``SAMPLE_RATE`` (8000 Hz). Any other sample rate would move the band without an error, so
 every entry point refuses it by name.
 
-``lrDb`` is left minus right. It is null wherever the audio gives no left-right cue (E-S1):
-- the whole source is mono, silent, dead on one channel, or dual mono (identical channels);
-- one word has a dead channel (``_interval_balance``'s per-window rule, applied to the word);
+``lrDb`` is left minus right. It is given only when both recorded levels are present. It is null wherever
+the audio gives no left-right cue (E-S1):
+- the whole source is mono, silent, dead on one channel, or dual mono (one channel a gain-scaled copy of
+  the other);
+- one word has a dead channel: one channel is below -52 dBFS while the other is at or above the -48 dBFS
+  activity floor (X78 DM2);
 - one word has no active speech-band audio.
 
 Every such case yields a named limit sentence (``stereo_limits``). A channel level below
@@ -22,15 +25,15 @@ from audit.dialogue_consistency import (ACTIVE_CHANNEL_DBFS, DEAD_CHANNEL_DBFS, 
 
 ACTIVE_WORD_DBFS = -48.0        # the activity floor dialogue_consistency._interval_balance uses
 SILENCE_FLOOR_DBFS = -120.0     # below this a channel level is digital silence and is recorded as null
-IDENTICAL_CHANNELS_DB = 40.0    # left minus right this far below the louder channel: dual mono
+IDENTICAL_CHANNELS_DB = 40.0    # left minus gain x right this far below the louder channel: dual mono
 MONO_LIMIT = 'Mono source: there is no left-right cue, so lrDb is null for every word.'
 SILENT_LIMIT = 'No active speech-band audio in the source: there is no left-right cue, so lrDb is null for every word.'
 DEAD_LIMIT = ('Dead channel (speech-band left {left:.1f} dBFS, right {right:.1f} dBFS): there is no left-right '
               'cue, so lrDb is null for every word.')
-DUAL_MONO_LIMIT = ('Identical channels (dual mono: left minus right is {gap:.1f} dB below the louder channel): there '
-                   'is no left-right cue, so lrDb is null for every word.')
-DEAD_WORDS_LIMIT = ('Dead channel on source words {words} (one channel below -52 dBFS while the other is above '
-                    '-35 dBFS): lrDb is null for those words.')
+DUAL_MONO_LIMIT = ('Identical channels up to gain (dual mono: left minus {gain:.3f} x right is {gap:.1f} dB below the '
+                   'louder channel): there is no left-right cue, so lrDb is null for every word.')
+DEAD_WORDS_LIMIT = ('Dead channel on source words {words} (one channel below -52 dBFS while the other is at or above '
+                    '-48 dBFS): lrDb is null for those words.')
 QUIET_WORDS_LIMIT = 'No active speech-band audio (below -48 dBFS) on source words {words}: lrDb is null for those words.'
 
 
@@ -63,8 +66,10 @@ def stereo_cue(samples: np.ndarray, rate: int) -> str | None:
     """Why the whole source gives no left-right cue, or None when it gives one.
 
     The dead-channel rule is ``_global_balance``'s: over active half-second windows, one channel is below
-    DEAD_CHANNEL_DBFS while the other is above ACTIVE_CHANNEL_DBFS. Dual mono means the speech-band level
-    of left minus right is at least IDENTICAL_CHANNELS_DB below the louder channel.
+    DEAD_CHANNEL_DBFS while the other is above ACTIVE_CHANNEL_DBFS. For dual mono, the least-squares gain
+    ``g = <L, R> / <R, R>`` is first fitted over the active windows. The source is dual mono when the
+    speech-band level of ``L - g R`` is at least IDENTICAL_CHANNELS_DB below the louder channel, so a
+    gain-mismatched copy counts too (X78 DM-m1).
 
     Args:
         samples: Source audio at 8000 Hz, mono or stereo.
@@ -84,9 +89,17 @@ def stereo_cue(samples: np.ndarray, rate: int) -> str | None:
     left, right = (float(value) for value in _db(np.sqrt(np.mean(np.square(rms[active]), axis=0))))
     if min(left, right) < DEAD_CHANNEL_DBFS and max(left, right) > ACTIVE_CHANNEL_DBFS:
         return DEAD_LIMIT.format(left=left, right=right)
-    side = _band_rms(audio[:, :1] - audio[:, 1:], rate // 2)[active]
-    gap = max(left, right) - float(_db(np.sqrt(np.mean(np.square(side)))))
-    return DUAL_MONO_LIMIT.format(gap=gap) if gap >= IDENTICAL_CHANNELS_DB else None
+    gain, gap = _residual(audio, active, rate // 2, max(left, right))
+    return DUAL_MONO_LIMIT.format(gain=gain, gap=gap) if gap >= IDENTICAL_CHANNELS_DB else None
+
+
+def _residual(audio: np.ndarray, active: np.ndarray, size: int, louder: float) -> tuple[float, float]:
+    """(fitted gain of right onto left, dB by which ``L - gain R`` lies below the louder channel)."""
+    samples = np.repeat(active, size)[:len(audio)]
+    left, right = audio[samples, 0], audio[samples, 1]
+    gain = float(np.dot(left, right) / max(float(np.dot(right, right)), 1e-24))
+    side = _band_rms((audio[:, 0] - gain * audio[:, 1]).reshape(-1, 1), size)[active]
+    return gain, louder - float(_db(np.sqrt(np.mean(np.square(side)))))
 
 
 def _word_levels(audio: np.ndarray, word: dict, rate: int) -> list[float]:
@@ -110,9 +123,9 @@ def _shown(level: float) -> float | None:
 
 
 def _dead(left: float | None, right: float | None) -> bool:
-    """``_interval_balance``'s dead-channel rule on recorded levels (null counts as silence)."""
+    """One channel below DEAD_CHANNEL_DBFS while the other is at or above ACTIVE_WORD_DBFS (null is silence)."""
     levels = [-np.inf if value is None else value for value in (left, right)]
-    return min(levels) < DEAD_CHANNEL_DBFS and max(levels) > ACTIVE_CHANNEL_DBFS
+    return min(levels) < DEAD_CHANNEL_DBFS and max(levels) >= ACTIVE_WORD_DBFS
 
 
 def stereo_rows(samples: np.ndarray, words: list[dict], rate: int) -> list[dict]:
@@ -125,8 +138,8 @@ def stereo_rows(samples: np.ndarray, words: list[dict], rate: int) -> list[dict]
 
     Returns:
         ``{sourceWord, start, end, leftDb, rightDb, lrDb, active}`` rows. A mono source has no channel
-        levels. ``lrDb`` is None when the source gives no cue, or when the word is inactive or has a dead
-        channel; ``stereo_limits`` names each case.
+        levels. ``lrDb`` is given only when both levels are present; it is None when the source gives no cue,
+        or when the word is inactive or has a dead channel. ``stereo_limits`` names each case.
 
     Raises:
         ValueError: Another sample rate, malformed audio, or a word beyond the decoded audio.
@@ -139,7 +152,7 @@ def stereo_rows(samples: np.ndarray, words: list[dict], rate: int) -> list[dict]
         levels = _word_levels(audio, word, rate)
         left, right = (_shown(levels[0]), _shown(levels[1])) if len(levels) == 2 else (None, None)
         active = max(levels) >= ACTIVE_WORD_DBFS
-        cue = len(levels) == 2 and usable and active and not _dead(left, right)
+        cue = usable and active and left is not None and right is not None and not _dead(left, right)
         rows.append({'sourceWord': word['sourceWord'], 'start': word['start'], 'end': word['end'],
                      'leftDb': left, 'rightDb': right, 'lrDb': round(levels[0] - levels[1], 2) if cue else None,
                      'active': active})

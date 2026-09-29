@@ -11,13 +11,19 @@ joins). The last 0.5 s before its end lies inside the 1.0 s tail. Frames shared 
 once, and dense wins. More than 6000 frames is refused (E-S6), so a caller can refuse an oversized batch
 before any media is opened.
 
-The one decode reads from frame 0 to the stream's last frame. ``keepalive_frames`` adds decode-only frames
-so that no stretch of that decode passes ``KEEPALIVE_FRAMES`` frames without one; each prints progress for
-the inspection owner's idle watchdog and is never measured (REVIEW M1).
+Frame times come from a ``FrameClock``, which is one of two kinds:
+- the nominal ``n / rate``, used only by the early E-S6 plan, before any media is read;
+- the video packets' own presentation timestamps, on the transcript's clock, used by the worker (X78 DM1).
+
+The packet clock is exact with no threshold. A range is sampled from the frame on screen at its start
+through the last frame that starts before its end. A range outside the video's frames is sampled only up
+to the nearest frame, and ``clipped_limits`` names it.
 """
 from __future__ import annotations
 
+import bisect
 import math
+from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -26,7 +32,6 @@ from studio.native_budget_schema import SHA256
 from studio.native_budget_selection import expand_words
 from studio.native_budget_store import require_clip_id
 from studio.native_budget_transcript import index_space_problem, read_transcript
-from studio.native_selected_frames import SelectedFrames
 
 if TYPE_CHECKING:
     from studio.native_speaker_observations import ObservationRequest
@@ -36,7 +41,6 @@ DENSE_TAIL_SECONDS = Fraction(1)
 DENSE_BOUNDARY_SECONDS = Fraction(1, 2)
 MAX_FRAMES = 6000
 CAP_MESSAGE = 'Speaker observation sampling exceeds 6000 frames'
-KEEPALIVE_FRAMES = 1800   # 60 s of 30p source: the 600 s idle deadline then holds down to a 3 fps decode
 SCRIPT_KEYS = frozenset({'clipId', 'scriptIdentity', 'wordRanges'})
 
 
@@ -148,23 +152,83 @@ def _decimal(seconds: float) -> Fraction:
     return Fraction(repr(float(seconds)))
 
 
-def _range_frames(start: float, end: float, rate: Fraction) -> tuple[int, int, dict[int, bool]]:
+@dataclass(frozen=True)
+class FrameClock:
+    """Frame ``n``'s presentation time on the transcript's clock.
+
+    Attributes:
+        rate: The nominal frame rate.
+        times: The video packets' presentation times, ascending, relative to the audio stream's start. When
+            empty, the clock is the nominal ``n / rate``.
+    """
+
+    rate: Fraction
+    times: tuple[Fraction, ...] = ()
+
+    def time(self, frame: int) -> Fraction:
+        """When frame ``frame`` is first shown."""
+        return self.times[frame] if self.times else frame / self.rate
+
+    def span(self, start: Fraction, end: Fraction) -> tuple[int, int]:
+        """(first frame on screen at ``start``, end frame exclusive: the frames that start before ``end``)."""
+        if not self.times:
+            return math.floor(start * self.rate), math.ceil(end * self.rate)
+        first = max(0, bisect.bisect_right(self.times, start) - 1)
+        return first, min(len(self.times), max(first + 1, bisect.bisect_left(self.times, end)))
+
+    def outside(self, start: Fraction, end: Fraction) -> bool:
+        """A range that begins before the first frame or ends after the last one is shown (one nominal interval)."""
+        return bool(self.times) and (start < self.times[0] or end > self.times[-1] + 1 / self.rate)
+
+
+def _range_frames(start: float, end: float, clock: FrameClock) -> tuple[int, int, dict[int, bool]]:
     """(first frame, end frame exclusive, {frame: dense}) of one retained range."""
     begin, finish = _decimal(start), _decimal(end)
-    first, stop = math.floor(begin * rate), math.ceil(finish * rate)
+    first, stop = clock.span(begin, finish)
     if math.ceil((stop - first) / EVERY_NTH_FRAME) > MAX_FRAMES:
         raise ValueError(CAP_MESSAGE)
     tail, head = finish - DENSE_TAIL_SECONDS, begin + DENSE_BOUNDARY_SECONDS
     frames = {}
     for frame in range(first, stop):
-        dense = frame / rate >= tail or frame / rate < head
+        dense = clock.time(frame) >= tail or clock.time(frame) < head
         if dense or (frame - first) % EVERY_NTH_FRAME == 0:
             frames[frame] = dense
     return first, stop, frames
 
 
+def frame_plan(request: ObservationRequest, words: list[dict], clock: FrameClock) -> dict:
+    """Source frames to sample on one frame clock (the rule is in the module docstring).
+
+    Args:
+        request: Its ``scripts`` name the retained word ranges.
+        words: The transcript's ``{sourceWord, text, start, end}`` rows.
+        clock: The nominal clock (early refusal) or the packet clock (the worker).
+
+    Returns:
+        ``sampling``: the rule's constants, ``ranges``, ``frames`` rows ``{frame, t, dense}`` in frame order
+        (``t`` is the frame's time on the transcript clock), and ``clipped``, the ranges outside the frames.
+
+    Raises:
+        ValueError: More than 6000 frames, or a malformed script.
+    """
+    ranges, chosen, clipped = [], {}, []
+    for row in retained_ranges(checked_scripts(request.scripts, len(words)), words):
+        first, stop, frames = _range_frames(row['start'], row['end'], clock)
+        ranges.append({**row, 'firstFrame': first, 'endFrame': stop})
+        if clock.outside(_decimal(row['start']), _decimal(row['end'])):
+            clipped.append(row)
+        for frame, dense in frames.items():
+            chosen[frame] = chosen.get(frame, False) or dense
+        if len(chosen) > MAX_FRAMES:
+            raise ValueError(CAP_MESSAGE)
+    return {'everyNthFrame': EVERY_NTH_FRAME, 'denseTailSeconds': float(DENSE_TAIL_SECONDS),
+            'denseBoundarySeconds': float(DENSE_BOUNDARY_SECONDS), 'maxFrames': MAX_FRAMES, 'ranges': ranges,
+            'frames': [{'frame': frame, 't': round(float(clock.time(frame)), 6), 'dense': chosen[frame]}
+                       for frame in sorted(chosen)], 'clipped': clipped}
+
+
 def observation_plan(request: ObservationRequest, words: list[dict], rate: Fraction) -> dict:
-    """Source frames to sample: sparse inside every retained range, dense at its end and after its start.
+    """The P2-06 plan on the nominal clock ``n / rate``: the early, media-free E-S6 refusal.
 
     Args:
         request: Its ``scripts`` name the retained word ranges.
@@ -172,26 +236,33 @@ def observation_plan(request: ObservationRequest, words: list[dict], rate: Fract
         rate: The source frame rate in frames per second.
 
     Returns:
-        The record's ``sampling``: the rule's constants, ``ranges`` (each with ``firstFrame`` and
-        ``endFrame``) and ``frames`` rows ``{frame, t, dense}`` in frame order.
+        ``frame_plan``'s result on the nominal clock.
 
     Raises:
         ValueError: More than 6000 frames, a malformed script, or a rate that is not a positive Fraction.
     """
     if type(rate) is not Fraction or rate <= 0:
         raise ValueError('Speaker observation sampling needs a positive rational frame rate')
-    ranges, chosen = [], {}
-    for row in retained_ranges(checked_scripts(request.scripts, len(words)), words):
-        first, stop, frames = _range_frames(row['start'], row['end'], rate)
-        ranges.append({**row, 'firstFrame': first, 'endFrame': stop})
-        for frame, dense in frames.items():
-            chosen[frame] = chosen.get(frame, False) or dense
-        if len(chosen) > MAX_FRAMES:
-            raise ValueError(CAP_MESSAGE)
-    return {'everyNthFrame': EVERY_NTH_FRAME, 'denseTailSeconds': float(DENSE_TAIL_SECONDS),
-            'denseBoundarySeconds': float(DENSE_BOUNDARY_SECONDS), 'maxFrames': MAX_FRAMES, 'ranges': ranges,
-            'frames': [{'frame': frame, 't': round(float(frame / rate), 6), 'dense': chosen[frame]}
-                       for frame in sorted(chosen)]}
+    return frame_plan(request, words, FrameClock(rate))
+
+
+def clipped_limits(plan: dict, clock: FrameClock) -> list[str]:
+    """One limit sentence naming the retained ranges outside the video's frames, when there are any.
+
+    Args:
+        plan: ``frame_plan``'s result on the packet clock.
+        clock: That packet clock.
+
+    Returns:
+        [] or one sentence.
+    """
+    if not plan['clipped']:
+        return []
+    shown = '; '.join(f"clip {row['clipId']} words {row['wordRange'][0]}-{row['wordRange'][1]} "
+                      f"({row['start']:.3f}-{row['end']:.3f} s)" for row in plan['clipped'])
+    return [f'Retained speech outside the video frames ({float(clock.times[0]):.3f}-'
+            f'{float(clock.times[-1] + 1 / clock.rate):.3f} s on the transcript clock) is sampled only up to the '
+            f'nearest frame: {shown}.']
 
 
 def source_clock(source: dict) -> Fraction:
@@ -218,41 +289,3 @@ def source_clock(source: dict) -> Fraction:
     if type(size) is not list or len(size) != 2 or not all(type(value) is int and value > 0 for value in size):
         raise ValueError('Speaker observations need the source resolution [width, height]')
     return rate
-
-
-def keepalive_frames(planned: list[int], frame_count: int) -> list[int]:
-    """Decode-only frames that keep every stretch of the one decode within KEEPALIVE_FRAMES frames.
-
-    Args:
-        planned: The sampled frames, ascending.
-        frame_count: Frames in the video stream (its counted packets).
-
-    Returns:
-        Frames not in ``planned``: every KEEPALIVE_FRAMES-th frame from 0, and the last frame. With them the
-        selection starts at frame 0, ends at the last frame, and no two neighbours are further apart.
-    """
-    grid = {*range(0, frame_count, KEEPALIVE_FRAMES), frame_count - 1}
-    return sorted(grid - set(planned))
-
-
-def frame_selection(source: dict, sampling: dict, frame_count: int) -> SelectedFrames:
-    """The sampled frames plus their keepalives, as one exact selection over the counted video frames.
-
-    Args:
-        source: The manifest source row (its ``resolution`` is the decoded geometry).
-        sampling: ``observation_plan``'s result.
-        frame_count: Frames in the video stream, from ``native_speaker_media.stream_clock``.
-
-    Returns:
-        The shared reader's ``SelectedFrames``.
-
-    Raises:
-        ValueError: A sampled frame lies at or past the stream's last frame.
-    """
-    planned = [row['frame'] for row in sampling['frames']]
-    if type(frame_count) is not int or frame_count <= 0 or (planned and planned[-1] >= frame_count):
-        raise ValueError(f'Speaker observation sampling reaches source frame {planned[-1] if planned else None}, '
-                         f'but the video stream holds {frame_count!r} frames')
-    width, height = source['resolution']
-    return SelectedFrames(tuple(sorted({*planned, *keepalive_frames(planned, frame_count)})), width, height,
-                          frame_count)

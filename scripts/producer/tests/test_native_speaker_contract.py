@@ -1,7 +1,13 @@
-"""Speaker-observation contract items the six P2-06 tests do not reach (REVIEW M4, M2, m2, m3, m6).
+"""Speaker-observation contract items the six P2-06 tests do not reach.
 
-All synthetic: the source "media" is a few text bytes that are only hashed; subprocesses are stubbed at
-``run_bounded``; nothing runs ffmpeg, ffprobe, ``observe`` or the owner, and nothing reads footage.
+Covers REVIEW M4, M2, m3 and m6, and X78 DM1, DM2, DM-m1 and DM-m4.
+
+Everything here is synthetic:
+- the source "media" is a few text bytes, which are only hashed;
+- probes are stubbed dicts;
+- subprocesses are stubbed at ``run_bounded``.
+
+Nothing runs ffmpeg, ffprobe, ``observe`` or the owner, and nothing reads footage.
 """
 from __future__ import annotations
 
@@ -32,8 +38,9 @@ FIRST_LIMIT = ('Measurements are cues, not attribution; stills do not establish 
                'nothing here is listening.')
 SOURCE = {'id': 'raw-1', 'duration': 4.0, 'frameRate': '30/1', 'vfr': False, 'resolution': [64, 36], 'rotation': 0,
           'audio': {'present': True, 'channels': 2, 'sampleRate': 48000}}
-PROBE = {'streams': [{'codec_type': 'video', 'nb_read_packets': '120', 'duration': '4.000000', 'start_time': '0.000000'},
-                     {'codec_type': 'audio', 'nb_read_packets': '188', 'duration': '4.010000', 'start_time': '0.000000'}]}
+HEADER = [{'codec_type': 'video', 'start_time': '0.000000', 'time_base': '1/600'},
+          {'codec_type': 'audio', 'start_time': '0.000000', 'time_base': '1/48000'}]
+PROBE = {'streams': HEADER, 'packets': [(str(20 * n), 'K__' if n % 30 == 0 else '___') for n in range(120) if n != 10]}
 
 
 def _sha(path: Path) -> str:
@@ -47,9 +54,14 @@ def _write(path: Path, value: object) -> Path:
     return path
 
 
-def _tone(seconds: float, amplitude: float) -> np.ndarray:
-    """A 1 kHz sine at RATE."""
-    return amplitude * np.sin(2 * np.pi * 1000.0 * np.arange(round(seconds * RATE)) / RATE)
+def _tone(seconds: float, amplitude: float, frequency: float = 1000.0) -> np.ndarray:
+    """A speech-band sine at RATE (1 kHz by default)."""
+    return amplitude * np.sin(2 * np.pi * frequency * np.arange(round(seconds * RATE)) / RATE)
+
+
+def _stereo(seconds: float) -> np.ndarray:
+    """Real stereo: different content on the two channels (1 kHz left, 700 Hz right)."""
+    return np.stack([_tone(seconds, 0.5), _tone(seconds, 0.1, 700.0)], axis=1)
 
 
 class Fixture(unittest.TestCase):
@@ -70,11 +82,11 @@ class Fixture(unittest.TestCase):
         self.body = {**inputs.inspection_request(request),
                      'tools': {'ffmpeg': str(self.tool), 'ffprobe': str(self.tool)}}
 
-    def measure(self, decode: object) -> dict:
+    def measure(self, decode: object, probe: dict = PROBE) -> dict:
         """``_measure`` with the subprocesses stubbed; ``decode`` stands in for the audio decode."""
         faces = ([], [], {'frames': 0})
         with patch.object(observations, '_pinned_decoders'), \
-                patch.object(observations, 'probe_streams', return_value=PROBE), \
+                patch.object(observations, 'probe_streams', return_value=probe), \
                 patch.object(observations, 'decode_audio', side_effect=decode), \
                 patch.object(observations, 'measure_frames', return_value=faces), \
                 contextlib.redirect_stdout(io.StringIO()):
@@ -86,7 +98,7 @@ class RecordTests(Fixture):
 
     def test_record_keys_and_bound_identities(self) -> None:
         """Exactly the P2-06 keys; source and transcript identities, scripts with word ranges, P2's first limit."""
-        record = self.measure(lambda *_: np.stack([_tone(2.0, 0.5), _tone(2.0, 0.1)], axis=1))
+        record = self.measure(lambda *_: _stereo(2.0))
         self.assertEqual(set(record), RECORD_KEYS)
         self.assertEqual(record['source'], {'id': 'raw-1', 'sourceSha256': self.source['sourceSha256'],
                                             'transcriptSha256': _sha(self.transcript)})
@@ -94,9 +106,14 @@ class RecordTests(Fixture):
         self.assertEqual(record['limits'][0], FIRST_LIMIT)
         self.assertEqual(record['tools'], {'ffmpegSha256': _sha(self.tool), 'modelSha256': self.body['model']['sha256'],
                                            'detector': 'yunet-2023mar', 'scoreThreshold': 0.7})
-        self.assertEqual(record['sampling']['clock']['frameCount'], 120)
+        self.assertEqual((record['sampling']['clock']['frameCount'], record['sampling']['clock']['indexDriftFrames']),
+                         (119, -1.0))
+        self.assertEqual((record['sampling']['ranges'][0]['firstFrame'], record['sampling']['frames'][0]['t']), (14, 0.5))
         self.assertEqual(record['sampling']['audio'], {'sampleRate': 8000, 'channels': 2})
         self.assertEqual([row['sourceWord'] for row in record['words']], [1, 2])
+        short = self.measure(lambda *_: _stereo(2.0), {**PROBE, 'packets': PROBE['packets'][:30]})
+        self.assertEqual(len(short['limits']), 4)
+        self.assertIn('clip A words 1-2 (0.500-1.500 s)', short['limits'][3])
         mono = self.measure(lambda *_: _tone(2.0, 0.5).reshape(-1, 1))
         self.assertEqual(mono['limits'][3:], ['Mono source: there is no left-right cue, so lrDb is null for every word.'])
 
@@ -114,9 +131,15 @@ class RecordTests(Fixture):
         def rewrite(*_: object) -> np.ndarray:
             """The decode 'sees' the file change underneath it."""
             self.media.write_bytes(b'other bytes')
-            return np.stack([_tone(2.0, 0.5), _tone(2.0, 0.1)], axis=1)
+            return _stereo(2.0)
 
         self.assertRaisesRegex(ValueError, 'source bytes changed after', self.measure, rewrite)
+
+    def test_measure_reads_the_packet_clock(self) -> None:
+        """``_measure`` maps frames through the probed packet clock: an unreadable timestamp refuses the run."""
+        broken = {**PROBE, 'packets': [('N/A', 'K__')] + PROBE['packets'][1:]}
+        self.assertRaisesRegex(ValueError, 'no readable presentation timestamp', self.measure, lambda *_: _stereo(2.0),
+                               broken)
 
     def test_decoder_pin(self) -> None:
         """The frame reader's PATH ffmpeg/ffprobe must be the pinned tools."""
@@ -137,6 +160,20 @@ class InputTests(Fixture):
         other.write_bytes(b'another model')
         body = {**self.body, 'model': {'path': str(other), 'sha256': _sha(other)}}
         self.assertRaisesRegex(ValueError, 'not the FACE_TRACK model', observations.current_inputs, body)
+
+    def test_batch_approvals_on_another_transcript_are_refused(self) -> None:
+        """``--batch`` checks every current approval's source and transcript against the inputs (REVIEW K31)."""
+        good = {'source': self.source['sourceSha256'], 'transcript': _sha(self.transcript), 'script': 'a' * 64,
+                'wordRanges': [[1, 2]]}
+        approvals = {'A': good, 'B': {**good, 'transcript': 'f' * 64}}
+        record = ({'clips': {'A': {}}}, 0.0)
+        with patch('studio.production.session.read_now', return_value=record), \
+                patch('studio.production.approvals.read_approval', side_effect=lambda _r, _b, clip: {'current': approvals[clip]}):
+            rows = inputs.batch_scripts('batch-one', self.manifest, self.transcript)
+            self.assertEqual(rows, ({'clipId': 'A', 'scriptIdentity': 'a' * 64, 'wordRanges': [[1, 2]]},))
+            with patch('studio.production.session.read_now', return_value=({'clips': {'A': {}, 'B': {}}}, 0.0)):
+                self.assertRaisesRegex(ValueError, 'Clip B of batch batch-one has no approved script on this source',
+                                       inputs.batch_scripts, 'batch-one', self.manifest, self.transcript)
 
     def test_scripts_file_names_source_and_transcript(self) -> None:
         """A scripts file on another source or transcript, or without the identities, is refused (REVIEW M2)."""
@@ -180,35 +217,41 @@ class MediaTests(unittest.TestCase):
         three = {**SOURCE, 'path': '/x', 'audio': {'present': True, 'channels': 6}}
         self.assertRaisesRegex(ValueError, 'mono or stereo', media.decode_audio, three, '/pinned/ffmpeg')
 
-    def test_stream_clock(self) -> None:
-        """Counted frames match duration x rate within one frame, and audio starts within one frame (REVIEW m2)."""
-        done = subprocess.CompletedProcess([], 0, json.dumps(PROBE).encode(), b'')
-        with patch.object(media, 'run_bounded', return_value=done) as run:
-            probe = media.probe_streams('/synthetic.media', '/pinned/ffprobe')
-        self.assertIn('-count_packets', run.call_args.args[0])
-        self.assertEqual(media.stream_clock(probe, Fraction(30))['frameCount'], 120)
-        video, audio = PROBE['streams']
-        cases = (([{**video, 'nb_read_packets': '122'}, audio], 'frame index = time x rate'),
-                 ([video, {**audio, 'start_time': '0.050000'}], 'do not share a clock'),
-                 ([{**video, 'duration': 'N/A'}, audio], 'no numeric duration'),
-                 ([video], 'no audio stream'), ([{**video, 'nb_read_packets': 'N/A'}, audio], 'no counted frames'))
-        for streams, message in cases:
-            self.assertRaisesRegex(ValueError, message, media.stream_clock, {'streams': streams}, Fraction(30))
-        near = {'streams': [video, {**audio, 'start_time': '0.030000'}]}
-        self.assertEqual(media.stream_clock(near, Fraction(30))['audioStartSeconds'], 0.03)
-
     def test_silent_word_has_no_cue_and_a_limit(self) -> None:
-        """Digital silence records null levels and a null lrDb, and the limit names the word (REVIEW m3)."""
-        samples = np.stack([np.concatenate([_tone(1.0, 0.5), np.zeros(RATE)]),
-                            np.concatenate([_tone(1.0, 0.3), np.zeros(RATE)])], axis=1)
-        words = [{'sourceWord': 4, 'text': 'a', 'start': 0.2, 'end': 0.6},
-                 {'sourceWord': 5, 'text': 'b', 'start': 1.3, 'end': 1.7}]
+        """An inactive word (quiet, or digital silence with null levels) has a null lrDb and a named limit (m3)."""
+        samples = np.stack([np.concatenate([_tone(1.0, 0.5), _tone(1.0, 0.001), np.zeros(RATE)]),
+                            np.concatenate([_tone(1.0, 0.3, 700.0), _tone(1.0, 0.0008, 700.0), np.zeros(RATE)])], axis=1)
+        words = [{'sourceWord': 4 + i, 'text': 'w', 'start': start, 'end': start + 0.4} for i, start in enumerate((0.2, 1.3, 2.3))]
         rows = observations.stereo_rows(samples, words, RATE)
-        self.assertEqual((rows[1]['leftDb'], rows[1]['rightDb'], rows[1]['lrDb'], rows[1]['active']),
+        self.assertEqual((rows[2]['leftDb'], rows[2]['rightDb'], rows[2]['lrDb'], rows[2]['active']),
                          (None, None, None, False))
+        self.assertEqual((rows[1]['lrDb'], rows[1]['active']), (None, False))
+        self.assertTrue(rows[1]['leftDb'] < -48 and rows[1]['rightDb'] < -48)
         self.assertIsNotNone(rows[0]['lrDb'])
         self.assertEqual(observations.stereo_limits(samples, rows, RATE),
-                         ['No active speech-band audio (below -48 dBFS) on source words 5: lrDb is null for those words.'])
+                         ['No active speech-band audio (below -48 dBFS) on source words 5-6: lrDb is null for those words.'])
+
+
+class DualMonoTests(unittest.TestCase):
+    """The channel gain is fitted before the residual is measured (X78 DM-m1), at a pinned 40 dB."""
+
+    def test_gain_mismatched_dual_mono_has_no_cue(self) -> None:
+        """One mic on both channels with a 1 dB gain mismatch is dual mono: no lrDb, one named limit."""
+        mono = np.concatenate([_tone(2.0, 0.5), _tone(3.0, 0.2)])
+        samples = np.stack([mono, 0.891 * mono], axis=1)
+        words = [{'sourceWord': i, 'text': 'w', 'start': start, 'end': start + 0.4} for i, start in enumerate((0.5, 2.3))]
+        self.assertEqual([row['lrDb'] for row in observations.stereo_rows(samples, words, RATE)], [None, None])
+        limit = observations.stereo_limits(samples, [], RATE)
+        self.assertEqual(len(limit), 1)
+        self.assertIn('Identical channels up to gain (dual mono: left minus 1.122 x right', limit[0])
+
+    def test_residual_threshold_is_40_db(self) -> None:
+        """A residual 38 dB below the louder channel still gives a cue; 42 dB below is dual mono."""
+        speech = _tone(4.0, 0.5)
+        for below, dual in ((38.0, False), (42.0, True)):
+            residual = 0.5 * 10 ** (-below / 20) * np.sin(2 * np.pi * 1500.0 * np.arange(4 * RATE) / RATE)
+            cue = observations.stereo_cue(np.stack([speech, speech + residual], axis=1), RATE)
+            self.assertEqual(cue is not None and cue.startswith('Identical channels'), dual, below)
 
 
 if __name__ == '__main__':

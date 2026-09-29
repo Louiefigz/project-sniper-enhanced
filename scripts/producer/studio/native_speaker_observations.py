@@ -42,7 +42,7 @@ from studio.native_runtime import digest as file_digest
 from studio.native_speaker_faces import DETECTION_WIDTH, face_rows, measure_frames
 from studio.native_speaker_inputs import batch_scripts, current_inputs, file_scripts, inspection_request
 from studio.native_speaker_media import decode_audio, probe_streams, stream_clock
-from studio.native_speaker_sampling import observation_plan, retained_words, source_clock
+from studio.native_speaker_sampling import clipped_limits, frame_plan, observation_plan, retained_words, source_clock
 from studio.native_speaker_stereo import stereo_cue, stereo_limits, stereo_rows
 from studio.native_stage_evidence import require
 from studio.owned_inspection import read_inspection, require_worker, run_inspection
@@ -103,12 +103,12 @@ def build_record(request: dict, source: dict, rate: Fraction, measured: dict) ->
         request: The inspection request (``transcript``, ``scripts``, ``model``, ``tools``, ``scoreThreshold``).
         source: The manifest source row.
         rate: The source frame rate.
-        measured: ``words``, ``faces``, ``sampling``, ``sheets`` and ``stereoLimits``.
+        measured: ``words``, ``faces``, ``sampling``, ``sheets``, ``stereoLimits`` and ``frameLimits``.
 
     Returns:
         The record. P2-07 binds ``source.sourceSha256``, ``source.transcriptSha256`` and ``scripts``.
     """
-    limits = [CUE_LIMIT, LEVEL_LIMIT, FACE_LIMIT, *measured['stereoLimits']]
+    limits = [CUE_LIMIT, LEVEL_LIMIT, FACE_LIMIT, *measured['stereoLimits'], *measured['frameLimits']]
     return {'schemaVersion': 1, 'kind': KIND,
             'source': {'id': source['id'], 'sourceSha256': source['sourceSha256'],
                        'transcriptSha256': request['transcript']['sha256']},
@@ -133,12 +133,12 @@ def _same_source(source: dict, when: str) -> None:
 
 
 def _measure(request: dict, inputs: dict, root: Path) -> dict:
-    """Probe the stream clock, decode the audio and the sampled frames once each, then build the record."""
+    """Read the packet clock, decode the audio and the sampled frames once each, then build the record."""
     source, words = inputs['source'], inputs['words']
     rate = source_clock(source)
     _pinned_decoders(request['tools'])
     _same_source(source, 'before')
-    clock = stream_clock(probe_streams(source['path'], request['tools']['ffprobe']), rate)
+    frame_clock, clock = stream_clock(probe_streams(source['path'], request['tools']['ffprobe']), rate)
     samples = decode_audio(source, request['tools']['ffmpeg'])
     rows = stereo_rows(samples, retained_words(request['scripts'], words), SAMPLE_RATE)
     measured = {'words': rows, 'stereoLimits': stereo_limits(samples, rows, SAMPLE_RATE)}
@@ -146,7 +146,9 @@ def _measure(request: dict, inputs: dict, root: Path) -> dict:
     _progress('speaker-audio')
     planned = ObservationRequest(Path(request['manifest']['path']), Path(request['transcript']['path']),
                                  tuple(request['scripts']), root)
-    sampling = {**observation_plan(planned, words, rate), 'clock': clock}
+    plan = frame_plan(planned, words, frame_clock)
+    sampling = {**plan, 'clock': clock}
+    measured['frameLimits'] = clipped_limits(plan, frame_clock)
     faces, sheets, decode = measure_frames(request, source, sampling, root)
     _same_source(source, 'after')
     measured.update(faces=faces, sheets=sheets, sampling={**sampling, 'audio': audio, 'decode': decode})
@@ -169,6 +171,9 @@ def worker(file: Path) -> None:
 
 def observe(request: ObservationRequest) -> dict:
     """Measure once under ``run_inspection`` and publish the reference as ``SPEAKER-OBSERVATIONS.json``.
+
+    Args:
+        request: The manifest, transcript, approved scripts and a new output directory.
 
     Returns:
         The completed inspection reference ``{path, sha256, owner, ownerSha256}``.

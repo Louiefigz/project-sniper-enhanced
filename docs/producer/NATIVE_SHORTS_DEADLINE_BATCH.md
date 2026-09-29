@@ -122,7 +122,9 @@ write of the real `~/.project-sniper/production-budgets`,
 under `~/.project-sniper`, is refused before the system call: inside a test method
 as `LiveStateTouched`, which fails that test even when it is caught; in a class or
 module fixture as a class-level error. Python child processes a test starts carry a
-child tripwire: a refused child exits 97 and its report fails the test or the run.
+child tripwire: a refused child exits 97 and its report fails the test or the run. A
+child started with `-I`, `-S` or `-E`, or with an environment that drops `PYTHONPATH`,
+is not armed; such children are reviewed one by one.
 The supervised real-media scripts in `scripts/producer/tests/` use a private
 authority root but the real host pool, so they share its heavy-slot limit.
 

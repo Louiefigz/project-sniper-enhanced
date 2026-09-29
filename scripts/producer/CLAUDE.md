@@ -122,7 +122,8 @@ the ledger lock, then re-checked by one lstat each inside): an owner with
 (`studio/native_run_disk.py`), retries waitable refusals and sysctl timeouts for 45 s and
 records `diskGrant` only after the grown record is durable; a final refusal aborts the
 owner (`disk-space`, `disk-unaccountable`, `pool-unsupported-mix` or
-`disk-reservation-error`; admission refusals record the first two as well). Admission
+`disk-reservation-error`; admission refusals record `disk-unaccountable` and
+`pool-unsupported-mix` as well). Admission
 retries a sysctl/ps timeout at most twice with deadline-clamped backoff, starts no retry once
 the admission deadline is reached, then fails as `host-inspection-timeout` (`studio/native_run_admission.py`); every receipt has
 `leaseCleanupVerified` (with `leaseCleanupReason` when false; `studio/native_run_lease.py`). Tests: `test_native_work_pool.py`,

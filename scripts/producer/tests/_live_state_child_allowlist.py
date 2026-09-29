@@ -68,6 +68,8 @@ REVIEWED: dict[str, str] = {
     'test_media_receipt_read_safety.py': NO_OWNER,
     'test_native_audio_owner.py': REFUSED_FIRST,
     'test_native_audio_owner_lifecycle.py': ISOLATED_CHILD,
+    'test_native_audio_owner_supervisor.py': ('the child runs only require_owned_audio_worker over this test\'s own '
+                                              'receipt and request files; it reads no root'),
     'test_native_budget_family_delivery.py': NO_CHILD,
     'test_native_media_jail.py': NO_OWNER,
     'test_native_owner_snapshot_race.py': NO_CHILD,

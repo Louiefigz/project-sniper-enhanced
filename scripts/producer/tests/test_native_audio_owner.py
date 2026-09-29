@@ -160,12 +160,13 @@ class AudioOwnerGateTests(AudioStageCase):
         self.assertEqual(receipt.get('supervisorPid'), os.getpid())
 
     def test_the_real_receipt_passes_the_supervisor_gate(self) -> None:
-        """M2 regression (P0): the gate that requires supervisorPid == getppid() admits a real NativeRun receipt."""
+        """M2 regression (P0): the supervisorPid a real NativeRun records passes the real worker gate (DSP starts)."""
         from studio.native_run import NativeRun
-        owner = NativeRun('audio-stage', self.settings)
-        receipt = json.loads(json.dumps(owner.result, allow_nan=False))
-        self.assertEqual(receipt.get('supervisorPid'), os.getpid())
-        self.assertNotIn('names another supervisor', str(receipt))
+        recorded = NativeRun('audio-stage', self.settings).result['supervisorPid']
+        with fake_clock(FakeClock()):
+            grant = allocation(start_anchor(), 300, 5)
+            self.run_worker(launch_receipt(self.settings, productionAllocation=grant, supervisorPid=recorded))
+        self.prepare.assert_called_once()
 
     def test_missing_owner_starts_no_dsp(self) -> None:
         """No binding at all, or a binding to an owner receipt that does not exist, is refused."""

@@ -267,9 +267,10 @@ Known limits:
   free bytes), `disk-unaccountable` (a filesystem the pool cannot charge),
   `pool-unsupported-mix` and `disk-reservation-error`; an owner refused at admission for
   a filesystem the pool cannot charge or an unsupported mix records the same two
-  categories. A sysctl/ps timeout during pool admission is retried up to three times
-  (0.5 s, then 1 s backoff, each clamped to the admission deadline) and then fails the
-  owner as `host-inspection-timeout`. Every owner receipt records
+  categories. A sysctl/ps timeout during pool admission is tried up to three times (at
+  most two retries, 0.5 s then 1 s backoff, each clamped to the admission deadline; no
+  retry starts once the deadline is reached) and then fails the owner as
+  `host-inspection-timeout`. Every owner receipt records
   `leaseCleanupVerified`, and when it is false, `leaseCleanupReason`.
 - Unverified on a virtual machine: a macOS guest whose disks report "Virtual
   Interface" or no Protocol Characteristics is refused as not a real disk. No VM guest

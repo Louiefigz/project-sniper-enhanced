@@ -1,6 +1,8 @@
 """Native Long style applications bind current research to executable visuals."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 from copy import deepcopy
 import tempfile
 import unittest

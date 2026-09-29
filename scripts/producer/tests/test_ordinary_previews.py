@@ -6,6 +6,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from graphics.composite_core import CompositeOptions, composite
 from ordinary_preview_windows import preparation_key, preview_windows, window_key
 from ordinary_previews import _current

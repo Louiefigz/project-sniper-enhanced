@@ -1,6 +1,8 @@
 """Tiny generated codec fixtures; never production timing or capacity evidence."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import shutil
 import tempfile

@@ -5,6 +5,7 @@ import shutil
 import unittest
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import native_short_sdk_picture_reuse as sdk
 from studio import native_short_picture_reuse as reuse
 from studio import native_short_autoresume as automatic

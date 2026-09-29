@@ -14,6 +14,7 @@ from cut_preview_io import bound_json, write_new
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
 from studio.native_runtime import REPO, digest, install_runtime
+from _private_budget_root import use_private_budget_root
 
 
 def worker(request: dict) -> None:
@@ -89,6 +90,7 @@ def prepare(root: Path, audio: Path, gsap: Path, canvas: dict) -> bool:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation', choices=('prepare', 'worker'))
     parser.add_argument('path', type=Path)

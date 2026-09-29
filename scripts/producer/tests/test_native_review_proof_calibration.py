@@ -1,6 +1,8 @@
 """Cold-reader proof-owner fixtures are synthetic, never actual measured evidence."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import tempfile
 import unittest

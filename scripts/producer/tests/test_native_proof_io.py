@@ -1,6 +1,8 @@
 """Honest task-local IO observations; fixtures do not establish service rates."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import ctypes as c
 import hashlib

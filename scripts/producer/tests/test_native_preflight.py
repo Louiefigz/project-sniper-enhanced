@@ -1,6 +1,8 @@
 """Native static preflight tests: real SDK rules, no video/browser/network work."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import json
 import os

@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from audio.channel_normalization import ChannelAuthority, ChannelRequest, ChannelTools, SourceIdentity
 from audio.channel_normalization_receipt import decision, peak_token, seal_channel_receipt
 from studio import native_short_dialogue as delivery

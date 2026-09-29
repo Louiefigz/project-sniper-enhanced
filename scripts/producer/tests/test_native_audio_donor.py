@@ -10,6 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from audio import native_audio_donor as donor
 from audio import native_dialogue_delivery as delivery
 from audio.aac_peak_candidates import AAC_PEAK_CANDIDATE_POLICY, corrected_peak_profile

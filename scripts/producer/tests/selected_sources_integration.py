@@ -20,6 +20,7 @@ from studio.native_runtime import install_runtime
 from studio.native_short_delivery import clock, dialogue_reference
 from studio.native_short_export import input_pins
 from studio.native_stage_evidence import require
+from _private_budget_root import use_private_budget_root
 
 
 def frame_hashes(request: dict, source: Path, start: Fraction, frames: int) -> list[str]:
@@ -117,4 +118,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     main()

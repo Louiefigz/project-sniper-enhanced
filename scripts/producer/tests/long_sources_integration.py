@@ -21,6 +21,7 @@ from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
 from studio.native_runtime import install_runtime
 from studio.native_stage_evidence import require
+from _private_budget_root import use_private_budget_root
 
 
 def frame_hashes(request: dict, source: Path, start: Fraction, frames: int = 72) -> list[str]:
@@ -190,4 +191,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     main()

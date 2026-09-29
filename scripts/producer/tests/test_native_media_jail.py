@@ -17,6 +17,7 @@ import tempfile
 import threading
 import time
 import unittest
+import uuid
 from pathlib import Path
 from unittest import mock
 
@@ -56,6 +57,19 @@ def _launcher(decoder: str, arguments: list[str], root: Path,
         os.close(attest)
 
 
+def _marked(marker: str) -> str:
+    """PIDs whose command line carries this test's unique marker; another run's decoder never matches."""
+    return subprocess.run(["/usr/bin/pgrep", "-f", marker], capture_output=True, text=True).stdout.strip()
+
+
+def _watch(marker: str, stop: threading.Event, seen: list[str]) -> None:
+    """Record once that the marked decoder was running, proving the leftover check can see it."""
+    while not seen and not stop.wait(0.05):
+        pids = _marked(marker)
+        if pids:
+            seen.append(pids)
+
+
 @unittest.skipUnless(HAVE_NATIVE, "needs macOS, sandbox-exec and ffmpeg")
 class NativeJailPropertyTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -70,6 +84,26 @@ class NativeJailPropertyTests(unittest.TestCase):
     def _ffmpeg(self, *arguments: str, limits: JailLimits = JailLimits(30, 30)):
         return run_decoder(self.runtime, self.runtime.ffmpeg, ("-nostdin", "-v", "error", *arguments),
                            (str(self.media), limits))
+
+    def _rejected_and_reaped(self, *inputs: str, limits: JailLimits) -> JailRejection:
+        """Decode ``inputs`` to a null output, which the jail must stop; its decoder must be gone after.
+
+        The marker is unique to this call, so a concurrent run of this suite in another checkout
+        cannot satisfy the sighting or fail the leftover check.
+        """
+        marker = f"comment=sniper-jail-test-{uuid.uuid4().hex}"
+        stop, seen = threading.Event(), []
+        watcher = threading.Thread(target=_watch, args=(marker, stop, seen))
+        watcher.start()
+        try:
+            with self.assertRaises(JailRejection) as caught:
+                self._ffmpeg(*inputs, "-metadata", marker, "-f", "null", "-", limits=limits)
+        finally:
+            stop.set()
+            watcher.join()
+        self.assertTrue(seen, "control: the leftover check sees this test's running decoder")
+        self.assertEqual(_marked(marker), "")
+        return caught.exception
 
     def test_admitted_input_decodes_with_attestation(self) -> None:
         done = self._ffmpeg("-i", str(self.media), "-f", "null", "-")
@@ -124,21 +158,15 @@ class NativeJailPropertyTests(unittest.TestCase):
         # limit; ffmpeg treats SIGXCPU as a graceful-stop request. The enforced
         # bound is the supervisor's deadline plus process-group reap.
         began = time.monotonic()
-        with self.assertRaises(JailRejection) as caught:
-            self._ffmpeg("-f", "lavfi", "-i", "mandelbrot=size=1920x1080:rate=30", "-t", "120",
-                         "-f", "null", "-", limits=JailLimits(3, 1))
-        self.assertIn(caught.exception.code, {"DECODE_TIMEOUT", "CPU_LIMIT", "DECODER_EXIT_255"})
+        rejection = self._rejected_and_reaped("-f", "lavfi", "-i", "mandelbrot=size=1920x1080:rate=30", "-t", "120",
+                                              limits=JailLimits(3, 1))
+        self.assertIn(rejection.code, {"DECODE_TIMEOUT", "CPU_LIMIT", "DECODER_EXIT_255"})
         self.assertLess(time.monotonic() - began, 8)
-        leftover = subprocess.run(["/usr/bin/pgrep", "-f", "mandelbrot=size=1920x1080"], capture_output=True)
-        self.assertEqual(leftover.stdout.strip(), b"")
 
     def test_wall_deadline_reaps_the_decoder(self) -> None:
-        with self.assertRaises(JailRejection) as caught:
-            self._ffmpeg("-re", "-f", "lavfi", "-i", "testsrc2=size=64x64:rate=30", "-t", "60",
-                         "-f", "null", "-", limits=JailLimits(1.5, 60))
-        self.assertEqual(caught.exception.code, "DECODE_TIMEOUT")
-        leftover = subprocess.run(["/usr/bin/pgrep", "-f", str(self.media) + " -f null"], capture_output=True)
-        self.assertEqual(leftover.stdout.strip(), b"")
+        rejection = self._rejected_and_reaped("-re", "-f", "lavfi", "-i", "testsrc2=size=64x64:rate=30", "-t", "60",
+                                              limits=JailLimits(1.5, 60))
+        self.assertEqual(rejection.code, "DECODE_TIMEOUT")
 
     def test_output_without_attestation_is_refused(self) -> None:
         with mock.patch.object(native_media_sandbox, "_read_attestation", return_value=None):

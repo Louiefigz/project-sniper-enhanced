@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import native_short_picture_reuse as reuse
 from studio import native_short_autoresume as automatic
 from studio.native_run_config import source_hashes

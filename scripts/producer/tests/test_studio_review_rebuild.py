@@ -10,6 +10,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import studio_review  # noqa: E402
 from studio.review_commands import ProducerPaths  # noqa: E402
 

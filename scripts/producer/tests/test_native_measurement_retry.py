@@ -11,6 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from native_render_processes import MissingProcessFootprint, ProcessIdentity
 from native_render_resources import (
     GIB, ResourceCommandTimeout, ResourceMeasurementError, ResourcePolicy,

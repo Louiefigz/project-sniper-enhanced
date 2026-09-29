@@ -1,6 +1,8 @@
 """Adversarial full rate-reader checks; every owner and counter fixture is fictional."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import unittest
 from pathlib import Path
 

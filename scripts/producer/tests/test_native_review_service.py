@@ -1,6 +1,8 @@
 """Rate helper arithmetic over cold authored geometry; no measurement or adoption claim."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import unittest
 from unittest.mock import patch

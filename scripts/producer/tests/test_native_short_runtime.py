@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from PIL import Image
 
 from studio.native_runtime import apply_bytes, digest

@@ -1,6 +1,8 @@
 """Successful owner finalization binds exact JSON bytes; no real media/owner runs occur."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 import tempfile
 import unittest

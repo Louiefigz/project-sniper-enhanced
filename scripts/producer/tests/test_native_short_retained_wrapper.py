@@ -1,6 +1,8 @@
 """Short dependency closure and upstream file contract; no render or eligibility qualification."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import tempfile
 import unittest
 from pathlib import Path

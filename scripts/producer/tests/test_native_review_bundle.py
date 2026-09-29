@@ -8,6 +8,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import native_review_bundle as bundle
 from studio import native_review_contract as contract
 from studio.native_review_contract import ReviewComposition

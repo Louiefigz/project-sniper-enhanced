@@ -1,6 +1,8 @@
 """A longer timeline's three copy revisions invalidate only declared scene neighborhoods."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 from pathlib import Path
 import tempfile

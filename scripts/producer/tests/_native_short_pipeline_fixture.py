@@ -7,6 +7,7 @@ from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from audio.mastering_profile import NATIVE_SHORT_MASTERING_PROFILE
 from studio.native_run_config import source_hashes
 from studio.native_runtime import digest

@@ -13,7 +13,19 @@ _HERE = os.path.dirname(os.path.abspath(__file__))   # scripts/producer (on sys.
 _TESTS = os.path.join(_HERE, "tests")
 sys.path.insert(0, _TESTS)                            # so test_*.py can `from _common import *`
 
+def _isolate_live_state() -> None:
+    """Give every test private budget and pool roots and refuse the live ones.
+
+    ``tests/_live_state_isolation.py`` replaces the per-user authority root and the host
+    pool namespace for each test and fails any test that touches the real ones. It runs
+    before discovery imports any test module.
+    """
+    sys.path.insert(0, _HERE)
+    import _live_state_isolation  # noqa: F401
+
+
 if __name__ == "__main__":
+    _isolate_live_state()
     suite = unittest.TestLoader().discover(
         start_dir=_TESTS, top_level_dir=_TESTS, pattern="test_*.py")
     result = unittest.TextTestRunner(verbosity=2).run(suite)

@@ -1,10 +1,10 @@
-import { combinePlanningGateVerdicts, type GateBundleInput, type GateBundleVerdict,
+import { combinePlanningGateVerdicts, PLANNING_GATE_IDS, type GateBundleInput, type GateBundleVerdict,
   type PlanningGateId, type PlanningGateVerdict } from "@/app/api/producer/auto-edit/planning-gates";
 import type { ProposalBrainInput } from "../guided-proposal-compiler";
 
-/** Every gate the bundle reducer treats as required; reference_lint stays optional. */
-const REQUIRED: PlanningGateId[] = ["operator_intent", "transcript_cut", "plan_lint", "hook_contract",
-  "template_usage", "claims_contract", "comp_size", "geometry_feasibility"];
+/** Every gate current readiness requires (assertCurrentReadinessGateExecution): all planning
+ * gates except the optional reference_lint. Derived, so a new required gate cannot be missed. */
+const REQUIRED: PlanningGateId[] = PLANNING_GATE_IDS.filter((gate) => gate !== "reference_lint");
 
 function gateVerdict(gate: PlanningGateId, errors: string[]): PlanningGateVerdict {
   return { gate, ok: errors.length === 0, errors, warnings: [], exit: errors.length ? 1 : 0, processGroupStopped: true };

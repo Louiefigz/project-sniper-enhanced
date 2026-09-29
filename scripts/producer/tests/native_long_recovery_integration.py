@@ -12,6 +12,7 @@ from studio.native_long_export import prepare
 from studio.native_long_recovery import ensure_picture
 from studio.native_runtime import digest
 from studio.native_short_pipeline import NativeShortPipeline
+from _private_budget_root import use_private_budget_root
 
 
 def settings(project: Path, output: Path, resume: Path | None = None,
@@ -66,6 +67,7 @@ def check_audio_reuse(partial: Path, recovered: Path, donor: Path | None) -> Non
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('project', type=Path)
     parser.add_argument('output', type=Path)

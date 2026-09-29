@@ -16,6 +16,7 @@ from studio.native_runtime import REPO, digest, install_runtime
 from studio.native_short_export import prepare
 from studio.native_short_pipeline import NativeShortPipeline
 from studio.native_review_contract import read_composition
+from _private_budget_root import use_private_budget_root
 
 HERE = Path(__file__).resolve()
 
@@ -140,6 +141,7 @@ def run(root: Path, source: Path, font: Path) -> None:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation', choices=('worker', 'run'))
     parser.add_argument('path', type=Path)

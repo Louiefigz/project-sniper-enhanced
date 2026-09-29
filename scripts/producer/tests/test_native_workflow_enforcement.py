@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 from types import SimpleNamespace
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_export import export_adapter, validate_export_launch, require_owned_worker, active_owner_snapshot
 from studio.native_long_autoresume import recover_automatically
 from studio.native_long_prebuild import prebuild_snapshot, require_long_prebuild

@@ -21,10 +21,13 @@ import subprocess
 import tempfile
 import unittest
 import urllib.request
+from pathlib import Path
+from unittest import mock
 
 from _common import *  # noqa: F401,F403
 from _common import _HAVE_FFMPEG
 
+import native_work_lease
 from graphics.graphics_render import HYPERFRAMES_BIN
 from studio.studio_project import GenerateRequest, generate_project
 from studio.managed_preview import open_preview, stop_preview
@@ -344,6 +347,13 @@ class StudioBuyerRoutePrivacyTests(StudioPlayerViewTests):
 
     @classmethod
     def _start_server(cls) -> None:
+        # Class fixtures get no shared private root (tests/_live_state_isolation.py): this class's
+        # managed view registers in its own pool namespace, never the host's.
+        state = Path(tempfile.mkdtemp(prefix="studio-player-pool-")).resolve()
+        cls.addClassCleanup(shutil.rmtree, state, True)
+        namespace = mock.patch.object(native_work_lease, "state_root", return_value=state / "native-work")
+        namespace.start()
+        cls.addClassCleanup(namespace.stop)
         cls.cli = str(install_runtime() / "dist" / "cli.js")
         record = open_preview(cls.studio_dir, pick_free_port((41100, 41200)))
         cls.addClassCleanup(stop_preview, cls.studio_dir)

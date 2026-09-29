@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from cut_preview_io import file_hash
 from edit.selected_sources_contract import selection_request, source_sections
 from edit.selected_sources_media import media_info, packet_origin

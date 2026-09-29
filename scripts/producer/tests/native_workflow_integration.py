@@ -23,6 +23,7 @@ from studio.native_review_contract import read_composition
 from studio.native_review_bundle import prepare as prepare_bundle, supervise, publish, read_bundle
 from studio.native_runtime import REPO, digest
 from studio.native_short_pipeline import NativeShortPipeline
+from _private_budget_root import use_private_budget_root
 
 
 def synthetic_review(project: Path, root: Path) -> None:
@@ -112,6 +113,7 @@ def run(source: Path, root: Path) -> None:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source_fixture', type=Path)
     parser.add_argument('new_output', type=Path)

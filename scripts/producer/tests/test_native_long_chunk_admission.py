@@ -1,6 +1,8 @@
 """Public Long chunk contract readers over real private files; no editorial/media qualification."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import argparse
 import copy
 import json

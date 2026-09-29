@@ -1,6 +1,8 @@
 """Independent byte/claim/identity checks; synthetic media is never editorial evidence."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import hashlib
 import json
 import tempfile

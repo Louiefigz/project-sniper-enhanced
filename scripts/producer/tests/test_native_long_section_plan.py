@@ -1,6 +1,8 @@
 """Initial Long partition and targeted repair regressions; no media approval is fabricated."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import copy
 import json
 import tempfile

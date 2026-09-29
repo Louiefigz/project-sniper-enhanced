@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_long_contract import read_long_plan, sample_frame_count
 from studio.native_short_pipeline import NativeShortPipeline
 from studio.native_workload import ProgressWatch, workload_budget

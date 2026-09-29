@@ -11,6 +11,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from audio import native_master_preparation as preparation
 from audio.native_dialogue_delivery import NativeDialogueDelivery, _master
 from audio.mastering_profile import NATIVE_SHORT_MASTERING_PROFILE, LEGACY_MASTERING_PROFILE

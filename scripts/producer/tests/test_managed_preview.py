@@ -1,6 +1,8 @@
 """Preview replacement and admission regressions without starting media."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 import tempfile
 import unittest

@@ -6,6 +6,7 @@ import unittest
 from fractions import Fraction
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_review_html import adapt_html, canvas_clock, decimal_text, frame_points, without_audio
 
 

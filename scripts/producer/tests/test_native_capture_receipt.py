@@ -10,6 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 import cut_preview_io as bounded
 from studio import native_short_delivery as delivery
 from studio import native_stage_evidence as stages

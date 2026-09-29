@@ -12,6 +12,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from graphics import scene_package_cli, scene_text_proposal
 from graphics.scene_bundle import promote_bundle
 from graphics.scene_contract import canonical_json

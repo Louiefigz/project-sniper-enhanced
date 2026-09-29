@@ -9,6 +9,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 import native_render_macos as sampler
 from native_render_measurements import DirectMeasurementError, parse_direct
 from native_render_processes import MissingProcessFootprint

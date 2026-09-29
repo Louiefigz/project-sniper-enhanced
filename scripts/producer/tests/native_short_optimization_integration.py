@@ -17,6 +17,7 @@ from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
 from studio.native_runtime import digest, install_runtime
 from studio.native_short_delivery import qualify_picture
+from _private_budget_root import use_private_budget_root
 
 
 def check_picture(request: dict, root: Path) -> dict:
@@ -119,4 +120,5 @@ def main() -> None:
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real
     main()

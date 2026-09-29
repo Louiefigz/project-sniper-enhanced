@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 import native_program_audio as command
 from audio.native_program_audio import publish_float_copy
 from cut_preview_io import digest, file_hash

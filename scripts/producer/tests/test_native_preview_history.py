@@ -1,6 +1,8 @@
 """Synthetic owner receipts test retention integrity, not media or editorial quality."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 import tempfile
 from pathlib import Path

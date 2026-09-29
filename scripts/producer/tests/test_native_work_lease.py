@@ -14,6 +14,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 import native_work_lease as work
 
 LANE = 'preview-control'

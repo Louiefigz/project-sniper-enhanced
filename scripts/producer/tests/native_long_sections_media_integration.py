@@ -15,6 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from _private_budget_root import use_private_budget_root  # noqa: E402  (tests/ is this script's own folder)
 from studio.native_segments.assemble import concat
 from studio.native_segments.manifest import Tools, check_compatible, check_coverage, describe_piece
 from studio.native_segments.verify import verify_assembly
@@ -76,4 +77,5 @@ class LongSectionsMediaTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    use_private_budget_root()  # private budget authority; the host pool stays real (T0 supervised-script rule)
     unittest.main()

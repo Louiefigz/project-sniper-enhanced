@@ -7,7 +7,10 @@ call the binder after mutation. No validator is patched or bypassed.
 from __future__ import annotations
 
 import json
+import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Callable
 
 from graphics.visual_source_project import admit_project_sources, describe_project
 from studio.native_runtime import digest
@@ -58,29 +61,83 @@ def bind_test_project_sources(project: Path) -> dict:
     return result
 
 
+def bound_clips(preview: Path) -> list[dict]:
+    """The TEST preview record's window clips."""
+    return json.loads(preview.read_text())['clips']
+
+
+HARNESS = Path(__file__).resolve().parent / '_isolated_review.ts'
+
+
+def typed_submission(request: dict, preview: Path, reviewer: dict, inspection: dict) -> tuple[list[Path], dict]:
+    """A TEST unbound motion-critic packet (resolved an hour ago; it freezes the reviewed project plan and names the
+    preview) and observations repeating the row, as the typed helper writes them: submission schema 2, timed on the
+    packet's own declared resolution (no batch clock, so no recorded submission event)."""
+    root, plan = Path(request['output']), (Path(request['project']) / 'SHORT-PROJECT.json').resolve()
+    packet = root / 'TEST-motion-critic-PACKET.json'
+    resolved = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    write_test_json(packet, {'schemaVersion': 1, 'kind': 'sniper-role-packet', 'role': 'motion-critic', 'resolvedAt': resolved,
+                             'subject': {'project': request['project'],
+                                         'preview': {'path': str(preview), 'sha256': digest(preview)}},
+                             'artifacts': [{'path': str(plan), 'sha256': digest(plan)}],
+                             'TEST_ONLY': 'Structural fixture packet; no critic ran'})
+    observations = root / 'TEST-motion-critic-OBSERVATIONS.json'
+    write_test_json(observations, {'kind': 'native-motion-review-observations', 'rolePacketSha256': digest(packet),
+                                   'reviewer': reviewer, 'verdict': 'pass', 'inspection': inspection['entries'],
+                                   'approves': inspection['approves'], 'materialIssues': [], 'findings': []})
+    submission = {'schemaVersion': 2, 'role': 'motion-critic', 'rolePacket': {'path': str(packet), 'sha256': digest(packet)},
+                  'packetResolvedAt': resolved, 'submittedAt': datetime.now(timezone.utc).isoformat(),
+                  'authenticity': 'declared-not-authenticated', 'timing': {'basis': 'declared-not-authenticated'}}
+    return [observations, packet], submission
+
+
+def isolated_gates(test: object, actual: Callable) -> Callable:
+    """``subprocess.run`` for a test: a ``native-short.ts`` gate command runs through the TEST harness
+    (``_isolated_review.ts``), so its engine given check reads this test's private budget and lease roots, never the
+    user's. Every other command runs unchanged."""
+    from _budget_fixture import private_root
+    budgets = private_root(test)
+    roots = (str(budgets), str(budgets.parent / 'leases'))
+
+    def run(command: list[str], **kwargs: object) -> object:
+        """The same command, with native-short.ts swapped for the harness and its private roots."""
+        if isinstance(command, list) and len(command) > 4 and str(command[3]).endswith('native-short.ts'):
+            command = [*command[:3], str(HARNESS), sys.executable, *roots, 'short', *command[4:]]
+        return actual(command, **kwargs)
+    return run
+
+
 def test_motion_review(request: dict, preview: Path, packet: dict) -> Path:
-    """Model only review-schema admission, with explicit no-playback TEST evidence."""
+    """Model only review-schema admission, with explicit no-playback TEST evidence and provenance."""
     root = Path(request['output'])
     evidence = root / 'TEST-no-playback.txt'
     evidence.write_text('TEST structural fixture only. Nobody viewed these synthetic bytes.')
     coverage = ('briefAndRetainedMessage', 'assetsAndSourceEvidence', 'cuesAndSceneCoverage',
                 'layoutCropAndText', 'motionAndTransitions', 'pacingAndAudio', 'feasibility',
                 'visualSourceSelection')
+    reviewer = {'identity': 'TEST synthetic reviewer', 'sessionId': 'TEST-review', 'plannerSessionId': 'TEST-author',
+                'independent': True}
+    inspection = {'schemaVersion': 1, 'approves': ['picture', 'motion'], 'entries': [
+        {'kind': 'motion-playback', 'artifact': {'path': clip['path'], 'sha256': clip['sha256']}, 'span': 'whole',
+         'method': 'TEST fixture declaration: nothing was played'} for clip in bound_clips(preview)]}
+    bound, submission = typed_submission(request, preview, reviewer, inspection)
     review = {
-        'reviewer': {'identity': 'TEST synthetic reviewer', 'sessionId': 'TEST-review',
-                     'plannerSessionId': 'TEST-author', 'independent': True},
+        'reviewer': reviewer,
         'coverage': {key: 'TEST structural assessment; no playback or real review occurred' for key in coverage},
-        'evidence': [{'path': str(evidence), 'sha256': digest(evidence)}],
+        'evidence': [{'path': str(path), 'sha256': digest(path)} for path in (*bound, evidence)],
         'review': {'schemaVersion': 1, 'stage': 'plan', 'verdict': 'pass',
                    'summary': 'TEST validator fixture only', 'materialIssues': [], 'findings': []},
         'units': {row['id']: row['hash'] for row in packet['units']},
         'preview': {'path': str(preview), 'sha256': digest(preview)},
         'assessment': 'TEST fixture, not production approval; no media was played or reviewed.',
+        'inspection': inspection, 'submission': submission,
+        'approvedContent': {'approved': None, 'planChecked': False, 'departures': [], 'contradictions': [],
+                            'proposedChanges': []},
     }
     file = root / 'TEST-motion-reviews.json'
     write_test_json(file, {'schemaVersion': 1, 'reviews': [review]})
     request['previewReviews'] = str(file)
-    request['pins'].update({str(path): digest(path) for path in (file, preview, evidence)})
+    request['pins'].update({str(path): digest(path) for path in (file, preview, evidence, *bound)})
     return file
 
 
@@ -93,7 +150,8 @@ def bind_test_motion_previews(request: dict) -> Path:
     for index, window in enumerate(preview_windows(packet)):
         media = root / f'TEST-preview-{index}.bin'
         media.write_bytes(b'TEST bytes only, not encoded media or playback proof')
-        clips.append({'path': str(media), 'sha256': digest(media),
+        clips.append({'path': str(media), 'sha256': digest(media), 'startFrame': window['startFrame'],
+                      'endFrameExclusive': window['endFrame'],
                       'absoluteFrameRange': [window['startFrame'], window['endFrame']]})
     file = root / 'motion-previews.json'
     write_test_json(file, {'status': 'native-motion-previews-complete', 'packet': packet,

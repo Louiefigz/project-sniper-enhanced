@@ -31,6 +31,7 @@ from pathlib import Path
 
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # producer pkg root on path
+import _live_state_isolation  # noqa: F401,E402  private budget/pool roots; live state refused
 from motion import baseline_look as bl
 from broll import broll_insert as bi
 from broll import broll_pool as bp

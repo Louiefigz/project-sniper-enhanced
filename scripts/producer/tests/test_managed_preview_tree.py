@@ -7,6 +7,7 @@ import sys
 import unittest
 from unittest import mock
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import managed_preview_state as state
 from studio.studio_server import StudioServerError
 

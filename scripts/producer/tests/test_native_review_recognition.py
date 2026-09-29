@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 sys.path[:0] = [str(Path(__file__).resolve().parents[2]), str(Path(__file__).resolve().parents[1])]
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio import native_review_recognition as recognition
 from studio.native_runtime import digest
 

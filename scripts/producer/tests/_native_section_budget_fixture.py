@@ -1,6 +1,8 @@
 """Private real authority records and controlled clocks for section-budget tests."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 import tempfile
 from pathlib import Path

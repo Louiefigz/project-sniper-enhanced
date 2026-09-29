@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.long_sources_html import inspect_html, transform
 from studio.long_sources_project import MANIFEST, check_project, hash_file, project_inputs, selection, write_project
 from studio.long_sources import prepare_project

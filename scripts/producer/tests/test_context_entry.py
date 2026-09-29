@@ -16,6 +16,7 @@ from unittest.mock import patch
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 import context as entry
 import context_inventory as inventory
 

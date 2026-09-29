@@ -1,6 +1,8 @@
 """Current material approval propagates through completed section-task dependencies."""
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import unittest
 
 from studio.production.section_results import read_completed_result

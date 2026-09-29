@@ -9,6 +9,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
 from studio.native_runtime import digest

@@ -1,17 +1,18 @@
 /** Persistence/replay contracts only: synthetic bytes and injected lineage, no real acceptance or render. */
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { test } from "node:test";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "../auto-edit-hash";
 import { assertGuidedNativeBinding } from "../guided-native-binding";
 import { prepareGuidedNativeShortRequest } from "../guided-native-authority";
-import { readNativeShortProject, writeNativeShortProject } from "../native-short-project";
+import { assembleNativeShortHtml, readNativeShortProject, writeNativeShortProject } from "../native-short-project";
+import { nativeShortPacingReport } from "../native-short-pacing";
+import type { LegacyNativeShortReadAuthority } from "../native-short-request-binding";
 import { writeGuidedNativeProject } from "../guided-native-project-store";
 import { buildNativeShortProjectFiles } from "../guided-native-project";
 import { guidedNativeSourceMedia } from "../guided-native-geometry";
 import { guidedBindingFixture } from "./_guided-native-binding-fixture";
-import { refreshNativePacingFixture } from "./_native-short-project-fixture";
 import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
 import { assertNativeShortPrebuildReview } from "../native-short-prebuild-review";
 
@@ -31,6 +32,26 @@ function rehashProject(directory: string, change: (input: Fixture["input"]) => v
   manifest.files = manifest.files.filter((row: { file: string }) => row.file !== omit)
     .map((row: { file: string }) => ({ ...row, sha256: fileSha256(path.join(directory, row.file)) }));
   writeFileSync(manifestPath, canonicalJson(manifest));
+}
+
+/** Rewrite a current build as historical requestless strategy-v2 bytes (the current writer never emits
+ * them) and return the external cold-read authority such bytes require (native-short-request-binding.ts). */
+function historicalRequestless(directory: string): LegacyNativeShortReadAuthority {
+  const file = path.join(directory, "SHORT-PROJECT.json"), manifestFile = path.join(directory, "PROJECT-MANIFEST.json");
+  const input = JSON.parse(readFileSync(file, "utf8")), manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+  input.strategy.schemaVersion = 2; delete input.strategy.assetUse; delete input.requestPacket; delete input.guidedBinding;
+  delete input.prebuildReview; delete manifest.prebuildReview;
+  for (const asset of input.assets) delete asset.origin;
+  writeFileSync(file, canonicalJson(input));
+  const removed = ["PREBUILD-REVIEW.json", "ASSET-USE-REPORT.json", "GUIDED-PROPOSAL.json"];
+  for (const name of removed) rmSync(path.join(directory, name), { force: true });
+  writeFileSync(path.join(directory, "PACING-REPORT.json"), canonicalJson(nativeShortPacingReport(input, assembleNativeShortHtml(input))));
+  manifest.projectHash = canonicalJsonSha256(input);
+  manifest.files = manifest.files.filter((row: { file: string }) => !removed.includes(row.file))
+    .map((row: { file: string }) => ({ ...row, sha256: fileSha256(path.join(directory, row.file)) }));
+  writeFileSync(manifestFile, canonicalJson(manifest));
+  return { schemaVersion: 1, scope: "legacy-native-short-cold-read", projectPath: realpathSync(directory),
+    projectSha256: fileSha256(file)!, manifestSha256: fileSha256(manifestFile)! };
 }
 
 test("V10 guided preparation retains pending work but cannot publish it unresolved", () => withFixture(f => {
@@ -95,19 +116,26 @@ test("reserved V10 location rejects stripping every editable guided pointer and 
     delete input.guidedBinding; delete input.requestPacket;
     input.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(input);
   }, "GUIDED-PROPOSAL.json");
-  assert.throws(() => readNativeShortProject(built.directory, f.dependencies), /Reserved guided native project lost/);
+  // Requestless strategy-v3 bytes have no read lane at all (native-short-request-binding.ts).
+  assert.throws(() => readNativeShortProject(built.directory, f.dependencies), /no historical read lane/);
   const alias = path.join(f.directory, "plain-native-alias"); symlinkSync(built.directory, alias);
-  assert.throws(() => readNativeShortProject(alias, f.dependencies), /Reserved guided native project lost/);
+  assert.throws(() => readNativeShortProject(alias, f.dependencies), /no historical read lane/);
+  // Rewritten as historical bytes with exact external cold-read authority, the reserved location still refuses.
+  const authority = historicalRequestless(built.directory);
+  assert.throws(() => readNativeShortProject(built.directory, f.dependencies, authority), /Reserved guided native project lost/);
+  assert.throws(() => readNativeShortProject(alias, f.dependencies, authority), /Reserved guided native project lost/);
 }));
 
 test("historical V9 metadata without guided pointers stays readable at a verified reserved location", () => withFixture(f => {
-  delete f.input.requestPacket; refreshNativePacingFixture(f.input);
-  const built = writeNativeShortProject(f.input, path.join(f.directory, "old-shape"));
+  // The current writer requires the prepared packet, so historical requestless bytes are rewritten from a build.
+  f.bind(); const built = writeNativeShortProject(f.input, path.join(f.directory, "old-shape"), f.dependencies);
   const parent = path.join(f.producerDir, "native-development"); mkdirSync(parent);
   const destination = path.join(parent, f.proposal.proposalHash); renameSync(built.directory, destination);
-  assert.equal(readNativeShortProject(destination, f.dependencies).guidedBinding, undefined);
+  const authority = historicalRequestless(destination);
+  assert.throws(() => readNativeShortProject(destination, f.dependencies), /external controller-owned/);
+  assert.equal(readNativeShortProject(destination, f.dependencies, authority).guidedBinding, undefined);
   f.proposal.proposalHash = "e".repeat(64);
-  assert.throws(() => readNativeShortProject(destination, f.dependencies), /superseded guided proposal/);
+  assert.throws(() => readNativeShortProject(destination, f.dependencies, authority), /superseded guided proposal/);
 }, 9));
 
 test("reserved location cannot adopt a packet from another proposal directory", () => withFixture(f => {

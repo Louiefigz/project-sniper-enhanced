@@ -6,6 +6,27 @@ import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
 import {NativeFrameTransport} from '../producer/studio/runtime/frame-source-transport.mjs';
 import {nativeSourceCacheIdentity} from '../producer/studio/native_source_cache.mjs';
+import {createHash} from 'node:crypto';
+import {nativeSourceContentIdentity} from '../producer/studio/native_source_identity.mjs';
+import {openSourceStore} from '../producer/studio/native_source_store.mjs';
+import {publishStoreEntry} from '../producer/studio/native_source_store_entry.mjs';
+
+const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
+
+function writeFrames(directory, totalFrames) {
+  fs.mkdirSync(directory,{recursive:true});fs.writeFileSync(path.join(directory,'.hf-complete'),'TEST complete cache');
+  for(let frame=0;frame<totalFrames;frame++)fs.writeFileSync(path.join(directory,`frame_${String(frame+1).padStart(5,'0')}.png`),`TEST PNG frame ${frame}`);
+}
+
+/** Seed the shared content store through its real publication primitive (TEST frames only). */
+export function seedStoreEntry(request, video, totalFrames, rate=25) {
+  const store=openSourceStore(request.cache);
+  const context={project:request.project,request,fps:{num:rate,den:1},rate,runtimeLibrarySha256:sha('TEST SDK library')};
+  const identity=nativeSourceContentIdentity(context,video,store.views),staging=path.join(store.views,'test-seed',identity.pathName);
+  writeFrames(staging,totalFrames);
+  return publishStoreEntry(store,{key:identity.contentKey,blob:identity.contentBlob,frames:totalFrames,directory:staging,
+    publisher:{test:'TEST fixture seed'}}).dir;
+}
 
 /** Exercise the real local transport contract without opening a server or decoding an image. */
 function fakeServer(calls) {

@@ -13,7 +13,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from _native_short_pipeline_fixture import ShortPipelineFixture
+from _native_short_pipeline_fixture import ShortPipelineFixture, isolate_early_checks
 from studio.native_runtime import digest
 from studio.native_short_pipeline import FINAL_STATUS, RENDER_STATUS, NativeShortPipeline
 from studio.native_short_resume import prepare_reverification
@@ -28,6 +28,7 @@ class NativeShortPipelineTests(unittest.TestCase):
         """Exercise real filesystem receipts; only child execution is a TEST stub."""
         base = Path(self.enterContext(tempfile.TemporaryDirectory(dir='/private/tmp')))
         self.fixture = ShortPipelineFixture(base)
+        isolate_early_checks(self)
         self.enterContext(mock.patch('studio.native_short_pipeline.NativeRun',
                                      side_effect=self.fixture.owner_factory))
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
@@ -45,7 +46,11 @@ class NativeShortPipelineTests(unittest.TestCase):
         self.assertTrue(self.pipeline().execute())
         calls = self.fixture.calls
         self.assertEqual([label for label, _ in calls], ['capture', 'preview-picture-0', 'preview-package-0', 'preview', 'pipeline', 'verification'])
-        self.assertEqual([config.deadline for _, config in calls], [600, 1200, 1200, 600, 600, 600])
+        # Every owner queues in the host pool (600 s) on top of its unchanged 600 s work allowance.
+        self.assertEqual([config.deadline for _, config in calls], [1200] * 6)
+        self.assertEqual([config.capacity_wait_seconds for _, config in calls], [600] * 6)
+        self.assertEqual([config.lane for _, config in calls],
+                         ['heavy', 'heavy', 'audio', 'heavy', 'heavy', 'heavy'])
         self.assertEqual(len({id(config) for _, config in calls}), 6)
         self.assertEqual(calls[4][1].command[-1], 'render')
         self.assertEqual(calls[5][1].command[-1], 'verify')

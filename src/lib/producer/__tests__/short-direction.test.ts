@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parseShortDirection, shortDirectionInstructions, shortMediaPolicy, shortDirectionForStyle } from "../short-direction";
+import { GIVEN_TITLE_OVERRIDE, parseShortDirection, shortDirectionInstructions, shortMediaPolicy, shortDirectionForStyle } from "../short-direction";
 import { validateIntent } from "../intent-presets";
 import { buildAutoEditRequest, buildStarterPlan } from "../intent-flow";
 import { parseAutoEditIntent } from "../../../app/api/producer/auto-edit/stream";
@@ -25,6 +25,8 @@ test("automatic selection carries the source-first and show-the-change obligatio
   assert.match(prompt, /retained message/); assert.match(prompt, /outside the dialogue cut/);
   assert.match(prompt, /visible operation/); assert.match(prompt, /cannot prove a health transformation/);
   assert.match(prompt, /canonical Script Director/);
+  assert.ok(prompt.includes(GIVEN_TITLE_OVERRIDE), "a batch-given title overrides the Director hook workflow");
+  assert.match(GIVEN_TITLE_OVERRIDE, /given block overrides this hook workflow.*verbatim.*skip the Director hook and title critique/);
   assert.doesNotMatch(prompt, /web_capture.py/);
   const publicPrompt = shortDirectionInstructions({ ...auto, mediaPolicy: { placement: "auto", sources: "public-web" } });
   assert.match(publicPrompt, /web_capture.py/); assert.match(publicPrompt, /exact official site/);

@@ -64,12 +64,18 @@ REVIEWED: dict[str, str] = {
     'test_local_asr_callers.py': NO_OWNER,
     'test_local_asr_worker.py': NO_OWNER,
     'test_local_whisper.py': NO_OWNER,
+    # deferred row; 7dde85ba blob unchanged (m7): ORPHAN children get the test's registry root (M-020 review)
+    'test_managed_preview_launch.py': OWN_ROOTS,
     'test_managed_preview_tree.py': NO_OWNER,
     'test_media_receipt_read_safety.py': NO_OWNER,
     'test_native_audio_owner.py': REFUSED_FIRST,
     'test_native_audio_owner_lifecycle.py': ISOLATED_CHILD,
     'test_native_audio_owner_supervisor.py': ('the child runs only require_owned_audio_worker over this test\'s own '
                                               'receipt and request files; it reads no root'),
+    # deferred row re-reviewed on the merged file: LAUNCHER, reserve() and DELIVER each assign their own roots first (M-020 review)
+    'test_native_batch_cli.py': OWN_ROOTS,
+    # deferred row re-reviewed on the merged file: the child only reads locked_batch(<root argument>) (M-020 review)
+    'test_native_budget_authority.py': EXPLICIT_ROOT,
     'test_native_budget_family_delivery.py': NO_CHILD,
     'test_native_media_jail.py': NO_OWNER,
     'test_native_owner_snapshot_race.py': NO_CHILD,
@@ -78,7 +84,11 @@ REVIEWED: dict[str, str] = {
     'test_native_review_admission.py': NO_CHILD,
     'test_native_runtime_lock.py': NO_OWNER,
     'test_native_selected_frames.py': NO_OWNER,
+    # deferred row; 7dde85ba blob unchanged: sys.executable only inside a NativeRunConfig command value (M-020 review)
+    'test_native_short_draft_launch.py': NO_CHILD,
     'test_native_short_picture_reuse.py': NO_CHILD,
+    # deferred row; 7dde85ba blob unchanged: HOLD_OWNER holds the cache path it is given (M-020 review)
+    'test_native_source_store.py': EXPLICIT_ROOT,
     'test_native_work_lease.py': OWN_ROOTS,
     'test_native_work_pool_interop.py': OWN_ROOTS,
     'test_native_workflow_enforcement.py': NO_CHILD,
@@ -95,9 +105,23 @@ REVIEWED: dict[str, str] = {
     'test_process_runner.py': NO_OWNER,
     'test_process_runner_bounded.py': NO_OWNER,
     'test_process_runner_fds.py': NO_OWNER,
+    # children are a flock holder and sleepers (M-020 review)
+    'test_production_dispatch.py': NO_OWNER,
+    # children are sleepers; one imports headless.process_runner only (M-020 review)
+    'test_production_process.py': NO_OWNER,
+    # REPLAY imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)
+    'test_production_recovery.py': ISOLATED_CHILD,
+    # the child is a sleeper (M-020 review)
+    'test_production_settle.py': NO_OWNER,
+    # RACE imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)
+    'test_production_staging.py': ISOLATED_CHILD,
+    # RACE imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)
+    'test_production_tasks.py': ISOLATED_CHILD,
     'test_program_mix_registry.py': STDLIB,
     'test_render_lane.py': NO_OWNER,
     'test_review_packet.py': NO_OWNER,
+    # node _isolated_review.ts gets this test's private budget/pool roots (M-020 review)
+    'test_role_packet_submission_contract.py': OWN_ROOTS,
     'test_stage_timing.py': NO_OWNER,
     'test_stage_timing_markers.py': NO_OWNER,
     'test_stage_timing_propagation.py': NO_OWNER,

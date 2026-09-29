@@ -651,6 +651,13 @@ Use existing transcript and caption-grouping code; do not rerun ASR for a title
 or layout revision. Native authoring supports the chosen composition directly.
 The obsolete contained-landscape development fallback is removed.
 
+Every element of authored extension markup and of each mounted catalog composition needs a unique
+`data-hf-id`; otherwise opening the project in Studio rewrites those files and invalidates the built
+project and its delivered MP4 (STUDIO_REVIEW_LANE.md). The build refuses such a project and names the
+elements. Add the ids once, before the file is hashed into the plan, with
+`./sniper node --import tsx scripts/producer/native-short.ts studio-ids <file.html> <new-file.html>`:
+it inserts `data-hf-id` into each start tag that lacks one and leaves every other byte unchanged.
+
 For a confirmed caption spelling correction, `canvas.captionCorrections` accepts
 an ordered list of `{occurrenceId, expectedSourceText, displayText, reason}`.
 Each entry binds one existing occurrence and its exact original ASR spelling.
@@ -727,6 +734,92 @@ with sound, revise affected content, and obtain current independent reviews
 before full picture rendering. Follow [render readiness](RENDER_READINESS.md)
 for the review bundle, coverage and conservative reuse rules. A generated clip
 or a matching hash is not a viewing or listening review.
+
+A critic packet assigns only the governing sections that apply to its role and to what
+the subject actually uses; the maintained catalog records every section it leaves out,
+with the reason and a content pin, so text added inside an excluded range stops packet
+resolution until the catalog is reviewed. A feature whose use is unknown keeps its
+sections. Large request indexes are narrowed to the entries the plan mounts, but the
+catalog index stays assigned whole whenever a custom or reference route must be judged.
+The packet records its own size and reading estimate (an estimate, not review time).
+
+Author the facts every clip shares once per production instead of in every critic:
+`./sniper python3 -B scripts/producer/context.py --evidence-draft /absolute/production
+--manifest /absolute/source/asset_manifest.json --bind title-reference=/absolute/ref.jpg
+--bind selections=/absolute/SELECTIONS.json` writes a draft with the engine-observed
+source, transcript and file identities. Fill in the source scan, the people and speaker
+evidence (each claim cites a bound file or a timecoded source moment), the selected
+reference and the decisions made before production, then seal it with `--evidence-seal
+<draft>` and pass the sealed `SHARED-EVIDENCE-vN.json` to every clip's packets with
+`--shared-evidence`. Binding re-runs every check: a record that was edited, moved,
+copied, superseded, describes another source or manifest, or binds a changed file is
+refused, and `--evidence-check <record>` repeats that check for the submission step.
+Only the engine-observed identities are facts critics may reuse; every authored claim
+and decision is input a critic checks and may raise as material, and with evidence
+bound each plan scene records `evidenceBasis` (`inspected` or `shared-evidence-only`).
+
+Titles and scripts handed over at batch start (requirement revision
+`approved-content-production-2026-09-27`) are inputs, not reopened decisions, and live
+only in the deadline batch's authority: its typed approval-changed events are the only
+change record, and shared evidence never carries them. Name the clip with `--batch <id>
+--clip <id>` on every role packet; whenever a live batch claims or holds the plan's
+source recording, a packet without them is refused, as is a clip with no approved title
+and script, an approval that does not recompute from the admitted transcript, or a plan
+whose cut selection is not that clip's Short. The packet reads the approval through the
+batch authority's `studio.production.api.read_approval`, the only source, and only while that
+batch is the one current active or draining batch; a closed, archived or unknown batch or clip is
+refused. Resolving a batch-bound packet also records a small `packet-resolved` event (packet hash,
+role, clip, batch-clock time) in that batch's trail. The packet's `given` block then reports the
+title (`exact`, `normalization-only` or `different`), and the selection, caption text and
+timing, each as `{matches, details}`. The author uses the given title verbatim and skips
+the Director hook fill; critics skip the Director title critique, treat a departure as
+material and a factual problem inside a given item as a finding for the operator, not a
+blocker. When the plan declares
+`canvas.captionSuppressions`, every critic packet lists each window, its reason and the
+kept words spoken inside it.
+
+The critic records what it actually did as typed `inspection` entries, each naming
+the exact artifact path and sha256 it covered: `still-frames` (`samples`: the exact
+frames looked at), `motion-playback` (continuous normal-speed playback) and
+`audio-listening` (hearing the actual audio). Stills cover only their sampled frames:
+sparse stills are reported as a sampled picture review with the count of frames
+looked at, never as every frame, and exhaustive stills are not required. `approves`
+lists what a pass speaks for: `picture` needs frames looked at on every reviewed
+rendering, `motion` needs playback and `audio` needs listening over every reviewed
+frame. Frame sheets are still frames and never establish motion; decode, loudness
+and sample checks are not listening. The helper refuses an approval without its
+matching evidence, an entry for other bytes than the reviewed ones, a note, event
+note or located issue at a frame nobody looked at (listening supports only an audio-lane
+claim; it never supports a visual or motion note or claim), and playback or listening
+longer than the measured interval. A plan review approves nothing beyond the plan.
+Records keep the answered packet's hash, its resolution time and the submission time, and
+the answered packet must have reviewed the very plan, preview or MP4 the record admits.
+For a batch-bound packet the interval runs on the batch clock from the `packet-resolved`
+event the authority recorded to the submission; for an unbound packet it runs from the
+packet's own author-written `resolvedAt`, which nothing authenticates (labelled
+`declared-not-authenticated`). The interval is only a lower bound: it never shows that
+anyone watched or listened, and a deliberately delayed submission looks like a slow review.
+All typed evidence is declared by the reviewer, not authenticated. The operator's approved
+title and script (requirement `approved-content-production-2026-09-27`; the packet's `given`
+block) carry forward: a pass is refused while the subject departs from them, and a revise
+covers each departure with a material issue scoped `approved-content-contradiction`. The
+submission and every gate that admits a build (`bind-prebuild`, `build`, `check-export`), a
+full render (the motion-review admission) or an editorial final (`check-final`) re-derive the
+given block now (`context.py --given-check`: the authority's current approval against the plan
+the packet froze, or the omission refusal for an unbound packet) and admit a record only while
+its approved content equals that result: an approval changed after the review, a batch
+started after it, a closed batch, or an edited or copied given block admits nothing. A native
+Short build needs a schema-2 plan review; schema-1 records stay readable for display only. A proposed change to the given words
+themselves is a finding scoped `proposed-change`, surfaced for the operator without withholding
+execution approval or asking for another approval round. Bound shared evidence is re-checked at submission, and plan scenes then state an
+`evidenceBasis`. Only a motion pass that approves
+`motion` admits full rendering; a picture-only pass is recorded and admits nothing,
+so the labeled review draft remains the route until a playback review exists. A
+checked MP4 is a technical pass: `native-review.ts check-final` reports
+`editorialFinal: approved` only for a pass approving picture, motion and audio over
+the whole exact MP4. Records written before typed inspection read as historical,
+untyped evidence and are never upgraded; a native Short's full picture needs a
+typed motion approval.
 
 ```sh
 ./sniper python3 scripts/producer/studio/native_export.py /absolute/new-project /absolute/new-export --preview-reviews /absolute/motion-reviews.json

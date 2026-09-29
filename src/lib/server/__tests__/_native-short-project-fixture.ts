@@ -1,7 +1,7 @@
 import { refreshVisualSourceFixture } from "./_visual-source-fixture";
 /** Synthetic contract data only; no visual/source-quality claim. */
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -14,6 +14,7 @@ import { nativePacingBindings, nativePacingVisualWindows } from "../native-short
 import type { NativeShortProjectInput } from "../native-short-project";
 import type { NativeAssetBinding } from "../native-short-strategy";
 import { pythonInterpreter } from "../../../app/api/_lib/spawn-python";
+import { typedRecordParts } from "./_native-review-fixture";
 import { resolveVisualPlanBinding } from "../visual-plan-binding";
 
 function assets(directory: string): NativeAssetBinding[] {
@@ -94,21 +95,45 @@ export function refreshNativePacingFixture(input: NativeShortProjectInput): void
   refreshNativePrebuildReviewFixture(input);
 }
 
-/** TEST-only synthetic pass for structural admission tests; never a real creative approval. */
+/** TEST-only synthetic schema-2 pass for structural admission tests; never a real creative approval. Its role packet
+ * binds no batch (the TEST given check in _native-review-fixture answers for it) and nobody inspected anything. */
 export function refreshNativePrebuildReviewFixture(input: NativeShortProjectInput): void {
-  const directory = path.dirname(input.assets[0].path), evidence = path.join(directory, "TEST-prebuild-evidence.txt");
-  writeFileSync(evidence, "TEST synthetic evidence; no footage inspection, playback, reviewer or creative approval.");
-  const planHash = nativeShortPrebuildPlanHash(input);
-  const receipt: NativePrebuildReview = { schemaVersion: 1, scope: "native-short-full-plan", planHash,
-    reviewer: { identity: "TEST synthetic reviewer", sessionId: "TEST-review-session", plannerSessionId: "TEST-plan-session", independent: true },
+  const directory = path.dirname(input.assets[0].path), planHash = nativeShortPrebuildPlanHash(input);
+  const reviewer = { identity: "TEST synthetic reviewer", sessionId: "TEST-review-session", plannerSessionId: "TEST-plan-session",
+    independent: true as const };
+  const reviewed = path.join(directory, `TEST-reviewed-plan-${planHash}.json`);
+  writeFileSync(reviewed, canonicalJson({ ...input, prebuildReview: undefined }));
+  const parts = typedRecordParts(directory, "plan-critic", { reviewer, verdict: "pass", inspection: { entries: [], approves: [] } },
+    { plan: { path: reviewed, sha256: fileSha256(reviewed)!, planHash } }, [reviewed]);
+  const receipt: NativePrebuildReview = { schemaVersion: 2, scope: "native-short-full-plan", planHash, reviewer,
     coverage: Object.fromEntries(NATIVE_PREBUILD_COVERAGE.map(key => [key,
       "TEST synthetic assessment only; not a production review"])) as NativePrebuildReview["coverage"],
-    evidence: [{ path: evidence, sha256: fileSha256(evidence)! }],
+    evidence: parts.evidence,
     review: { schemaVersion: 1, stage: "plan", verdict: "pass", summary: "TEST structural fixture only; no creative approval",
-      materialIssues: [], findings: [] } };
+      materialIssues: [], findings: [] },
+    inspection: { schemaVersion: 1, entries: [], approves: [] },
+    submission: parts.submission as NativePrebuildReview["submission"], approvedContent: parts.approvedContent };
   const file = path.join(directory, `TEST-prebuild-${planHash}.json`);
   writeFileSync(file, canonicalJson(receipt));
   input.prebuildReview = { path: file, sha256: fileSha256(file)! };
+}
+
+/** Apply a TEST change to the fixture's plan review; a typed record's bound observations are re-written to mirror its
+ * reviewer, verdict, findings and inspection, as the typed submission would have. Structural tests only. */
+export function reviseNativePrebuildReviewFixture(input: NativeShortProjectInput,
+  change: (review: NativePrebuildReview) => void): void {
+  const file = input.prebuildReview!.path, review = JSON.parse(readFileSync(file, "utf8")) as NativePrebuildReview;
+  change(review);
+  if (review.schemaVersion === 2 && review.inspection) {
+    const binding = review.evidence[0], observations = JSON.parse(readFileSync(binding.path, "utf8")) as Record<string, unknown>;
+    Object.assign(observations, { reviewer: review.reviewer, verdict: review.review.verdict,
+      materialIssues: review.review.materialIssues, findings: review.review.findings,
+      inspection: review.inspection.entries, approves: review.inspection.approves });
+    writeFileSync(binding.path, JSON.stringify(observations));
+    binding.sha256 = fileSha256(binding.path)!;
+  }
+  writeFileSync(file, canonicalJson(review));
+  input.prebuildReview!.sha256 = fileSha256(file)!;
 }
 
 /** Attach one fully admitted TEST visual plan and its exact executable mapping. */

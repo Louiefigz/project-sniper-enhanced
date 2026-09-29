@@ -87,6 +87,11 @@ Reuse only dependency-current detailed reviews; refresh the complete-plan assess
 after editorial changes. A receipt alone is not evidence of playback or listening.
 Final encoded-output QC and editorial/listening review remain required.
 
+Native Short critics record typed `inspection` (still frames, normal-speed motion
+playback, listening; each bound to the exact bytes covered) and the aspects a pass
+`approves`; stills never approve motion, and only a typed motion approval admits full
+picture.
+
 ## Establish editorial scope before selecting or reshaping footage
 
 Use the [edit-scope guidance](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#establish-the-edit-the-user-wants):
@@ -474,6 +479,10 @@ to Shorts, long-form and revisions. Open both the checked MP4 review and matchin
 editable Studio project; providing only one view or a project file link leaves
 the handoff incomplete. Use Chrome unless the operator requests another browser.
 Headless writers leave browser opening to the owning interactive task/controller.
+For a native export, `studio/native_handoff.py open` records the pair and reports a
+Studio that changed the delivered project as a failure, never a pass; after opening both pages
+for the operator, `native_handoff.py confirm` records the visible hand-off (it requires the review
+player to have observed the browser load of the exact MP4).
 
 ## DESTINATION FIRST — where every job starts and ends
 

@@ -94,10 +94,23 @@ def export(project: Path, attempt: Path, options: list[str], timeout: float) -> 
             'stages': [{key: row.get(key) for key in ('phase', 'status', 'elapsedSeconds')} for row in delivery['stages']]}
 
 
-def write_test_reviews(run: Path, preview: Path) -> Path:
-    """Write explicitly TEST motion reviews bound to this fixture preview's exact units."""
+def canary_inspection(root: Path, clips: list[dict]) -> dict:
+    """An explicit TEST fixture declaration: nobody played anything. Gate readers admit it only for this TEST fixture's
+    own project (manifest scope TEST, productionAuthority false) and never count it as a review."""
+    _fixture, project = fixture_project(root)
+    return {'schemaVersion': 1, 'approves': ['picture', 'motion'], 'entries': [
+        {'kind': 'motion-playback', 'artifact': {'path': clip['path'], 'sha256': clip['sha256']}, 'span': 'whole',
+         'method': 'TEST route canary declaration: nothing was played; exercises the export route only'}
+        for clip in clips],
+        'fixture': {'scope': FIXTURE_SCOPE, 'manifest': {'path': str(root / 'FIXTURE.json'),
+                                                         'sha256': digest(root / 'FIXTURE.json')}, 'project': str(project)}}
+
+
+def write_test_reviews(root: Path, run: Path, preview: Path) -> Path:
+    """Write explicitly TEST motion reviews bound to this fixture preview's exact units and window clips."""
     result = preview / 'motion-previews.json'
-    packet = bound_json(result)['packet']
+    value = bound_json(result)
+    packet = value['packet']
     evidence = run / 'TEST-canary-no-playback.txt'
     with evidence.open('x', encoding='utf-8') as handle:
         handle.write('TEST route canary only. No person or agent viewed or listened to these previews; '
@@ -110,7 +123,8 @@ def write_test_reviews(run: Path, preview: Path) -> Path:
                          'summary': 'TEST route canary structural record only; never production approval'},
               'units': {row['id']: row['hash'] for row in packet['units']},
               'preview': {'path': str(result), 'sha256': digest(result)},
-              'assessment': 'TEST canary: exercises the export route only; no media was watched or approved.'}
+              'assessment': 'TEST canary: exercises the export route only; no media was watched or approved.',
+              'inspection': canary_inspection(root, value['clips']), 'submission': None, 'approvedContent': None}
     file = run / 'TEST-canary-motion-reviews.json'
     write_new(file, {'schemaVersion': 1, 'reviews': [review]})
     return file
@@ -180,7 +194,7 @@ def run_canary(root: Path, run: Path, bounds: CanaryBounds) -> dict:
     try:
         preview = export(project, run / 'preview', ['--preview-only'], bounds.preview_seconds)
         require(preview['status'] == PREVIEW_STATUS, f"canary preview failed: {preview['error']}")
-        step, reviews = 'final', write_test_reviews(run, run / 'preview')
+        step, reviews = 'final', write_test_reviews(root, run, run / 'preview')
         final = export(project, run / 'final', ['--preview-reviews', str(reviews)], bounds.final_seconds)
         require(final['status'] == FINAL_STATUS, f"canary final export failed: {final['error']}")
         final['reviewSha256'] = digest(run / 'final/review.mp4')

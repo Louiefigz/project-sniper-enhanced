@@ -154,12 +154,20 @@ structures, never reviewer findings.
    can satisfy `native_batch.py handoff --batch SESSION --clip A --confirmation
    /absolute/confirmation.json`. Complete the director and close the batch after
    owned tasks settle.
+   State whether each is a checked MP4 (a technical pass, CHECKED FOR REVIEW) or a
+   review draft, with its open findings.
 
 Every critic packet also names its author session and shared evidence when
 available. Review submissions reject stale media, changed approved words and
 unsupported inspection claims. Stills, playback and listening are distinct
 forms of evidence. Technical checks never certify that somebody watched or
 listened. Follow the existing whole-video review and title/reference duties.
+
+Resolving a role packet for a batch clip (`context.py --role ... --batch --clip`) appends
+one `packet-resolved` event (packet SHA-256, role, clip, batch-clock seconds; at most
+512 bytes) while the batch is active. It changes no record field and is new work, so it
+is refused once the trail reaches its reserve. Review submissions and gates time a
+review's claimed playback and listening from it on the batch clock.
 
 If a complete labeled review draft is the appropriate next artifact, use
 `native-short.ts build-draft` for a plan with pending or nonpassing review, then

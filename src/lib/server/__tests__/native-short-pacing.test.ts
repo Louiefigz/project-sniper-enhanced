@@ -188,7 +188,7 @@ test("source-burned captions bind visual ownership and cold-read without claimin
   assert.equal(observed.captionTimingScope, "transcript-groups-only-burned-caption-timing-unmeasured");
   assert.deepEqual(observed.phrases, measured.phrases);
   assert.throws(() => assembleNativeShortHtml(input), /Pacing plan is stale/);
-  input.extension = { markup: '<div id="annotation" class="clip" data-start="0" data-duration="2">TEST annotation</div>', css: "", motion: "" };
+  input.extension = { markup: '<div id="annotation" data-hf-id="hf-annotation" class="clip" data-start="0" data-duration="2">TEST annotation</div>', css: "", motion: "" };
   refreshNativePacingFixture(input);
   const project = writeNativeShortProject(input, path.join(directory, "source-burned"));
   assert.deepEqual(readNativeShortProject(project.directory), input);

@@ -9,8 +9,9 @@ function scriptsDir(): string {
   return path.join(pipelineRepositoryRoot(), ...["scripts"]);
 }
 
+/** The engine checkout's own venv interpreter (a developer checkout links `.venv`, so it is not canonical). */
 function venvPython(): string {
-  return path.join(process.cwd(), ...[".venv", "bin", "python3"]);
+  return path.join(pipelineRepositoryRoot(), ...[".venv", "bin", "python3"]);
 }
 
 /** Explicit installed runtime for an isolated checkout; never creates a venv or falls back. */
@@ -56,11 +57,16 @@ export function pipelineRepositoryRoot(): string {
   return pinned && path.isAbsolute(pinned) ? pinned : process.cwd();
 }
 
+/** The engine Python: the explicit SNIPER_PYTHON_VENV_ROOT venv, else `<pipeline root>/.venv`; never an ambient
+ * `python3` (a missing venv fails with a specific error instead of running another interpreter). */
 export function pythonInterpreter(): string {
   const selected = process.env.SNIPER_PYTHON_VENV_ROOT;
   if (selected !== undefined) return explicitVenvPython(selected);
   const candidate = venvPython();
-  return existsSync(candidate) ? candidate : "python3";
+  if (!existsSync(candidate)) {
+    throw new Error(`no engine Python venv: set SNIPER_PYTHON_VENV_ROOT or provide ${pipelineRepositoryRoot()}/.venv`);
+  }
+  return candidate;
 }
 
 /**

@@ -266,7 +266,8 @@ September 15 review handoff: Shorts and long-form require both the local checked
 MP4 review and a live editable HyperFrames Studio view by default. The owning
 interactive task follows `docs/producer/STUDIO_REVIEW_LANE.md` → "Required review
 handoff: local playback and Studio"; an export receipt or project file link alone
-does not complete that handoff.
+does not complete that handoff; `studio/native_handoff.py` records it (the September 27 visible
+hand-off record below).
 
 September 11 native Shorts entry points: `native-short.ts` prepares local request
 packets, builds explicit native strategies and cold-checks projects.
@@ -1091,3 +1092,133 @@ matching live Studio view. Managed preview holds are per owner/project;
 `production/handoff.py` consumes a verified visible-handoff confirmation.
 The executable route and deferred qualification boundary are documented in
 `docs/producer/NATIVE_SHORTS_DEADLINE_BATCH.md`.
+
+September 27 Studio selection ids: pinned Studio stamps `data-hf-id` on any element lacking one and
+writes `index.html`/`compositions/*.html` back re-serialized, which changed delivered projects at
+hand-off. New native Short builds refuse such files (`src/lib/server/native-studio-host-ids.ts`,
+called from `writeNativeShortProject`); `native-short.ts studio-ids` inserts the missing ids byte-
+preservingly (`native-studio-host-stamp.ts`). Test: `native-studio-host-ids.test.ts`.
+
+Scoped packets (B1): critic catalog rows may subtract sub-ranges (`except_`/`drop`,
+`paragraph`) or assign a section only for a used subject feature (`when`, `FEATURES`,
+computed by `role_packet_native.plan_features`); every exclusion is resolved, recorded with
+its reason and content-pinned (`role_packet_sections.pinned`: text inserted into an
+excluded range fails closed until reclassified), and unknown use keeps the section.
+`role_packet_scope.py` classifies artifacts (inspect/entries/bound/history), narrows
+CATALOG-INDEX/DIRECTOR-LIBRARY by exact id (whole index kept for custom/reference routes)
+and records the packet's self-inclusive `size`. Shared evidence: `role_packet_evidence.py`
+drafts/seals once-per-production `SHARED-EVIDENCE-vN.json` (`context.py --evidence-draft/
+--evidence-seal`), `role_packet_evidence_schema.py` validates provenance-cited claims at
+seal AND bind, `role_packet_evidence_record.py` re-observes, re-validates, checks location
+and supersession (`--evidence-check`, `evidence_check` for the submission step).
+Requirement revision `approved-content-production-2026-09-27`: given titles/scripts come ONLY
+from the batch authority (unit A1/A2; shared evidence carries none). `role_packet_given.py`
+takes `--batch/--clip`, refuses omission while a live batch claims or holds the plan's
+source, reads A1/A2's `studio.production.api.read_approval` directly for the one current active
+or draining batch only (the only source; unit tests patch `role_packet_given.authority.read_approval`
+and `current_batches` with TEST readers) and checks the
+plan's selection with the authority's `same_short`. `role_packet_approvals.py` reproduces
+A1/A2's approval-v2 form byte for byte and recomputes every identity from the transcript;
+`role_packet_transcript.py` refuses transcripts whose raw word numbering differs from the
+writer's kept-word numbering and mirrors the writer's occurrence-frame rule. The packet's
+`given` contract (other units read it; fixture `tests/fixtures/role-packet-given-contract.json`)
+is {status: "not-supplied", meaning} or {status: "bound", readFrom, requirementRevision,
+batchId, clipId, authorityStatus, identity, scriptSha256, titleSha256, planChecked, title:
+{given, planned, status: exact|normalization-only|different, material}, selection, captionText,
+timing: each {matches, details}} (`role_packet_speech.py`; display corrections listed in
+captionText.details with `changesGivenSpelling`, never mismatches). Critic subjects list C3
+`canvas.captionSuppressions` windows with their uncaptioned words. Tests:
+`test_role_packet_scope.py`, `test_role_packet_pins.py`, `test_role_packet_evidence.py`,
+`test_role_packet_approvals.py`, `test_role_packet_submission_contract.py` (real `submit-prebuild`).
+Gate side: `role_packet_given_check.py` (`context.py --given-check <packet>`) re-derives a packet's
+given block from the authority's current approval against the plan the packet froze, or re-runs
+the omission refusal, and returns a bound packet's batch-clock resolution; `record_resolution`
+writes that `packet-resolved` event before a batch-bound packet is published. A missing approved
+title is a material `different` title.
+
+Typed review evidence (B2): observations schema 2 and new records carry
+`inspection` entries of three kinds — `still-frames` (exact `samples`),
+`motion-playback`, `audio-listening` — each bound to the exact artifact path and
+sha256 it covered, plus `approves` (picture/motion/audio), all declared, not
+authenticated. Stills cover only their sampled frames (reported `sampled`, never
+complete unless every frame). `native-review-submission-shared.ts` refuses
+motion/audio approvals their kind does not cover on every reviewed frame (stills
+never establish motion), picture approval of a rendering nobody looked at, other
+bytes than the target's (stale), and notes/events/located issues at frames not
+looked at (`VISUAL_KINDS`; listening supports only audio-lane claims, `claimKinds`).
+`native-review-provenance.ts` records the answered packet (which must have reviewed
+the plan digest, preview or MP4 the record admits), its resolution time and the
+submission time. For a batch-bound packet the interval is batch-clock seconds from the
+`packet-resolved` event `context.py --role` recorded (`studio/production/packets.py`); an
+unbound packet's interval starts at its author-written `resolvedAt` and is labelled
+`declared-not-authenticated` (it bounds nothing against a hand-edited packet). Playback
+plus listening summed over artifacts must fit; the interval is a lower bound, never
+proof anything was seen or heard. Every typed gate reader also re-derives the approved
+content through `native-review-given-check.ts` → `context.py --given-check`
+(`role_packet_given_check.py`) and admits only a record equal to it. Submission schema 1
+is refused; a Short build needs a schema-2 plan review.
+`native-review-approved-content.ts` (requirement
+`approved-content-production-2026-09-27`) reads the packet's `given` block in B1's
+contract (the TS fixture loads `tests/fixtures/role-packet-given-contract.json`:
+`not-supplied` binds nothing; `bound` only from `studio.production.api.read_approval`;
+title status/material, selection, caption text, timing as `{matches, details}`), records
+the approval's batch, clip and identities, refuses a pass on any departure (a revise must cover it with an
+`approved-content-contradiction` material issue) and records `proposed-change`
+findings for the operator without withholding execution approval; an absent block
+binds no approval. `native-review-shared-evidence.ts` re-runs `context.py
+--evidence-check` on bound shared evidence; plan scenes then need `evidenceBasis`. Only a motion approval admits full
+rendering (a picture-only pass admits nothing); only a final pass approving all
+three is `editorialFinal: approved`. Records without `inspection` read as
+historical untyped evidence and are never upgraded: Short (schema-2) packets
+refuse them for full picture — `native_motion_review.require_typed_short_reviews`
+refuses them during Short option validation, before any budget charge — and Long
+(schema-1) keeps their historical admission, reported as untyped. The route
+canary writes an explicit TEST fixture declaration admitted only for its own
+TEST fixture project. `studio/review_player*` labels a checked MP4 CHECKED FOR
+REVIEW and leaves editorial approval to `check-final`. `role_packets.retainable`
+keeps only typed, non-fixture motion approvals. Tests:
+`native-review-{inspection,approved-content}.test.ts`, `test_native_review_typing_gate.py`.
+Gate regressions (probes p02-p09, p16, p19): `tests/test_approved_content_gates.py`. The TEST
+harness `tests/_isolated_review.ts` + `_isolated_context.py` runs the real `native-review.ts` /
+`native-short.ts` commands with the given check pointed at the test's private authority root;
+the TS fixture `_native-review-fixture.ts` installs a TEST given check that never reads the real
+authority. End-to-end approved-content chain (B1+B2+B3 over A1/A2's real authority, placeholder media, no
+renders): `tests/test_approved_content_chain.py` (authorize with the approval → owner/plan-critic
+packets bind `given` → `submit-prebuild` pass; changed title/order/word text refused, covered revise
+recorded; shared evidence re-checked through the real `context.py --evidence-check`) and
+`tests/test_approved_content_handoff.py` (motion/final packets MC-13/FC-12 and submissions; the
+hand-off records the same approval identity, lists caption display corrections, keeps the neutral
+CHECKED FOR REVIEW label and confirms visibility); fixture `tests/_approved_content_fixture.py`.
+
+September 27 visible hand-off record: `studio/native_handoff.py open <attempt> --owner TAG
+--record NEW.json [--review-player URL]` (`native_handoff_open.py`) writes a typed
+`native-visible-handoff` record per output (`native_handoff_record.py`), after an O_EXCL intent
+file: exact MP4 (review player's evaluator), the delivery-bound files plus every visible markup
+file hashed no-follow before Studio opens and after it loads (`native_handoff_evidence.py`), the
+live view's served check and load (`native_handoff_checks.py`), the review player's
+`/inventory.json` row, server identity and per-attempt activity (`studio/review_player_activity.py`),
+checked/draft label, findings, and the approved title/script read from the batch authority
+(`native_handoff_approval.py`: by the export's own productionBudget batch clip via A12's
+`read_approval`, confirmed by the folder binding `approval_for_project`, else
+APPROVAL_BINDING_MISSING; unit tests patch both with TEST readers) and compared with the build as B1
+reads a plan: source words, merged cut seconds, the admitted transcript and writer-rule timing
+(`native_handoff_content.py`; caption display corrections are listed as `displayCorrections`, never
+a mismatch). Status is `views-ready` or `handoff-incomplete` (exit 2; SIGTERM still writes
+`handoff-interrupted`). `visibleHandoffAt` is set only by `confirm` (`native_handoff_confirm.py`): a
+full re-check, the served page's own 'playing' report for the exact MP4 route from a page load after
+`viewsVerifiedAt` (a bare media request, from curl or anything else, is only `mediaRequested`), and
+the caller's attestation that the review page and Studio page were opened (it cannot prove anyone
+watched; a local program can imitate the report). `managed_preview.open_view` takes a `ViewOwner` (tag, per-hand-off
+token, evidence files); `managed_preview_holds.py` owns launcher/hold/user-hold rules, the hold cap
+and `ViewOwnedElsewhere`; `managed_preview_owned.py` counts views (`views`), releases by token
+(`release --handoff`) and prunes unevidenced or ended hand-offs' holds (`prune-holds`). An open
+writes its binding and hold in one registry write after admission (`registry.admit_open`), so a
+refusal changes nothing. The review player caches only
+passing receipt admissions keyed on pinned-input and attempt-file identities; bundle forks'
+inserted dialogue node carries a `data-hf-id`. Tests: `test_native_handoff.py`,
+`test_native_handoff_views.py` (fixtures `tests/_handoff_fixture.py`, fake Studio
+`tests/_fake_studio_server.py`), managed-preview, review-player and bundle tests.
+
+`review-submitted` events, read-only `check-final --as-submitted` and `studio/native_handoff_verify.py`
+are the unreviewed I-B123 round preserved on `p0/preserve-i-b123-wt`; review, acceptance and their
+docs belong to P3b.

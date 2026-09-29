@@ -31,14 +31,14 @@ PRESENT = {name: True for name in FEATURES}
 # Rules a native Short plan critic must always be assigned, whatever the plan uses (document, line prefix).
 PLAN_CRITIC_RULES = (
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "### Preserve the actual request before choosing assets"),
-    ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "### Produce several Shorts against a deadline"),
+    ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "For an approved Short or batch, follow"),  # P0 adapt: src :641
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "### Author the pacing record"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "### Bind the authored story to executable visuals"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "### One asset decision across images and video"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "Every element of authored extension markup"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "For a confirmed caption spelling correction"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "For progressive native reveals"),
-    ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "Give each independent critic a role packet"),
+    ("docs/producer/NATIVE_SHORTS_DEADLINE_BATCH.md", "Run `context.py --role clip-owner`"),  # P0 adapt: src :133
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "Native Shorts stage catalog HTML through"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "Native delivery shares dialogue cleanup"),
     ("docs/producer/NATIVE_SHORTS_WORKFLOW.md", "Background music in native Shorts remains unsupported"),

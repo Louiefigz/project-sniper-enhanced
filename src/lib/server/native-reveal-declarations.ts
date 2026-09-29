@@ -58,8 +58,11 @@ function seconds(element: Element, name: string): number {
 
 function mountFacts(element: Element): NativeMountFacts {
   const id = element.getAttribute("id") ?? "", compositionId = element.getAttribute("data-composition-id") ?? "";
+  if (!id || !compositionId) {
+    throw new Error(`Catalog mount ${id || element.getAttribute("data-composition-src")} lacks a stable id or data-composition-id`);
+  }
   const start = seconds(element, "data-start"), duration = seconds(element, "data-duration");
-  if (!id || !compositionId || !Number.isFinite(start) || start < 0 || !Number.isFinite(duration) || duration <= 0) {
+  if (!Number.isFinite(start) || start < 0 || !Number.isFinite(duration) || duration <= 0) {
     throw new Error(`Catalog mount ${id} lacks explicit timing`);
   }
   const text = element.getAttribute("data-variable-values"), message = `Catalog mount ${id} has malformed data-variable-values`;
@@ -69,7 +72,7 @@ function mountFacts(element: Element): NativeMountFacts {
     variables: variables as Record<string, unknown> };
 }
 
-/** Every catalog mount (`data-composition-src`) in `extension.markup`, parsed with linkedom. */
+/** Every catalog mount (`data-composition-src`) in `extension.markup`, parsed with linkedom; strict for every mount. */
 export function nativeMountFacts(markup: string): NativeMountFacts[] {
   const document = parseHTML(markup).document as unknown as Document;
   return Array.from(document.querySelectorAll("[data-composition-src]")).map(mountFacts);
@@ -134,15 +137,34 @@ function winner(declarations: Declaration[], prop: string): Declaration | undefi
   return rows.filter(row => row.important).at(-1) ?? rows.at(-1);
 }
 
-function inlineState(element: Element): InlineState {
+/** The declarations of a style attribute; undefined when it does not stay one declaration block. */
+function inlineDeclarations(element: Element): Declaration[] | undefined {
   const style = element.getAttribute("style");
-  if (!style?.trim()) return { parsed: true, visibilityHidden: false };
+  if (!style?.trim()) return [];
   const root = parseCss(`element{${style}}`), rule = root.nodes?.length === 1 ? root.first : undefined;
+  if (rule?.type !== "rule" || (rule as Rule).nodes.some(node => node.type !== "decl")) return undefined;
+  return (rule as Rule).nodes as Declaration[];
+}
+
+function inlineState(element: Element): InlineState {
+  const declarations = inlineDeclarations(element);
   // A style attribute that does not stay one declaration block cannot be read as one: not provably hidden.
-  if (rule?.type !== "rule" || (rule as Rule).nodes.some(node => node.type !== "decl")) return { parsed: false, visibilityHidden: false };
-  const declarations = (rule as Rule).nodes as Declaration[], opacity = winner(declarations, "opacity");
+  if (!declarations) return { parsed: false, visibilityHidden: false };
+  const opacity = winner(declarations, "opacity");
   return { parsed: true, visibilityHidden: winner(declarations, "visibility")?.value.trim().toLowerCase() === "hidden",
     opacity: opacity && { zero: opacityZero(opacity.value), important: Boolean(opacity.important) } };
+}
+
+/**
+ * Inline `visibility:hidden` proves hidden only when no other `visibility` declaration can apply: none in the
+ * file's sheets (a matching `!important` rule would win over the inline value) and none in a descendant's inline
+ * style (a child set `visibility:visible` shows inside a hidden parent, and the runtime probe's walk cannot see it).
+ */
+function visibilityHolds(element: Element, sheets: Container[]): boolean {
+  const declares = (rows: Declaration[] | undefined) => !rows || rows.some(row => row.prop.toLowerCase() === "visibility");
+  let inSheets = false;
+  sheets.forEach(sheet => sheet.walkDecls(row => { inSheets ||= row.prop.toLowerCase() === "visibility"; }));
+  return !inSheets && !Array.from(element.querySelectorAll("[style]")).some(child => declares(inlineDeclarations(child)));
 }
 
 function insideKeyframes(rule: Rule): boolean {
@@ -180,14 +202,15 @@ function matchingOpacity(element: Element, sheets: Container[], declaration: Nat
 }
 
 /**
- * P2-02 rule with the cascade's precedence: inline `visibility:hidden` hides; a matching `!important` non-zero
+ * P2-02 rule with the cascade's precedence: inline `visibility:hidden` hides when nothing can override it
+ * (`visibilityHolds`); a matching `!important` non-zero
  * opacity shows; an inline opacity decides unless an unconditional `!important` zero rule overrides a normal one;
  * otherwise at least one unconditional matching rule declares opacity 0 and every matching opacity declaration is 0.
  */
 function staticallyHidden(element: Element, sheets: Container[], declaration: NativeRevealDeclaration): boolean {
   const inline = inlineState(element);
   if (!inline.parsed) return false;
-  if (inline.visibilityHidden) return true;
+  if (inline.visibilityHidden && visibilityHolds(element, sheets)) return true;
   const rules = matchingOpacity(element, sheets, declaration);
   if (rules.some(row => row.important && !row.zero)) return false;
   const firm = rules.filter(row => row.zero && !row.conditional);
@@ -213,13 +236,22 @@ export function assertStaticallyHidden(html: string, declarations: NativeRevealD
   }
 }
 
-/** Resolve and statically check the declared reveals of every catalog mount; returns every declaration. */
+/**
+ * Resolve and statically check the declared reveals of every catalog mount; returns every declaration. Only a mount
+ * whose staged file declares a reveal needs the strict mount facts (X72 M1), so legacy mounts of undeclared files
+ * (for example without `data-composition-id`) still build and cold-read.
+ */
 export function assertNativeRevealDeclarations(input: NativeShortProjectInput, files: Record<string, string>): NativeRevealDeclaration[] {
   const [num, den] = input.canvas.frameRate.split("/").map(Number);
-  return nativeMountFacts(input.extension?.markup ?? "").flatMap(mount => {
-    if (!Object.hasOwn(files, mount.file)) throw new Error(`Catalog mount ${mount.id} names ${mount.file}, which is not a staged catalog file`);
-    const declarations = declaredReveals(files[mount.file], mount, num / den);
-    assertStaticallyHidden(files[mount.file], declarations);
+  const markup = parseHTML(input.extension?.markup ?? "").document as unknown as Document;
+  return Array.from(markup.querySelectorAll("[data-composition-src]")).flatMap(element => {
+    const file = element.getAttribute("data-composition-src") ?? "";
+    if (!Object.hasOwn(files, file)) {
+      throw new Error(`Catalog mount ${element.getAttribute("id") ?? ""} names ${file}, which is not a staged catalog file`);
+    }
+    if (!declaredElements(compositionDocuments(files[file])).length) return [];
+    const declarations = declaredReveals(files[file], mountFacts(element), num / den);
+    assertStaticallyHidden(files[file], declarations);
     return declarations;
   });
 }

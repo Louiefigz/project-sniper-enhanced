@@ -243,26 +243,56 @@ function orderReveals(group) {
 }
 
 /**
+ * The active root frames of every probed mount, keyed by id (P2-03 `RevealProbeManifest.mounts`).
+ * @param {unknown} mounts `[{id, first, endExclusive}]`
+ * @returns {Map<string, {first: number, endExclusive: number}>}
+ */
+function mountRanges(mounts) {
+  if (!Array.isArray(mounts)) malformed('mount ranges are not a list');
+  const ranges = new Map(mounts.map(row => [row?.id, {first: row?.first, endExclusive: row?.endExclusive}]));
+  const valid = ([id, {first, endExclusive}]) => typeof id === 'string' && id && Number.isSafeInteger(first)
+    && first >= 0 && Number.isSafeInteger(endExclusive) && endExclusive > first;
+  if (ranges.size !== mounts.length || ![...ranges].every(valid)) malformed('mount ranges need unique ids and frames');
+  return ranges;
+}
+
+/**
+ * The series entry of a declared mount, after proving its cue frame K was sampled and that K+1 was sampled
+ * whenever it lies inside the mount (X72(c): "outside the mount" is then the only reason K+1 is absent).
+ * @param {Map<string, any>} index indexed series
+ * @param {Map<string, {first: number, endExclusive: number}>} ranges
+ * @param {{mount: string, hfId: string, cueLocalFrame: number}} declaration
+ * @returns {{first: number, orders: Map<string, Map<number, Map<string, {opacity: number}>>>}}
+ */
+function sampledCue(index, ranges, declaration) {
+  const {mount, hfId, cueLocalFrame: cue} = declaration, range = ranges.get(mount), entry = index.get(mount);
+  if (!range || !entry || entry.first !== range.first) malformed(`mount ${mount} of ${hfId} lacks its range or its rows disagree`);
+  const active = range.endExclusive - range.first;
+  const sampled = (/** @type {number} */ local) => [...entry.orders.values()].some(frames => frames.has(local));
+  if (cue >= active || !sampled(cue)) malformed(`declared cue frame ${cue} of ${hfId} in ${mount} is outside it or unsampled`);
+  if (cue + 1 < active && !sampled(cue + 1)) malformed(`frame ${cue + 1} after the cue of ${hfId} is inside ${mount} but unsampled`);
+  return entry;
+}
+
+/**
  * Condition C2 for declared reveals, each with its mount-local cue frame K:
  * (a) `visible-before-reveal` when a sampled local frame 0 <= k < K has effective opacity > VISIBLE_EPSILON
  *     (one row per declaration and seek order, at the earliest such frame; `opacity` is [o(k), o(K) in that
  *     order, or null when that order did not sample K]);
- * (b) `reveal-starts-visible` when o(K) > o(K+1) + VISIBLE_EPSILON in an order that sampled both (the probe
- *     samples K+1 only when it lies inside the mount).
- * K must be sampled in some order, and the declared element must be reported in every sampled frame 0..K+1.
+ * (b) `reveal-starts-visible` when o(K) > o(K+1) + VISIBLE_EPSILON in an order that sampled both.
+ * K must be sampled in some order, K+1 too whenever it lies inside the mount, and the declared element must be
+ * reported in every sampled frame 0..K+1.
  * @param {Array<object>} series D-B rows
  * @param {Array<{mount: string, hfId: string, cueLocalFrame: number}>} declarations
+ * @param {Array<{id: string, first: number, endExclusive: number}>} mounts active root frames per mount
  * @returns {Array<object>} finding rows
  */
-export function declaredRevealFindings(series, declarations) {
-  const mounts = indexSeries(series);
+export function declaredRevealFindings(series, declarations, mounts) {
+  const index = indexSeries(series), ranges = mountRanges(mounts);
   if (!Array.isArray(declarations)) malformed('declarations are not a list');
-  return sortFindings(declarations.map(checkedDeclaration).flatMap(({mount, hfId, cueLocalFrame}) => {
-    const entry = mounts.get(mount);
-    if (!entry || ![...entry.orders.values()].some(frames => frames.has(cueLocalFrame))) {
-      malformed(`declared cue frame ${cueLocalFrame} of ${hfId} in ${mount} was not sampled`);
-    }
-    return [...entry.orders].flatMap(([order, frames]) => orderReveals({mount, element: hfId, cue: cueLocalFrame,
-      first: entry.first, order, frames}));
+  return sortFindings(declarations.map(checkedDeclaration).flatMap(declaration => {
+    const entry = sampledCue(index, ranges, declaration);
+    return [...entry.orders].flatMap(([order, frames]) => orderReveals({mount: declaration.mount,
+      element: declaration.hfId, cue: declaration.cueLocalFrame, first: entry.first, order, frames}));
   }));
 }

@@ -111,6 +111,12 @@ test("refuses a later CSS rule that re-shows the element", () => {
   const aside = (inner: string) => `<p data-hf-id="hf-aside" style="visibility:hidden" data-hf-reveal="2.5">${inner}</p>`;
   refusesVisible(BASE + HIDE, PANEL + aside(`<b style="visibility:visible">shown</b>`), "hf-aside", "2.5");
   refusesVisible(BASE + HIDE + `#${ID} p{visibility:visible !important}`, PANEL + aside(""), "hf-aside", "2.5");
+  // `all` resets visibility too (X77 dm1), inline or in a sheet; an unparsable descendant style proves nothing.
+  refusesVisible(BASE + HIDE, PANEL + aside(`<b style="all:initial">shown</b>`), "hf-aside", "2.5");
+  refusesVisible(BASE + HIDE + `#${ID} .kid{all:initial}`, PANEL + aside(`<b class="kid">shown</b>`), "hf-aside", "2.5");
+  refusesVisible(BASE + HIDE, PANEL + aside(`<b style="a:b}x{c:d">shown</b>`), "hf-aside", "2.5");
+  refusesVisible(BASE + HIDE, PANEL + `<p data-hf-id="hf-aside" style="visibility:hidden;all:initial" data-hf-reveal="2.5">x</p>`,
+    "hf-aside", "2.5");
 });
 
 test("refuses a cue outside the mount and a declaration without data-hf-id", () => {
@@ -149,4 +155,6 @@ test("ignores compositions without declarations", () => {
   assert.deepEqual(assertNativeRevealDeclarations(project(legacy), undeclared), []);
   assert.deepEqual(assertNativeRevealDeclarations(project(""), {}), []);
   assert.throws(() => assertNativeRevealDeclarations(project(mount({})), {}), /names compositions\/numbers-t\.html, which is not a staged catalog file/u);
+  assert.throws(() => assertNativeRevealDeclarations(project('<div data-composition-src="compositions/gone.html"></div>'), {}),
+    /^Error: Catalog mount without an id names compositions\/gone\.html, which is not a staged catalog file$/u);
 });

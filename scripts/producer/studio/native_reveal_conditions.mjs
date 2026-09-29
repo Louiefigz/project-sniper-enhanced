@@ -2,7 +2,7 @@
  * Pure reveal conditions for mounted catalog graphics (MASTER-PLAN M-066, P2-EARLY-CHECKS P2-01).
  *
  * Data in, data out: no browser, no files. The runtime reveal probe (P2-03) seeks each catalog mount in fixed
- * orders and records every element's effective opacity (the product over its ancestors) per sampled frame.
+ * orders and records every element's effective opacity (`effectiveOpacitySource`) per sampled frame.
  * This module plans those frames and evaluates two exact conditions on the recorded series:
  *   C1 first-frame flash, which needs no declaration;
  *   C2 declared reveals (`data-hf-reveal`): visible before the cue, or visible at the cue and then dipping.
@@ -11,8 +11,10 @@
  *   {order: 'forward'|'reverse'|'cold-<n>', mount, frame, localFrame,
  *    elements: [{key: <data-hf-id or DOM index path>, opacity, ancestors: [key, ... outermost first]}]}
  * Finding rows: {condition, mount, element, frame, localFrame, order, opacity: [before, after]}.
- * Malformed input fails closed with `Error('Reveal series malformed: ...')`; nothing is assumed.
+ * Malformed input fails closed with `Error('Reveal series malformed: ...')`; nothing is assumed. Series and
+ * declaration validation lives in native_reveal_series.mjs (split for the 300-line rule, X77).
  */
+import {checkedDeclaration, cueFrame, indexSeries, malformed, mountRanges, sampledCue} from './native_reveal_series.mjs';
 
 /** C1 threshold: visible at local frame 0 means at least this opacity; the dip keeps at most this share of it. */
 export const FLASH_RATIO = 0.5;
@@ -23,29 +25,18 @@ export const VISIBLE_EPSILON = 0.001;
 const GRID_FRAMES = 15;
 /** The runtime's clip-bound snap: floor(seconds * rate + 1e-9) (native-review-regions.ts mountFrames). */
 const SNAP_EPSILON = 1e-9;
-/** Seek-order labels are syntax, not meaning: forward, reverse, or cold-<index into probeFramePlan().cold>. */
-const ORDER = /^(?:forward|reverse|cold-(?:0|[1-9]\d*))$/u;
 
 /**
- * Fail closed on input the conditions cannot evaluate.
- * @param {string} detail what is wrong
- * @returns {never}
- */
-function malformed(detail) {
-  throw new Error(`Reveal series malformed: ${detail}`);
-}
-
-/**
- * Browser function source returning an element's effective opacity: the product of `opacity` over the element
- * and its ancestors, and 0 when any of them has display none, visibility hidden or clip-path inset(100%). This is
- * the ancestor walk of `visualState` (native_short_capture_checks.mjs), returning the product instead of a flag.
+ * Browser function source returning an element's effective opacity (P2-01 as amended by X77). Visibility comes
+ * from the element's own computed style, which already reflects inheritance and a descendant's override (a child
+ * set visible inside a hidden parent is visible); opacity is the product over the element and its ancestors; an
+ * ancestor's display none or clip-path inset(100%) hides it.
  * @returns {string} source of `el => number`, for `page.evaluate`
  */
 export function effectiveOpacitySource() {
-  return "el => { let o = 1; for (let n = el; n && n.nodeType === 1; n = n.parentElement) { "
-    + "const s = getComputedStyle(n); "
-    + "if (s.display === 'none' || s.visibility === 'hidden' || s.clipPath === 'inset(100%)') return 0; "
-    + "o *= Number(s.opacity); } return o; }";
+  return "el => { if (getComputedStyle(el).visibility !== 'visible') return 0; let o = 1; "
+    + "for (let n = el; n && n.nodeType === 1; n = n.parentElement) { const s = getComputedStyle(n); "
+    + "if (s.display === 'none' || s.clipPath === 'inset(100%)') return 0; o *= Number(s.opacity); } return o; }";
 }
 
 /**
@@ -61,16 +52,6 @@ export function mountFrameRange(start, duration, rate) {
   }
   const snap = (/** @type {number} */ seconds) => Math.floor(seconds * rate + SNAP_EPSILON);
   return [snap(start), snap(start + duration)];
-}
-
-/**
- * A declared cue frame: a mount-local frame index.
- * @param {unknown} value
- * @returns {number}
- */
-function cueFrame(value) {
-  if (!Number.isSafeInteger(value) || /** @type {number} */ (value) < 0) malformed(`cue frame ${JSON.stringify(value)}`);
-  return /** @type {number} */ (value);
 }
 
 /**
@@ -101,56 +82,6 @@ export function probeFramePlan(mount, declarations, rate) {
   const cold = [...new Map(clipped.filter(frames => frames.length).map(frames => [frames.join(), frames])).values()];
   const root = (/** @type {number[]} */ frames) => frames.map(k => first + k);
   return {forward: [...(first > 0 ? [first - 1] : []), ...root(sampled)], reverse: root(reverse), cold: cold.map(root)};
-}
-
-/**
- * One validated element entry.
- * @param {any} value `{key, opacity, ancestors}`
- * @returns {[string, {opacity: number, ancestors: string[]}]}
- */
-function elementEntry(value) {
-  const {key, opacity, ancestors} = value ?? {};
-  if (typeof key !== 'string' || !key || !Number.isFinite(opacity) || opacity < 0 || opacity > 1
-      || !Array.isArray(ancestors) || !ancestors.every(row => typeof row === 'string' && row)) {
-    malformed(`element ${JSON.stringify(key)} needs a key, an effective opacity in [0, 1] and its ancestor keys`);
-  }
-  return [key, {opacity, ancestors}];
-}
-
-/**
- * One validated series row, with its elements keyed.
- * @param {any} row D-B row
- * @returns {{order: string, mount: string, frame: number, localFrame: number, elements: Map<string, {opacity: number, ancestors: string[]}>}}
- */
-function checkedRow(row) {
-  const {order, mount, frame, localFrame, elements} = row ?? {};
-  if (typeof order !== 'string' || !ORDER.test(order) || typeof mount !== 'string' || !mount
-      || !Number.isSafeInteger(frame) || frame < 0 || !Number.isSafeInteger(localFrame) || !Array.isArray(elements)) {
-    malformed(`row ${JSON.stringify({order, mount, frame, localFrame})} needs an order, a mount, frames and elements`);
-  }
-  const entries = new Map(elements.map(elementEntry));
-  if (entries.size !== elements.length) malformed(`${order} ${mount} frame ${frame} repeats an element key`);
-  return {order, mount, frame, localFrame, elements: entries};
-}
-
-/**
- * Index a series by mount, then seek order, then local frame. Every row of a mount must agree on the mount's
- * first root frame (`frame - localFrame`), and no order samples one local frame twice.
- * @param {unknown} series D-B rows
- * @returns {Map<string, {first: number, orders: Map<string, Map<number, Map<string, {opacity: number, ancestors: string[]}>>>}>}
- */
-function indexSeries(series) {
-  if (!Array.isArray(series)) malformed('series is not a list');
-  const mounts = new Map();
-  for (const {order, mount, frame, localFrame, elements} of series.map(checkedRow)) {
-    const entry = mounts.get(mount) ?? {first: frame - localFrame, orders: new Map()};
-    if (entry.first !== frame - localFrame) malformed(`rows of mount ${mount} disagree on its first frame`);
-    const frames = entry.orders.get(order) ?? new Map();
-    if (frames.has(localFrame)) malformed(`${order} samples ${mount} local frame ${localFrame} twice`);
-    mounts.set(mount, entry);
-    entry.orders.set(order, frames.set(localFrame, elements));
-  }
-  return mounts;
 }
 
 /**
@@ -211,19 +142,6 @@ export function flashFindings(series) {
 }
 
 /**
- * One validated declaration.
- * @param {any} value `{mount, hfId, cueLocalFrame}`
- * @returns {{mount: string, hfId: string, cueLocalFrame: number}}
- */
-function checkedDeclaration(value) {
-  const {mount, hfId, cueLocalFrame} = value ?? {};
-  if (typeof mount !== 'string' || !mount || typeof hfId !== 'string' || !hfId) {
-    malformed(`declaration ${JSON.stringify(value)} needs a mount and an hfId`);
-  }
-  return {mount, hfId, cueLocalFrame: cueFrame(cueLocalFrame)};
-}
-
-/**
  * C2 inside one seek order for one declaration.
  * @param {{mount: string, element: string, cue: number, first: number, order: string, frames: Map<number, Map<string, {opacity: number}>>}} group
  * @returns {Array<object>}
@@ -243,45 +161,13 @@ function orderReveals(group) {
 }
 
 /**
- * The active root frames of every probed mount, keyed by id (P2-03 `RevealProbeManifest.mounts`).
- * @param {unknown} mounts `[{id, first, endExclusive}]`
- * @returns {Map<string, {first: number, endExclusive: number}>}
- */
-function mountRanges(mounts) {
-  if (!Array.isArray(mounts)) malformed('mount ranges are not a list');
-  const ranges = new Map(mounts.map(row => [row?.id, {first: row?.first, endExclusive: row?.endExclusive}]));
-  const valid = ([id, {first, endExclusive}]) => typeof id === 'string' && id && Number.isSafeInteger(first)
-    && first >= 0 && Number.isSafeInteger(endExclusive) && endExclusive > first;
-  if (ranges.size !== mounts.length || ![...ranges].every(valid)) malformed('mount ranges need unique ids and frames');
-  return ranges;
-}
-
-/**
- * The series entry of a declared mount, after proving its cue frame K was sampled and that K+1 was sampled
- * whenever it lies inside the mount (X72(c): "outside the mount" is then the only reason K+1 is absent).
- * @param {Map<string, any>} index indexed series
- * @param {Map<string, {first: number, endExclusive: number}>} ranges
- * @param {{mount: string, hfId: string, cueLocalFrame: number}} declaration
- * @returns {{first: number, orders: Map<string, Map<number, Map<string, {opacity: number}>>>}}
- */
-function sampledCue(index, ranges, declaration) {
-  const {mount, hfId, cueLocalFrame: cue} = declaration, range = ranges.get(mount), entry = index.get(mount);
-  if (!range || !entry || entry.first !== range.first) malformed(`mount ${mount} of ${hfId} lacks its range or its rows disagree`);
-  const active = range.endExclusive - range.first;
-  const sampled = (/** @type {number} */ local) => [...entry.orders.values()].some(frames => frames.has(local));
-  if (cue >= active || !sampled(cue)) malformed(`declared cue frame ${cue} of ${hfId} in ${mount} is outside it or unsampled`);
-  if (cue + 1 < active && !sampled(cue + 1)) malformed(`frame ${cue + 1} after the cue of ${hfId} is inside ${mount} but unsampled`);
-  return entry;
-}
-
-/**
  * Condition C2 for declared reveals, each with its mount-local cue frame K:
  * (a) `visible-before-reveal` when a sampled local frame 0 <= k < K has effective opacity > VISIBLE_EPSILON
  *     (one row per declaration and seek order, at the earliest such frame; `opacity` is [o(k), o(K) in that
  *     order, or null when that order did not sample K]);
  * (b) `reveal-starts-visible` when o(K) > o(K+1) + VISIBLE_EPSILON in an order that sampled both.
- * K must be sampled in some order, K+1 too whenever it lies inside the mount, and the declared element must be
- * reported in every sampled frame 0..K+1.
+ * Every row must lie inside the mount's range, K inside the mount and sampled, K and K+1 sampled in one seek order
+ * whenever K+1 lies inside the mount (`sampledCue`), and the declared element reported in every sampled frame 0..K+1.
  * @param {Array<object>} series D-B rows
  * @param {Array<{mount: string, hfId: string, cueLocalFrame: number}>} declarations
  * @param {Array<{id: string, first: number, endExclusive: number}>} mounts active root frames per mount

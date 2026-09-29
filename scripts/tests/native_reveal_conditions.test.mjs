@@ -8,10 +8,10 @@ const MOUNT = 'sn-numbers-q1';
 const FIRST = 745;
 /** The mount's active root frames, as P2-03's manifest records them (run-1 Q1: 24.833333333333332 s + 11.4 s). */
 const RANGES = [{id: MOUNT, first: FIRST, endExclusive: 1087}];
-/** P2-01's quoted browser function body, character for character. */
-const PLAN_SOURCE = "el => { let o = 1; for (let n = el; n && n.nodeType === 1; n = n.parentElement) { "
-  + "const s = getComputedStyle(n); if (s.display === 'none' || s.visibility === 'hidden' || s.clipPath === "
-  + "'inset(100%)') return 0; o *= Number(s.opacity); } return o; }";
+/** The browser function body as P2-01 is amended by X77 (own computed visibility; ancestor opacity product). */
+const X77_SOURCE = "el => { if (getComputedStyle(el).visibility !== 'visible') return 0; let o = 1; for (let n = el; "
+  + "n && n.nodeType === 1; n = n.parentElement) { const s = getComputedStyle(n); if (s.display === 'none' || "
+  + "s.clipPath === 'inset(100%)') return 0; o *= Number(s.opacity); } return o; }";
 
 /** One D-B series row; `opacities` maps element key to [opacity, ancestors]. */
 function row(order, localFrame, opacities) {
@@ -81,20 +81,23 @@ test('declared cue-0 reveal that starts visible', () => {
 });
 
 test('outermost flashing element only', () => {
-  assert.equal(effectiveOpacitySource(), PLAN_SOURCE);
-  // Real effective opacities: the browser function run over a stub DOM (panel fades, child keeps opacity 1).
+  assert.equal(effectiveOpacitySource(), X77_SOURCE);
+  // The browser function over a stub DOM whose styles stand for computed styles (inheritance written out).
   const measure = new Function('getComputedStyle', `return (${effectiveOpacitySource()});`)(node => node.style);
   const style = (opacity, extra = {}) => ({display: 'block', visibility: 'visible', clipPath: 'none',
     opacity: String(opacity), ...extra});
   const root = {nodeType: 9, parentElement: null};
   const panel = {nodeType: 1, parentElement: root, style: style(1)};
   const child = {nodeType: 1, parentElement: panel, style: style(1)};
-  for (const hidden of [{display: 'none'}, {visibility: 'hidden'}, {clipPath: 'inset(100%)'}]) {
-    panel.style = style(1, hidden);
-    assert.equal(measure(child), 0, JSON.stringify(hidden));
-  }
-  panel.style = style(0.5);
-  assert.equal(measure(child), 0.5);
+  const seen = (panelStyle, childStyle) => { panel.style = panelStyle; child.style = childStyle; return measure(child); };
+  const hiddenParent = style(1, {visibility: 'hidden'});
+  assert.equal(seen(style(1, {display: 'none'}), style(1)), 0, 'display none on an ancestor hides');
+  assert.equal(seen(style(1, {clipPath: 'inset(100%)'}), style(1)), 0, 'a fully clipped ancestor hides');
+  assert.equal(seen(hiddenParent, style(1, {visibility: 'hidden'})), 0, 'inherited hidden stays hidden');
+  assert.equal(seen(hiddenParent, style(1)), 1, 'a child set visible inside a hidden parent is seen');
+  assert.equal(seen(hiddenParent, style(1, {display: 'inline'})), 1, 'an all:initial child (inline, visible) is seen');
+  assert.equal(seen(style(0.5), style(1)), 0.5, 'opacity is the ancestor product');
+  child.style = style(1);
   const sample = local => {
     panel.style = style(local === 0 ? 1 : 0);
     return {panel: [measure(panel)], child: [measure(child), ['panel']]};
@@ -147,6 +150,14 @@ test('malformed series fails closed', () => {
   assert.throws(() => declaredRevealFindings(good, cue(0), []), malformed);
   assert.throws(() => declaredRevealFindings(good, cue(0), [{id: MOUNT, first: 700, endExclusive: 800}]), malformed);
   assert.throws(() => declaredRevealFindings(good, cue(0), [...RANGES, ...RANGES]), malformed);
+  // Rows at or beyond the mount's end, K beyond it, an empty range, and K / K+1 only in different orders.
+  const threeFrames = forward([0, 1, 2], () => ({panel: [0]})), twoFrames = [{id: MOUNT, first: FIRST, endExclusive: 747}];
+  assert.throws(() => declaredRevealFindings(threeFrames, cue(0), twoFrames), /row at local frame 2, outside its range$/u);
+  assert.throws(() => declaredRevealFindings(good, cue(2), twoFrames), /cue frame 2 of panel lies outside mount sn-numbers-q1$/u);
+  assert.throws(() => declaredRevealFindings(good, cue(0), [{id: MOUNT, first: FIRST, endExclusive: FIRST}]),
+    /mount ranges need unique ids and non-empty frames$/u);
+  const split = [row('cold-0', 0, {panel: [1]}), row('reverse', 1, {panel: [0]})];
+  assert.throws(() => declaredRevealFindings(split, cue(0), RANGES), /frames 0 and 1 of panel in sn-numbers-q1 are not sampled in one seek order$/u);
   assert.throws(() => mountFrameRange(Number.NaN, 1, 30), malformed);
   assert.throws(() => probeFramePlan({first: 10, endExclusive: 11}, [], 30), malformed);
 });

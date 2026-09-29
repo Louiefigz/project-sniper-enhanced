@@ -155,16 +155,21 @@ function inlineState(element: Element): InlineState {
     opacity: opacity && { zero: opacityZero(opacity.value), important: Boolean(opacity.important) } };
 }
 
+/** Properties that can set `visibility`: itself and the `all` shorthand (`all:initial` makes it visible). */
+const CONTROLS_VISIBILITY = new Set(["visibility", "all"]);
+
 /**
- * Inline `visibility:hidden` proves hidden only when no other `visibility` declaration can apply: none in the
- * file's sheets (a matching `!important` rule would win over the inline value) and none in a descendant's inline
- * style (a child set `visibility:visible` shows inside a hidden parent, and the runtime probe's walk cannot see it).
+ * Inline `visibility:hidden` proves hidden only when nothing else can set visibility (X72(a), X77 dm1): no
+ * `visibility` or `all` declaration in the file's sheets (a matching `!important` rule would win), none in a
+ * descendant's inline style (a child set visible shows inside a hidden parent), and no `all` in the element's own
+ * inline style. A style attribute that does not parse as one block counts as declaring it.
  */
 function visibilityHolds(element: Element, sheets: Container[]): boolean {
-  const declares = (rows: Declaration[] | undefined) => !rows || rows.some(row => row.prop.toLowerCase() === "visibility");
+  const declares = (rows: Declaration[] | undefined) => !rows || rows.some(row => CONTROLS_VISIBILITY.has(row.prop.toLowerCase()));
   let inSheets = false;
-  sheets.forEach(sheet => sheet.walkDecls(row => { inSheets ||= row.prop.toLowerCase() === "visibility"; }));
-  return !inSheets && !Array.from(element.querySelectorAll("[style]")).some(child => declares(inlineDeclarations(child)));
+  sheets.forEach(sheet => sheet.walkDecls(row => { inSheets ||= CONTROLS_VISIBILITY.has(row.prop.toLowerCase()); }));
+  const ownAll = inlineDeclarations(element)?.some(row => row.prop.toLowerCase() === "all") ?? true;
+  return !inSheets && !ownAll && !Array.from(element.querySelectorAll("[style]")).some(child => declares(inlineDeclarations(child)));
 }
 
 function insideKeyframes(rule: Rule): boolean {
@@ -247,7 +252,7 @@ export function assertNativeRevealDeclarations(input: NativeShortProjectInput, f
   return Array.from(markup.querySelectorAll("[data-composition-src]")).flatMap(element => {
     const file = element.getAttribute("data-composition-src") ?? "";
     if (!Object.hasOwn(files, file)) {
-      throw new Error(`Catalog mount ${element.getAttribute("id") ?? ""} names ${file}, which is not a staged catalog file`);
+      throw new Error(`Catalog mount ${element.getAttribute("id") || "without an id"} names ${file}, which is not a staged catalog file`);
     }
     if (!declaredElements(compositionDocuments(files[file])).length) return [];
     const declarations = declaredReveals(files[file], mountFacts(element), num / den);

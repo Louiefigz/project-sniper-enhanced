@@ -1,0 +1,82 @@
+{
+  "capturedAt": "2026-09-27T18:20:47-0500",
+  "scenario": "codex-turn-duplicate",
+  "handle": {
+    "pid": 68464,
+    "started": "Sun Sep 27 18:18:46 2026",
+    "pgid": 68464
+  },
+  "threadId": "01a0e529-f172-72a1-a58b-79bb3146e133",
+  "startReplies": [
+    {
+      "at": 1.44,
+      "result": {
+        "turn": {
+          "id": "01a0e529-f69e-7dc1-8e37-e04e0b8c1cc1",
+          "items": [],
+          "itemsView": "notLoaded",
+          "status": "inProgress",
+          "error": null,
+          "startedAt": null,
+          "completedAt": null,
+          "durationMs": null
+        }
+      },
+      "error": null
+    },
+    {
+      "at": 1.444,
+      "result": {
+        "turn": {
+          "id": "01a0e529-f6a4-7a53-a4d6-9447d0c87d46",
+          "items": [],
+          "itemsView": "notLoaded",
+          "status": "inProgress",
+          "error": null,
+          "startedAt": null,
+          "completedAt": null,
+          "durationMs": null
+        }
+      },
+      "error": null
+    }
+  ],
+  "turnIds": [
+    "01a0e529-f69e-7dc1-8e37-e04e0b8c1cc1",
+    "01a0e529-f6a4-7a53-a4d6-9447d0c87d46"
+  ],
+  "turns": [
+    {
+      "turnId": "01a0e529-f69e-7dc1-8e37-e04e0b8c1cc1",
+      "status": "failed",
+      "durationMs": 4846,
+      "error": {
+        "message": "{\"type\":\"error\",\"status\":400,\"error\":{\"type\":\"invalid_request_error\",\"message\":\"The 'gpt-6-astra' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again.\"}}",
+        "codexErrorInfo": "other",
+        "additionalDetails": null
+      },
+      "usageUpdates": [],
+      "completedItemTypes": [
+        "userMessage",
+        "userMessage"
+      ]
+    },
+    {
+      "turnId": "01a0e529-f6a4-7a53-a4d6-9447d0c87d46",
+      "status": null,
+      "durationMs": null,
+      "error": null,
+      "usageUpdates": [],
+      "completedItemTypes": []
+    }
+  ],
+  "threadReadTurns": [
+    [
+      "01a0e529-f69e-7dc1-8e37-e04e0b8c1cc1",
+      "completed",
+      2
+    ]
+  ],
+  "exitCode": 0,
+  "hostVersion": "codex-cli 0.144.1"
+}

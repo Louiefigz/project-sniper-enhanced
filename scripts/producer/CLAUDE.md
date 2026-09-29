@@ -1,5 +1,204 @@
 # CLAUDE.md — PRODUCER (`scripts/producer/`)
 
+September 27 timing lineage (A6 timing): `studio/native_run.py` launches every native
+child with `native_run_config.launch_environment` — the closed environment plus only the
+allowlisted `SNIPER_TIMING_*` lineage (`stage_timing_context.LINEAGE_ENV`), so worker spans
+link to their owner span; nothing else from the supervisor environment is copied.
+Version-2 rows carry optional `taskId`/`claimEpoch`/`hostTurnId` (`task_scope`, env, or TS
+`withStageTimingContext`; an epoch/turn needs its task) and a closed `metadata.activity`
+(model, tool, host-slot-wait, native-queue-wait, pressure-wait). Malformed lineage is
+dropped and named in `lineageRejected`, never thrown: timing never fails work. TS reads
+inherited env lineage only inside `withInheritedStageTimingLineage` (a command launched by
+a timed parent; no current command calls it), never implicitly in a long-lived server.
+`native_run_admission.py` records queue/pressure admission as `child_span`s under a
+journaling owner. `stage_timing.record_handoff` / TS `journalHandoffEvent` append the task
+handoff vocabulary (dependencies satisfied → ready → claim requested → host accepted →
+execution started → artifact published → consumer accepted → terminal settlement); a
+malformed event writes nothing and returns `{recorded: false, reason}`, never throws (the
+CLI still exits 1 with that reason).
+`stage_timing.py DIR STAGE start|end|handoff` (`stage_timing_markers.py`) writes linked
+wall-clock v2 markers in an explicit run (`--run-id`/env/`--parent-span-id`), serialized by
+a lock beside the journal; `start --handover LABEL=SHA256` notes the handed-over title/script
+identities (diagnostic only; the budget authority owns the batch start and its binding).
+`stage_timing_report.py [--run-id]` + `stage_timing_attribution.py` scope the window to the
+run's descendant spans, from its earliest (even crashed) production_total start; foreign,
+unparented and unknown-lineage spans are reported apart (a legacy run-less window counts
+only legacy spans). They separate model, tool, host-slot, native queue, pressure and
+publication-to-acceptance time as inclusive, innermost-exclusive and summed-outermost
+unions (absent = unknown). Journals stay diagnostics; no
+safety decision reads them. Tests: `test_stage_timing*.py`, `test_production_timing_coverage.py`,
+`stage-timing-{v2,propagation,fallback}.test.ts`.
+
+September 27 reasoned caption suppression: `canvas.captionSuppressions` (`{startFrame, endFrame,
+reason}` rows) is validated in `src/lib/server/native-caption-display.ts` (views and suppressions
+partition the Short; each window hides a phrase, never all, and never the whole phrase of a word
+spoken wholly outside every window; reasons must be readable text). The compositor emits no caption
+in a window, highlights only rendered spans, and an explicit `<!--native-caption-mount-->` that
+`native-short-project.ts` mounts extension markup before (`nativeExtensionMount`), since
+`caption-0-0` may not exist. Windows and reasons enter the pacing visual hash
+(`native-short-pacing-observations.ts`, which also reports visible frames, uncaptioned words and
+fragments under the 0.25 s readable minimum), never the timing hash or the audio contract. `studio/native_preview_events.py` names the edges (`native_preview_schedule.py` priority),
+`studio/native_review_html.frame_points` adds review stills, and `native_short_capture_checks.mjs`
+captures both sides forward and backward and asserts no caption is in or painted inside a window.
+Tests: `native-short-{composition,project,pacing}.test.ts`, `native_capture_frame_state` and
+`native_short_capture_points` (`scripts/tests`), `test_native_short_regions.py`,
+`test_native_review_html.py`, `test_native_capture_reuse.py`.
+
+September 27 host capability gate (maintainer tooling, withheld from the buyer package):
+`studio/production/host_conformance/` measures whether Claude Code or Codex can meet the §6
+host contract of the orchestration review (identity, idempotent launch, exact handles, replay,
+interrupt, tool cleanup, coordinator death, usage). `run_gate.py` runs named scenarios into
+path-neutral evidence JSON; Claude mechanics use the loopback `stub_model.py`, Codex scenarios
+spend real subscription turns on probe-owned app-servers (`codex_rpc.py`, `ws_unix.py` for
+`--listen unix://`). It is not a host adapter and no runtime imports it. The 2026-09-27 run did
+not pass for either host; report and evidence are HOST_CAPABILITY_GATE.md and
+host-capability-gate/ under docs/producer. Test: `test_host_conformance.py`.
+
+September 27 host work pool: `native_work_pool.py` replaces the single heavy
+mutex. `NativeWorkLease.acquire(lane, project)` keeps its API: 'heavy'/'audio'
+return a pool member (`native_work_pool_lease.PoolLease`), 'preview-control' stays
+the exclusive lease. Members reserve memory/disk against one host budget
+(`native_work_pool_policy.py` holds the derivation); FIFO tickets, quarantine and
+legacy interop live in `native_work_pool_state.py`/`_observe.py`; state is
+`<state_root>/pool-v1`. Without the host record written by `studio/pool_qualification.py`
+(`native_work_qualification.py`, `native_work_session.py`) the pool is exclusive.
+Qualification profiles (E, September 27): each request's mode comes from the profile
+covering its workload. `native_work_workload.py` describes the request from files it already
+binds (plan format, receipt stage, canvas duration/pixels, frozen engine identity);
+`native_work_profiles.py` validates schema-2 profiles (per-format bounds re-derived from
+per-job evidence; a 'mixed' claim needs the jobs' own audio-stage owners overlapping heavy
+owners) and selects one. The schema-1 record keeps serving, as `legacy-v1`, whatever no
+schema-2 profile covers: Shorts until a Short profile exists, unbound supporting owners and
+older clients' unrecorded owners, never Longs. `native_work_pool_mix.py` decides mixes before
+capacity: uncovered work starts only on an idle pool and otherwise fails at once with
+`NativeWorkUnsupportedMix` (never queued, so it holds up no other class); profile-admitted
+work is refused the same way beside a live exclusive or out-of-profile member, and
+terminally beside such a member with unverified cleanup. `native_work_pool_fence.py` is the
+one compatibility fence for older pool clients (E3 exclusive members, schema-2 members,
+E2 off-root disk and any admission whose disk space is an APFS container, which older
+clients key per volume — `native_work_pool_disk.fence_reasons`): while a valid schema-1
+record makes older clients run qualified, such a member holds one fence ticket per class
+with sequence 0 (`native_work_pool_lease.FENCE_SEQUENCE`), which every older request counts
+as ahead of it; while any fence is held (or the request takes one), no request of this
+engine counts older requests in its FIFO (`native_work_pool_mix.competing`; counting them
+would deadlock, test `test_native_work_pool_liveness.py`).
+`native_work_pool_expand.off_root_fence` calls `fence_member()` before a running member
+reserves disk on another device. Records carry `poolClient` 2. Rollout rule and trade-off:
+older clients never join fenced work (on APFS: any member of this engine) and wait while
+new fenced work keeps overlapping; every exclusive or fenced member's record charges the
+whole memory budget (`reservationBytes`, raised by `fence_member` via `PoolLease.adopt_charge`
+at an off-root expansion) while this engine charges `guardReservationBytes`, so older
+clients stay out even after its supervisor dies, until recovery.
+The batch forecast (`native_budget_forecast.heavy_lane_capacity(seconds)`) uses the
+batch's longest known output. The harness (`run --class-mix`) writes profiles via
+`studio/pool_qualification_profile.py` from `studio/pool_qualification_evidence.py`
+(nested owners, per-owner summed memory, class and own-audio-stage overlap,
+cold/warm/partial cache, admission load and owner CPU receipts, disk, throughput, failures,
+cleanup, managed Studio views at start/end). Tests: `test_native_work_profiles.py`,
+`test_native_work_committed.py`, `test_native_work_pool_fence.py` and
+`test_native_work_pool_mixed_engine.py` (real base-engine client from
+`tests/fixtures/base_pool_4a15560/` via `base_pool_driver.py`, both launch orders:
+exclusive member, off-root disk, sibling-APFS root), `test_pool_qualification*.py`, `test_native_run_pool_receipt_evidence.py`.
+`NativeRunConfig.lane`/`disk_reservation_bytes` select class and disk; `studio/native_run_admission.py`
+queues within the owner deadline and records `queueSeconds` (top level, read by
+`pool_qualification_evidence`, and in `queue`: ticket, attempts, admitted); `studio/native_owner_queue.py`
+gives immediate-refusal owners the bounded queue. Recover one quarantined member or a
+legacy marker with `native_work_recovery.py <nonce>`. Disk is charged per shared space
+(APFS container or single HFS+/exFAT/FAT filesystem; versioned records;
+`native_work_pool_disk.py`). `native_work_pool_storage.py` refuses what cannot be charged
+exactly (`DiskUnaccountable`): non-`MNT_LOCAL`, types outside apfs/hfs/exfat/msdos, and
+volumes whose IOKit ancestry is not a real Internal/External disk (disk images report
+"Virtual Interface"; read in-process, never cached). Earlier engines' member roots are
+classified before the ledger lock (`native_work_pool_roots.prescan`: one reused thread per
+root, all roots concurrently, bounded by the caller's deadline or expansion tick; timeout,
+crash, no root or a late member → charged in every space, named in
+`diskChargedInEverySpace`), never inside it. An unreadable member record is waited for while its lock is held and
+refuses all disk admission once quarantined; recovery removes it only on a present, free
+lock file (`native_work_pool_recovery.py`). A running member
+grows its reservation with `native_work_pool_expand.expand_disk` (adds to the admitted
+bytes; not queued; child-supplied directories are resolved, opened and classified before
+the ledger lock, then re-checked by one lstat each inside): an owner with
+`NativeRunConfig.disk_expansion` serves its child's one `<label>.disk-request.json`
+(`studio/native_run_disk.py`), retries waitable refusals and sysctl timeouts for 45 s and
+records `diskGrant` only after the grown record is durable; a final refusal aborts the
+owner (`disk-space`, `disk-unaccountable`, `pool-unsupported-mix` or
+`disk-reservation-error`; admission refusals record the first two as well). Admission
+retries a sysctl/ps timeout at most twice with deadline-clamped backoff, starts no retry once
+the admission deadline is reached, then fails as `host-inspection-timeout` (`studio/native_run_admission.py`); every receipt has
+`leaseCleanupVerified` (with `leaseCleanupReason` when false; `studio/native_run_lease.py`). Tests: `test_native_work_pool.py`,
+`_interop.py`, `_storage.py` (real APFS/HFS sparse images), `_unknown.py`,
+`test_native_work_recovery.py`, `test_native_run_pool_admission.py`.
+Long extraction asks for the cache share; Long `capture` binds its samples and
+`picture`/`pipeline` their output from `diskProjection` at admission.
+Limits: `docs/producer/NATIVE_LONG_EXPORT.md` → "Disk accounting spaces and limits".
+
+September 27 owner reliability (R1): a recorded identity is PID + start time. In
+`native_render_processes._anchors`, a recorded process whose PID now shows another
+start has exited and is retired (`recycled` in `process_selection`,
+`ResourceSnapshot.recycled_registered_pids`): not an anchor, not a violation; the new
+holder is owned only through an owned parent. Same PID and start in another group, or a
+root whose start changed, is still a violation (`reused_registered_pids`, unverified,
+stop). `native_render_process_table.recorded_row` reads a recorded PID that another
+user's process now holds through `kinfo_proc` (`public_row`; libproc returns EPERM);
+the same start or an unbound identity still fails closed, and the root is always read
+through libproc; `process_bindings` refuses unless this process's own `kinfo_proc` and
+libproc rows agree. `add_children` re-reads each parent after listing its children and
+refuses the sample (`parent-changed-during-child-discovery`, retried) if that PID changed.
+Remembered rows at the root PID are judged as the root. `OwnedRegistry.remember_measured`
+replaces a retired record with the measured new process and refuses only a group change.
+After each verified sample `studio/native_run_lease.py` (`retire_exited`) forgets exited
+and reassigned non-root identities (`OwnedRegistry.retire`) and calls the lease's
+`retire_processes`, which drops rows only after its own `ps` read shows them absent;
+`record_lease_processes`/`release_lease` live there too. At most
+`native_work_lease.MAX_RECORDED_IDENTITIES` (4,096) identities are recorded at once;
+`ProcessRegistryOverflow` stops the owner as `process-registry-overflow`, and a verified
+cleanup still completes the lease. Receipt counters: `identityRetirement`. `ResourceSnapshot` and
+`ResourcePolicy` live in `native_render_snapshot.py` (re-exported by
+`native_render_resources`). Owner receipts: `cut_preview_io.read_bytes` raises
+`ArtifactReplaced` only when the opened file was unlinked and its path names another
+regular file; `native_export.active_owner_snapshot` (export, audio, inspection and
+capability workers) reopens only on that, at most `OWNER_READ_ATTEMPTS` (5) reads,
+never returning replaced bytes. Tests: `test_native_pid_recycling.py`,
+`test_native_owner_snapshot_race.py`, `test_native_identity_retirement.py`. See
+`docs/findings/EXITED_PROCESS_PIDS_ARE_REASSIGNED_DURING_LONG_OWNERS.md`.
+
+September 27 CPU attribution (evidence only): the direct sampler (`native_render_macos.py`,
+payload schema 2) keeps each owned process's rusage user/system CPU, converted from Mach
+ticks with the call's own `mach_timebase_info`, and reads fresh per-processor ticks with
+`host_processor_info` (`host_statistics` CPU load is rate limited and cached across
+processes). The helper emits only CPU readings that pass `cpu_problem` (the parser's own
+rule) and reports Rosetta translation or any invalid value as CPU unavailable, so CPU
+never withholds the memory reading. `ResourceSnapshot.host_cpu`
+(`native_render_measurements.HostCpuSample`) and `ProcessFootprint.cpu_user_ns`/`cpu_system_ns`
+carry them; `top` readings have none. `native_render_cpu.CpuTracker` derives deltas bound
+to PID + kernel start time: reuse is exit plus birth, a falling counter is excluded, stale
+or duplicate readings give no utilization, every processor must advance 0.8-1.2x its tick
+rate, 32-bit tick wraps count only when they fit, and intervals over 15 s count only when
+every owned identity continued. Each owner writes the interval as `cpu` in
+`<label>.resources.jsonl` (raw processor ticks only in the receipt) and the stage summary
+(`cpu`), admission reading (`cpuAtAdmission`) and per-poll `cpuLaunchDeferral` in
+`<label>.render.json`. No stop, admission or reservation reads CPU.
+`native_render_deferral.py` is the launch-deferral hook: admission passes no profile
+because no measured profile has shown a throughput or deadline benefit, so every decision
+is `launch`. A future `CpuDeferralProfile` must name the qualified pool record and its
+evidence; it holds only on a measured busy interval, its hold is bounded, counted in
+`cpuDeferralSeconds` (not `pressureWaitSeconds`) and never becomes a refusal. Tests:
+`test_native_render_cpu.py`. See
+`docs/findings/MACOS_CPU_COUNTERS_NEED_TIMEBASE_AND_FRESH_HOST_TICKS.md`.
+
+September 27 audio owner (C1): only the audio stage's live, admitted owner runs its worker.
+`native_export.launch_binding` closes the audio command/request/pins
+before admission and `worker_environment` binds `SNIPER_NATIVE_AUDIO_REQUEST`;
+`studio/native_audio_owner.py` is the worker side. `require_owned_audio_worker` refuses
+(`NativeOwnerRefused`, CLI exit 2, nothing written) before any DSP unless the owner
+receipt pinned the exact request, is active, admitted, in time and the worker's
+parent; `require_live_supervisor` repeats the parent check before DSP and before
+the result, so an orphan never publishes. The stage failure record reads the logged
+refusal (`worker_refusal`) and keeps its category (`audio-owner-refused`, or
+`budget-exhausted` for a spent deadline). NativeRun records
+`supervisorPid`/`productionAllocation` for this. Tests: `test_native_audio_owner.py`,
+`test_native_audio_owner_lifecycle.py`.
+
 September 22 ordinary render admission: `render_readiness.py` calls the shared
 TypeScript `plan-readiness.ts` validator before `render.py` or `assemble.py`
 starts media work. `readiness_preview.py` uses the existing native full-decode
@@ -811,6 +1010,44 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
 - `selftest.py` + `tests/` — stdlib `unittest` (no pytest). Run
   `PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`. Shared fixtures +
   module aliases in `tests/_common.py` — add new tests there, reuse the aliases.
+  `tests/_live_state_isolation.py` (imported by `selftest.py`, `_common`,
+  `_budget_fixture` and the native/pool fixtures) gives every test method private
+  `native_budget_store.default_root()` and `native_work_lease.state_root()` roots. Its audit
+  hook (`_live_state_paths.py`: spellings, dir fds, and what it cannot see) fails any test
+  that touches the operator's live budget authority, pool record or pool namespace. Class
+  and module fixtures get no shared root: asking for one during a run is a class-level
+  `LiveStateScopeError`. A refusal in a fixture is a class-level error. A swallowed one fails
+  the run at `stopTestRun`, or the process at exit.
+  `test_live_state_isolation.py` covers the runtime behavior; `test_live_state_coverage.py`
+  covers the static checks (import closure, selftest order, the reviewed child launches and
+  dynamic imports in `_live_state_child_allowlist.py`, and the supervised scripts).
+  **Extending isolation on a merge:** after merging a branch that adds test modules
+  or fixtures, run `PYTHONPATH=.:tests ../../.venv/bin/python3 -B -m unittest
+  test_live_state_coverage test_live_state_isolation`.
+  `test_modules_that_can_reach_the_owners_install_the_isolation` names every test module whose
+  imports can reach `studio.native_budget_store`, `native_work_lease` or
+  `native_work_qualification` without installing the isolation at import time. For each one, add
+  `import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused`
+  as its first local import, or import it in a shared fixture the module already uses.
+  An import inside a function does not count. `test_dynamic_imports_and_child_launches_are_reviewed`
+  names every new file that uses `sys.executable` or a dynamic import. Review it: a child that
+  runs budget or pool code must assign its own roots (as
+  `test_live_state_child_tripwire.test_a_child_with_its_own_private_root_is_not_refused` does). Then
+  add a row with its reason. Rerun until both lists are empty.
+  **Exemption, supervised real-media scripts** (`tests/*_integration.py`,
+  `native_perf_fixture.py`, `native_route_canary_fixture.py`): they are not unittest modules and
+  do not install the isolation. Each calls `_private_budget_root.use_private_budget_root()` first
+  in `__main__`, so a live batch never refuses or charges them. They keep the real host pool
+  namespace and qualification record on purpose: real renders share the host's heavy-slot limit
+  with every other owner on this Mac.
+
+  **Child tripwire.** Python children a test starts inherit `tests/_child_live_state/sitecustomize.py`
+  (armed by `_live_state_children.arm`: the folder first on `PYTHONPATH`, the refused prefixes as JSON in
+  `SNIPER_TEST_CHILD_REFUSED`, a reports folder and `PYTHONDONTWRITEBYTECODE=1`). It imports only the
+  standard library and adds no `sys.path` entry. A refused child writes a report and exits 97, and the
+  report fails the test or run even when the child's exit status is ignored; a missing or malformed
+  variable also exits 97. A child started with `-I` or `-S`, or with an environment without
+  `PYTHONPATH`, is not armed (`test_live_state_child_tripwire.py`).
 
 ## House rules (see repo memory / CLAUDE.md at root)
 

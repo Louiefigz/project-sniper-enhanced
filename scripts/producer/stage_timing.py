@@ -14,6 +14,14 @@ Row shape (one JSON object per line)::
 immune to wall-clock steps. The TS controller (src/lib/server/stage-timing.ts)
 appends the same shape to the same file.
 
+Version-2 spans add run/attempt/writer/span/parent identity and optional
+task/claim/host-turn lineage (stage_timing_context.py). ``record_handoff`` appends
+point events for the task handoff vocabulary (dependencies satisfied → ready →
+claim requested → host accepted → execution started → artifact published →
+consumer accepted → terminal settlement). Manual markers from separate command
+invocations use the same linked shape (stage_timing_markers.py). All of it is
+diagnostics: authoritative task and claim transitions never read this journal.
+
 Doctrine: the journal is pure TELEMETRY and must never fail the pipeline —
 append errors return False instead of raising (the same warn-and-continue
 doctrine as preview_proxy: a deliverable must not fail because observability
@@ -25,20 +33,34 @@ lines on POSIX.
 from __future__ import annotations
 
 import contextlib
-import argparse
+import contextvars
 import functools
 import json
 import os
 import time
 import uuid
-from pathlib import Path
+from dataclasses import dataclass
 from typing import Callable, Iterator, Protocol, TypeVar
 
-from stage_timing_context import PARENT_SPAN, timing_context, timing_metadata
+from stage_timing_context import PARENT_SPAN, handoff_problem, timing_context, timing_metadata
 
 JOURNAL_NAME = "stage_timings.jsonl"
+JOURNAL_UNWRITABLE = "journal-unwritable"  # the one handoff refusal that is not about content
 _EVENTS = ("start", "end")
 _T = TypeVar("_T")
+# The journal directory of the innermost open span, so nested helpers can join it.
+_JOURNAL_DIR: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "sniper_timing_journal_dir", default=None)
+
+
+@dataclass(frozen=True)
+class HandoffEvent:
+    """One observed task handoff; task/claim/host-turn lineage comes from the context."""
+
+    stage: str
+    phase: str
+    artifact_sha256: str | None = None
+    consumer_id: str | None = None  # consumer-accepted: which of several consumers accepted
 
 
 class _HasOutDir(Protocol):
@@ -69,11 +91,11 @@ def journal_event(producer_dir: str, stage: str, event: str) -> bool:
     """
     if event not in _EVENTS:
         raise ValueError(f"event must be one of {_EVENTS}, got {event!r}")
-    return _append_row(producer_dir, {"stage": stage, "event": event,
+    return append_row(producer_dir, {"stage": stage, "event": event,
                                      "ts": time.time(), "mono": time.monotonic()})
 
 
-def _append_row(producer_dir: str, fields: dict) -> bool:
+def append_row(producer_dir: str, fields: dict) -> bool:
     """Append one bounded telemetry record without changing pipeline outcomes."""
     try:
         row = json.dumps(fields, ensure_ascii=False)
@@ -101,9 +123,10 @@ def stage_span(producer_dir: str, stage: str,
     span_id = str(uuid.uuid4())
     fields = {**timing_context(), "stage": stage, "spanId": span_id,
               "metadata": timing_metadata(metadata)}
-    _append_row(producer_dir, {**fields, "event": "start",
+    append_row(producer_dir, {**fields, "event": "start",
                               "ts": time.time(), "mono": began})
     token = PARENT_SPAN.set(span_id)
+    directory = _JOURNAL_DIR.set(producer_dir)
     status = "completed"
     try:
         yield
@@ -118,8 +141,9 @@ def stage_span(producer_dir: str, stage: str,
         raise
     finally:
         ended = time.monotonic()
+        _JOURNAL_DIR.reset(directory)
         PARENT_SPAN.reset(token)
-        _append_row(producer_dir, {**fields, "event": "end", "status": status,
+        append_row(producer_dir, {**fields, "event": "end", "status": status,
                                   "ts": time.time(), "mono": ended,
                                   "elapsedMs": (ended - began) * 1000})
 
@@ -148,19 +172,52 @@ def timed_stage(stage: str) -> Callable[[Callable[..., _T]], Callable[..., _T]]:
     return wrap
 
 
+def child_span(stage: str, metadata: dict | None = None) -> contextlib.AbstractContextManager:
+    """A nested span in the enclosing span's journal; outside any span nothing is written.
+
+    Shared helpers (native admission) run under many owners; only an owner that
+    already journals its work (the export pipeline) receives their child spans.
+    """
+    directory = _JOURNAL_DIR.get()
+    return stage_span(directory, stage, metadata) if directory else contextlib.nullcontext()
+
+
+def _point_row(stage: str, kind: str, lineage: dict | None) -> dict:
+    """A point event under the current lineage, or an explicit recorded one (manual markers)."""
+    return {**(lineage or timing_context()), "event": kind, "stage": stage,
+            "eventId": str(uuid.uuid4()), "ts": time.time(), "mono": time.monotonic()}
+
+
+def _label_problem(stage: object) -> str | None:
+    """A handoff is labelled like a stage: a 1-128 character string."""
+    return None if isinstance(stage, str) and 1 <= len(stage) <= 128 else "invalid-stage-label"
+
+
+def record_handoff(producer_dir: str, event: HandoffEvent, lineage: dict | None = None) -> dict:
+    """Append one handoff event under the current lineage (see ``task_scope``).
+
+    Timing never fails the work it records, so this never raises for event content.
+
+    Returns:
+        ``{"recorded": True, "row": row}`` when appended. Otherwise ``{"recorded": False,
+        "reason": ...}``: an unknown phase or label, a missing task, claim epoch or artifact
+        hash (nothing is written), or ``journal-unwritable`` when the filesystem refused.
+    """
+    row = {**_point_row(event.stage, "handoff", lineage), "handoffPhase": event.phase}
+    optional = {"artifactSha256": event.artifact_sha256, "consumerId": event.consumer_id}
+    row.update({key: value for key, value in optional.items() if value is not None})
+    problem = _label_problem(event.stage) or handoff_problem(row)
+    if problem:
+        return {"recorded": False, "reason": problem}
+    if not append_row(producer_dir, row):
+        return {"recorded": False, "reason": JOURNAL_UNWRITABLE}
+    return {"recorded": True, "row": row}
+
+
 def main() -> None:
     """Mark operator/agent work in the existing journal; never imply quality approval."""
-    parser = argparse.ArgumentParser(description='Record actual production work, including editorial phases')
-    parser.add_argument('directory', type=Path)
-    parser.add_argument('stage', help='Unique stage label; production_total surrounds the complete task')
-    parser.add_argument('event', choices=_EVENTS)
-    args = parser.parse_args()
-    if not args.directory.is_dir() or not 1 <= len(args.stage) <= 128 \
-            or any(not (char.isascii() and (char.isalnum() or char in '_-')) for char in args.stage):
-        parser.error('Use an existing directory and a bounded ASCII stage identifier')
-    recorded = journal_event(str(args.directory.resolve()), args.stage, args.event)
-    print(json.dumps({'recorded': recorded, 'qualityApproved': False,
-                      'scope': 'manual stage markers; use unique labels for parallel work'}))
+    from stage_timing_markers import main as markers
+    markers()
 
 
 if __name__ == '__main__':

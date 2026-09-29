@@ -16,14 +16,16 @@ from cut_preview_io import write_new
 from studio.native_runtime import digest
 from studio.native_owned_processes import OwnedRegistry
 from studio.native_measurement_retry import MeasurementWindow
-from studio.native_run_config import owner_file_pins, NativeRunConfig, policy_for_baseline, source_hashes
+from studio.native_run_config import owner_file_pins, NativeRunConfig, launch_environment, policy_for_baseline, source_hashes
 from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt, publish_completed_attempt
 from studio.native_workload import ProgressWatch
 from studio.native_run_admission import acquire_capacity
 from studio.native_run_disk import serve_disk_request
+from studio import native_run_lease
 from studio.native_export import launch_binding, worker_environment
 from native_render_processes import ProcessIdentity, ProcessRequest, ResourceMeasurementError
 from native_render_resources import ResourceSnapshot, admission_reasons, resource_warnings, stop_reasons
+from native_render_cpu import CpuTracker, journal_record
 from native_render_policy import AdaptiveMemoryGuard, MODE, adaptive_admission_reasons, capacity_derivation
 from native_work_lease import NativeWorkLease
 
@@ -45,14 +47,14 @@ class NativeRun:
         self.deadline, self.policy = settings.deadline, settings.policy
         self.hard_deadline = dict(settings.hard_deadline) if settings.hard_deadline else None
         self.capacity_context = None
-        self.resource_guard = None
+        self.resource_guard, self.cpu = None, CpuTracker()
         self.path = self.root / f'{label}.render.json'
         self.started = time.monotonic()
         self.child, self.registry, self.abort_reason = None, None, None
         self.progress_watch = None
         self.log, self.samples = None, None
         self.receipt_owned = False
-        self.lease, self.lease_identities = None, None
+        self.lease, self.lease_identities, self.lease_recorded = None, None, {}
         self.signal_handlers = NativeSignalHandlers(self.request_abort)
         self.owner_pins = owner_file_pins()
         self.additional_pins = {**self.owner_pins, **settings.additional_pins}
@@ -64,7 +66,7 @@ class NativeRun:
                        'resourcePolicyMode': MODE if settings.policy is None else 'fixed', 'args': settings.command,
                        'nativeOverrides': self.native_env, 'runDeadlineSeconds': self.deadline,
                        'productionAllocation': self.hard_deadline,
-                       'supervisorSigkillProtection': False,
+                       'supervisorSigkillProtection': False, 'supervisorPid': os.getpid(),
                        'unusedRamAdvisory': settings.policy is None or settings.unused_ram_advisory,
                        'compressorAdmissionMode': settings.compressor_admission if settings.policy else 'host-pressure-advisory',
                        'additionalFilePinsBefore': self.additional_pins}
@@ -115,7 +117,7 @@ class NativeRun:
             raise RuntimeError('Native supervision code changed during admission')
         if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
             raise RuntimeError('Native input changed while waiting for capacity')
-        environment = worker_environment(self.settings, self.path)
+        environment = launch_environment(worker_environment(self.settings, self.path))  # + timing lineage only
         from studio.native_run_lifecycle import bind_launch_allocation, require_launch_time
         bind_launch_allocation(self)
         require_launch_time(self)
@@ -155,13 +157,15 @@ class NativeRun:
             return
         if snapshot.identity_verified:
             self.registry.remember_measured(snapshot.processes)
+            native_run_lease.retire_exited(self, snapshot)
             self.record_lease_processes()
         evaluation = self.resource_guard.evaluate(snapshot) if self.resource_guard else {
             'mode': 'fixed', 'stopReasons': stop_reasons(snapshot, self.baseline, self.policy),
             'warnings': resource_warnings(snapshot, self.policy)}
-        measured = asdict(snapshot) | {'warnings': evaluation['warnings'], 'guard': evaluation}
-        self.samples.write(json.dumps(measured) + '\n')
-        self.result['latestResourceSnapshot'] = measured
+        measured = asdict(snapshot) | {'warnings': evaluation['warnings'], 'guard': evaluation,
+                                       'cpu': self.cpu.observe(snapshot)}
+        self.samples.write(json.dumps(journal_record(measured)) + '\n')
+        self.result['latestResourceSnapshot'], self.result['cpu'] = measured, self.cpu.summary()
         self.result['resourcePolicyEvaluation'] = evaluation
         reasons = evaluation['stopReasons']
         if reasons:
@@ -204,28 +208,11 @@ class NativeRun:
 
     def record_lease_processes(self) -> None:
         """Durably retain newly discovered identities without per-poll write churn."""
-        if self.registry is None or self.lease is None:
-            return
-        rows = [{'pid': row.pid, 'started': row.started, 'pgid': row.pgid}
-                for row in self.registry.known.values()]
-        if rows != self.lease_identities:
-            self.lease.record_processes(rows)
-            self.lease_identities = rows
+        native_run_lease.record_lease_processes(self)
 
     def release_lease(self) -> None:
         """Clear the heavy lane only after independently verified owned cleanup."""
-        if self.lease is None:
-            return
-        try:
-            self.record_lease_processes()
-            if self.result.get('cleanup', {}).get('verified'):
-                self.lease.complete()
-                self.result['leaseCleanupVerified'] = True
-        except Exception as error:
-            self.result['leaseCleanupVerified'] = False
-            self.abort_reason = self.abort_reason or f'Heavy-work cleanup fence: {error}'
-        finally:
-            self.lease.close()
+        native_run_lease.release_lease(self)
 
     def cleanup(self) -> None:
         """Run on success as well as failure; no surviving browsers are accepted."""

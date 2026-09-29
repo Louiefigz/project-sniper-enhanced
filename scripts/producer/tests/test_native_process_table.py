@@ -8,7 +8,8 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from native_render_process_table import BsdInfo, process_row, child_pids, identity_table, MAX_PROCESSES
-from native_render_processes import ProcessIdentity, ProcessRequest, ResourceMeasurementError, process_selection
+from native_render_processes import (MissingProcessFootprint, ProcessIdentity, ProcessRequest,
+                                     ResourceMeasurementError, process_selection)
 
 
 class DirectIdentityTests(unittest.TestCase):
@@ -61,6 +62,29 @@ class DirectIdentityTests(unittest.TestCase):
              patch('native_render_process_table.os.getpid', return_value=999):
             result = process_selection(identity_table(request), request)
         self.assertEqual(result['owned'], {100, 101, 200})
+
+    def test_children_listed_after_the_parent_pid_was_reassigned_are_refused(self):
+        """An owned orphan exits mid-read and its PID goes to a foreign process with a child.
+
+        Listing children by PID would adopt that child; the parent re-read refuses instead,
+        naming only the recorded parent identity for the retry (never the foreign rows).
+        """
+        root, orphan = ProcessIdentity(100, 'START', 100), ProcessIdentity(200, 'START', 100)
+        reads = {'orphan': 0}
+        def row_for(_lib, pid):
+            """The orphan's first read shows it; every later read shows the foreign holder."""
+            if pid == 200:
+                reads['orphan'] += 1
+                return (1, 100, 'START') if reads['orphan'] == 1 else (1, 200, 'LATER')
+            return {100: (50, 100, 'START'), 300: (200, 300, 'LATER'), 999: (40, 40, 'START')}.get(pid)
+        with patch('native_render_process_table.process_bindings', return_value=Mock()), \
+             patch('native_render_process_table.process_row', side_effect=row_for), \
+             patch('native_render_process_table.child_pids', side_effect=lambda _lib, pid: [300] * (pid == 200)), \
+             patch('native_render_process_table.os.getpid', return_value=999), \
+             self.assertRaises(MissingProcessFootprint) as caught:
+            identity_table(ProcessRequest(root, (root, orphan)))
+        self.assertEqual(caught.exception.reason, 'parent-changed-during-child-discovery')
+        self.assertEqual(caught.exception.identities, (ProcessIdentity(200, 'START', 100),))
 
     def test_reused_root_never_authorizes_descendant_discovery(self):
         with patch('native_render_process_table.process_bindings', return_value=Mock()), \

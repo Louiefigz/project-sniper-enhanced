@@ -1,0 +1,175 @@
+{
+  "capturedAt": "2026-09-27T18:35:22-0500",
+  "scenario": "claude-control-interrupt",
+  "endpoint": "loopback stub",
+  "session": "78e8e08d-5740-4913-a5a6-1c9bb7f00767",
+  "handle": {
+    "argv": [
+      "~/.local/bin/claude",
+      "-p",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--safe-mode",
+      "--model",
+      "sonnet",
+      "--session-id",
+      "78e8e08d-5740-4913-a5a6-1c9bb7f00767",
+      "--input-format",
+      "stream-json",
+      "--permission-mode",
+      "bypassPermissions",
+      "--tools",
+      "Bash"
+    ],
+    "process": {
+      "pid": 72031,
+      "started": "Sun Sep 27 18:35:17 2026",
+      "pgid": 72031
+    }
+  },
+  "toolUseAt": 0.766,
+  "treeAtTool": [
+    {
+      "pid": 72129,
+      "ppid": 72031,
+      "pgid": 72129,
+      "argv": [
+        "/bin/zsh",
+        "-c",
+        "source",
+        "~/.claude/shell-snapshots/snapshot-zsh-1790552118688-ai1e5c.sh",
+        "2>/dev/null",
+        "||"
+      ]
+    },
+    {
+      "pid": 72134,
+      "ppid": 72129,
+      "pgid": 72129,
+      "argv": [
+        "/bin/sleep",
+        "301"
+      ]
+    }
+  ],
+  "interruptSentAt": 3.53,
+  "ack": [
+    3.536,
+    {
+      "type": "control_response",
+      "response": {
+        "subtype": "success",
+        "request_id": "probe-interrupt-1",
+        "response": {
+          "still_queued": []
+        }
+      }
+    }
+  ],
+  "result": [
+    3.542,
+    {
+      "subtype": "error_during_execution",
+      "is_error": true,
+      "session_id": "78e8e08d-5740-4913-a5a6-1c9bb7f00767",
+      "uuid": "29edd0dd-a049-4c91-ad82-7f7073451910",
+      "num_turns": 3,
+      "duration_ms": 2842,
+      "duration_api_ms": 26,
+      "total_cost_usd": 9.199999999999999e-05,
+      "usage": {
+        "input_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 7,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-sonnet-5": {
+          "inputTokens": 11,
+          "outputTokens": 7,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 9.199999999999999e-05,
+          "contextWindow": 200000,
+          "maxOutputTokens": 64000,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "stop_reason": "tool_use",
+      "terminal_reason": "aborted_tools",
+      "errors": [
+        "[ede_diagnostic] result_type=user last_content_type=n/a stop_reason=tool_use"
+      ]
+    }
+  ],
+  "sleep": {
+    "identity": {
+      "pid": 72134,
+      "started": "Sun Sep 27 18:35:18 2026",
+      "pgid": 72129
+    },
+    "goneWithinS": 0.302,
+    "leakedAndKilledByProbe": false
+  },
+  "childAliveAfterResult": true,
+  "exitCode": 1,
+  "stubRequestsAfterInterrupt": [],
+  "timelineAfterInterrupt": [
+    [
+      3.536,
+      "control_response",
+      null
+    ],
+    [
+      3.541,
+      "user",
+      null
+    ],
+    [
+      3.542,
+      "user",
+      null
+    ],
+    [
+      3.542,
+      "result",
+      "error_during_execution"
+    ]
+  ],
+  "transcript": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/78e8e08d-5740-4913-a5a6-1c9bb7f00767.jsonl",
+    "lines": 9,
+    "kinds": [
+      "queue-operation",
+      "queue-operation",
+      "user:text",
+      "attachment",
+      "atis-latch",
+      "assistant:tool_use",
+      "user:tool_result",
+      "user:text",
+      "last-prompt"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

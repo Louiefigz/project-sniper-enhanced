@@ -136,6 +136,21 @@ class ConcurrentAppendTests(unittest.TestCase):
                                  "per-writer order lost under concurrency")
 
 
+class ChildSpanTests(unittest.TestCase):
+    """Shared helpers join an enclosing span's journal and write nothing outside one."""
+
+    def test_child_span_needs_an_enclosing_span(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            with st.child_span("orphan", {"activity": "pressure-wait"}):
+                pass
+            self.assertFalse(os.path.exists(st.journal_path(tmp)))
+            with st.stage_span(tmp, "owner"), st.child_span("wait", {"activity": "pressure-wait"}):
+                pass
+            rows = _rows(st.journal_path(tmp))
+        self.assertEqual([r["stage"] for r in rows], ["owner", "wait", "wait", "owner"])
+        self.assertEqual(rows[1]["parentSpanId"], rows[0]["spanId"])
+
+
 class PlanVersionBumpTests(unittest.TestCase):
     """Every plan WRITE bumps planVersion; bumps never flip base fingerprints."""
 

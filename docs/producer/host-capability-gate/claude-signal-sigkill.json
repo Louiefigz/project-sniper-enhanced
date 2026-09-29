@@ -1,0 +1,83 @@
+{
+  "capturedAt": "2026-09-27T18:14:32-0500",
+  "scenario": "claude-signal-sigkill",
+  "endpoint": "loopback stub",
+  "session": "a7cad30c-369e-4767-8387-ac07aae088b8",
+  "handle": {
+    "argv": [
+      "~/.local/bin/claude",
+      "-p",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--safe-mode",
+      "--model",
+      "sonnet",
+      "--session-id",
+      "a7cad30c-369e-4767-8387-ac07aae088b8",
+      "--input-format",
+      "stream-json",
+      "--permission-mode",
+      "bypassPermissions",
+      "--tools",
+      "Bash"
+    ],
+    "process": {
+      "pid": 81219,
+      "started": "Sun Sep 27 18:14:14 2026",
+      "pgid": 81219
+    }
+  },
+  "toolUseAt": 0.29,
+  "treeAtTool": [
+    {
+      "pid": 81356,
+      "ppid": 81219,
+      "pgid": 81356,
+      "argv": [
+        "/bin/zsh",
+        "-c",
+        "source",
+        "~/.claude/shell-snapshots/snapshot-zsh-1790550854302-6ghylq.sh",
+        "2>/dev/null",
+        "||"
+      ]
+    },
+    {
+      "pid": 81360,
+      "ppid": 81356,
+      "pgid": 81356,
+      "argv": [
+        "/bin/sleep",
+        "305"
+      ]
+    }
+  ],
+  "signalSentAt": 2.892,
+  "exitCode": -9,
+  "sleep": {
+    "identity": {
+      "pid": 81360,
+      "started": "Sun Sep 27 18:14:14 2026",
+      "pgid": 81356
+    },
+    "goneWithinS": null,
+    "leakedAndKilledByProbe": true
+  },
+  "stubRequestsAfterSignal": [],
+  "timelineAfterSignal": [],
+  "transcript": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/a7cad30c-369e-4767-8387-ac07aae088b8.jsonl",
+    "lines": 6,
+    "kinds": [
+      "queue-operation",
+      "queue-operation",
+      "user:text",
+      "attachment",
+      "atis-latch",
+      "assistant:tool_use"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

@@ -1,0 +1,35 @@
+{
+  "commit": "4a15560ac6218190f43c12138c23c2b13bd1c489",
+  "files": {
+    "native_work_lease.py": {
+      "gitBlob": "f6a9346c7990ad7266e5a3da483d20209bf5f229",
+      "sha256": "6e17a64b8ab4bd1992f5cda870c7d4b5307f39b5f8db4060166bd28a003fe0dc"
+    },
+    "native_work_pool.py": {
+      "gitBlob": "68b0e6d35966935f644b664a6c2e138130336893",
+      "sha256": "32a83e4958e00ba4f98a6a1aac37b18d06cae8780d016fed91cfeb1c79a48312"
+    },
+    "native_work_pool_lease.py": {
+      "gitBlob": "17e7760e3acd48bcbeb2b021a50c8419e25ac18b",
+      "sha256": "eeda886e1102ff69991e0c09292a61417fb0d922e684634842e413a9d868246f"
+    },
+    "native_work_pool_observe.py": {
+      "gitBlob": "64d1dfae9294234dda08c9b43bf89aa9b3a2c5b3",
+      "sha256": "c22213119910b8248afa2fbc74514b6ef48d3ea413a6470098b8353952be7b20"
+    },
+    "native_work_pool_policy.py": {
+      "gitBlob": "b05b723a54a276b8b72331cc2c5e99ea3825b56d",
+      "sha256": "8577ef5b8297ad264b0bc2ab036651c9241cc84e4fbcf40d01a4addf610d0023"
+    },
+    "native_work_pool_state.py": {
+      "gitBlob": "fb782bf0f1510f5e2eb94f01f045c1ebd2e6f5e1",
+      "sha256": "c13d0886b46030bcc698188bb5e4feeffbee1917c230781667b9acb1dace4f0c"
+    },
+    "native_work_qualification.py": {
+      "gitBlob": "9f8bbe887efb0abae353e671fa6990f103f1c6d5",
+      "sha256": "285e69e9739c85cb5a0edab6c5cf7282ee3ddc78f295c246a7be8b84e13fa1ef"
+    }
+  },
+  "scope": "TEST fixture: unmodified pool client modules of the base engine, used only as the older client in interop tests",
+  "sourceDirectory": "scripts/producer"
+}

@@ -21,6 +21,7 @@ from test_native_render_resources import REQUEST, direct_sample
 def process_row(pid: int = 100) -> dict:
     """Return one synthetic live rusage observation with inclusive footprint."""
     return {'pid': pid, 'status': 'measured', 'footprintBytes': 214041128,
+            'userTimeAbstime': 7200, 'systemTimeAbstime': 2400,
             'processStartAbstime': 1234, 'processExitAbstime': 0,
             'compressedBytes': None, 'compressedStatus': sampler.COMPRESSED_UNAVAILABLE,
             'footprintSource': 'proc_pid_rusage:RUSAGE_INFO_V0:ri_phys_footprint'}
@@ -38,6 +39,44 @@ def host_system(count: int = 38, result: int = 0) -> SimpleNamespace:
         return result
     return SimpleNamespace(mach_host_self=Mock(return_value=91),
                            host_statistics64=Mock(side_effect=statistics))
+
+
+def processor_system(values: list[int], count: int = 2, size: int = 8, result: int = 0) -> SimpleNamespace:
+    """Fill host_processor_info's out-of-line array exactly as the kernel's MIG reply does."""
+    array = (c.c_int32 * len(values))(*values)
+    def info(host: int, flavor: int, processors: object, pointer: object, integers: object) -> int:
+        if (host, flavor) != (91, sampler.PROCESSOR_CPU_LOAD_INFO):
+            raise AssertionError('Wrong host port or processor flavor')
+        c.cast(processors, c.POINTER(c.c_uint32))[0] = count
+        c.cast(pointer, c.POINTER(c.POINTER(c.c_int32)))[0] = c.cast(array, c.POINTER(c.c_int32))
+        c.cast(integers, c.POINTER(c.c_uint32))[0] = size
+        return result
+    return SimpleNamespace(mach_host_self=Mock(return_value=91), host_processor_info=Mock(side_effect=info),
+                           vm_deallocate=Mock(return_value=0), array=array)
+
+
+def translation(value: int, result: int = 0, code: int = 0) -> Mock:
+    """sysctlbyname('sysctl.proc_translated'): 0 natively, 1 under Rosetta, or a failure."""
+    def sysctl(name: bytes, pointer: object, _size: object, _new: object, _length: int) -> int:
+        if name != b'sysctl.proc_translated':
+            raise AssertionError(f'Unexpected sysctl {name!r}')
+        c.cast(pointer, c.POINTER(c.c_int))[0] = value
+        c.set_errno(code)
+        return result
+    return Mock(side_effect=sysctl)
+
+
+def cpu_system(values: list[int], numer: int = 125, read: int = 1000) -> SimpleNamespace:
+    """A native (untranslated) host with a 125/3 timebase and the given processor ticks."""
+    system = processor_system(values)
+    def timebase(pointer: object) -> int:
+        target = c.cast(pointer, c.POINTER(sampler.MachTimebase)).contents
+        target.numer, target.denom = numer, 3
+        return 0
+    system.mach_timebase_info = Mock(side_effect=timebase)
+    system.mach_absolute_time = Mock(return_value=read)
+    system.sysctlbyname = translation(0)
+    return system
 
 
 class NativeRenderMacosTests(unittest.TestCase):
@@ -141,6 +180,7 @@ class NativeRenderMacosTests(unittest.TestCase):
             self.assertEqual((pid, version), (100, 0))
             usage = c.cast(buffer, c.POINTER(sampler.RusageV0)).contents
             usage.ri_resident_size, usage.ri_phys_footprint = 4096, 214041128
+            usage.ri_user_time, usage.ri_system_time = 7200, 2400
             usage.ri_proc_start_abstime = 1234
             return 0
         result = sampler.process_memory(SimpleNamespace(proc_pid_rusage=Mock(side_effect=rusage)), 100)
@@ -281,6 +321,125 @@ class NativeRenderMacosTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     sampler.main()
                 collect.assert_not_called()
+
+
+    def test_rusage_cpu_is_raw_mach_ticks_and_v0_has_no_child_totals(self) -> None:
+        """Each process reports only its own CPU, so descendants are never counted twice."""
+        names = [name for name, _ in sampler.RusageV0._fields_]
+        self.assertFalse([name for name in names if 'child' in name])
+        self.assertEqual(sampler.abi_layout()['RusageV0']['offsets']['ri_user_time'], 16)
+        self.assertEqual(process_row()['userTimeAbstime'], 7200)  # Mach ticks, never nanoseconds
+
+    def test_processor_ticks_copy_natural_t_counters_and_release_the_kernel_array(self) -> None:
+        """Signed integer_t storage is read as unsigned ticks; the MIG array is freed."""
+        system = processor_system([10, 20, 30, 0, -1, 5, 6, 7])
+        rows = sampler.processor_ticks(system, 7)
+        self.assertEqual(rows, [[10, 20, 30, 0], [2 ** 32 - 1, 5, 6, 7]])
+        system.vm_deallocate.assert_called_once_with(7, c.addressof(system.array), 32)
+
+    def test_incomplete_processor_arrays_fail_and_are_still_released(self) -> None:
+        """A short or oversized reply is refused; only a failed call has nothing to free."""
+        for count, size in [(2, 7), (0, 0), (sampler.MAXIMUM_PROCESSORS + 1, 8)]:
+            system = processor_system([1] * 8, count, size)
+            with self.subTest(count=count, size=size), self.assertRaisesRegex(RuntimeError, 'Incomplete'):
+                sampler.processor_ticks(system, 7)
+            system.vm_deallocate.assert_called_once()
+        failed = processor_system([1] * 8, result=5)
+        with self.assertRaisesRegex(RuntimeError, 'host_processor_info failed'):
+            sampler.processor_ticks(failed, 7)
+        failed.vm_deallocate.assert_not_called()
+        leaked = processor_system([1] * 8)
+        leaked.vm_deallocate.return_value = 4
+        with self.assertRaisesRegex(RuntimeError, 'not released'):
+            sampler.processor_ticks(leaked, 7)
+
+    def test_cpu_bindings_declare_clock_processor_and_translation_signatures(self) -> None:
+        """Out-of-line pointers, 64-bit clocks and the sysctl probe need explicit signatures."""
+        system = SimpleNamespace(mach_absolute_time=Mock(), mach_timebase_info=Mock(),
+                                 host_processor_info=Mock(), vm_deallocate=Mock(), sysctlbyname=Mock())
+        with patch.object(c.c_uint32, 'in_dll', return_value=SimpleNamespace(value=259), create=True) as task:
+            self.assertEqual(sampler.cpu_bindings(system), 259)
+        task.assert_called_once_with(system, 'mach_task_self_')
+        self.assertIs(system.mach_absolute_time.restype, c.c_uint64)
+        self.assertEqual(system.host_processor_info.argtypes[3], c.POINTER(c.POINTER(c.c_int32)))
+        self.assertEqual(system.vm_deallocate.argtypes, [c.c_uint32, c.c_size_t, c.c_size_t])
+        self.assertEqual(system.sysctlbyname.argtypes[:3], [c.c_char_p, c.c_void_p, c.POINTER(c.c_size_t)])
+
+    def test_host_cpu_reads_timebase_ticks_then_clock(self) -> None:
+        """The Mach read time follows the copied ticks; SC_CLK_TCK is recorded, not assumed."""
+        system = cpu_system([10, 20, 30, 0, 1, 2, 3, 4])
+        system.mach_absolute_time = Mock(side_effect=lambda: system.vm_deallocate.call_count * 1000)
+        with patch.object(sampler, 'cpu_bindings', return_value=7), \
+                patch.object(sampler.os, 'sysconf', return_value=100) as clock:
+            result = sampler.host_cpu(system)
+        clock.assert_called_once_with('SC_CLK_TCK')
+        self.assertEqual(result, {'status': 'measured', 'source': sampler.CPU_SOURCE, 'readAbstime': 1000,
+                                  'timebase': {'numer': 125, 'denom': 3}, 'clockTicksPerSecond': 100,
+                                  'processorTicks': [[10, 20, 30, 0], [1, 2, 3, 4]]})
+        self.assertIsNone(sampler.cpu_problem(result))
+
+    def test_rosetta_translation_reports_cpu_unavailable(self) -> None:
+        """Translated Mach time is nanoseconds while rusage stays native ticks: never measured."""
+        cases = [(translation(1), 'Rosetta translation'), (translation(0, -1, errno.EPERM), 'errno=1'),
+                 (translation(7), 'Unexpected Rosetta')]
+        for probe, message in cases:
+            system = cpu_system([1] * 8)
+            system.sysctlbyname = probe
+            with self.subTest(message=message), patch.object(sampler, 'cpu_bindings', return_value=7), \
+                    patch.object(sampler.os, 'sysconf', return_value=100):
+                result = sampler.host_cpu(system)
+            self.assertEqual(result['status'], 'unavailable')
+            self.assertIn(message, result['error'])
+            system.host_processor_info.assert_not_called()
+        native = cpu_system([1] * 8)
+        native.sysctlbyname = translation(0, -1, errno.ENOENT)  # Hosts without translation lack the sysctl.
+        with patch.object(sampler, 'cpu_bindings', return_value=7), patch.object(sampler.os, 'sysconf', return_value=100):
+            self.assertEqual(sampler.host_cpu(native)['status'], 'measured')
+
+    def test_helper_reports_every_invalid_cpu_value_as_unavailable(self) -> None:
+        """The helper applies the parser's rule, so a CPU defect never reaches strict parsing."""
+        cases = [('timebase', cpu_system([1] * 8, numer=0), 100), ('tick rate', cpu_system([1] * 8), -1),
+                 ('tick rate', cpu_system([1] * 8), 0), ('read time', cpu_system([1] * 8, read=0), 100)]
+        for problem, system, clock in cases:
+            with self.subTest(problem=problem, clock=clock), patch.object(sampler, 'cpu_bindings', return_value=7), \
+                    patch.object(sampler.os, 'sysconf', return_value=clock):
+                result = sampler.host_cpu(system)
+            self.assertEqual(result['errorType'], 'InvalidCpuReading')
+            self.assertIn(problem, result['error'])
+
+    def test_cpu_defect_never_withholds_the_memory_reading(self) -> None:
+        """A CPU-only defect parses as unknown CPU; memory and every owned footprint remain."""
+        raw = direct_sample()
+        with patch.object(sampler, 'cpu_bindings', return_value=7), patch.object(sampler.os, 'sysconf', return_value=-1):
+            cpu = sampler.host_cpu(cpu_system([1] * 8))
+        value = json.loads(raw['direct']) | {'cpu': cpu}
+        result = parse_direct(json.dumps(value), raw['ps'], REQUEST)
+        self.assertEqual(result['hostCpu'].status, 'unavailable')
+        self.assertEqual([row.footprint_bytes for row in result['selection']['processes']], [2 ** 31, 2 ** 30])
+        self.assertTrue(all(row.cpu_user_ns is None for row in result['selection']['processes']))
+        with patch.object(sampler, 'validate_abi'), patch.object(sampler, 'bindings', return_value=('proc', 'sys')), \
+                patch.object(sampler, 'process_memory', side_effect=lambda _lib, pid: process_row(pid)), \
+                patch.object(sampler, 'host_memory', return_value={'test': 'host'}), \
+                patch.object(sampler, 'cpu_bindings', side_effect=AttributeError('no symbol')):
+            collected = sampler.collect([100])
+        self.assertEqual(collected['cpu'], {'status': 'unavailable', 'errorType': 'AttributeError',
+                                            'error': 'no symbol'})
+        self.assertEqual((collected['status'], collected['schemaVersion']), ('measured', 2))
+        self.assertEqual(collected['processes'][0]['footprintBytes'], 214041128)
+
+    def test_collect_reads_cpu_inside_the_memory_identity_bracket(self) -> None:
+        """Host CPU is read after the first process pass and before the second."""
+        order = []
+        def process(_library: object, pid: int) -> dict:
+            order.append(pid)
+            return process_row(pid)
+        with patch.object(sampler, 'validate_abi'), patch.object(sampler, 'bindings', return_value=('proc', 'sys')), \
+                patch.object(sampler, 'process_memory', side_effect=process), \
+                patch.object(sampler, 'host_memory', side_effect=lambda _sys: order.append('host') or {}), \
+                patch.object(sampler, 'host_cpu', side_effect=lambda _sys: order.append('cpu') or {'status': 'x'}):
+            result = sampler.collect([100])
+        self.assertEqual(order, [100, 'host', 'cpu', 100])
+        self.assertEqual(result['cpu'], {'status': 'x'})
 
 
 if __name__ == '__main__':

@@ -10,22 +10,22 @@ import argparse
 import base64
 import json
 import logging
-import math
 import re
 import shutil
 import subprocess
 import sys
 import time
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Mapping
 
 from native_render_processes import (
-    ProcessFootprint, ProcessIdentity, ProcessRequest, ResourceMeasurementError,
+    ProcessIdentity, ProcessRequest, ResourceMeasurementError,
     identity_matches, parse_size, process_table, read_identities,
     reconcile_process_request, select_processes, process_selection,
 )
 from native_render_measurements import parse_direct
+from native_render_snapshot import ResourcePolicy, ResourceSnapshot
 
 GIB = 1024 ** 3
 LOGGER = logging.getLogger(__name__)
@@ -65,55 +65,6 @@ class ResourceCommandTimeout(ResourceMeasurementError):
         self.evidence['identities'] = [asdict(row) for row in self.identities]
 
 
-@dataclass(frozen=True)
-class ResourceSnapshot:
-    """Live system pressure and the inclusive footprint of one owned tree."""
-
-    measured_at: float
-    physical_bytes: int
-    free_percent: float
-    swap_used_bytes: int
-    compressor_bytes: int
-    disk_free_bytes: int
-    owned_footprint_bytes: int
-    largest_owned_process_bytes: int
-    owned_pids: tuple[int, ...]
-    processes: tuple[ProcessFootprint, ...]
-    identity_verified: bool
-    unused_physical_bytes: int
-    missing_registered_pids: tuple[int, ...]
-    reused_registered_pids: tuple[int, ...]
-    kernel_pressure_level: int
-    memory_sampler: str = 'macos-top-v1'
-
-
-@dataclass(frozen=True)
-class ResourcePolicy:
-    """Conservative initial limits; success still requires measured full runs."""
-
-    admission_free_percent: float = 25
-    stop_free_percent: float = 10
-    maximum_compressor_fraction: float = 0.25
-    maximum_owned_gib: float = 16
-    maximum_process_gib: float = 8
-    maximum_swap_growth_gib: float = 4
-    minimum_disk_free_gib: float = 10
-    minimum_unused_physical_gib: float = 6
-    maximum_snapshot_age_seconds: float = 30
-
-    def __post_init__(self) -> None:
-        """Reject invalid or unbounded policies before any execution decision."""
-        values = tuple(self.__dict__.values())
-        if any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in values):
-            raise ValueError("Resource limits must be finite positive numbers")
-        if any(not math.isfinite(x) or x <= 0 for x in values):
-            raise ValueError("Resource limits must be finite positive numbers")
-        if not self.stop_free_percent < self.admission_free_percent < 100:
-            raise ValueError("Stop pressure threshold must precede admission headroom")
-        if self.maximum_compressor_fraction >= 1:
-            raise ValueError("Compressor fraction must be below one")
-
-
 def _match(pattern: str, text: str) -> re.Match:
     """Require a measurement instead of substituting a healthy zero."""
     match = re.search(pattern, text)
@@ -151,7 +102,7 @@ def parse_snapshot(raw: Mapping[str, str], request: ProcessRequest,
                             memory['compressor'], disk_free_bytes, sum(footprints),
                             max(footprints, default=0), tuple(x.pid for x in processes), processes,
                             selected["verified"], memory['unused'], selected["missing"], selected["reused"],
-                            kernel_pressure, memory['sampler'])
+                            kernel_pressure, memory['sampler'], memory['hostCpu'], selected["recycled"])
 
 
 def _memory_values(raw: Mapping[str, str], request: ProcessRequest) -> dict:
@@ -162,7 +113,7 @@ def _memory_values(raw: Mapping[str, str], request: ProcessRequest) -> dict:
         return parse_direct(raw['direct'], raw['ps'], request)
     return {'compressor': parse_size(_match(r'([\d.]+[BKMGT])\s+compressor', raw['top'])[1]),
         'unused': parse_size(_match(r'([\d.]+[BKMGT])\s+unused', raw['top'])[1]),
-        'selection': select_processes(raw['ps'], raw['top'], request), 'sampler': 'macos-top-v1'}
+        'selection': select_processes(raw['ps'], raw['top'], request), 'sampler': 'macos-top-v1', 'hostCpu': None}
 
 
 def _read_command(args: list[str], input_text: str | None = None) -> str:

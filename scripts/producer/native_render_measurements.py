@@ -2,15 +2,20 @@
 
 The bounded owner reads ps before and after this payload. Parsing shares the
 historical process-selection authority; it cannot create owned identities.
+CPU counters are converted from Mach ticks with the payload's own timebase; an
+unavailable CPU reader leaves every CPU value None, never zero. The helper emits
+only CPU readings that pass cpu_problem, so a measured block that fails it here is
+forged or from another sampler version and fails closed like any malformed field.
 """
 from __future__ import annotations
 
 import json
 import math
 import errno
+from dataclasses import dataclass
 from typing import Any
 
-from native_render_macos import COMPRESSED_UNAVAILABLE, SAMPLER
+from native_render_macos import COMPRESSED_UNAVAILABLE, CPU_SOURCE, SAMPLER, SCHEMA_VERSION, cpu_problem
 from native_render_processes import (
     MissingProcessFootprint, ProcessRequest, ResourceMeasurementError, select_footprints,
 )
@@ -25,11 +30,61 @@ class DirectMeasurementError(ResourceMeasurementError):
         super().__init__(f'Direct macOS resource measurement unavailable: {reason}')
 
 
+@dataclass(frozen=True)
+class HostCpuSample:
+    """One host processor-tick reading and the Mach time that orders it.
+
+    Attributes:
+        status: 'measured', or 'unavailable' with ``error`` and no counters.
+        source: The public API that produced the ticks.
+        read_abstime: mach_absolute_time() immediately after the ticks were copied.
+        timebase_numer: mach_timebase_info numerator (ticks to nanoseconds).
+        timebase_denom: mach_timebase_info denominator.
+        clock_ticks_per_second: Processor-load tick rate (SC_CLK_TCK).
+        processor_ticks: Per-processor (user, system, idle, nice) natural_t counters.
+        error: Why the CPU reader was unavailable.
+    """
+
+    status: str
+    source: str | None = None
+    read_abstime: int | None = None
+    timebase_numer: int | None = None
+    timebase_denom: int | None = None
+    clock_ticks_per_second: int | None = None
+    processor_ticks: tuple[tuple[int, ...], ...] = ()
+    error: str | None = None
+
+
 def unsigned(value: Any, label: str) -> int:
     """Reject booleans, fractions, negative values, infinity and absent counters."""
     if type(value) is not int or not 0 <= value <= 2**64 - 1:
         raise ValueError(f'Invalid unsigned measurement: {label}')
     return value
+
+
+def cpu_values(value: Any) -> HostCpuSample:
+    """Accept explicit unavailability or a reading the helper itself validated."""
+    if value['status'] == 'unavailable':
+        if set(value) != {'status', 'errorType', 'error'} or not all(
+                isinstance(value[key], str) for key in ('errorType', 'error')):
+            raise ValueError('Malformed CPU unavailability evidence')
+        return HostCpuSample('unavailable', error=f"{value['errorType']}: {value['error']}")
+    problem = cpu_problem(value)
+    if problem:
+        raise ValueError(f'Forged or version-skewed CPU reading: {problem}')
+    timebase, rows = value['timebase'], value['processorTicks']
+    return HostCpuSample('measured', CPU_SOURCE, value['readAbstime'], timebase['numer'], timebase['denom'],
+                         value['clockTicksPerSecond'], tuple(tuple(row) for row in rows))
+
+
+def cpu_nanoseconds(row: dict, cpu: HostCpuSample) -> dict:
+    """Convert both rusage CPU counters only when this payload measured its timebase."""
+    user = unsigned(row['userTimeAbstime'], 'user CPU time')
+    system = unsigned(row['systemTimeAbstime'], 'system CPU time')
+    if cpu.status != 'measured':
+        return {'cpu_user_ns': None, 'cpu_system_ns': None}
+    return {'cpu_user_ns': user * cpu.timebase_numer // cpu.timebase_denom,
+            'cpu_system_ns': system * cpu.timebase_numer // cpu.timebase_denom}
 
 
 def host_values(host: dict) -> tuple[int, int]:
@@ -51,7 +106,7 @@ def host_values(host: dict) -> tuple[int, int]:
     return compressor, unused
 
 
-def process_values(row: dict) -> dict:
+def process_values(row: dict, cpu: HostCpuSample) -> dict:
     """Accept only paired live kernel identities and explicit missing CMPRS provenance."""
     start = unsigned(row['processStartAbstime'], 'process start')
     if not start or unsigned(row['processStartAbstimeBefore'], 'earlier process start') != start:
@@ -66,7 +121,7 @@ def process_values(row: dict) -> dict:
         'compressed_bytes': None, 'memory_sampler': SAMPLER,
         'compressed_status': COMPRESSED_UNAVAILABLE, 'process_start_abstime': start,
         'process_start_abstime_before': row['processStartAbstimeBefore'],
-        'process_exit_abstime': row['processExitAbstime']}
+        'process_exit_abstime': row['processExitAbstime'], **cpu_nanoseconds(row, cpu)}
 
 
 def require_disappearance(row: dict) -> None:
@@ -117,9 +172,9 @@ def require_transient_unavailable(row: dict) -> None:
             raw_identity(side)
 
 
-def payload_values(payload: dict) -> tuple[int, int, dict[int, dict]]:
+def payload_values(payload: dict) -> tuple[int, int, HostCpuSample, dict[int, dict]]:
     """Validate schema and every supplied row before selecting current owned identities."""
-    if type(payload['schemaVersion']) is not int or payload['schemaVersion'] != 1:
+    if type(payload['schemaVersion']) is not int or payload['schemaVersion'] != SCHEMA_VERSION:
         raise ValueError('Unknown direct sampler schema')
     if payload['sampler'] != SAMPLER or payload['status'] != 'measured':
         raise ValueError('Direct API sampling failed or sampler is unknown')
@@ -127,6 +182,7 @@ def payload_values(payload: dict) -> tuple[int, int, dict[int, dict]]:
     if type(elapsed) not in {int, float} or not math.isfinite(elapsed) or elapsed < 0:
         raise ValueError('Invalid direct sample duration')
     compressor, unused = host_values(payload['host'])
+    cpu = cpu_values(payload['cpu'])
     rows, found, seen = payload['processes'], {}, set()
     if not isinstance(rows, list) or len(rows) > 4096:
         raise ValueError('Unbounded direct process readings')
@@ -136,10 +192,10 @@ def payload_values(payload: dict) -> tuple[int, int, dict[int, dict]]:
             raise ValueError('Invalid or duplicate direct PID')
         seen.add(pid)
         if row['status'] == 'measured':
-            found[pid] = process_values(row)
+            found[pid] = process_values(row, cpu)
         else:
             require_transient_unavailable(row)
-    return compressor, unused, found
+    return compressor, unused, cpu, found
 
 
 def parse_direct(text: str, ps_text: str, request: ProcessRequest) -> dict:
@@ -149,11 +205,12 @@ def parse_direct(text: str, ps_text: str, request: ProcessRequest) -> dict:
         if len(text) > 8 * 1024 * 1024:
             raise ValueError('Direct sample exceeds bounded payload size')
         payload = json.loads(text)
-        compressor, unused, found = payload_values(payload)
+        compressor, unused, cpu, found = payload_values(payload)
         selection = select_footprints(ps_text, found, request)
     except MissingProcessFootprint as error:
         error.evidence.update(sampler=SAMPLER, directReadings=payload)
         raise
     except (ValueError, TypeError, KeyError, OverflowError) as error:
         raise DirectMeasurementError(str(error), payload) from error
-    return {'compressor': compressor, 'unused': unused, 'selection': selection, 'sampler': SAMPLER}
+    return {'compressor': compressor, 'unused': unused, 'selection': selection, 'sampler': SAMPLER,
+            'hostCpu': cpu}

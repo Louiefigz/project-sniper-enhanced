@@ -1,0 +1,102 @@
+{
+  "capturedAt": "2026-09-27T18:14:13-0500",
+  "scenario": "claude-signal-sigint",
+  "endpoint": "loopback stub",
+  "session": "234d68b1-523b-4125-8ca9-c5a5f91d4af2",
+  "handle": {
+    "argv": [
+      "~/.local/bin/claude",
+      "-p",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--safe-mode",
+      "--model",
+      "sonnet",
+      "--session-id",
+      "234d68b1-523b-4125-8ca9-c5a5f91d4af2",
+      "--input-format",
+      "stream-json",
+      "--permission-mode",
+      "bypassPermissions",
+      "--tools",
+      "Bash"
+    ],
+    "process": {
+      "pid": 80044,
+      "started": "Sun Sep 27 18:14:10 2026",
+      "pgid": 80044
+    }
+  },
+  "toolUseAt": 0.285,
+  "treeAtTool": [
+    {
+      "pid": 80208,
+      "ppid": 80044,
+      "pgid": 80208,
+      "argv": [
+        "/bin/zsh",
+        "-c",
+        "source",
+        "~/.claude/shell-snapshots/snapshot-zsh-1790550850992-63u1gj.sh",
+        "2>/dev/null",
+        "||"
+      ]
+    },
+    {
+      "pid": 80212,
+      "ppid": 80208,
+      "pgid": 80208,
+      "argv": [
+        "/bin/sleep",
+        "304"
+      ]
+    }
+  ],
+  "signalSentAt": 2.874,
+  "exitCode": 0,
+  "sleep": {
+    "identity": {
+      "pid": 80212,
+      "started": "Sun Sep 27 18:14:11 2026",
+      "pgid": 80208
+    },
+    "goneWithinS": 0.036,
+    "leakedAndKilledByProbe": false
+  },
+  "stubRequestsAfterSignal": [],
+  "timelineAfterSignal": [
+    [
+      2.92,
+      "user",
+      null
+    ],
+    [
+      2.92,
+      "user",
+      null
+    ],
+    [
+      2.92,
+      "result",
+      "error_during_execution"
+    ]
+  ],
+  "transcript": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/234d68b1-523b-4125-8ca9-c5a5f91d4af2.jsonl",
+    "lines": 9,
+    "kinds": [
+      "queue-operation",
+      "queue-operation",
+      "user:text",
+      "attachment",
+      "atis-latch",
+      "assistant:tool_use",
+      "last-prompt",
+      "user:tool_result",
+      "user:text"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

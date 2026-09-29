@@ -135,13 +135,30 @@ existing agent workflow authors and obtains the critics' actual judgments.
 The native previews use the full original composition, absolute frame clock,
 current native capture path and final-quality encoding. Audio is a sample-exact
 excerpt of the checked whole-program float master, then encoded once; it is never
-normalized per excerpt. Windows include two seconds of neighboring context. Long
-regions use bounded start/middle/end samples rather than claiming exhaustive
-playback. Final output still receives full decode and existing encoded QC.
+normalized per excerpt. Final output still receives full decode and existing
+encoded QC.
 
-An optional `REVIEW-REGIONS.json` declares complete, uniquely mounted catalog
-units. For Short projects author the same object as `reviewRegions` in the input;
-the writer stages it and includes it in the manifest:
+**Native Short (packet schema 2).** Do not author `reviewRegions`: the project
+writer derives `REVIEW-REGIONS.json` from the executable composition mounts and
+the cold reader re-derives it, so the prebuild plan hash is unchanged and still
+binds every input the map comes from. Each uniquely mounted, frame-exact catalog
+composition is a region; program time outside every region is split into window
+units. A region marked `scoped` (proven isolated; see NATIVE_SHORTS_WORKFLOW.md)
+contributes only its global parts to the shared hash, so its own copy/style/script
+edits invalidate only that region; unproven regions keep literal copy and variable
+defaults local while code, CSS and markup stay global. Every unit binds the
+compositions visible in its preview windows. Dependency hashes use executable
+content, not project, revision-folder or prepared-source paths.
+
+Changed units preview their risk events (source joins, title entrance/exit,
+composition start/end/midpoint, hold bounds, checkpoints, motion cues, gain edges)
+with bounded windows; short units are shown whole with two seconds of context.
+`motion-previews.json` records `schedule`, a `navigation` index into the clips and
+`uncoveredEvents` that the full-output review must inspect. These declarations
+guide bounded review; they do not establish semantic independence or replace the
+current full-plan prebuild assessment.
+
+**Native Long (packet schema 1)** keeps the optional authored `REVIEW-REGIONS.json`:
 
 ```json
 {"schemaVersion":1,"units":[{"id":"example","file":"compositions/example.html","startFrame":1800,"endFrame":1905}]}
@@ -150,19 +167,17 @@ the writer stages it and includes it in the manifest:
 The exporter checks the files and literal mount clocks. Only literal component
 copy and declared variable defaults have local preview dependencies; code, CSS,
 markup, timing, source/media and unknown inputs stay global. Separate start, middle
-and end context units cover global picture/audio samples. Every unit also binds
-all mapped graphics visible in its preview windows, including the two-second
-context. Changing an overlapping or nearby graphic invalidates those reviews too.
-These declarations guide bounded review;
-they do not establish semantic independence or replace the current full-plan
-prebuild assessment. For components with cross-scene dependencies, omit the region
-map so the project is reviewed together.
+and end context units cover global picture/audio samples, and long regions use
+bounded start/middle/end samples. For components with cross-scene dependencies,
+omit the region map so the project is reviewed together.
 
-Completed previews are discovered automatically from bounded same-project export
-history. `--preview-from /absolute/motion-previews.json` selects one explicitly.
-Unchanged units retain their earlier media; all ancestor receipts and clips remain
-required and checked. Changed units get new continuous previews. A malformed or
-missing selected record is an error, never permission to claim reuse.
+Completed previews are discovered automatically from bounded export history. A
+Short rebuilt with `native-short.ts build ... --parent <project>` may reuse
+previews of hash-verified ancestors of the same logical clip; another clip's
+previews never qualify. `--preview-from /absolute/motion-previews.json` selects
+one explicitly. Unchanged units retain their earlier media; all ancestor receipts
+and clips remain required and checked. Changed units get new previews. A
+malformed or missing selected record is an error, never permission to claim reuse.
 
 Store the critics' results outside the authored project to avoid a dependency
 cycle. A review bundle has `schemaVersion: 1` and `reviews: [...]`. Each review uses
@@ -181,3 +196,20 @@ Retain earlier rows for unchanged units, add actual new judgments for changed
 units, and rerun with `--preview-reviews`. The separate current prebuild assessment
 still checks the complete edit's meaning and source decisions. The exporter
 validates records and media; it never invents a reviewer or calls a model.
+For native Shorts, do not assemble this JSON by hand: the critic starts from
+`context.py --role motion-critic --preview <motion-previews.json>` (add
+`--prior-reviews <earlier record>` when units are reused) and finishes with
+`native-review.ts submit-motion`, which serializes these fields from the critic's
+observations, retains current earlier rows verbatim and gates the record with
+the same reader before publishing it. Each new row also carries typed
+`inspection` (still frames, motion playback and listening, each bound to the
+exact window clip bytes) and the aspects its pass `approves`; a native Short's
+full picture needs a row approving `motion` over every window, and a row without
+typed inspection is historical evidence that no longer admits it. See the native
+Shorts workflow.
+
+A native `--review-draft` export renders the complete edit without previews and
+without this gate; it is labeled `native-short-review-draft` and never admits a final.
+`--promote-draft` applies the same `--preview-reviews` gate before exact draft bytes
+can become a checked final. See the review-draft section of
+[NATIVE_SHORTS_WORKFLOW.md](NATIVE_SHORTS_WORKFLOW.md).

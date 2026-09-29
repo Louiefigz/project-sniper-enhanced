@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import json
 import sys
+import unittest
 from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from audio.mastering_profile import NATIVE_SHORT_MASTERING_PROFILE
@@ -21,6 +23,19 @@ def write_json(path: Path, value: dict) -> None:
 
 
 STUDIO = Path(__file__).resolve().parents[1] / 'studio'
+
+
+def isolate_early_checks(test: unittest.TestCase) -> None:
+    """Exclude the separately tested pre-capture checks from fake-project fixtures.
+
+    These inert projects have no lintable HTML or dialogue inputs. Static preflight,
+    audio-stage binding/import and their ordering are covered with real validators
+    in test_native_early_stage.py and test_native_audio_stage.py.
+    """
+    test.enterContext(mock.patch('studio.native_early_stage.run_early_checks'))
+    test.enterContext(mock.patch('studio.native_early_stage.capture_diagnostics_gate'))
+    test.enterContext(mock.patch('studio.native_audio_import.bind_audio_stage',
+                                 side_effect=lambda request, _explicit: request))
 
 
 class ShortPipelineFixture:

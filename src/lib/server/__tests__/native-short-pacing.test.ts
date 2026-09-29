@@ -200,3 +200,46 @@ test("source-burned captions bind visual ownership and cold-read without claimin
   assert.throws(() => nativePacingBindings(input), /cannot apply native caption corrections/);
   assert.throws(() => measureNativeShortPacing(input.canvas), /cannot apply native caption corrections/);
 }));
+
+test("caption suppression stales picture bindings, keeps the speech clock and reports uncaptioned speech", () => withFixture(input => {
+  const bindings = nativePacingBindings(input), before = measureNativeShortPacing(input.canvas);
+  input.canvas.captionSuppressions = [];
+  assert.deepEqual(nativePacingBindings(input), bindings);
+  assert.deepEqual(measureNativeShortPacing(input.canvas), before);
+  const reason = "TEST opening title card holds frames 0-24";
+  input.canvas.captionSuppressions = [{ startFrame: 0, endFrame: 25, reason }];
+  input.canvas.captionViews[0].startFrame = 25;
+  const words = structuredClone(input.canvas.occurrences), groups = structuredClone(input.canvas.captionGroups);
+  const after = nativePacingBindings(input), report = measureNativeShortPacing(input.canvas);
+  assert.equal(after.timingHash, bindings.timingHash);
+  assert.notEqual(after.visualHash, bindings.visualHash);
+  assert.throws(() => assembleNativeShortHtml(input), /Pacing plan is stale/);
+  const { captionSuppressions, uncaptionedOccurrenceIds, shortCaptionFragments, readableCaptionFragment, ...rest } = report;
+  const phrases = rest.phrases.map(row => { const phrase = { ...row }; delete phrase.visibleFrames; return phrase; });
+  assert.deepEqual({ ...rest, phrases }, before,
+    "Phrase, gap and rate observations keep the transcript clock");
+  assert.deepEqual(rest.phrases.map(row => row.visibleFrames), [0, 20]);
+  assert.deepEqual(captionSuppressions, [{ startFrame: 0, endFrame: 25, reason, spokenOccurrenceIds: [0, 1] }]);
+  assert.deepEqual([uncaptionedOccurrenceIds, shortCaptionFragments, readableCaptionFragment.seconds], [[0], [], 0.25]);
+  assert.deepEqual([input.canvas.occurrences, input.canvas.captionGroups], [words, groups]);
+  input.canvas.captionSuppressions[0].reason = "TEST a different editorial basis";
+  assert.notEqual(nativePacingBindings(input).visualHash, after.visualHash, "The reason is part of the reviewed picture");
+  refreshNativePacingFixture(input);
+  const html = assembleNativeShortHtml(input);
+  assert.ok(nativeShortPacingReport(input, html).reviewRequired.some(row => row.includes("caption suppression")));
+}));
+
+test("a suppression that leaves a one-frame caption fragment reports it against the readable minimum", () => withFixture(input => {
+  input.canvas.captionSuppressions = [{ startFrame: 0, endFrame: 44, reason: "TEST title card holds almost to the end" }];
+  input.canvas.captionViews[0].startFrame = 44;
+  const report = measureNativeShortPacing(input.canvas);
+  assert.deepEqual(report.phrases.map(row => [row.durationSeconds, row.visibleFrames]), [[.8, 0], [1, 1]],
+    "The resumed phrase is on screen for one frame, not its full 1 s reading window");
+  assert.deepEqual(report.shortCaptionFragments, [{ occurrenceIds: [1], startFrame: 44, endFrame: 45, seconds: .04 }]);
+  assert.match(report.readableCaptionFragment!.source, /CAPTIONS\.WHISPER\.min_hold_s/u);
+  refreshNativePacingFixture(input);
+  const lines = nativeShortPacingReport(input, assembleNativeShortHtml(input)).reviewRequired;
+  assert.ok(lines.some(row => row.startsWith("Caption fragments a suppression leaves on screen for under 0.25 s")), lines.join("\n"));
+  input.canvas.captionSuppressions[0].endFrame = 30; input.canvas.captionViews[0].startFrame = 30;
+  assert.deepEqual(measureNativeShortPacing(input.canvas).shortCaptionFragments, [], "A 15-frame (0.6 s) fragment is readable");
+}));

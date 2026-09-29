@@ -1,0 +1,204 @@
+{
+  "capturedAt": "2026-09-27T18:31:45-0500",
+  "scenario": "codex-socket-coordinator-death",
+  "plan": {
+    "deadlineS": 20.0,
+    "restartS": 45.0,
+    "observeS": 120.0,
+    "sleepSeconds": 93
+  },
+  "coordinatorExit": -9,
+  "handles": {
+    "host": "codex-socket",
+    "threadId": "01a0e533-b976-7a92-aa18-b9768daa2869",
+    "turnId": "01a0e533-bd93-72f2-aded-b2f4fbf666d8",
+    "child": {
+      "pid": 55199,
+      "started": "Sun Sep 27 18:29:25 2026",
+      "pgid": 55199
+    },
+    "sleep": {
+      "pid": 55680,
+      "started": "Sun Sep 27 18:29:34 2026",
+      "pgid": 55680
+    },
+    "model": "gpt-5.6-sol",
+    "commandStartedAt": 8.552,
+    "tree": [
+      {
+        "pid": 55202,
+        "ppid": 55199,
+        "pgid": 55199,
+        "argv": [
+          "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+          "app-server",
+          "--listen",
+          "unix://<tmpdir>/sniper-hg-qc6ur8z6/p.sock",
+          "--disable",
+          "plugins"
+        ]
+      },
+      {
+        "pid": 55310,
+        "ppid": 55202,
+        "pgid": 55310,
+        "argv": [
+          "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+        ]
+      },
+      {
+        "pid": 55673,
+        "ppid": 55202,
+        "pgid": 55673,
+        "argv": [
+          "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host"
+        ]
+      },
+      {
+        "pid": 55680,
+        "ppid": 55202,
+        "pgid": 55680,
+        "argv": [
+          "sleep",
+          "93"
+        ]
+      }
+    ],
+    "coordinator": {
+      "pid": 55204,
+      "started": "Sun Sep 27 18:29:26 2026",
+      "pgid": 55167
+    },
+    "client": null
+  },
+  "afterDeath": {
+    "changes": [
+      {
+        "t": 0.0,
+        "childAlive": true,
+        "sleepAlive": true
+      },
+      {
+        "t": 93.07,
+        "childAlive": true,
+        "sleepAlive": false
+      }
+    ],
+    "deadline": {
+      "t": 20.94,
+      "childAlive": true,
+      "sleepAlive": true
+    },
+    "restart": {
+      "t": 45.19,
+      "childAlive": true,
+      "sleepAlive": true,
+      "action": {
+        "readBefore": [
+          [
+            "01a0e533-bd93-72f2-aded-b2f4fbf666d8",
+            "inProgress",
+            [
+              "userMessage",
+              "agentMessage"
+            ]
+          ]
+        ],
+        "resumeError": null,
+        "resumeTurns": [
+          [
+            "01a0e533-bd93-72f2-aded-b2f4fbf666d8",
+            "inProgress",
+            [
+              "userMessage",
+              "agentMessage",
+              "commandExecution"
+            ]
+          ]
+        ],
+        "sleepAliveBeforeInterrupt": true,
+        "interruptReply": {
+          "sentAt": 0.051,
+          "at": 0.058,
+          "result": {},
+          "error": null
+        },
+        "turnCompleted": [
+          0.058,
+          "interrupted"
+        ],
+        "sleepGoneWithinS": null,
+        "readAfter": [
+          [
+            "01a0e533-bd93-72f2-aded-b2f4fbf666d8",
+            "interrupted",
+            [
+              "userMessage",
+              "agentMessage"
+            ]
+          ]
+        ],
+        "notifications": [
+          [
+            0.001,
+            "remoteControl/status/changed"
+          ],
+          [
+            0.014,
+            "thread/tokenUsage/updated"
+          ],
+          [
+            0.016,
+            "thread/goal/cleared"
+          ],
+          [
+            0.055,
+            "thread/tokenUsage/updated"
+          ],
+          [
+            0.055,
+            "account/rateLimits/updated"
+          ],
+          [
+            0.058,
+            "thread/status/changed"
+          ],
+          [
+            0.058,
+            "turn/completed"
+          ],
+          [
+            12.418,
+            "item/commandExecution/terminalInteraction"
+          ]
+        ]
+      }
+    }
+  },
+  "reconciledByProbe": {},
+  "finalReplay": {
+    "threadRead": [
+      [
+        "01a0e533-bd93-72f2-aded-b2f4fbf666d8",
+        "interrupted",
+        [
+          "userMessage",
+          "agentMessage"
+        ]
+      ]
+    ],
+    "error": null
+  },
+  "serverArgv": [
+    "/opt/homebrew/bin/codex",
+    "app-server",
+    "--listen",
+    "unix://<tmpdir>/sniper-hg-qc6ur8z6/p.sock",
+    "--disable",
+    "plugins",
+    "--disable",
+    "apps"
+  ],
+  "serverExit": 0,
+  "hostVersion": "codex-cli 0.144.1"
+}

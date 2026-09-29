@@ -3,21 +3,26 @@ import { canonicalJsonSha256 } from "./auto-edit-hash";
 import { assertNativeCaptionGroups, nativeCaptionGroupEnd } from "./guided-native-captions";
 import type { NativeCanvasInput, NativeWindow } from "./native-short-composition";
 import type { NativeShortProjectInput } from "./native-short-project";
-import { nativeCaptionDisplayMap, nativeCaptionPhraseText } from "./native-caption-display";
+import { nativeCaptionDisplayMap, nativeCaptionPhraseText, nativeCaptionPhraseVisibility,
+  nativeCaptionSuppressions } from "./native-caption-display";
 
 export interface PacingVisualWindow extends NativeWindow {
   id: string; requiredHold: boolean;
 }
 
-/** Bind both the delivery clock and the actual treatment, including custom scenes. */
+/**
+ * Bind both the delivery clock and the actual treatment, including custom scenes.
+ * Caption suppression is picture meaning (windows and reasons); the speech clock ignores it.
+ */
 export function nativePacingBindings(input: NativeShortProjectInput) {
-  const c = input.canvas, display = nativeCaptionDisplayMap(c);
+  const c = input.canvas, display = nativeCaptionDisplayMap(c), hidden = nativeCaptionSuppressions(c);
   return {
     timingHash: canonicalJsonSha256({ source: c.sourceFile, cuts: c.cuts, segments: c.segments,
       frameRate: c.frameRate, totalFrames: c.totalFrames, occurrences: c.occurrences, captionGroups: c.captionGroups }),
     visualHash: canonicalJsonSha256({ pictureViews: c.pictureViews, captionViews: c.captionViews,
       ...(c.captionMode === "source-burned" ? { captionMode: c.captionMode } : {}),
       ...(display.size ? { captionCorrections: c.captionCorrections } : {}),
+      ...(hidden.length ? { captionSuppressions: hidden } : {}),
       text: c.text, shapes: c.shapes, motion: c.motion, titleCard: c.titleCard ?? null,
       extension: input.extension ?? null, scenes: input.strategy.scenes,
       supporting: input.strategy.supportingSearch.candidates.filter(row => row.selected),
@@ -62,16 +67,49 @@ function speechWindows(canvas: NativeCanvasInput) {
   return { speech, gaps };
 }
 
+/**
+ * Shortest caption fragment treated as readable beside a suppression edge: the engine's documented
+ * caption readable minimum. It flags fragments for review; it does not reject the plan.
+ */
+export const READABLE_CAPTION_FRAGMENT = { seconds: 0.25,
+  source: "scripts/producer/producer_config.py CAPTIONS.WHISPER.min_hold_s (PUNCH_STYLE.md section 9.2, CAP2 readable minimum)" };
+
+type PhraseVisibility = ReturnType<typeof nativeCaptionPhraseVisibility>[number];
+const visibleFrames = (phrase: PhraseVisibility) => phrase.fragments.reduce((sum, part) => sum + part.endFrame - part.startFrame, 0);
+
+/** Fragments a suppression cut from a phrase that stay on screen for less than the readable minimum. */
+function shortFragments(canvas: NativeCanvasInput, visibility: PhraseVisibility[], fps: number) {
+  return visibility.flatMap((phrase, index) => {
+    if (visibleFrames(phrase) === phrase.endFrame - phrase.startFrame) return [];
+    return phrase.fragments.filter(part => (part.endFrame - part.startFrame) / fps < READABLE_CAPTION_FRAGMENT.seconds)
+      .map(part => ({ occurrenceIds: canvas.captionGroups[index], ...part, seconds: (part.endFrame - part.startFrame) / fps }));
+  });
+}
+
+/**
+ * Speech heard while captions are suppressed, words whose whole phrase never shows, and cut
+ * fragments; phrase timing itself is never shortened.
+ */
+function suppressionObservations(canvas: NativeCanvasInput, visibility: PhraseVisibility[] | undefined, fps: number) {
+  if (!visibility) return {};
+  return { captionSuppressions: nativeCaptionSuppressions(canvas).map(({ startFrame, endFrame, reason }) => ({ startFrame, endFrame, reason,
+    spokenOccurrenceIds: canvas.occurrences.filter(word => word[3] < endFrame && word[4] > startFrame).map(word => word[0]) })),
+  uncaptionedOccurrenceIds: visibility.flatMap((phrase, index) => visibleFrames(phrase) ? [] : canvas.captionGroups[index]),
+  shortCaptionFragments: shortFragments(canvas, visibility, fps), readableCaptionFragment: READABLE_CAPTION_FRAGMENT };
+}
+
 /** Reuse caption membership and the renderer's next-phrase clamp, without regrouping words. */
 export function measureNativeShortPacing(canvas: NativeCanvasInput) {
   const fps = frameRate(canvas), { speech, gaps } = speechWindows(canvas), display = nativeCaptionDisplayMap(canvas);
+  const visibility = nativeCaptionSuppressions(canvas).length ? nativeCaptionPhraseVisibility(canvas) : undefined;
   const phrases = canvas.captionGroups.map((ids, index) => {
     const first = canvas.occurrences[ids[0]], endFrame = nativeCaptionGroupEnd(canvas, index);
     if (endFrame <= first[3]) throw new Error("Pacing caption phrase has no visible reading interval");
     return { occurrenceIds: ids, startFrame: first[3], endFrame,
       ...nativeCaptionPhraseText(canvas, ids, display),
       durationSeconds: (endFrame - first[3]) / fps,
-      wordsPerMinute: ids.length * 60 * fps / (endFrame - first[3]) };
+      wordsPerMinute: ids.length * 60 * fps / (endFrame - first[3]),
+      ...(visibility ? { visibleFrames: visibleFrames(visibility[index]) } : {}) };
   });
   return { schemaVersion: 1, scope: "timing-observations-not-energy-or-comprehension", fps,
     ...(canvas.captionMode === "source-burned" ? { captionMode: canvas.captionMode,
@@ -80,7 +118,8 @@ export function measureNativeShortPacing(canvas: NativeCanvasInput) {
     wordCount: canvas.occurrences.length, wordsPerMinute: canvas.occurrences.length * 60 * fps / canvas.totalFrames,
     speechCoverageFrames: speech.reduce((sum, row) => sum + row.endFrame - row.startFrame, 0),
     gaps, phrases, cutFrames: canvas.segments.slice(1).map(row => row.startFrame),
-    knownMotion: canvas.motion.map(({ id, startFrame, durationFrames }) => ({ id, startFrame, durationFrames })) };
+    knownMotion: canvas.motion.map(({ id, startFrame, durationFrames }) => ({ id, startFrame, durationFrames })),
+    ...suppressionObservations(canvas, visibility, fps) };
 }
 
 /** Inventory static timing from the same generated HTML used for assembly. */

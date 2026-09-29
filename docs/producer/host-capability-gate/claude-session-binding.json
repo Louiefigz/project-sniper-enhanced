@@ -1,0 +1,310 @@
+{
+  "capturedAt": "2026-09-27T18:13:44-0500",
+  "scenario": "claude-session-binding",
+  "endpoint": "loopback stub",
+  "envKeys": [
+    "ANTHROPIC_API_KEY",
+    "ANTHROPIC_BASE_URL",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC",
+    "DISABLE_AUTOUPDATER",
+    "DISABLE_ERROR_REPORTING",
+    "DISABLE_TELEMETRY",
+    "HOME",
+    "LANG",
+    "LOGNAME",
+    "PATH",
+    "SHELL",
+    "TMPDIR",
+    "USER"
+  ],
+  "session": "3380f4d2-7b64-4da8-8e30-be96193f7344",
+  "first": {
+    "handle": {
+      "argv": [
+        "~/.local/bin/claude",
+        "-p",
+        "Reply with the single word OK",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--safe-mode",
+        "--model",
+        "sonnet",
+        "--session-id",
+        "3380f4d2-7b64-4da8-8e30-be96193f7344",
+        "--tools",
+        ""
+      ],
+      "process": {
+        "pid": 70077,
+        "started": "Sun Sep 27 18:13:42 2026",
+        "pgid": 70077
+      }
+    },
+    "init": {
+      "session_id": "3380f4d2-7b64-4da8-8e30-be96193f7344",
+      "apiKeySource": "ANTHROPIC_API_KEY",
+      "model": "claude-sonnet-5",
+      "claude_code_version": "2.1.247",
+      "tools": [],
+      "permissionMode": "auto",
+      "cwd": "<scratch>/work",
+      "uuid": "65fddfd7-c10a-45c4-b37e-b40b5c00e31f"
+    },
+    "result": {
+      "subtype": "success",
+      "is_error": false,
+      "result": "OK",
+      "session_id": "3380f4d2-7b64-4da8-8e30-be96193f7344",
+      "uuid": "178729ce-2261-47ad-8fdc-3a8a80fc4413",
+      "num_turns": 1,
+      "duration_ms": 46,
+      "duration_api_ms": 31,
+      "total_cost_usd": 9.199999999999999e-05,
+      "usage": {
+        "input_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 7,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-sonnet-5": {
+          "inputTokens": 11,
+          "outputTokens": 7,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 9.199999999999999e-05,
+          "contextWindow": 200000,
+          "maxOutputTokens": 64000,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "stop_reason": "end_turn",
+      "terminal_reason": "completed"
+    },
+    "exitCode": 0,
+    "stubRequests": [
+      {
+        "at": 1790550823.259,
+        "method": "POST",
+        "path": "/v1/messages?beta=true",
+        "stream": true,
+        "hasTools": false,
+        "afterToolResult": false
+      }
+    ],
+    "stderrTail": "",
+    "timeline": [
+      [
+        0.262,
+        "system",
+        "init"
+      ],
+      [
+        0.294,
+        "assistant",
+        null
+      ],
+      [
+        0.298,
+        "result",
+        "success"
+      ]
+    ]
+  },
+  "transcriptAfterFirst": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/3380f4d2-7b64-4da8-8e30-be96193f7344.jsonl",
+    "lines": 8,
+    "kinds": [
+      "queue-operation",
+      "queue-operation",
+      "user",
+      "attachment",
+      "attachment",
+      "atis-latch",
+      "assistant:text",
+      "last-prompt"
+    ]
+  },
+  "duplicate": {
+    "handle": {
+      "argv": [
+        "~/.local/bin/claude",
+        "-p",
+        "Reply with the single word OK",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--safe-mode",
+        "--model",
+        "sonnet",
+        "--session-id",
+        "3380f4d2-7b64-4da8-8e30-be96193f7344",
+        "--tools",
+        ""
+      ],
+      "process": {
+        "pid": 70218,
+        "started": "Sun Sep 27 18:13:43 2026",
+        "pgid": 70218
+      }
+    },
+    "init": null,
+    "result": null,
+    "exitCode": 1,
+    "stubRequests": [],
+    "stderrTail": "Error: Session ID 3380f4d2-7b64-4da8-8e30-be96193f7344 is already in use.\n",
+    "timeline": []
+  },
+  "resume": {
+    "handle": {
+      "argv": [
+        "~/.local/bin/claude",
+        "-p",
+        "Reply with the single word OK",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--safe-mode",
+        "--model",
+        "sonnet",
+        "--resume",
+        "3380f4d2-7b64-4da8-8e30-be96193f7344",
+        "--tools",
+        ""
+      ],
+      "process": {
+        "pid": 70421,
+        "started": "Sun Sep 27 18:13:43 2026",
+        "pgid": 70421
+      }
+    },
+    "init": {
+      "session_id": "3380f4d2-7b64-4da8-8e30-be96193f7344",
+      "apiKeySource": "ANTHROPIC_API_KEY",
+      "model": "claude-sonnet-5",
+      "claude_code_version": "2.1.247",
+      "tools": [],
+      "permissionMode": "auto",
+      "cwd": "<scratch>/work",
+      "uuid": "8008f40c-c169-4802-a87b-4dd8c70a333f"
+    },
+    "result": {
+      "subtype": "success",
+      "is_error": false,
+      "result": "OK",
+      "session_id": "3380f4d2-7b64-4da8-8e30-be96193f7344",
+      "uuid": "90d6c89e-7b97-48af-941c-e87311e3f828",
+      "num_turns": 1,
+      "duration_ms": 38,
+      "duration_api_ms": 21,
+      "total_cost_usd": 9.199999999999999e-05,
+      "usage": {
+        "input_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 7,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-sonnet-5": {
+          "inputTokens": 11,
+          "outputTokens": 7,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 9.199999999999999e-05,
+          "contextWindow": 200000,
+          "maxOutputTokens": 64000,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "stop_reason": "end_turn",
+      "terminal_reason": "completed"
+    },
+    "exitCode": 0,
+    "stubRequests": [
+      {
+        "at": 1790550824.116,
+        "method": "POST",
+        "path": "/v1/messages?beta=true",
+        "stream": true,
+        "hasTools": false,
+        "afterToolResult": false
+      }
+    ],
+    "stderrTail": "",
+    "timeline": [
+      [
+        0.265,
+        "system",
+        "init"
+      ],
+      [
+        0.294,
+        "assistant",
+        null
+      ],
+      [
+        0.296,
+        "result",
+        "success"
+      ]
+    ]
+  },
+  "transcriptAfterResume": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/3380f4d2-7b64-4da8-8e30-be96193f7344.jsonl",
+    "lines": 15,
+    "kinds": [
+      "attachment",
+      "attachment",
+      "atis-latch",
+      "assistant:text",
+      "last-prompt",
+      "queue-operation",
+      "queue-operation",
+      "user",
+      "attachment",
+      "assistant:text",
+      "last-prompt",
+      "mode"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

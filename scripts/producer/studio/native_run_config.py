@@ -12,6 +12,7 @@ from graphics.render_tools import resolve_tools
 from native_render_resources import ResourcePolicy, ResourceSnapshot
 from native_render_policy import capacity_policy
 from native_work_pool_policy import POOL_CLASSES
+from stage_timing_context import LINEAGE_VARIABLES, lineage_environment
 from studio.native_runtime import digest
 
 
@@ -166,7 +167,8 @@ def owner_file_pins() -> dict[str, str]:
     files = [studio / name for name in (
         'native_run.py', 'native_owned_processes.py', 'native_measurement_retry.py',
         'native_run_config.py', 'native_run_lifecycle.py', 'native_runtime.py', 'native_workload.py',
-        'native_run_admission.py', 'native_queue_accounting.py', 'native_run_disk.py', 'native_export.py')]
+        'native_run_admission.py', 'native_queue_accounting.py', 'native_run_disk.py', 'native_export.py',
+        'native_run_lease.py')]
     files += list(studio.parent.glob('native_render_*.py'))
     files += list(studio.parent.glob('native_work_*.py'))
     files += list(studio.glob('native_budget_*.py'))
@@ -191,3 +193,16 @@ def validate_allocation(grant: dict | None) -> None:
     if any(type(value) not in (int, float) or not math.isfinite(value) for value in values) \
             or grant['grantedSeconds'] <= 0 or not 0 <= grant['cleanupReserveSeconds'] < grant['grantedSeconds']:
         raise ValueError('Invalid inherited production deadline numbers')
+
+
+def launch_environment(environment: dict[str, str]) -> dict[str, str]:
+    """The closed child environment plus only the allowlisted timing lineage of the launch.
+
+    Nothing else from the supervisor's own environment is copied, so an inherited
+    credential or arbitrary variable never reaches the child. Lineage already present in
+    the closed mapping is replaced, so the child links to the span open at launch (the
+    owner's span) and an absent parent or task stays absent. Telemetry only: the child
+    never uses these values for admission, ownership or any other decision.
+    """
+    closed = {name: value for name, value in environment.items() if name not in LINEAGE_VARIABLES}
+    return {**closed, **lineage_environment()}

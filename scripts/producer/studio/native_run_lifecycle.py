@@ -77,7 +77,8 @@ def failure_category(result: dict) -> str | None:
         return 'cancelled'
     if result.get('failureCategory') == 'measurement-unavailable':
         return 'measurement-unavailable'
-    if result.get('failureCategory') in (*DISK_CATEGORIES, 'host-inspection-timeout', 'budget-exhausted'):
+    if result.get('failureCategory') in (*DISK_CATEGORIES, 'host-inspection-timeout', 'budget-exhausted',
+                                         'process-registry-overflow'):
         return result['failureCategory']
     if any(word in reason for word in ('kernel-warning', 'kernel memory pressure', 'low-headroom')):
         return 'host-memory-pressure'

@@ -24,11 +24,9 @@ export function catalogCapturePoints(plan) {
     .map(time=>Math.round(time*rate)));
 }
 
-/** Compiled file identity, timeline registration and full selected title copy remain observable. */
-export async function checkCatalogMounts(page, frame, plan) {
-  if(!plan.catalogFiles?.length)return;
-  const mounts=catalogMounts(plan);
-  const values=await page.evaluate(rows=>rows.map(row=>{
+/** In-page read of each declared mount (serialized into the page; no outer references). */
+export function readCatalogMounts(rows) {
+  return rows.map(row=>{
     const el=document.getElementById(row.id);
     if(!el)return null;
     const box=el.getBoundingClientRect(),css=getComputedStyle(el);
@@ -36,7 +34,19 @@ export async function checkCatalogMounts(page, frame, plan) {
       start:Number(el.dataset.start),duration:Number(el.dataset.duration??el.dataset.hfAuthoredDuration??(Number(el.dataset.end)-Number(el.dataset.start))),width:box.width,height:box.height,
       timeline:!!window.__timelines?.[row.composition],clip:css.clipPath,display:css.display,
       text:el.textContent.replace(/\s+/gu,' ').trim()};
-  }),mounts);
+  });
+}
+
+/** Compiled file identity, timeline registration and full selected title copy remain observable. */
+export async function checkCatalogMounts(page, frame, plan) {
+  if(!plan.catalogFiles?.length)return;
+  const mounts=catalogMounts(plan);
+  assertCatalogMountValues(await page.evaluate(readCatalogMounts,mounts),frame,plan,mounts);
+}
+
+/** The same mount assertions on values read by checkCatalogMounts or a combined frame read. */
+export function assertCatalogMountValues(values, frame, plan, mounts) {
+  if(!plan.catalogFiles?.length)return;
   const [num,den]=plan.canvas.frameRate.split('/').map(Number),time=frame*den/num;
   for(const [index,mount] of mounts.entries()){
     const value=values[index];assert.ok(value,`Catalog mount ${mount.id} is absent`);

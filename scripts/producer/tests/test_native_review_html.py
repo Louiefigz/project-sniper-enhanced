@@ -74,6 +74,17 @@ class NativeReviewHtmlTests(unittest.TestCase):
         self.assertEqual([row['frame'] for row in points], [0, 11, 12, 14, 29])
         self.assertLess(abs(Fraction(points[-1]['seconds']) - Fraction(29 * 1001, 30000)), Fraction(1, 10**12))
 
+    def test_caption_suppression_edges_become_review_checkpoints(self) -> None:
+        """The review stills show expected absence inside a suppression and the resumed caption."""
+        _source, canvas = fixture('25/1', 50)
+        plan = {'canvas': canvas, 'strategy': {'scenes': [{'startFrame': 0, 'endFrame': 50}]}}
+        before = {row['frame'] for row in frame_points(plan)}
+        canvas['captionSuppressions'] = [{'startFrame': 30, 'endFrame': 40, 'reason': 'TEST full-frame chart'}]
+        after = {row['frame'] for row in frame_points(plan)}
+        self.assertEqual(after - before, {30, 39, 40})
+        canvas['captionSuppressions'] = [{'startFrame': 0, 'endFrame': 50, 'reason': 'TEST'}]
+        self.assertTrue(all(0 <= row['frame'] < 50 for row in frame_points(plan)))
+
     def test_real_long_shape_keeps_visual_bytes_and_scene_checkpoints(self) -> None:
         """Long export does not promise Short wrappers, root IDs or audio CSS classes."""
         source, canvas = fixture('30/1', 120, 'long-test')

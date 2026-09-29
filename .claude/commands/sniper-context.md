@@ -1,6 +1,6 @@
 ---
 description: Load Sniper tools, installed HyperFrames skills, project context and review routes
-argument-hint: [--project /absolute/project] [--workflow native-long|native-short|producer|code]
+argument-hint: [--project /absolute/project] [--workflow native-long|native-short|producer|code] [--role clip-owner|plan-critic|motion-critic|final-critic --plan|--preview|--export /absolute/input]
 ---
 
 Invoke the `sniper-context` skill at

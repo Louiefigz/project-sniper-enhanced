@@ -1,4 +1,10 @@
-"""Route native exports and enforce their shared supervised launch contract."""
+"""Route native exports and enforce their shared supervised launch contract.
+
+The same boundary binds the sealed audio stage's worker to its live owner: the
+supervisor names the closed ``stage-request.json`` (never an export request) in
+the child environment; the worker's side of that contract is
+``native_audio_owner.require_owned_audio_worker``.
+"""
 from __future__ import annotations
 
 import os
@@ -8,7 +14,7 @@ from typing import TYPE_CHECKING
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from cut_preview_io import bound_json
+from cut_preview_io import ArtifactReplaced, bound_json
 from studio.native_runtime import digest
 from studio.native_stage_evidence import require
 
@@ -24,6 +30,7 @@ BINDING_ENV = (REQUEST_ENV, AUDIO_REQUEST_ENV, OWNER_ENV, PID_ENV)
 AUDIO_WORKER = HERE / 'native_audio_stage.py'
 AUDIO_SCOPE = 'native-short-audio-stage-request'
 SANDBOX_PREFIX = ('/usr/bin/sandbox-exec', '-f')
+OWNER_READ_ATTEMPTS = 5  # Each retry follows one completed owner publication.
 
 
 def native_project(project: Path) -> bool:
@@ -165,21 +172,26 @@ def require_owned_worker(request: dict) -> None:
     require(owner.get('additionalFilePinsBefore', {}).get(str(file)) == digest(file)
             and owner.get('project') == request['project'] and not owner.get('completedAt'),
             'Native worker owner does not bind the current request')
-    pid = int(os.environ.get('SNIPER_NATIVE_EXPORT_PID', '0'))
+    pid = int(os.environ.get(PID_ENV, '0'))
     require(pid > 1, 'Native worker has no live supervisor')
     os.kill(pid, 0)
 
 
 def active_owner_snapshot(file: Path) -> dict:
-    """Retry only an observed atomic owner replacement, never malformed or stale evidence."""
-    for attempt in range(3):
+    """Reopen only when the owner renamed a new receipt over the one being read.
+
+    ``NativeRun.persist`` publishes each complete snapshot by rename, so a worker that
+    opened the previous receipt finds it unlinked. That read is discarded and the path
+    reopened and fully revalidated, at most ``OWNER_READ_ATTEMPTS`` times in all. An
+    in-place change, a missing, linked or malformed receipt fails at once, and bytes of
+    a replaced receipt are never returned.
+    """
+    for _ in range(OWNER_READ_ATTEMPTS - 1):
         try:
             return bound_json(file)
-        except RuntimeError as error:
-            failure = error
-        if attempt == 2 or 'artifact changed during read' not in str(failure):
-            raise failure
-    raise RuntimeError('Native owner snapshot unavailable')
+        except ArtifactReplaced:
+            continue
+    return bound_json(file)
 
 
 def worker_environment(settings: NativeRunConfig, owner_file: Path) -> dict[str, str]:

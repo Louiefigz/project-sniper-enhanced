@@ -4,9 +4,26 @@ from __future__ import annotations
 import unittest
 from dataclasses import replace
 
+from native_render_deferral import (
+    DEFERRAL_MARGIN_SECONDS, NO_CPU_PROFILE, NO_INTERVAL, CpuDeferralProfile, DeferralRequest, launch_deferral,
+)
 from native_render_policy import AdaptiveMemoryGuard, adaptive_admission_reasons, capacity_policy
 from native_render_resources import GIB, ResourceSnapshot, parse_snapshot
-from test_native_render_resources import REQUEST, raw_sample
+from native_work_pool_policy import RESERVATION_BYTES, reserved_policy
+from test_native_render_resources import REQUEST, direct_sample, raw_sample
+
+POOL_RECORD, EVIDENCE = 'a' * 64, 'b' * 64
+PROFILE = CpuDeferralProfile('TEST-profile', POOL_RECORD, ('heavy',), .8, 60.0, EVIDENCE)
+QUALIFIED_POOL = {'mode': 'qualified', 'modeRecord': {'path': '/TEST/record.json', 'sha256': POOL_RECORD}}
+
+
+def deferral(busy: float | None, **changes: object) -> DeferralRequest:
+    """A memory-admitted heavy launch whose latest CPU interval shows ``busy``."""
+    cpu = ({'status': 'baseline', 'reason': 'first-cpu-reading'} if busy is None else
+           {'status': 'measured', 'host': {'status': 'measured', 'busyFraction': busy}})
+    values = {'lane': 'heavy', 'pool': QUALIFIED_POOL, 'cpu': cpu, 'waited_seconds': 0.0,
+              'remaining_seconds': 120.0} | changes
+    return DeferralRequest(**values)
 
 
 def policy_snapshot(capacity: int = 64) -> ResourceSnapshot:
@@ -227,6 +244,102 @@ class AdaptiveGuardTests(unittest.TestCase):
                 self.assertTrue(result['stopReasons'])
                 self.assertEqual(result['conditions']['kernel-warning']['readings'], 1)
 
+
+
+class CpuSeparationTests(unittest.TestCase):
+    """CPU is evidence: it never stops running work and never shrinks a reservation."""
+
+    def test_saturated_cpu_never_stops_healthy_work(self) -> None:
+        """Every processor busy and a huge owned CPU counter leave the guard's decision alone."""
+        direct = parse_snapshot(direct_sample(), REQUEST, 40 * GIB)
+        baseline = replace(policy_snapshot(), host_cpu=direct.host_cpu)
+        busy = replace(direct.host_cpu, processor_ticks=((2 ** 32 - 1, 2 ** 32 - 1, 0, 0),) * 16)
+        guard = AdaptiveMemoryGuard(baseline, capacity_policy(baseline))
+        for index in range(4):
+            current = replace(baseline, measured_at=1001 + 5 * index, host_cpu=busy,
+                              processes=tuple(replace(row, cpu_user_ns=10 ** 15) for row in baseline.processes))
+            result = guard.evaluate(current, monotonic_now=100 + 5 * index, wall_now=1001 + 5 * index)
+            self.assertFalse(result['stopReasons'])
+
+    def test_low_recent_rss_never_reduces_a_live_reservation(self) -> None:
+        """Budgets derive from physical RAM and the ledger reservation, never from sampled RSS."""
+        tiny, large = (replace(policy_snapshot(), owned_footprint_bytes=value, largest_owned_process_bytes=value)
+                       for value in (1024, 12 * GIB))
+        bound = [reserved_policy(capacity_policy(item), RESERVATION_BYTES['heavy']) for item in (tiny, large)]
+        self.assertEqual(bound[0], bound[1])
+        self.assertEqual(bound[0].maximum_owned_gib, 6)
+        guard = AdaptiveMemoryGuard(tiny, bound[0])
+        for index in range(5):
+            result = guard.evaluate(replace(tiny, measured_at=1001 + 5 * index),
+                                    monotonic_now=100 + 5 * index, wall_now=1001 + 5 * index)
+            self.assertEqual(result['budgets']['maximum_owned_gib'], 6)
+        self.assertIs(guard.policy, bound[0])
+
+
+class LaunchDeferralTests(unittest.TestCase):
+    """The hook consumes only a qualified profile, and none exists."""
+
+    def test_without_a_profile_cpu_never_holds_a_launch(self) -> None:
+        """Even a saturated host launches: no measured profile has shown a benefit."""
+        for busy in (None, 0.0, .999, 1.0):
+            with self.subTest(busy=busy):
+                decision = launch_deferral(deferral(busy), None)
+                self.assertEqual((decision['enabled'], decision['decision'], decision['reasons']),
+                                 (False, 'launch', ()))
+                self.assertEqual(decision['why'], NO_CPU_PROFILE)
+
+    def test_qualified_profile_holds_only_a_measured_busy_host(self) -> None:
+        """At or above its measured threshold the profile holds; below it launches."""
+        held = launch_deferral(deferral(.85), PROFILE)
+        self.assertEqual((held['decision'], held['profile']), ('defer', 'TEST-profile'))
+        self.assertIn('host busy 0.850 >= 0.800', held['reasons'][0])
+        self.assertEqual(launch_deferral(deferral(.8), PROFILE)['decision'], 'defer')
+        self.assertEqual(launch_deferral(deferral(.79), PROFILE)['reasons'], ())
+
+    def test_only_a_measured_interval_can_hold_a_launch(self) -> None:
+        """A first, stale or unavailable reading neither holds every launch nor reads as idle."""
+        stale = {'status': 'unavailable', 'reason': 'sample-clock-not-advancing'}
+        host_stale = {'status': 'measured', 'host': {'status': 'unavailable', 'reason': 'host-counters-stale'}}
+        for cpu in (None, stale, host_stale, 'not-a-record'):
+            request = deferral(None) if cpu is None else deferral(None, cpu=cpu)
+            with self.subTest(cpu=cpu):
+                decision = launch_deferral(request, PROFILE)
+                self.assertEqual((decision['decision'], decision['reasons'], decision['why']),
+                                 ('launch', (), NO_INTERVAL))
+
+    def test_a_hold_never_outlives_its_budget_or_the_owner_limit(self) -> None:
+        """Deferral stops before the capacity-wait limit, so it never becomes a refusal."""
+        exhausted = launch_deferral(deferral(1.0, waited_seconds=60.0), PROFILE)
+        self.assertEqual((exhausted['decision'], exhausted['why']), ('launch', 'qualified deferral time is exhausted'))
+        late = launch_deferral(deferral(1.0, remaining_seconds=DEFERRAL_MARGIN_SECONDS), PROFILE)
+        self.assertEqual(late['decision'], 'launch')
+
+    def test_profile_applies_only_to_its_pool_record_and_lane(self) -> None:
+        """A profile measured elsewhere, or for another class, cannot hold this launch."""
+        cases = [{'lane': 'audio'}, {'pool': {'mode': 'exclusive'}},
+                 {'pool': {'mode': 'qualified', 'modeRecord': {'sha256': 'c' * 64}}},
+                 {'pool': {'mode': 'qualification-session', 'modeRecord': {'session': 'x'}}}]
+        for changes in cases:
+            with self.subTest(changes=changes):
+                self.assertEqual(launch_deferral(deferral(1.0, **changes), PROFILE)['decision'], 'launch')
+
+    def test_profiles_require_exact_evidence_and_bounded_holds(self) -> None:
+        """No unnamed, unmeasured, unbounded or unknown-lane profile can be constructed."""
+        valid = ('TEST-profile', POOL_RECORD, ('heavy',), .8, 60.0, EVIDENCE)
+        invalid = {0: ['', '  ', None], 1: ['A' * 64, 'a' * 63, None], 2: [(), ('preview',), ['heavy']],
+                   3: [0, 1, 1.5, float('nan'), True], 4: [0, -1, 601, float('inf'), True],
+                   5: ['', 'z' * 64]}
+        for index, values in invalid.items():
+            for value in values:
+                fields = list(valid)
+                fields[index] = value
+                with self.subTest(field=index, value=value), self.assertRaises(ValueError):
+                    CpuDeferralProfile(*fields)
+
+    def test_deferral_reasons_never_read_as_disk_refusals(self) -> None:
+        """Admission refuses immediately on disk wording; CPU holds must never match it."""
+        for request in (deferral(None), deferral(.95)):
+            self.assertFalse([reason for reason in launch_deferral(request, PROFILE)['reasons'] if 'disk' in reason])
 
 if __name__ == '__main__':
     unittest.main()

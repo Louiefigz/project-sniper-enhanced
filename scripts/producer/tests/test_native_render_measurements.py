@@ -60,7 +60,7 @@ class NativeRenderMeasurementTests(unittest.TestCase):
 
     def test_unknown_schema_or_sampler_cannot_be_reinterpreted(self) -> None:
         """No schema coercion or implicit historical-top fallback is permitted."""
-        for key, values in [('schemaVersion', [True, 1.0, '1', 0, 2, None]),
+        for key, values in [('schemaVersion', [True, 2.0, '2', 0, 1, 3, None]),
                             ('sampler', ['macos-top-v1', 'rss', '', None])]:
             for value in values:
                 with self.subTest(key=key, value=value), self.assertRaises(DirectMeasurementError):
@@ -224,13 +224,16 @@ class NativeRenderMeasurementTests(unittest.TestCase):
         self.assertTrue(selected['verified'])
 
     def test_reused_registered_pid_is_excluded_instead_of_becoming_owned(self) -> None:
-        """A matching number with another lstart is unrelated despite a valid API row."""
+        """A matching number with another lstart is unrelated despite a valid API row.
+
+        The recorded process exited, so its identity is retired rather than violated.
+        """
         request = ProcessRequest(None, (ProcessIdentity(101, START, 101),))
         ps = f'101 1 101 a different start\n500 1 500 {START}\n'
         selected = parse(payload(), ps, request)['selection']
-        self.assertEqual(selected['reused'], (101,))
+        self.assertEqual((selected['recycled'], selected['reused']), ((101,), ()))
         self.assertEqual(selected['processes'], ())
-        self.assertFalse(selected['verified'])
+        self.assertTrue(selected['verified'])
 
     def test_no_owned_processes_needs_no_footprint_but_still_requires_host(self) -> None:
         """An intentionally empty discovery set differs from a missing live owned row."""
@@ -282,8 +285,65 @@ class NativeRenderMeasurementTests(unittest.TestCase):
                     patch('native_render_resources.shutil.disk_usage', return_value=SimpleNamespace(free=40 * GIB)):
                 snapshot = read_snapshot(Path('/mock-project'), REQUEST)
             self.assertEqual(snapshot.owned_pids, (100,))
-            self.assertEqual(snapshot.reused_registered_pids if child else snapshot.missing_registered_pids, (101,))
+            self.assertEqual(snapshot.recycled_registered_pids if child else snapshot.missing_registered_pids, (101,))
+            self.assertEqual((snapshot.reused_registered_pids, snapshot.identity_verified), ((), True))
 
+
+    def test_cpu_counters_convert_mach_ticks_with_the_payloads_own_timebase(self) -> None:
+        """24e6 ticks x 125/3 is one second; reading raw ticks as ns would be 41.67x low."""
+        result = parse(payload())
+        owned = result['selection']['processes']
+        self.assertEqual([row.cpu_user_ns for row in owned], [100 * 10 ** 9, 101 * 10 ** 9])
+        self.assertEqual([row.cpu_system_ns for row in owned], [5 * 10 ** 8] * 2)
+        cpu = result['hostCpu']
+        self.assertEqual((cpu.status, cpu.timebase_numer, cpu.timebase_denom), ('measured', 125, 3))
+        self.assertEqual((len(cpu.processor_ticks), cpu.clock_ticks_per_second), (16, 100))
+        intel = payload()
+        intel['cpu']['timebase'] = {'numer': 1, 'denom': 1}
+        self.assertEqual(parse(intel)['selection']['processes'][0].cpu_user_ns, 2_400_000_000)
+
+    def test_unavailable_cpu_reader_keeps_memory_and_leaves_cpu_unknown(self) -> None:
+        """CPU unavailability is explicit evidence, never zero use or a memory failure."""
+        value = payload()
+        value['cpu'] = {'status': 'unavailable', 'errorType': 'OSError', 'error': 'denied'}
+        result = parse(value)
+        self.assertEqual((result['hostCpu'].status, result['hostCpu'].error), ('unavailable', 'OSError: denied'))
+        owned = result['selection']['processes']
+        self.assertEqual([row.footprint_bytes for row in owned], [2 * GIB, GIB])
+        self.assertTrue(all(row.cpu_user_ns is None and row.cpu_system_ns is None for row in owned))
+
+    def test_malformed_cpu_payload_fails_closed_with_evidence(self) -> None:
+        """The helper's CPU block has one exact shape; nothing is coerced or defaulted."""
+        edits = [('status', 'ok'), ('source', 'host_statistics:HOST_CPU_LOAD_INFO'), ('readAbstime', 0),
+                 ('readAbstime', -1), ('clockTicksPerSecond', 0), ('clockTicksPerSecond', True),
+                 ('timebase', {'numer': 0, 'denom': 3}), ('timebase', {'numer': 125, 'denom': 2 ** 32}),
+                 ('processorTicks', []), ('processorTicks', [[1, 2, 3]]), ('processorTicks', [[1, 2, 3, 2 ** 32]]),
+                 ('processorTicks', [[1, 2, 3, -1]]), ('processorTicks', [[1, 2, 3, 1.5]]),
+                 ('processorTicks', [[1, 2, 3, True]]), ('processorTicks', [[0, 0, 0, 0]] * 1025)]
+        for key, changed in edits:
+            value = payload()
+            value['cpu'][key] = changed
+            with self.subTest(key=key, changed=str(changed)[:40]), self.assertRaises(DirectMeasurementError) as caught:
+                parse(value)
+            self.assertEqual(caught.exception.evidence['payload'], value)
+        for broken in ({'status': 'unavailable', 'error': 'x'}, {'status': 'unavailable', 'errorType': 'E',
+                       'error': 1}, None, 'measured'):
+            value = payload() | {'cpu': broken}
+            with self.subTest(cpu=broken), self.assertRaises(DirectMeasurementError):
+                parse(value)
+        value = payload()
+        del value['cpu']
+        with self.assertRaises(DirectMeasurementError):
+            parse(value)
+
+    def test_process_cpu_counters_must_be_unsigned_integers(self) -> None:
+        """A malformed rusage CPU field cannot become zero or a fractional duration."""
+        for field in ('userTimeAbstime', 'systemTimeAbstime'):
+            for counter in (True, 1.5, -1, None, '1', 2 ** 64):
+                value = payload()
+                value['processes'][0][field] = counter
+                with self.subTest(field=field, counter=counter), self.assertRaises(DirectMeasurementError):
+                    parse(value)
 
 if __name__ == '__main__':
     unittest.main()

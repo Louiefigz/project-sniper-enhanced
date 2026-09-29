@@ -679,6 +679,37 @@ Review real pixels for crop/overlay clearance and legibility; this mode cannot
 remove or edit text already burned into source footage. See
 [caption ownership](../findings/BURNED_CAPTIONS_NEED_EXPLICIT_OWNERSHIP.md).
 
+For frames where native captions must not draw, such as while the opening title
+card holds, declare `canvas.captionSuppressions`: an ordered list of
+`{startFrame, endFrame, reason}` on the output frame clock, end exclusive. Caption
+views and suppressions together partition the Short, so end the preceding view at
+`startFrame` and start the next at `endFrame`; a caption-free gap without a
+suppression still fails. The reason states the actual editorial basis in readable
+text (no C0/C1 or directional controls, at least one visible character); validation
+checks frames and bounds, not whether the reason is true. Overlapping, out-of-order,
+out-of-range or unreasoned windows, a window that hides no caption phrase, a list
+that hides every phrase, a hidden phrase containing a word spoken wholly outside
+every window, and any suppression in source-burned mode all fail.
+Suppression is visual execution only: it never changes approved content (retained
+words, title words) under `approved-content-production-2026-09-27`.
+Occurrences, phrase groups, cuts, dialogue and the frame clock are unchanged: a
+phrase spanning an edge shows from the resume frame with its original word windows,
+and a suppressed build schedules word highlights only for spans it renders.
+A suppression is picture meaning. Its windows and reasons enter the pacing visual
+hash, so it needs a new build, capture and review, while the timing hash and the
+audio-input identity stay unchanged and a sealed audio stage remains reusable. The
+pacing report lists the words heard inside each window (`spokenOccurrenceIds`), the
+words whose whole phrase never shows (`uncaptionedOccurrenceIds`, e.g. a tail running
+past the resume frame), each phrase's `visibleFrames`, and fragments a window leaves
+on screen for under 0.25 s (`shortCaptionFragments`; the WHISPER caption `min_hold_s`
+readable minimum in `producer_config.py`). It asks review to confirm the reason is on
+screen and the speech is followable. Capture checks the frames on both sides of each
+edge (start−1, start, end−1, end) forward and backward and fails if any caption is in
+its window or painted there; preview risk events and review stills include the edges.
+With any suppression the renderer emits `<!--native-caption-mount-->` ahead of the
+caption layer, so scene-extension markup mounts even when `caption-0-0` does not
+exist. Do not use opacity CSS or source-burned mode to hide native captions.
+
 For progressive native reveals, initialize every future term's visibility
 explicitly. A future GSAP `fromTo` with `immediateRender:false` does not hide the
 element before its tween starts. Add visible-state checkpoints before each reveal
@@ -758,6 +789,26 @@ cannot count as sustained evidence. Host-wide swap/compressor changes are logged
 without attributing them to the render alone. These are sampled supervisor limits,
 not an OS-enforced allocation guarantee.
 
+Lost process identity means a recorded process whose identity changed while alive
+(same PID and start time in another process group) or an owner root whose start
+changed. A recorded process that has exited leaves its PID free for any later host
+process: when that PID shows a different start time, the recorded identity is retired
+and listed in `recycled_registered_pids`. The new holder is not owned, measured or
+signalled unless an owned process is its parent, and it never stops the owner. A PID
+held by another user's process is judged by the kernel start time `ps` reads; a
+refused read of the recorded process itself still stops the owner. A child listed
+under a parent whose PID changed during the listing is never owned; the sample is
+retried. After each verified sample the owner forgets exited and reassigned
+identities (never the root), and its work lease drops their rows once its own `ps`
+read shows them absent. An owner can record at most 4,096 identities at one time,
+however many exit over its lifetime; more stops it as `process-registry-overflow`,
+and a verified cleanup still completes the lease so the pool slot is released.
+Workers that
+read their live owner receipt reopen it only when the owner renamed a newer snapshot
+over it during the read (at most five reads); an in-place change, a second link, a
+missing or malformed receipt still refuses at once. See
+[the PID reassignment finding](../findings/EXITED_PROCESS_PIDS_ARE_REASSIGNED_DURING_LONG_OWNERS.md).
+
 Callers that explicitly provide `ResourcePolicy` retain fixed-policy behavior.
 `--unused-ram-advisory` remains compatible with that route. Historical frozen
 Long-form supervisors retain their recorded policies; this change updates current
@@ -790,6 +841,25 @@ the allocation and writes `visual-usage-registration.json` before reporting
 workflow success. A registration failure preserves the checked render and
 returns a failed workflow result; use `visual-plan-usage.ts register` only to
 recover or backfill. This machine record keeps `humanApprovalClaim: false`.
+
+When an export prepares its audio in a separate audio-stage owner
+(`studio/native_audio_stage.py`), only that stage's own live owner may run its DSP. Before pool admission the owner
+checks the exact worker command, request, output, pool class and pins
+(`native_export.launch_binding`), then gives its child the closed audio binding
+(`SNIPER_NATIVE_AUDIO_REQUEST`, never the export request variable, plus its own
+receipt and supervisor PID). The worker refuses before any input check or DSP
+unless that receipt pinned these request bytes and this command, is still active
+(`preparing` or `running`, not completed or aborted), was admitted in the
+request's pool class, is within its recorded inherited production allocation and
+belongs to the worker's actual parent process (the receipt's `supervisorPid`;
+`native_audio_owner.py`). The worker
+checks its parent again before DSP and before publishing its result, so a worker
+orphaned by a killed supervisor publishes nothing. Calling
+`native_audio_stage.py worker` directly exits 2 with `{"status": "refused"}` and
+writes nothing into the stage; use `prepare`. When the owner's own worker is
+refused, `audio-stage-failed.json` and the export's delivery receipt carry that
+refusal as the error, with category `audio-owner-refused` (or `budget-exhausted`
+when the inherited deadline had passed).
 
 Detailed native capture receipts use the shared `read_native_capture_receipt`
 reader with a 256 MiB limit. Both pipeline handoff and encoded-picture checks
@@ -887,14 +957,18 @@ or word-synchronization approval.
 
 Follow the [optimization plan and target schedule](SHORTS_OPTIMIZATION_IMPLEMENTATION_PLAN_2026-09-15.md).
 Start the shared production journal before source review/search and end it after
-both review surfaces have been checked. Use one unique label for each overlapping
-agent/clip stage, recording failures and revisions as separate spans:
+both review surfaces have been checked. Every marker names its run (`--run-id`, or
+`SNIPER_TIMING_RUN_ID` in the environment); a marker with no run is refused. Nest
+each agent/clip stage under the window with the `spanId` that `production_total start`
+prints, and use one unique label for each overlapping stage, recording failures and
+revisions as separate spans:
 
 ```sh
-.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total start
-.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search start
-.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search end
-.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total end
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total start --run-id batch-0927a
+# prints {"recorded": true, "spanId": "<window span>", ...}
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search start --parent-span-id <window span>
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search end --run-id batch-0927a
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total end --run-id batch-0927a
 ```
 
 This CLI requires an existing directory. The timing report unions overlapping
@@ -902,6 +976,53 @@ substage intervals rather than summing them twice; incomplete or inconsistent
 clocks remain visible. Uninstrumented time is not automatically idle time.
 Telemetry is not an editorial or quality gate, and a 30-minute target never
 waives a real defect or missing proof.
+
+Each command writes a version-2 marker (`clock: wall-epoch`); `start` prints the
+new `spanId`, and `end` closes exactly the one open start of that label in the
+named run (pass `--span-id` when two are open; an ambiguous, missing or repeated
+end, or one after the wall clock stepped back, is refused with exit 1 and nothing
+is written). `--run-id` must agree with any `SNIPER_TIMING_*` lineage in the
+environment, and an exact `--span-id` end is narrowed only by an explicit `--run-id`.
+Marker commands on one journal take a short kernel lock (`stage_timings.jsonl.lock`
+beside it, never followed through a symlink); a folder where the journal or lock
+cannot be written prints `recorded: false` with a `journal-unwritable` reason and
+exits 0, like any other telemetry write failure. Optional flags link the marker:
+`--parent-span-id <span>` nests it and joins that span's run, `--task-id`,
+`--claim-epoch` and `--host-turn-id` attribute it to a task claim, `--activity`
+(`model`, `tool`, `host-slot-wait`, `native-queue-wait`, `pressure-wait`) places
+it in an attribution category, and `end --status failed|interrupted` records the
+outcome. The batch (and its 40-minute clock, owned by the budget authority)
+starts when the approved titles and scripts are handed over. The start marker
+can note their identities with one `--handover <label>=<sha256>` per title and
+script (for example `--handover clip_a_title=<sha256> --handover clip_a_script=<sha256>`);
+the report repeats them in `recordedWindow.handover`. This is a diagnostic note
+only: it does not bind the batch to those scripts, start or move any clock, and a
+second, contradictory start is not detected. The binding belongs to the batch
+record in the budget authority. `SNIPER_TIMING_*` variables supply the same lineage
+from the environment. Task handoffs (which also accept `--parent-span-id` to join
+the batch run) use
+`stage_timing.py <dir> <label> handoff --run-id <run> --phase <phase> --task-id <task> --claim-epoch <n>`
+with `--artifact-sha256` for `artifact-published`/`consumer-accepted` (and
+`--consumer-id` when several consumers accept one artifact). Read the journal with
+`.venv/bin/python scripts/producer/stage_timing_report.py <dir>/stage_timings.jsonl --run-id <run>`.
+`recordedWindow` counts only that run's spans that descend from one of its
+`production_total` starts (every parent hop stays in the run). An earlier start
+left open by a crash is never hidden: the window then runs from the earliest start
+(`openWindows`, `closedWindowStartedAtEpoch`), or is unavailable when an open start
+has no earlier wall time. Same-run spans without that ancestry
+(`unparentedSameRunSeconds`), other runs' spans (`foreignRunSeconds`) and spans whose
+run cannot be compared (`unknownLineageSeconds`: a run-less legacy span beside a
+versioned window, or a versioned span beside a legacy run-less window, which counts
+only legacy spans) are reported apart and never fill it. `attribution.categories`
+reports each category as a wall-clock union including nested spans of other
+categories, an exclusive union in which each instant of a nested chain belongs to its
+innermost category (exclusive times sum to `categorizedUnionSeconds` plus
+`concurrentOverlapSeconds` for unrelated categories active at once), and summed work
+of concurrent outermost spans (not elapsed time; only completed same-run ancestors
+make a span non-outermost), or `unknown` when no evidence was recorded. `handoffs`
+lists per-claim phase gaps, publication-to-acceptance delays, replayed or missing
+events. These records are
+diagnostics only; the task and budget authorities never read them.
 
 The retained-frame default implements the required revision checkpoints, without
 a claim that initial rendering is faster. Repeated browser startup can dominate
@@ -938,6 +1059,20 @@ host compressor bytes remain measured and required. Historical `top` receipts
 retain their numeric diagnostics. Permission failures and malformed measurements
 stop immediately. The direct sampler passed eight actual codec regressions and
 a supervised native export; see the implementation receipt for scope and timings.
+
+The same samples also record CPU as evidence. Each resource line carries a `cpu`
+interval (owned-tree CPU-seconds, cores and share of the host, plus host busy share
+from fresh per-processor ticks); each owner receipt carries a per-stage `cpu`
+summary and `cpuAtAdmission`. Totals are lower bounds: CPU after a process's last
+sample is unobserved. A reused PID, a reset counter, a stale or repeated reading,
+a processor whose ticks do not fit the interval, or a process that exits across a
+gap over 15 seconds reports no utilization instead of a guessed one. A CPU value the
+sampler cannot validate, including under Rosetta, is recorded as unavailable and
+never fails the memory reading. CPU never stops work, changes a reservation or delays
+a launch: `cpuLaunchDeferral` always records `launch` (or `not-evaluated` while
+memory admission waits) because no measured profile has shown that deferring on CPU
+helps.
+See `docs/findings/MACOS_CPU_COUNTERS_NEED_TIMEBASE_AND_FRESH_HOST_TICKS.md`.
 
 Deliver `review.mp4`, the editable project and receipts, and complete the shared
 [local playback and Studio handoff](STUDIO_REVIEW_LANE.md#required-review-handoff-local-playback-and-studio).

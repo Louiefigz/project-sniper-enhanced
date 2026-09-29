@@ -1,0 +1,48 @@
+{
+  "capturedAt": "2026-09-27T18:37:35-0500",
+  "scenario": "host-status",
+  "modelCalls": 0,
+  "claudeVersion": {
+    "argv": [
+      "~/.local/bin/claude",
+      "--version"
+    ],
+    "exitCode": 0,
+    "stdout": "2.1.247 (Claude Code)",
+    "stderr": ""
+  },
+  "claudeAuthStatus": {
+    "argv": [
+      "~/.local/bin/claude",
+      "auth",
+      "status",
+      "--json"
+    ],
+    "exitCode": 1,
+    "stdout": {
+      "loggedIn": false,
+      "authMethod": "none",
+      "apiProvider": "firstParty"
+    },
+    "stderr": ""
+  },
+  "codexVersion": {
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "--version"
+    ],
+    "exitCode": 0,
+    "stdout": "codex-cli 0.144.1",
+    "stderr": ""
+  },
+  "codexLoginStatus": {
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "login",
+      "status"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "Logged in using ChatGPT"
+  }
+}

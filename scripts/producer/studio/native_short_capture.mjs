@@ -5,8 +5,10 @@ import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {assertNativeCaptureOwner} from './runtime/native-export-guard.mjs';
 import {reuseNativeForwardQc} from './native_forward_qc.mjs';
-import {capturePoints,checkTypography,visualState} from './native_short_capture_checks.mjs';
+import {assertNativeFrameState,capturePoints,readNativeFrameState} from './native_short_capture_checks.mjs';
 import {encodeSamples} from './native_long_capture.mjs';
+import {compactNativeTypography} from './native_capture_receipt.mjs';
+import {importNativeCaptureLibrary,nativeTimingLedger,nativeTimingSummary,timedNativeSdk,timedStep} from './native_capture_timing.mjs';
 import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,captureNativeFrame,
   nativeCaptureHash,nativeCaptureBatches,nativeCaptureEvidence,nativeCaptureFailure,NATIVE_CAPTURE_BATCH_FRAMES} from './native_short_capture_context.mjs';
 
@@ -27,14 +29,16 @@ export function nativeCaptureQcPoints(plan, batched=false, maximum=NATIVE_CAPTUR
 async function inspectFrame(context, session, frame, receipt) {
   const row=await captureNativeFrame(context,session,frame),destination=path.join(context.work,`pose-${receipt.frames.length}.jpg`);
   fs.copyFileSync(row.path,destination,fs.constants.COPYFILE_EXCL);
-  const prior=receipt.frames.find(previous=>previous.frame===frame),state=await visualState(session.page);
+  // One page read supplies scene state, typography, catalog mounts and checkpoints; checks are unchanged.
+  const observed=await timedStep(context.timing,'frameStateRead',()=>readNativeFrameState(session.page,frame,context.plan));
+  const prior=receipt.frames.find(previous=>previous.frame===frame),state=observed.visualState;
   if(prior){
     try{assert.deepEqual(state,prior.visualState,`Reverse seek changed scene state at ${frame}`);}
     catch(error){receipt.failedSceneStates.push({frame,error:String(error)});}
     assert.deepEqual(row.payload,prior.payload,`Reverse seek changed source frames at ${frame}`);
   }
   receipt.frames.push({...row,path:destination,repeat:!!prior,byteIdentical:prior?row.sha256===prior.sha256:null,
-    visualState:state,typography:await checkTypography(session.page,frame,context.plan)});
+    visualState:state,typography:assertNativeFrameState(observed,frame,context.plan)});
 }
 
 /** Default QC keeps its original single session; explicit batch mode preserves every occurrence. */
@@ -46,9 +50,11 @@ export async function runNativeShortCapture(request, dependencies={}) {
     sessionMode:batched?'bounded-fresh-native-sessions':'original-single-native-session',
     frames:[],cacheEntries:[],failedSceneStates:[],fonts:[],sessions:[]};
   let context;
+  const ledger=nativeTimingLedger();  // Telemetry only: the timed SDK passes every call through unchanged.
   try {
-    context=await createNativeCaptureContext(request,work,dependencies.sdk);
-    await prepareNativeCaptureContext(context);Object.assign(receipt,nativeCaptureEvidence(context));
+    const sdk=timedNativeSdk(dependencies.sdk??await importNativeCaptureLibrary(request),ledger);
+    context=await createNativeCaptureContext(request,work,sdk);context.timing=ledger;
+    await timedStep(ledger,'prepare',()=>prepareNativeCaptureContext(context));Object.assign(receipt,nativeCaptureEvidence(context));
     const maximum=context.batchPlan.maximumFrames,points=nativeCaptureQcPoints(context.plan,batched,maximum);
     const forward=points.slice(0,points.indexOf(context.plan.canvas.totalFrames-1)+1);
     const retained=batched?reuseNativeForwardQc(context,forward):null;
@@ -75,12 +81,14 @@ export async function runNativeShortCapture(request, dependencies={}) {
     assert.equal(receipt.failedSceneStates.length,0,JSON.stringify(receipt.failedSceneStates));
     assert.equal(context.sourceHtmlSha256,nativeCaptureHash(path.join(request.project,'index.html')));
     receipt.transport={sessions:receipt.sessions.map(row=>row.transport),errors:0};
-    await encodeSamples(context,receipt,dependencies.encode);
+    await timedStep(ledger,'encodeSamples',()=>encodeSamples(context,receipt,dependencies.encode));
+    compactNativeTypography(receipt);  // Exact per-frame expansion asserted (studio/native_capture_receipt.mjs).
     receipt.status='native-references-and-seek-states-pass';
   }catch(error){receipt.error=nativeCaptureFailure(error);}
   finally{
     if(context)Object.assign(receipt,nativeCaptureEvidence(context));
-    fs.writeFileSync(receiptPath,JSON.stringify(receipt,null,2),{flag:'wx'});
+    receipt.timings=nativeTimingSummary(ledger);
+    fs.writeFileSync(receiptPath,JSON.stringify(receipt),{flag:'wx'});
   }
   return receipt;
 }

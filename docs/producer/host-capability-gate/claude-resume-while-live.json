@@ -1,0 +1,257 @@
+{
+  "capturedAt": "2026-09-27T18:32:44-0500",
+  "scenario": "claude-resume-while-live",
+  "endpoint": "loopback stub",
+  "session": "ede9316f-a036-431d-97c8-a6525c032ac7",
+  "first": {
+    "handle": {
+      "argv": [
+        "~/.local/bin/claude",
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--safe-mode",
+        "--model",
+        "sonnet",
+        "--session-id",
+        "ede9316f-a036-431d-97c8-a6525c032ac7",
+        "--input-format",
+        "stream-json",
+        "--permission-mode",
+        "bypassPermissions",
+        "--tools",
+        "Bash"
+      ],
+      "process": {
+        "pid": 64488,
+        "started": "Sun Sep 27 18:32:41 2026",
+        "pgid": 64488
+      }
+    },
+    "toolUseAt": 0.831,
+    "treeAtTool": [
+      {
+        "pid": 64585,
+        "ppid": 64488,
+        "pgid": 64585,
+        "argv": [
+          "/bin/zsh",
+          "-c",
+          "source",
+          "~/.claude/shell-snapshots/snapshot-zsh-1790551962792-xc2s97.sh",
+          "2>/dev/null",
+          "||"
+        ]
+      },
+      {
+        "pid": 64587,
+        "ppid": 64585,
+        "pgid": 64585,
+        "argv": [
+          "/bin/sleep",
+          "306"
+        ]
+      }
+    ],
+    "aliveAfterSecond": true,
+    "sleepAliveAfterSecond": true,
+    "interruptSentAt": 1.966,
+    "result": [
+      1.976,
+      {
+        "subtype": "error_during_execution",
+        "is_error": true,
+        "session_id": "ede9316f-a036-431d-97c8-a6525c032ac7",
+        "uuid": "4908970d-1f75-43e3-bc09-83ef8a026cdc",
+        "num_turns": 3,
+        "duration_ms": 1203,
+        "duration_api_ms": 23,
+        "total_cost_usd": 9.199999999999999e-05,
+        "usage": {
+          "input_tokens": 11,
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "output_tokens": 7,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "",
+          "iterations": [],
+          "speed": "standard"
+        },
+        "modelUsage": {
+          "claude-sonnet-5": {
+            "inputTokens": 11,
+            "outputTokens": 7,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0,
+            "webSearchRequests": 0,
+            "costUSD": 9.199999999999999e-05,
+            "contextWindow": 200000,
+            "maxOutputTokens": 64000,
+            "canonicalModel": "claude-sonnet-5",
+            "provider": "firstParty",
+            "costBasis": "list"
+          }
+        },
+        "stop_reason": "tool_use",
+        "terminal_reason": "aborted_tools",
+        "errors": [
+          "[ede_diagnostic] result_type=user last_content_type=n/a stop_reason=tool_use"
+        ]
+      }
+    ],
+    "sleep": {
+      "identity": {
+        "pid": 64587,
+        "started": "Sun Sep 27 18:32:42 2026",
+        "pgid": 64585
+      },
+      "goneWithinS": 0.297,
+      "leakedAndKilledByProbe": false
+    },
+    "exitCode": 1
+  },
+  "second": {
+    "handle": {
+      "argv": [
+        "~/.local/bin/claude",
+        "-p",
+        "Reply with the single word OK",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--safe-mode",
+        "--model",
+        "sonnet",
+        "--resume",
+        "ede9316f-a036-431d-97c8-a6525c032ac7",
+        "--tools",
+        ""
+      ],
+      "process": {
+        "pid": 64624,
+        "started": "Sun Sep 27 18:32:43 2026",
+        "pgid": 64624
+      }
+    },
+    "init": {
+      "session_id": "ede9316f-a036-431d-97c8-a6525c032ac7",
+      "apiKeySource": "ANTHROPIC_API_KEY",
+      "model": "claude-sonnet-5",
+      "claude_code_version": "2.1.247",
+      "tools": [],
+      "permissionMode": "auto",
+      "cwd": "<scratch>/work",
+      "uuid": "fbc0494e-a76c-4a7f-8a78-4218312ac854"
+    },
+    "result": {
+      "subtype": "success",
+      "is_error": false,
+      "result": "OK",
+      "session_id": "ede9316f-a036-431d-97c8-a6525c032ac7",
+      "uuid": "a9762f58-72dc-4d1a-8a31-b15d1163cfdc",
+      "num_turns": 1,
+      "duration_ms": 69,
+      "duration_api_ms": 37,
+      "total_cost_usd": 9.199999999999999e-05,
+      "usage": {
+        "input_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 7,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-sonnet-5": {
+          "inputTokens": 11,
+          "outputTokens": 7,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 9.199999999999999e-05,
+          "contextWindow": 200000,
+          "maxOutputTokens": 64000,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "stop_reason": "end_turn",
+      "terminal_reason": "completed"
+    },
+    "exitCode": 0,
+    "stubRequests": [
+      {
+        "at": 1790551963.81,
+        "method": "POST",
+        "path": "/v1/messages?beta=true",
+        "stream": true,
+        "hasTools": false,
+        "afterToolResult": false
+      }
+    ],
+    "stderrTail": "",
+    "timeline": [
+      [
+        0.373,
+        "system",
+        "init"
+      ],
+      [
+        0.425,
+        "assistant",
+        null
+      ],
+      [
+        0.432,
+        "result",
+        "success"
+      ]
+    ]
+  },
+  "transcript": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/ede9316f-a036-431d-97c8-a6525c032ac7.jsonl",
+    "lines": 19,
+    "kinds": [
+      "queue-operation",
+      "user:text",
+      "assistant:text",
+      "user",
+      "attachment",
+      "attachment",
+      "assistant:text",
+      "last-prompt",
+      "mode",
+      "user:tool_result",
+      "user:text",
+      "last-prompt"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

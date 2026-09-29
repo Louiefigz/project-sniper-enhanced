@@ -137,17 +137,29 @@ review quality or prevent an operator using a separate external renderer.
 2. Prepare and qualify the exact audio master. A failed audio gate stops picture
    work. A reused master is still checked against current input, profile, sample
    count, section mapping and quality; human listening approval is never invented.
-3. Probe source PNG sizes at three positions in each distinct used range, reject
-   short ending windows there, and admit projected cache, scratch,
-   sample and output allocations plus the shared 10 GiB reserve, then ask the
-   pinned SDK to extract original-resolution source frames. Metadata and source
-   extraction are sequential within the SDK; complete-source HDR negotiation
-   remains unchanged. HDR compositions conservatively reserve cold-cache space
-   because SDR-to-HDR transforms use different cache keys. The projection has
-   headroom; it is not a worst-case compression guarantee. Live disk/memory
-   monitoring remains mandatory. A source ending early fails here, before a full
-   master. Author an explicit last-frame hold when appropriate; do not shorten
-   dialogue or silently fabricate missing picture.
+3. Probe source PNG sizes at three positions in each distinct used range (these
+   bounded probes decode samples) and reject short ending windows there. Project
+   cache, scratch, sample and output allocations per filesystem: source frames and
+   SDK scratch in the cache volume; samples, picture/AAC/review copies and 1 GiB in
+   the attempt volume (`diskProjection` in the export request, always taken from the
+   current inputs, also when an earlier attempt is resumed). Each owner reserves at
+   admission what it writes in the attempt: `capture` its samples plus 1 GiB (a warm
+   cache never expands), `picture` and final media the projected output plus 1 GiB.
+   An owner that must extract grows its host-pool reservation by the cache share
+   before source extraction, in one ledger transaction: in each shared space (below)
+   live free space minus every other member's reservation there must cover the
+   member's new total plus the shared 10 GiB reserve, so two Longs cannot both claim
+   the same free bytes. When other running members hold the bytes (or the ledger is
+   busy) the owner retries on later ticks for up to 45 seconds; a final refusal stops
+   the owner before source extraction with failure category `disk-space`. Then ask
+   the pinned SDK to extract original-resolution source frames. Metadata and source
+   extraction are sequential within the SDK; complete-source HDR negotiation remains
+   unchanged. HDR compositions conservatively reserve cold-cache space because
+   SDR-to-HDR transforms use different cache keys. The projection has headroom; it
+   is not a worst-case compression guarantee. Live disk/memory monitoring remains
+   mandatory. A source ending early fails here, before a full master. Author an
+   explicit last-frame hold when appropriate; do not shorten dialogue or silently
+   fabricate missing picture.
 4. Capture full-project absolute-time samples at each cut ±2 frames, start/end,
    and every two seconds, then visit them in reverse. Check active media, exact
    scene/source state, pixel stability and a full-quality encoded sample reel.
@@ -164,8 +176,119 @@ review quality or prevent an operator using a separate external renderer.
 7. Seal the completed picture under its own verified owner. Then run shared AAC,
    mux, sRGB metadata/payload checks, encoded/native comparisons and full decode.
 
+### Disk accounting spaces and limits
+
+Every APFS volume of one container reports the container's free space, so the pool
+charges disk to a *space*: the APFS container (the whole disk of the volume's
+`/dev/diskNsM` slice, which is what `diskutil info` reports as
+`APFSContainerReference`) or, for an HFS+, exFAT or FAT volume, that filesystem alone.
+The pool charges only filesystems whose free bytes are exactly their own
+(`scripts/producer/native_work_pool_storage.py`): local (`MNT_LOCAL`), of type
+`apfs`, `hfs`, `exfat` or `msdos` (the `statfs` names on macOS 26), on a real disk
+whose IOKit ancestry reports an Internal or External interconnect other than
+"Virtual Interface". Anything else refuses admission and expansion with
+`DiskUnaccountable` ("Disk accounting refused for ..."), never a guessed space:
+network shares (smbfs, nfs, afpfs, webdav), stacked or memory filesystems (nullfs,
+bindfs, tmpfs, devfs, autofs), disk images of any format (a sparse image's free bytes
+are the free bytes of the volume holding its file) and an APFS volume whose container
+cannot be named. Keep projects, attempts and caches on a local APFS/HFS+/exFAT/FAT
+volume of a real disk. An earlier engine's reservation whose space cannot be derived
+from its root directory is charged in every space.
+
+A pool member record that cannot be read or validated is *unknown*. While its
+supervisor holds the member lock, admissions and expansions wait for it
+(`NativeWorkQueued`); once the lock is free every disk admission and expansion is
+refused until `native_work_recovery.py <nonce>` removes it. Recovery removes an
+unreadable record only when its liveness lock file is present and free (a missing lock
+file proves nothing, so that record is refused and must be inspected by hand) and any
+identity still readable from it is absent, archiving the original bytes and that
+weaker basis in `recovery-<nonce>.json`; a readable record keeps the full
+process-absence rules. Member
+records carry `diskAccounting: space-v2`; records from earlier engines and from the
+first E2 commit (rows `{device, bytes}`) are read by their own rules and never become
+unknown.
+
+**A crashed Long blocks its filesystem until recovery.** A Long whose supervisor dies
+leaves a quarantined record that keeps exactly the bytes it had reserved (after
+expansion: its cache share plus its attempt reservation). Until
+`native_work_recovery.py <nonce>` proves its processes absent, every admission and
+expansion on that space that needs those bytes is refused as quarantined, not queued
+— including Shorts. Check `native_work_recovery.py` first when Shorts on a volume
+start failing with "disk headroom ... below policy after reservations".
+
+Expansion policy: an expansion is not queued. FIFO tickets hold no bytes, so a grant
+can lengthen a queued Short's wait, and admissions are never held back while an
+expansion waits; a Long that keeps losing the bytes fails after its 45-second window.
+
+Known limits:
+
+- Earlier engines sharing the same `/private/tmp` pool namespace (the installed rc4
+  package and older checkouts) read only `diskDevice`/`diskReservationBytes`: they see
+  a grown Long's reservation on its attempt device (the mirrored root entry) and key
+  disk by device, not container. While a valid schema-1 host record lets them run
+  qualified, the compatibility fence (`native_work_pool_fence.py`) keeps them out of
+  everything they would miscount: an admission whose space is an APFS container
+  (any other volume of the container, including one mounted later, would hide it from
+  them), and an expansion onto another device, which
+  `native_work_pool_expand.off_root_fence` fences before the bytes are reserved. Fence
+  tickets carry sequence 0, so older requests always wait behind them while this
+  engine's fenced work keeps overlapping; an older request can wait out its whole
+  capacity window (the trade-off in `NATIVE_SHORTS_DEADLINE_BATCH.md`). On APFS
+  volumes older clients never start beside this engine's members; this engine's
+  members may start beside theirs and charge them by container. An earlier-engine
+  Long never consults the pool for its extraction, so do not run earlier-engine Longs
+  alongside this engine. Earlier engines' member roots are classified before the
+  ledger lock by at most one thread per root in a process, whose pending or recent
+  result is reused (`native_work_pool_roots.py`). All roots are classified at once and
+  the wait ends at 5 s after each thread's start or at the caller's own bound (the
+  owner's admission deadline, the Long monitor's expansion tick), whichever is first; a
+  root that has not answered by then, a failed classifier, a record naming no root or project,
+  or a member that appeared after classification is charged in every space
+  (conservative) and named in the admission receipt (`diskChargedInEverySpace`). No
+  foreign root is statted while the host-wide lock is held.
+- Short owners and non-extracting Long owners reserve only on their attempt
+  filesystem. Short source frames written to a cache on a separate volume have no
+  reservation there; the live disk guard and 10 GiB reserve are their only bound.
+- The source-size probes before extraction are bounded by the owner's admission
+  reservation and the 10 GiB reserve, not by the expansion.
+- Space keys and device numbers are per boot session; a quarantined record keeps the
+  keys it was written with until it is recovered. That includes renumbering within one
+  boot: if a disk holding a quarantined reservation is ejected and another disk is
+  later given the same `diskN` or device number, the old bytes are charged against the
+  newcomer (conservatively refusing work there) until `native_work_recovery.py`
+  recovers the record.
+- The expansion request's directories come from the owner's child, so they are
+  resolved, opened, statted and classified before the ledger lock; inside the
+  transaction each resolved path gets one lstat that must still name the opened
+  directory (a directory renamed away, replaced or removed is refused by name). Their
+  free bytes are therefore read at most one ledger wait before the transaction.
+  Admission still reads its own root inside the transaction, as before.
+- Final disk-request refusals carry their own category: `disk-space` (reservations or
+  free bytes), `disk-unaccountable` (a filesystem the pool cannot charge),
+  `pool-unsupported-mix` and `disk-reservation-error`; an owner refused at admission for
+  a filesystem the pool cannot charge or an unsupported mix records the same two
+  categories. A sysctl/ps timeout during pool admission is retried up to three times
+  (0.5 s, then 1 s backoff, each clamped to the admission deadline) and then fails the
+  owner as `host-inspection-timeout`. Every owner receipt records
+  `leaseCleanupVerified`, and when it is false, `leaseCleanupReason`.
+- Unverified on a virtual machine: a macOS guest whose disks report "Virtual
+  Interface" or no Protocol Characteristics is refused as not a real disk. No VM guest
+  has been measured; run Sniper on the host's own disks.
+- The fence decision is fixed at admission (and at an off-root expansion): a schema-1
+  host record written while members run does not fence them retroactively, so write
+  host records (the qualification harness's last step) only when no other pool work
+  runs.
+
 All expensive stages retain the shared heavy-work lease, current memory/disk
-limits and verified descendant cleanup. Long owners can wait up to 600 seconds
+limits and verified descendant cleanup. The host pool admits a Long owner beside
+other work only under a qualification profile that exercised Longs of at least
+that duration and picture size on the same engine; a Short-only qualification
+(including the legacy schema-1 host record) never covers a Long. Such a Long owner
+starts only on an idle pool and runs alone; while other work runs it fails at once
+with `NativeWorkUnsupportedMix` rather than queueing ahead of Shorts, and while it
+runs Short owners fail the same way. A quarantined member (unverified cleanup)
+makes it fail terminally until `native_work_recovery.py` recovers the member
+(`scripts/producer/native_work_pool_mix.py`). Long owners can wait up to 600 seconds
 for temporary contention/pressure, recording `waiting-for-capacity` with no
 launched child. Missing telemetry and unverified cleanup still fail explicitly.
 The owner records `running` only after the child exists.

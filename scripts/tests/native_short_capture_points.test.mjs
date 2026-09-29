@@ -66,3 +66,17 @@ test('catalog title capture covers actual mount boundaries without a built-in ti
   plan.extension.markup=plan.extension.markup.replace('id="catalog-title"','');
   assert.throws(()=>capturePoints(plan),/stable IDs/);
 });
+
+test('caption suppression edges are captured on both sides and seeked backward', () => {
+  const plan = fixture();
+  plan.canvas.captionViews = [{startFrame: 0, endFrame: 43}, {startFrame: 67, endFrame: 100}];
+  plan.canvas.captionSuppressions = [{startFrame: 43, endFrame: 67, reason: 'TEST full-frame chart'}];
+  const points = capturePoints(plan), lastForward = points.indexOf(99);
+  const forward = points.slice(0, lastForward + 1), reverse = points.slice(lastForward + 1, -1);
+  for (const frame of [42, 43, 44, 66, 67, 68]) assert.ok(forward.includes(frame), `forward ${frame}`);
+  for (const frame of [42, 43, 66, 67]) assert.ok(reverse.includes(frame), `reverse ${frame}`);
+  delete plan.canvas.captionSuppressions;
+  const unsuppressed = capturePoints(plan), unsuppressedReverse = unsuppressed.slice(unsuppressed.indexOf(99) + 1, -1);
+  assert.deepEqual([42, 43, 66, 67].filter(frame => unsuppressedReverse.includes(frame)), [],
+    'Only a declared suppression forces both sides of its edges backward');
+});

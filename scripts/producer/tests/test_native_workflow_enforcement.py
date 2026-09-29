@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -11,6 +12,9 @@ from types import SimpleNamespace
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 from studio.native_export import export_adapter, validate_export_launch, require_owned_worker, active_owner_snapshot
+from studio.native_audio_owner import NativeOwnerRefused, require_owned_audio_worker
+from studio.native_export import OWNER_ENV, OWNER_READ_ATTEMPTS, PID_ENV, REQUEST_ENV
+from cut_preview_io import ArtifactReplaced
 from studio.native_long_autoresume import recover_automatically
 from studio.native_long_prebuild import prebuild_snapshot, require_long_prebuild
 from studio.native_run_config import NativeRunConfig
@@ -95,9 +99,15 @@ class LaunchEnforcementTests(unittest.TestCase):
             validate_export_launch(settings)
 
     def test_direct_worker_has_no_implicit_authority(self) -> None:
-        """Calling an internal worker directly cannot omit its owner."""
+        """Calling an internal worker directly cannot omit its owner; an export owner never binds audio."""
         with patch.dict('os.environ', {}, clear=True), self.assertRaisesRegex(ValueError, 'supervisor'):
             require_owned_worker(self.request)
+        exported = {REQUEST_ENV: str(self.file), OWNER_ENV: str(self.output / 'owner.render.json'),
+                    PID_ENV: str(os.getppid())}
+        for environment in ({}, exported):
+            with patch.dict('os.environ', environment, clear=True), \
+                    self.assertRaisesRegex(NativeOwnerRefused, 'no live audio-stage owner'):
+                require_owned_audio_worker(self.output / 'stage-request.json')
 
     def test_owner_updates_publish_whole_snapshots_and_never_replace_an_unowned_receipt(self) -> None:
         """The launch guard can read the complete previous owner during the next write."""
@@ -116,17 +126,18 @@ class LaunchEnforcementTests(unittest.TestCase):
         with self.assertRaises(FileExistsError): owner.persist()
 
     def test_owner_snapshot_retries_only_atomic_replacement_and_is_bounded(self) -> None:
-        """A changed inode may be reread; arbitrary broken JSON never becomes implicit approval."""
-        changed = RuntimeError('cut preview artifact changed during read')
+        """A replaced inode may be reread; in-place changes and broken JSON never become approval."""
+        changed = ArtifactReplaced('cut preview artifact changed during read: replaced')
         with patch('studio.native_export.bound_json', side_effect=[changed, {'status': 'running'}]) as read:
             self.assertEqual(active_owner_snapshot(self.file), {'status': 'running'})
             self.assertEqual(read.call_count, 2)
-        with patch('studio.native_export.bound_json', side_effect=changed) as read, self.assertRaises(RuntimeError):
+        with patch('studio.native_export.bound_json', side_effect=changed) as read, self.assertRaises(ArtifactReplaced):
             active_owner_snapshot(self.file)
-        self.assertEqual(read.call_count, 3)
-        with patch('studio.native_export.bound_json', side_effect=RuntimeError('unsafe file')) as read, self.assertRaises(RuntimeError):
-            active_owner_snapshot(self.file)
-        self.assertEqual(read.call_count, 1)
+        self.assertEqual(read.call_count, OWNER_READ_ATTEMPTS)
+        for error in (RuntimeError('unsafe file'), RuntimeError('cut preview artifact changed during read')):
+            with patch('studio.native_export.bound_json', side_effect=error) as read, self.assertRaises(RuntimeError):
+                active_owner_snapshot(self.file)
+            self.assertEqual(read.call_count, 1)
 
 
 class AutomaticRecoveryTests(unittest.TestCase):

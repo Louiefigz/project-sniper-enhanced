@@ -1,0 +1,175 @@
+{
+  "capturedAt": "2026-09-27T18:14:02-0500",
+  "scenario": "claude-control-interrupt",
+  "endpoint": "loopback stub",
+  "session": "f10346ba-57ab-44c6-a388-92335782d41c",
+  "handle": {
+    "argv": [
+      "~/.local/bin/claude",
+      "-p",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--safe-mode",
+      "--model",
+      "sonnet",
+      "--session-id",
+      "f10346ba-57ab-44c6-a388-92335782d41c",
+      "--input-format",
+      "stream-json",
+      "--permission-mode",
+      "bypassPermissions",
+      "--tools",
+      "Bash"
+    ],
+    "process": {
+      "pid": 75641,
+      "started": "Sun Sep 27 18:13:59 2026",
+      "pgid": 75641
+    }
+  },
+  "toolUseAt": 0.286,
+  "treeAtTool": [
+    {
+      "pid": 75806,
+      "ppid": 75641,
+      "pgid": 75806,
+      "argv": [
+        "/bin/zsh",
+        "-c",
+        "source",
+        "~/.claude/shell-snapshots/snapshot-zsh-1790550839318-qwz9mb.sh",
+        "2>/dev/null",
+        "||"
+      ]
+    },
+    {
+      "pid": 75810,
+      "ppid": 75806,
+      "pgid": 75806,
+      "argv": [
+        "/bin/sleep",
+        "301"
+      ]
+    }
+  ],
+  "interruptSentAt": 2.875,
+  "ack": [
+    2.877,
+    {
+      "type": "control_response",
+      "response": {
+        "subtype": "success",
+        "request_id": "probe-interrupt-1",
+        "response": {
+          "still_queued": []
+        }
+      }
+    }
+  ],
+  "result": [
+    2.882,
+    {
+      "subtype": "error_during_execution",
+      "is_error": true,
+      "session_id": "f10346ba-57ab-44c6-a388-92335782d41c",
+      "uuid": "f742ef72-381b-47a1-adfa-a8ea3721146d",
+      "num_turns": 3,
+      "duration_ms": 2633,
+      "duration_api_ms": 18,
+      "total_cost_usd": 9.199999999999999e-05,
+      "usage": {
+        "input_tokens": 11,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 7,
+        "output_tokens_details": {
+          "thinking_tokens": 0
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 0,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "",
+        "iterations": [],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-sonnet-5": {
+          "inputTokens": 11,
+          "outputTokens": 7,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 9.199999999999999e-05,
+          "contextWindow": 200000,
+          "maxOutputTokens": 64000,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "stop_reason": "tool_use",
+      "terminal_reason": "aborted_tools",
+      "errors": [
+        "[ede_diagnostic] result_type=user last_content_type=n/a stop_reason=tool_use"
+      ]
+    }
+  ],
+  "sleep": {
+    "identity": {
+      "pid": 75810,
+      "started": "Sun Sep 27 18:13:59 2026",
+      "pgid": 75806
+    },
+    "goneWithinS": 0.279,
+    "leakedAndKilledByProbe": false
+  },
+  "childAliveAfterResult": true,
+  "exitCode": 1,
+  "stubRequestsAfterInterrupt": [],
+  "timelineAfterInterrupt": [
+    [
+      2.877,
+      "control_response",
+      null
+    ],
+    [
+      2.882,
+      "user",
+      null
+    ],
+    [
+      2.882,
+      "user",
+      null
+    ],
+    [
+      2.882,
+      "result",
+      "error_during_execution"
+    ]
+  ],
+  "transcript": {
+    "found": true,
+    "path": "~/.claude/projects/<scratch-slug>-work/f10346ba-57ab-44c6-a388-92335782d41c.jsonl",
+    "lines": 9,
+    "kinds": [
+      "queue-operation",
+      "queue-operation",
+      "user:text",
+      "attachment",
+      "atis-latch",
+      "assistant:tool_use",
+      "user:tool_result",
+      "user:text",
+      "last-prompt"
+    ]
+  },
+  "hostVersion": "2.1.247 (Claude Code)"
+}

@@ -39,11 +39,178 @@ requests a different handoff:
   `file://`, pasting a project path, or showing a flattened MP4 does not complete
   this step.
 
+Opening Studio must not change a delivered project. Pinned Studio (HyperFrames 0.8.31) gives every
+element without a `data-hf-id` a minted id when it serves the project and writes the file back
+re-serialized: `persistHfIdsIfNeeded` for `index.html`, `stampFileHfIds` for each previewed
+`compositions/*.html`. The delivered MP4's receipts then stop verifying ("current authored project
+differs from supervised sources"), and a promotion or export of that project is refused. New native
+Short builds therefore refuse an index or mounted composition with an element Studio would stamp
+(`src/lib/server/native-studio-host-ids.ts`); authors add the ids with `native-short.ts studio-ids`
+before hashing a catalog adaptation or extension markup. Projects built before this rule still rewrite
+when opened; hand them off only after their MP4 is delivered, and expect their receipts to stop
+re-verifying once Studio has loaded them. Evidence: a stamped and an unstamped copy of one build,
+opened and previewed side by side; only the unstamped copy's three files changed.
+
 Use the operator's requested browser or established browser preference. Keep
 both views available in separate tabs; preserve an active review position until
 the next candidate is ready. Start a newly presented candidate at the beginning.
 Include both labeled live URLs in the handoff and record which candidate/project
 they show plus the checks actually performed in the existing review notes.
+
+### Local playback for a batch of native attempts
+
+`review_player.py` serves the delivered MP4s of named attempts on one loopback page,
+from a review-bundle manifest or `--attempt ID=/absolute/attempt` pairs:
+
+```bash
+./sniper python3 scripts/producer/studio/review_player.py serve --manifest /abs/review-manifest.json
+./sniper python3 scripts/producer/studio/review_player.py serve --attempt A=/abs/A/final-v1 --attempt B=/abs/B/draft-v1
+```
+
+It prints its `http://127.0.0.1:<port>/` URL (`--port`, and `--serve-seconds` for a
+bounded run), binds 127.0.0.1 only, refuses other Host headers, loads nothing from the
+network and serves each attempt's recorded MP4 read-only, with byte ranges for seeking.
+Labels come from each `delivery.json`: **CHECKED FOR REVIEW — technical checks pass;
+editorial approval: see native-review.ts check-final** only when the review-bundle receipt
+admission re-verifies now (the player does not read editorial reviews; `check-final` reports
+`editorialFinal: approved` only for a typed final review), **REVIEW DRAFT** with its open findings,
+otherwise NOT RE-VERIFIED (with the refusal), FAILED, PREVIEW EXCERPTS ONLY, IN PROGRESS
+or CHANGED. `list` prints the same labels as JSON, and the running server answers
+`/inventory.json` with them and its per-attempt activity: page loads (each with a token the page
+carries), media requests of each attempt's exact MP4 route (404s, favicon and other paths are not
+recorded) and the page's own playback reports (its script POSTs `/activity` when an attempt's video
+fires `loadeddata` or `playing`; admitted only from this server's origin with an issued page token and
+that attempt's route). A running page re-reads an attempt's receipts whenever the
+delivery, the MP4, any pinned input or a top-level project file changes identity, so a
+project Studio rewrote after the page first loaded stops showing CHECKED FOR REVIEW on the next load.
+This is the MP4 view only; open and record the matching Studio project with
+`native_handoff.py open` (below). Copy delivered MP4s and
+receipts, never hard-link them: a second link makes later verification and review
+readers refuse the file (`cut preview hash input is unsafe or over budget`).
+
+### Record each output's hand-off: exact MP4, matching project, owned views
+
+For each delivered native attempt (final or review draft), after `review_player.py serve`
+prints its URL:
+
+```bash
+./sniper python3 scripts/producer/studio/native_handoff.py open /abs/Q1/final-v1 \
+  --owner batch-<id> --record /abs/Q1/HANDOFF-final-v1.json --review-player http://127.0.0.1:<port>/ \
+  [--pending-findings /abs/Q1/PENDING-FINDINGS.json]
+```
+
+Before any view opens it binds the delivered MP4 (the review player's own evaluator: exact
+bytes, decode receipt, CHECKED FOR REVIEW only when receipts re-verify), validates the delivery's findings and
+`--pending-findings` (same schema as `--draft-findings`), reads the approved content from the
+batch authority (below), and hashes, without following links, every project file the delivery
+pins, the top-level authored sources and every visible `.html`/`.htm` file; a linked file or
+folder is named, never hashed or walked through. A refusal here opens nothing. It then writes an
+O_EXCL intent file beside the record (`<record>.intent.json`: owner, token, attempt) and opens or
+reuses that project's managed Studio view with the MP4 bound. It asks the live server who it is
+(`/__hyperframes_config`: the registered PID and this project directory), loads the project as
+Studio's page does (the main preview and every sub-composition preview: the requests on which
+Studio stamps missing `data-hf-id` values), hashes again, re-runs the receipt reader and re-reads
+the view. It confirms the review player (its server pid, port and start time) lists this attempt,
+serves these bytes and shows the label the hand-off computed after the load.
+
+The record (`native-visible-handoff`, schema 1, a new file outside the attempt and project) keeps
+the MP4 path/SHA-256; the project identity before open and after load; the Studio URL, PID and
+process start, ownership, holders and whether it served this project; the review-player URL,
+server identity and label; the draft/final label and open and pending findings; receipts before
+and after; the approved content comparison; and the view's cleanup state. `status` is
+`views-ready` only when every check held; otherwise `handoff-incomplete` with named `failures`
+and exit 2: `STUDIO_CHANGED_PROJECT` (Studio rewrote files while serving them; the receipts
+reason is recorded), `MP4_RECEIPTS_NOT_REVERIFIED_BEFORE_OPEN` / `_AFTER_LOAD`,
+`PROJECT_DIFFERS_FROM_DELIVERY` (including linked files and folders), `STUDIO_NOT_OPENED`,
+`STUDIO_VIEW_OWNED_ELSEWHERE`, `STUDIO_DID_NOT_SERVE_PROJECT`, `STUDIO_NOT_LIVE_AFTER_LOAD`,
+`MP4_CHANGED_DURING_HANDOFF`, `REVIEW_PLAYER_NOT_VERIFIED`, `REVIEW_PLAYER_LABEL_DIFFERS`,
+`APPROVAL_BINDING_MISSING`, `APPROVED_CONTENT_DIFFERS_FROM_BUILD`, or a named unreadable step. Once the intent file exists a
+record carrying the token is always written, including `handoff-interrupted` when the command is
+interrupted or receives SIGTERM (for example an agent tool timeout); if the process is killed
+outright, the intent file itself serves `release` and `prune-holds`. The views stay open either
+way. A project built before the selection-id rule fails with `STUDIO_CHANGED_PROJECT`: report it
+and keep the MP4 visible. The rewritten folder is no longer the delivered project; a corrected
+revision stamps its authored markup with `native-short.ts studio-ids` (NATIVE_SHORTS_WORKFLOW.md),
+builds a new project and exports it.
+
+**Views-ready is not a visible hand-off.** `open` checks servers and leaves `visibleHandoffAt`
+null. The interactive coordinator opens the review page and the Studio page for the operator,
+then records it:
+
+```bash
+./sniper python3 scripts/producer/studio/native_handoff.py confirm --handoff /abs/Q1/HANDOFF-final-v1.json \
+  --record /abs/Q1/VISIBLE-final-v1.json --review-page <reviewPlayer.url> --studio-page <studio.url> \
+  --browser Chrome --attested-by "<who opened them, e.g. the coordinator session>"
+```
+
+It accepts only a `views-ready` record with no failures and its exact verified URLs, and re-runs
+every check now: the MP4 bytes and label; the same registered Studio process (pid and start
+time), live, bound to that MP4 and serving this project (loaded again), then the project identity
+against the post-load identity (the operator's own Studio navigation can stamp more files); the
+same review-player server serving these bytes with the after-load label
+(`REVIEW_PLAYER_NOT_VERIFIED_AT_CONFIRM` otherwise). For the review page the evidence is observed,
+not attested: the served page must itself report that its video element started playing this exact
+MP4 route, from a page load after `viewsVerifiedAt` (`REVIEW_PAGE_PLAYBACK_NOT_OBSERVED` otherwise,
+so press play on the review page). An HTTP request of the MP4, from `curl` or any other client, is
+recorded as `mediaRequested` and never counts. The attestation states that the review page and the
+Studio page were opened for the operator, with the caller's identity. Only when all of this holds
+is `visibleHandoffAt` set. What it still cannot prove: that a person watched or listened, that the
+window was visible or unobscured, or that playback continued past the report; a local program that
+fetches the page can imitate its report. Playback, seeking, listening and approval remain the checks
+below and the review records.
+
+**Approved content (`approved-content-production-2026-09-27`).** The batch authority bound at
+batch start is the only source of each clip's approved title and script; no caller-supplied
+approval is accepted. When the export request names a batch clip (`productionBudget`), the
+hand-off reads that clip's approval by name (`studio.production.api.read_approval`, approval-v2)
+and requires the project folder's own binding (`approval_for_project`) to exist and name the same
+clip; an unbound or differently bound folder, or an unreadable named batch, is
+`APPROVAL_BINDING_MISSING`. An export that names no batch clip is read by its folder; a folder no
+batch binds records `not-supplied`: approval is unknown there, never "not approved". The build is
+read as B1 reads a
+plan: the `catalogTitle` copy, else the built-in `canvas.titleCard` copy; the canvas source asset
+and the source word index and text of every kept `canvas.occurrences` row, in output order. The
+approved script is the spoken words, so word texts are each occurrence's source text, which
+`canvas.captionCorrections` never rewrite; accepted caption display corrections are listed as
+`displayCorrections` (occurrence, source text, display text, reason; any beyond 128 are counted in
+`displayCorrectionsOmitted`) and are never a mismatch. The title is exact, normalization-only (NFC
+and whitespace; reported, not material) or different; the source, the ordered word indices (the
+same words in another order differ), the word texts, the merged cut seconds (against the approval's
+merged second ranges), the transcript (the plan's admitted manifest transcript against the
+approval's) and the writer-rule occurrence timing must equal the approval's, and the clip and batch
+the delivery's production budget names. A mismatch is `APPROVED_CONTENT_DIFFERS_FROM_BUILD`,
+reported and never repaired by changing content. Content approval is recorded apart from
+`output.executionReview`, whose `humanApprovedRenderedOutput: false` speaks only for the render's
+execution.
+
+Later navigation in Studio can load more files than the hand-off load did; `confirm` re-checks.
+
+**Owned views and holds.** A hand-off's `--owner` tag and token are recorded on a view only when
+that hand-off launched it. Every hand-off relying on a view, including one that reused the user's
+or another hand-off's view of the same project, is one hold naming its token and its intent and
+record files; a plain unowned `managed_preview.py open` that reuses a view adds one user hold. An
+owned open never replaces a stale view of its project unless its own tag launched it and no other
+token or the user still holds it: otherwise `STUDIO_VIEW_OWNED_ELSEWHERE`, and nothing is stopped.
+(A plain `managed_preview.py open` by the user may still replace its project's own stale view.)
+`native_handoff.py views --owner batch-<id>` lists the owner's launched views with their holds and
+retained process identities and counts every other active view, for workload qualification.
+`native_handoff.py release --handoff <record or intent file> [...] --record <new file>` drops those
+hand-offs' holds and stops, by verified identity, only a view a hand-off launched once no hand-off
+and no user hold remains; the last hand-off holder's release stops a view its launcher already let
+go. A view nobody's hand-off launched is never stopped by a release; a cleanup that is not verified
+stays registered and exits 2. Release is bound to tokens, so two batches reusing one tag cannot
+release each other's views. A view holds at most 16 holds; a full list is refused with the holders
+named. The recovery for lost holds is `native_handoff.py prune-holds --project <dir> --record <new
+file>`: it keeps a hold only while its intent or record file still names its token and that
+hand-off has not ended without a view to keep (a record `handoff-incomplete` or `handoff-interrupted`
+holds nothing), stops nothing and reports what it dropped. A registry record written by the first hand-off version (an owner tag
+without a token) reads as a legacy view that no token release stops. Views of other projects are
+never stopped or reused by a hand-off.
+
+`native_review_bundle.py open <bundle> <id>` uses the same open, served check and Studio load for
+a bundle's editable fork (an unowned view, like `managed_preview.py open`), reporting
+`studioChangedOnOpen` apart from the operator's edits. The fork's single dialogue node carries its
+own `data-hf-id`, so a fork of a stamped build is not rewritten when opened.
 
 ### Verify the browser that receives the handoff
 
@@ -71,6 +238,13 @@ or changing audio synchronization tolerances to hide the failure.
 Reuse the managed preview entry points below: native projects use
 `managed_preview.py open`; legacy generated graphics views use
 `studio_review.py open`. Opening a ready native project needs no rerender.
+
+A native review draft (`review-draft.mp4`, status `native-short-review-draft`) may be
+handed off the same way, labeled **REVIEW DRAFT - editorial review pending; not
+final**. Review bundles accept it, keep its `.review-draft.mp4` name and show the label
+on the local page. `managed_preview.py open` of a draft-built project reports
+`reviewState: "draft"` and prints the label; the composition is not altered and
+nothing is burned into the video. Keep the last checked MP4 visible beside a draft.
 If a project is sealed as verification evidence, prepare a separate editable
 revision with its dependencies intact and record its origin before handing it
 over for edits. Preserve the checked project, MP4 and receipts.
@@ -114,16 +288,52 @@ auto-open OFF), records `{port, pid, url, startedAt}` in
 `studio/.studio-server.json`, and prints the URL
 (`http://localhost:<P>/#project/studio`). `stop` verifies the recorded pid is
 and its retained descendants have exited before clearing ownership. The central
-private registry holds one current preview across draft directories/checkouts;
-repeated open reuses it and replacement first verifies prior cleanup. Startup
-must pass host resource admission and acquire the shared heavy-job lease.
+private registry (`studio/managed_preview_registry.py`) keeps one managed preview
+per project, at most six across draft directories/checkouts: opening another
+project never stops or switches an existing view, repeated open of the same
+project reuses its exact live server (also one another checkout started from a runtime
+with the same content identity), and replacing that project's own stale-runtime server
+first verifies its cleanup. Beyond the bound the refusal names every running view and
+stops nothing. In this build Studio startup takes one heavy host-pool slot until the
+server is ready, and keeps it quarantined when startup cannot be verified
+(`studio/managed_preview.py`, `_launch`). A startup that fails
+before any child exists is recorded as stopped. An unfinished launch (an opener that was
+killed or interrupted, or a server whose stop was not verified) keeps only that project's
+record in `launching`, and only while a process of that launch still runs: its retained
+identities, or the server it started, found by its exact command (this project, the
+recorded port and the recorded runtime CLI; stock servers, other ports and other
+checkouts are never taken for one, and a record from earlier code that names no port is
+settled by its retained identities alone). Every `open`,
+`list`, `status` and capacity check closes such a record once nothing of it runs; `open`
+of that project replaces the survivor after admission, and `stop <project>` stops it.
+A survivor that does not exit stays recorded and named in the error.
 
 For an already-authored native project, use
 `python scripts/producer/studio/managed_preview.py open <native-project> --port <P>`
 directly. This serves its existing files without plan regeneration. Use this
 managed entry point instead of raw SDK preview commands. Open the returned URL
 through the app's browser control when a visible preview is wanted. The matching
-`status` and `stop` actions read/check or stop the registered native project.
+`status` and `stop` actions read/check or stop the registered native project;
+`list` shows every managed view. `open ... --review-mp4 <file>` records the
+review MP4 the view accompanies, and `status`/`list` report whether those bytes
+are unchanged; reopening with a newer MP4 rebinds it without restarting Studio.
+`--wait-seconds` bounds the wait for another agent's registry operation. What Studio
+writes into the project it serves is never a preview, static-preflight or source input:
+its server record (`.studio-server.json` at the project root), its log (`.hyperframes/`)
+and the SDK's own caches at the project root (`.thumbnails/`, `.waveform-cache/`,
+`.transcode-cache/`), and likewise Finder's `.DS_Store` and AppleDouble `._*` files. So
+opening or using Studio never changes reviewed preview units or fails an export running
+for the same project. Every other file or folder, hidden or not, stays an input. Studio
+reads the process table with C-format start times and UTF-8 text (`LC_TIME=C`,
+`LC_CTYPE=UTF-8`), so a caller's locale, a non-ASCII project or checkout path, or an
+unrelated process's argument bytes change nothing; a table it cannot read refuses the
+command instead of settling a launch. Stopped records
+are kept; the registry holds at most 4096 records, so a host that has managed more
+projects than that must remove old stopped records by hand. Known limits: process
+start times are read in the host's time zone, so a view registered before a time-zone
+change (or from a shell with `TZ` set) no longer matches and is treated as exited; and a
+project path is keyed as spelled, so one accented folder opened once as NFC and once as
+NFD gets two views.
 
 Re-render after an applied
 sync: `assemble.py <base_final.mp4> <edit_plan.json> <final.mp4> --auto-base

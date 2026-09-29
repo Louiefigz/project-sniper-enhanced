@@ -90,14 +90,19 @@ class MeasurementReconciliationTests(unittest.TestCase):
             self.sample(raw, after)
 
     def test_child_pid_reuse_never_uses_the_old_top_footprint(self) -> None:
-        """Changed start identity is a failed identity check, not a healthy sample."""
+        """A child that exits and whose PID an unrelated process takes is retired, not charged.
+
+        Neither the old reading nor the new holder counts; a retired identity is not a
+        violation, so a healthy root keeps running (F0 spike: this stopped a 424 s owner).
+        """
         raw = raw_sample()
         after = raw["ps"].replace(f"101 100 101 {START}", "101 1 101 later start")
         snapshot = self.sample(raw, after)
         self.assertEqual(snapshot.owned_pids, (100,))
-        self.assertEqual(snapshot.reused_registered_pids, (101,))
-        self.assertFalse(snapshot.identity_verified)
-        self.assertIn("owned root start identity was not bound", stop_reasons(snapshot, snapshot))
+        self.assertEqual(snapshot.owned_footprint_bytes, 2 * GIB)
+        self.assertEqual((snapshot.recycled_registered_pids, snapshot.reused_registered_pids), ((101,), ()))
+        self.assertTrue(snapshot.identity_verified)
+        self.assertEqual(stop_reasons(snapshot, snapshot), ())
 
     def test_root_exit_preserves_a_discovered_live_child(self) -> None:
         """The owner can still account for a child after its parent terminates."""

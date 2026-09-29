@@ -1,0 +1,127 @@
+{
+  "capturedAt": "2026-09-27T18:18:37-0500",
+  "scenario": "codex-identity",
+  "modelCalls": 0,
+  "clean": {
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "app-server",
+      "--listen",
+      "stdio://",
+      "-c",
+      "mcp_servers={}"
+    ],
+    "envKeys": [
+      "HOME",
+      "LANG",
+      "LOGNAME",
+      "PATH",
+      "SHELL",
+      "TMPDIR",
+      "USER"
+    ],
+    "account": {
+      "type": "chatgpt",
+      "planType": "pro",
+      "requiresOpenaiAuth": true,
+      "error": null
+    },
+    "rateLimits": {
+      "primary": {
+        "usedPercent": 75,
+        "windowDurationMins": 10080,
+        "resetsAt": 1791084985
+      },
+      "credits": {
+        "hasCredits": false,
+        "unlimited": false,
+        "balance": "0"
+      },
+      "planType": "pro"
+    },
+    "exitCode": 0
+  },
+  "placeholderKey": {
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "app-server",
+      "--listen",
+      "stdio://",
+      "-c",
+      "mcp_servers={}"
+    ],
+    "envKeys": [
+      "HOME",
+      "LANG",
+      "LOGNAME",
+      "OPENAI_API_KEY",
+      "PATH",
+      "SHELL",
+      "TMPDIR",
+      "USER"
+    ],
+    "account": {
+      "type": "chatgpt",
+      "planType": "pro",
+      "requiresOpenaiAuth": true,
+      "error": null
+    },
+    "rateLimits": {
+      "primary": {
+        "usedPercent": 75,
+        "windowDurationMins": 10080,
+        "resetsAt": 1791084985
+      },
+      "credits": {
+        "hasCredits": false,
+        "unlimited": false,
+        "balance": "0"
+      },
+      "planType": "pro"
+    },
+    "exitCode": 0
+  },
+  "placeholderKeyForcedChatgpt": {
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "app-server",
+      "--listen",
+      "stdio://",
+      "-c",
+      "mcp_servers={}",
+      "-c",
+      "forced_login_method=\"chatgpt\""
+    ],
+    "envKeys": [
+      "HOME",
+      "LANG",
+      "LOGNAME",
+      "OPENAI_API_KEY",
+      "PATH",
+      "SHELL",
+      "TMPDIR",
+      "USER"
+    ],
+    "account": {
+      "type": "chatgpt",
+      "planType": "pro",
+      "requiresOpenaiAuth": true,
+      "error": null
+    },
+    "rateLimits": {
+      "primary": {
+        "usedPercent": 75,
+        "windowDurationMins": 10080,
+        "resetsAt": 1791084985
+      },
+      "credits": {
+        "hasCredits": false,
+        "unlimited": false,
+        "balance": "0"
+      },
+      "planType": "pro"
+    },
+    "exitCode": 0
+  },
+  "hostVersion": "codex-cli 0.144.1"
+}

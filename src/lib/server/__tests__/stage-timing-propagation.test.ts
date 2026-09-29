@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import childProcess from "node:child_process";
 import { syncBuiltinESMExports } from "node:module";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test, { mock } from "node:test";
 import { spawnPlanningGate } from "../../../app/api/producer/auto-edit/planning-gate-runner";
 import { runAuditGate } from "../../../app/api/_lib/audit-gate";
 import { timedStage, stageTimingsPath } from "../stage-timing";
-import { withStageTimingContext } from "../stage-timing-context";
+import { STAGE_TIMING_LINEAGE_ENV, stageTimingLineageEnv, withStageTimingContext } from "../stage-timing-context";
+
+// Exported SNIPER_TIMING_* from the caller's shell must not change these results.
+for (const name of Object.values(STAGE_TIMING_LINEAGE_ENV)) delete process.env[name];
 
 const producer = path.resolve("scripts/producer");
 const probe = [
@@ -89,4 +92,79 @@ test("Audit B preserves timing identity and its existing PYTHONPATH without runn
     syncBuiltinESMExports();
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+const LINEAGE = new Set<string>(Object.values(STAGE_TIMING_LINEAGE_ENV));
+const MACOS_SELF_SET = "__CF_USER_TEXT_ENCODING"; // CoreFoundation sets it inside the child; never inherited
+// Extensionless imports, as repository entry points use, so the child shares one context module.
+const tsChild = (dir: string) => [
+  `import { writeFileSync } from "node:fs";`,
+  `import { timedStage } from ${JSON.stringify(path.resolve("src/lib/server/stage-timing"))};`,
+  `import { withInheritedStageTimingLineage, withStageTimingFallback } from ${JSON.stringify(path.resolve("src/lib/server/stage-timing-context"))};`,
+  `void withInheritedStageTimingLineage(() => withStageTimingFallback({ runId: "job-fallback", attemptId: "job", attemptNo: 1 }, () =>`,
+  `  timedStage(${JSON.stringify(dir)}, "ts_child", async () => writeFileSync(${JSON.stringify(path.join(dir, "ts-env.json"))},`,
+  `    JSON.stringify(Object.keys(process.env).sort())))));`,
+].join("\n");
+const pythonParent = [
+  "import subprocess, sys",
+  "sys.path.insert(0, sys.argv[1])",
+  "from stage_timing import stage_span",
+  "from stage_timing_context import task_scope",
+  "from studio.native_run_config import launch_environment",
+  "closed = {'PATH': '/usr/bin:/bin', 'TMPDIR': sys.argv[4]}",
+  "with task_scope('ts-task', 5, 'turn-ts'), stage_span(sys.argv[2], 'py_parent'):",
+  "    subprocess.run([sys.argv[5], '--import', 'tsx', sys.argv[3]], env=launch_environment(closed), check=True)",
+].join("\n");
+
+test("a closed Python launch reaches a TypeScript child with only allowlisted lineage, and the child links", () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "py-ts-lineage-"));
+  try {
+    const child = path.join(dir, "child.ts");
+    writeFileSync(child, tsChild(dir));
+    const result = childProcess.spawnSync(path.resolve(".venv/bin/python3"),
+      ["-c", pythonParent, producer, dir, child, os.tmpdir(), process.execPath],
+      { encoding: "utf8", env: { ...process.env, SNIPER_TIMING_RUN_ID: "py-run", UNRELATED_API_KEY: "TEST-NOT-A-SECRET" } });
+    assert.equal(result.status, 0, result.stderr);
+    const names = (JSON.parse(readFileSync(path.join(dir, "ts-env.json"), "utf8")) as string[]).filter((name) => name !== MACOS_SELF_SET);
+    assert.deepEqual(new Set(names), new Set(["PATH", "TMPDIR", ...LINEAGE]));
+    assert.ok(!names.includes("UNRELATED_API_KEY"));
+    const found = rows(dir);
+    const parent = found.find((row) => row.stage === "py_parent" && row.event === "start")!;
+    const tsRow = found.find((row) => row.stage === "ts_child" && row.event === "start")!;
+    assert.equal(tsRow.parentSpanId, parent.spanId);
+    assert.deepEqual([tsRow.runId, tsRow.attemptId, tsRow.taskId, tsRow.claimEpoch, tsRow.hostTurnId],
+      ["py-run", parent.attemptId, "ts-task", 5, "turn-ts"], "the job fallback never replaces inherited lineage");
+    assert.notEqual(tsRow.writerId, parent.writerId);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("a TypeScript parent hands a closed Python child only its lineage; malformed inherited values are named", async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "ts-py-lineage-"));
+  const initial = { ...process.env };
+  try {
+    await withStageTimingContext({ runId: "ts-run", attemptId: "ts-attempt", attemptNo: 2, taskId: "py-task", claimEpoch: 0 },
+      () => timedStage(dir, "ts_parent", async () => {
+        const env = { PATH: "/usr/bin:/bin", ...stageTimingLineageEnv() };
+        assert.deepEqual(new Set(Object.keys(env)), new Set(["PATH", "SNIPER_TIMING_RUN_ID", "SNIPER_TIMING_ATTEMPT_ID",
+          "SNIPER_TIMING_ATTEMPT_NO", "SNIPER_TIMING_PARENT_SPAN_ID", "SNIPER_TIMING_TASK_ID", "SNIPER_TIMING_CLAIM_EPOCH"]));
+        const script = "import sys; sys.path.insert(0, sys.argv[1]); from stage_timing import stage_span\n"
+          + "with stage_span(sys.argv[2], 'python_child'): pass";
+        for (const extra of [{}, { SNIPER_TIMING_HOST_TURN_ID: "bad turn" }] as Record<string, string>[]) {
+          const closed: Record<string, string> = { ...env, ...extra }; // exactly these names, nothing inherited
+          const result = childProcess.spawnSync(path.resolve(".venv/bin/python3"), ["-c", script, producer, dir], { env: closed as unknown as NodeJS.ProcessEnv, encoding: "utf8" });
+          assert.equal(result.status, 0, result.stderr);
+        }
+      }));
+    const found = rows(dir);
+    const parent = found.find((row) => row.stage === "ts_parent" && row.event === "start")!;
+    const children = found.filter((row) => row.stage === "python_child" && row.event === "start");
+    for (const child of children) {
+      assert.equal(child.parentSpanId, parent.spanId);
+      assert.deepEqual([child.runId, child.attemptNo, child.taskId, child.claimEpoch], ["ts-run", 2, "py-task", 0]);
+    }
+    assert.equal(children[0].lineageRejected, undefined);
+    assert.deepEqual(children[1].lineageRejected, ["hostTurnId"]);
+    assert.equal(children[1].hostTurnId, undefined);
+    assert.deepEqual({ ...process.env }, initial);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });

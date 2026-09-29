@@ -1,4 +1,11 @@
-"""Bounded capacity waiting without launching a child or weakening host gates."""
+"""Bounded capacity waiting without launching a child or weakening host gates.
+
+Each baseline also records host CPU evidence (cpuAtAdmission) and each poll records the deferral hook's outcome
+(cpuLaunchDeferral); the hook receives no qualified CPU profile, so CPU never holds a launch
+(native_render_deferral.py). A CPU hold, were one qualified, is counted in cpuDeferralSeconds, not
+pressureWaitSeconds. Under an owner that journals its work, the queue and pressure phases are also child
+timing spans (diagnostics only). Disk refusals at admission say "Disk admission refused".
+"""
 from __future__ import annotations
 
 import json
@@ -10,9 +17,11 @@ from typing import TYPE_CHECKING
 from native_render_processes import ProcessRequest
 from native_render_resources import admission_reasons
 from native_render_policy import AdaptiveMemoryGuard, adaptive_admission_reasons, capacity_derivation
+from native_render_deferral import MEMORY_WAITING, DeferralRequest, launch_deferral
 from native_work_lease import NativeWorkLease, NativeWorkBusy
 from native_work_pool import PoolRequest
 from native_work_pool_policy import reserved_policy
+from stage_timing import child_span
 from studio.native_run_config import policy_for_baseline
 from studio.native_run_lifecycle import require_production_time
 from studio.native_run_disk import disk_request_path, pool_refusal_category
@@ -35,6 +44,65 @@ def wait_capacity(owner: NativeRun, reasons: tuple, until: float) -> None:
     time.sleep(min(2, max(0, until - time.monotonic())))
 
 
+def _baseline_policy(owner: NativeRun) -> tuple:
+    """Measure, derive the policy, bound it by the reservation and return the memory admission reasons."""
+    owner.baseline = owner.measure_resources(ProcessRequest())
+    owner.result['cpuAtAdmission'] = owner.cpu.observe(owner.baseline)
+    derived = policy_for_baseline(owner.settings, owner.baseline)
+    owner.policy = reserved_policy(derived, owner.lease.reservation_bytes)
+    owner.result.update(baseline=asdict(owner.baseline), policy=asdict(owner.policy),
+                        poolReservationBound={'reservationBytes': owner.lease.reservation_bytes,
+                                              'derivedOwnedGib': derived.maximum_owned_gib,
+                                              'boundOwnedGib': owner.policy.maximum_owned_gib,
+                                              'boundProcessGib': owner.policy.maximum_process_gib})
+    if owner.settings.policy is None:
+        owner.resource_guard = AdaptiveMemoryGuard(owner.baseline, owner.policy)
+        owner.result['resourcePolicyDerivation'] = capacity_derivation(owner.baseline, owner.policy)
+    admission = adaptive_admission_reasons if owner.resource_guard else admission_reasons
+    reasons = admission(owner.baseline, owner.policy)
+    if owner.settings.unused_ram_advisory:
+        reasons = tuple(value for value in reasons if value != 'unused physical RAM is below the reserved host margin')
+    return reasons
+
+
+def _cpu_deferral(owner: NativeRun, memory: tuple, clock: tuple) -> tuple:
+    """Record this poll's deferral outcome; only memory-admitted launches reach the hook.
+
+    No measured profile has shown a throughput or deadline benefit from CPU deferral, so
+    the hook receives None and always launches (E detail, row 2).
+    """
+    if memory:
+        owner.result['cpuLaunchDeferral'] = dict(MEMORY_WAITING)
+        return ()
+    held, until = clock
+    request = DeferralRequest(owner.settings.lane, owner.result['pool'], owner.result['cpuAtAdmission'],
+                              held, until - time.monotonic())
+    owner.result['cpuLaunchDeferral'] = launch_deferral(request, None)
+    return owner.result['cpuLaunchDeferral']['reasons']
+
+
+def _await_pressure(owner: NativeRun, until: float) -> None:
+    """Measure the host and wait only for pressure, bounded by the same admission clock."""
+    pressure_started, held = time.monotonic(), 0.0
+    while True:
+        require_production_time(owner)
+        memory = _baseline_policy(owner)
+        held_reasons = _cpu_deferral(owner, memory, (held, until))  # Called every poll: no stale record.
+        reasons = memory or held_reasons
+        owner.result['admissionReasons'] = reasons
+        owner.persist()
+        if not reasons:
+            owner.result.update(status='preparing', cpuDeferralSeconds=held,
+                                pressureWaitSeconds=time.monotonic() - pressure_started - held)
+            owner.lease.mark_launching()
+            return
+        if any('disk' in value for value in reasons):
+            raise RuntimeError('Disk admission refused: ' + '; '.join(reasons))
+        began = time.monotonic()
+        wait_capacity(owner, reasons, until)
+        held += 0.0 if memory else time.monotonic() - began
+
+
 def acquire_capacity(owner: NativeRun) -> None:
     """Wait only for live contention/host pressure; never reclaim unverified cleanup."""
     until = min(owner.started + owner.deadline,
@@ -42,33 +110,14 @@ def acquire_capacity(owner: NativeRun) -> None:
     remaining = require_production_time(owner)
     if remaining is not None:
         until = min(until, time.monotonic() + remaining)
-    join_queue(owner, until)
+    with child_span('native_queue_admission', {'activity': 'native-queue-wait'}):
+        join_queue(owner, until)
     until = min(owner.started + owner.deadline, time.monotonic() + owner.settings.capacity_wait_seconds)
     owner.result['pool'] = owner.lease.admission
     if owner.settings.disk_expansion:
         owner.result['diskExpansion'] = {'status': 'available', 'request': str(disk_request_path(owner.path))}
-    while True:
-        require_production_time(owner)
-        owner.baseline = owner.measure_resources(ProcessRequest())
-        owner.policy = reserved_policy(policy_for_baseline(owner.settings, owner.baseline),
-                                       owner.lease.reservation_bytes)
-        owner.result.update(baseline=asdict(owner.baseline), policy=asdict(owner.policy))
-        if owner.settings.policy is None:
-            owner.resource_guard = AdaptiveMemoryGuard(owner.baseline, owner.policy)
-            owner.result['resourcePolicyDerivation'] = capacity_derivation(owner.baseline, owner.policy)
-        admission = adaptive_admission_reasons if owner.resource_guard else admission_reasons
-        reasons = admission(owner.baseline, owner.policy)
-        if owner.settings.unused_ram_advisory:
-            reasons = tuple(value for value in reasons if value != 'unused physical RAM is below the reserved host margin')
-        owner.result['admissionReasons'] = reasons
-        owner.persist()
-        if not reasons:
-            owner.result['status'] = 'preparing'
-            owner.lease.mark_launching()
-            return
-        if any('disk' in value for value in reasons):
-            raise RuntimeError('Admission refused: ' + '; '.join(reasons))
-        wait_capacity(owner, reasons, until)
+    with child_span('native_pressure_admission', {'activity': 'pressure-wait'}):
+        _await_pressure(owner, until)
 
 
 def join_queue(owner: NativeRun, until: float) -> None:
@@ -84,9 +133,10 @@ def join_queue(owner: NativeRun, until: float) -> None:
             until = attempt_pool_admission(owner, request, until)
     finally:
         request.withdraw()
+        waited = time.monotonic() - started
+        owner.result['queueSeconds'] = waited  # top-level: the pool qualification evidence reads it (I-E23)
         owner.result['queue'] = {'ticket': request.sequence, 'attempts': request.attempts,
-                                 'queueSeconds': time.monotonic() - started,
-                                 'admitted': owner.lease is not None}
+                                 'queueSeconds': waited, 'admitted': owner.lease is not None}
 
 
 def attempt_pool_admission(owner: NativeRun, request: PoolRequest, until: float) -> float:

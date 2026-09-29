@@ -11,6 +11,7 @@ import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
 import { nativeShortPacingReport } from "../native-short-pacing";
 import { buildNativeShortProjectFiles } from "../guided-native-project";
 import { createUserTitleCopy } from "../native-hook-template";
+import { missingStudioHostIds } from "../native-studio-host-ids";
 
 function fixture() {
   const directory = realpathSync(mkdtempSync(path.join(os.tmpdir(), "sniper-short-project-")));
@@ -189,6 +190,30 @@ test("new writer and cold reader preserve immutable origin evidence instead of s
     assert.equal(existsSync(path.join(f.directory, "stripped")), false);
     writeFileSync(f.input.assets[0].origin!.path, "TEST mutated immutable acquisition evidence");
     assert.throws(() => readNativeShortProject(directory), /origin evidence.*changed/);
+  } finally { f.cleanup(); }
+});
+
+test("suppressing the first caption view keeps extension markup mounted, Studio ids and cold reads", () => {
+  const f = fixture();
+  try {
+    const canvas = f.input.canvas;
+    canvas.captionSuppressions = [{ startFrame: 0, endFrame: 25, reason: "TEST backed title card holds frames 0-24" }];
+    canvas.captionViews[0].startFrame = 25;
+    f.input.extension = { css: "", motion: "", markup: '<div id="annotation" data-hf-id="hf-annotation" class="clip" '
+      + 'data-start="0" data-duration="2">TEST annotation</div>' };
+    refreshNativePacingFixture(f.input);
+    const html = assembleNativeShortHtml(f.input);
+    assert.doesNotMatch(html, /id="caption-0-0"/u, "The historical literal anchor does not exist in this build");
+    const order = ['id="annotation"', "<!--native-caption-mount-->", 'id="caption-1-0"'].map(text => html.indexOf(text));
+    assert.ok(order[0] > 0 && order[0] < order[1] && order[1] < order[2], "Extension markup mounts ahead of the caption layer");
+    assert.deepEqual(missingStudioHostIds(html), []);
+    const project = writeNativeShortProject(f.input, path.join(f.directory, "suppressed"));
+    assert.deepEqual(readNativeShortProject(project.directory), f.input);
+    assert.equal(readFileSync(path.join(project.directory, "index.html"), "utf8").includes('id="annotation"'), true);
+    const report = JSON.parse(readFileSync(path.join(project.directory, "PACING-REPORT.json"), "utf8"));
+    assert.deepEqual(report.observations.captionSuppressions.map((row: { spokenOccurrenceIds: number[] }) => row.spokenOccurrenceIds), [[0, 1]]);
+    const unreasoned = structuredClone(f.input); delete unreasoned.canvas.captionSuppressions;
+    assert.throws(() => assembleNativeShortHtml(unreasoned), /omit part of the Short/, "A caption-free opening needs its declared reason");
   } finally { f.cleanup(); }
 });
 

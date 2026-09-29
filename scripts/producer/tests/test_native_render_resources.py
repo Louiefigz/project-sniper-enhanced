@@ -4,7 +4,7 @@ from __future__ import annotations
 import unittest
 import json
 import re
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -37,22 +37,34 @@ def raw_sample() -> dict[str, str]:
     }
 
 
+CPU_READ_ABSTIME = 24 * 10 ** 9  # Mach ticks; x125/3 = 1,000 s after the fixture processes started.
+
+
+def cpu_block(read: int = CPU_READ_ABSTIME, ticks: list | None = None) -> dict:
+    """A measured 16-processor host CPU reading with Apple Silicon's 125/3 timebase."""
+    from native_render_macos import CPU_SOURCE
+    rows = ticks if ticks is not None else [[1000, 500, 8000, 0] for _ in range(16)]
+    return {'status': 'measured', 'source': CPU_SOURCE, 'readAbstime': read,
+            'timebase': {'numer': 125, 'denom': 3}, 'clockTicksPerSecond': 100, 'processorTicks': rows}
+
+
 def direct_sample(raw: dict[str, str] | None = None) -> dict[str, str]:
     """Replay existing identity-turnover fixtures through the explicit live schema."""
-    from native_render_macos import COMPRESSED_UNAVAILABLE, SAMPLER
+    from native_render_macos import COMPRESSED_UNAVAILABLE, SAMPLER, SCHEMA_VERSION
     from native_render_processes import parse_size
     result = dict(raw or raw_sample())
     top = result.pop('top')
     processes = [{'pid': int(pid), 'status': 'measured', 'footprintBytes': parse_size(mem),
+        'userTimeAbstime': 24 * 10 ** 6 * int(pid), 'systemTimeAbstime': 12 * 10 ** 6,
         'processStartAbstime': 123456 + int(pid), 'processStartAbstimeBefore': 123456 + int(pid),
         'processExitAbstime': 0, 'compressedBytes': None, 'compressedStatus': COMPRESSED_UNAVAILABLE,
         'footprintSource': 'proc_pid_rusage:RUSAGE_INFO_V0:ri_phys_footprint'}
         for pid, mem, _ in re.findall(r'(?m)^\s*(\d+)\s+(\S+)\s+(\S+)\s*$', top)]
-    result['direct'] = json.dumps({'schemaVersion': 1, 'status': 'measured', 'sampler': SAMPLER,
+    result['direct'] = json.dumps({'schemaVersion': SCHEMA_VERSION, 'status': 'measured', 'sampler': SAMPLER,
         'elapsedSeconds': .0001, 'host': {'pageSizeBytes': 16384, 'pageSizeSource': 'vm_kernel_page_size',
         'returnedIntegerCount': 38, 'compressorBytes': 2 * GIB, 'unusedPhysicalBytes': 34 * GIB,
         'raw': {'compressor_page_count': 2 * GIB // 16384, 'free_count': 34 * GIB // 16384,
-                'speculative_count': 100}}, 'processes': processes})
+                'speculative_count': 100}}, 'cpu': cpu_block(), 'processes': processes})
     return result
 
 
@@ -255,6 +267,34 @@ class NativeRenderResourceTests(unittest.TestCase):
                 self.assertIn("kernel memory pressure state is unrecognized",
                               stop_reasons(current, self.healthy()))
 
+
+    def test_direct_snapshot_preserves_per_process_and_host_cpu_counters(self) -> None:
+        """The memory result no longer discards the rusage CPU fields it already read."""
+        snapshot = parse_snapshot(direct_sample(), REQUEST, 40 * GIB)
+        self.assertEqual([row.cpu_user_ns for row in snapshot.processes], [100 * 10 ** 9, 101 * 10 ** 9])
+        self.assertEqual(snapshot.host_cpu.status, "measured")
+        self.assertEqual(len(snapshot.host_cpu.processor_ticks), 16)
+        journal = json.loads(json.dumps(asdict(snapshot)))
+        self.assertEqual(journal["host_cpu"]["processor_ticks"][0], [1000, 500, 8000, 0])
+        self.assertEqual(journal["processes"][1]["cpu_system_ns"], 5 * 10 ** 8)
+
+    def test_historical_top_snapshot_has_no_cpu_rather_than_zero(self) -> None:
+        """A sampler without CPU counters records None, never idle processes."""
+        snapshot = self.healthy()
+        self.assertIsNone(snapshot.host_cpu)
+        self.assertTrue(all(row.cpu_user_ns is None and row.cpu_system_ns is None
+                            for row in snapshot.processes))
+
+    def test_cpu_counters_never_change_stop_or_admission_reasons(self) -> None:
+        """Saturated or absent CPU readings leave every memory, disk and identity decision alone."""
+        direct = parse_snapshot(direct_sample(), REQUEST, 40 * GIB)
+        busy = replace(direct.host_cpu, processor_ticks=((2 ** 32 - 1, 2 ** 32 - 1, 0, 0),) * 16)
+        heavy = tuple(replace(row, cpu_user_ns=10 ** 15) for row in direct.processes)
+        for base in (direct, replace(direct, kernel_pressure_level=2, owned_footprint_bytes=17 * GIB)):
+            variants = (base, replace(base, host_cpu=busy, processes=heavy), replace(base, host_cpu=None))
+            with self.subTest(pressure=base.kernel_pressure_level):
+                self.assertEqual({stop_reasons(item, direct) for item in variants}, {stop_reasons(base, direct)})
+                self.assertEqual({admission_reasons(item) for item in variants}, {admission_reasons(base)})
 
 if __name__ == "__main__":
     unittest.main()

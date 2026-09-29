@@ -72,15 +72,28 @@ class OwnedRegistry:
         return [asdict(row) for row in self.live().values()]
 
     def remember_measured(self, processes: tuple) -> None:
-        """Retain internally verified sampler discoveries through reparenting."""
+        """Retain internally verified sampler discoveries through reparenting.
+
+        A measured owned process whose start differs from the one recorded at its PID
+        is new: the recorded process exited and its identity is retired. The same
+        start in another group is one live process whose identity changed: refused.
+        """
         for measured in processes:
             row = OwnedProcess(measured.pid, measured.parent_pid, measured.pgid, measured.started)
             prior = self.known.get(row.pid)
-            if prior and (prior.started, prior.pgid) != (row.started, row.pgid):
+            if prior and prior.started == row.started and prior.pgid != row.pgid:
                 raise RuntimeError('Measured PID conflicts with recorded cleanup identity')
             self.known[row.pid] = row
             if row.pid == row.pgid:
                 self.groups.add(row.pgid)
+
+    def retire(self, pids: set[int]) -> list[OwnedProcess]:
+        """Forget identities a verified sample found exited or reassigned; never the root.
+
+        The caller passes only PIDs whose every recorded identity was absent and none
+        owned, so no live owned process is forgotten. Returns the forgotten rows.
+        """
+        return [self.known.pop(pid) for pid in sorted(pids) if pid != self.root_pid and pid in self.known]
 
     def signal_owned(self, value: signal.Signals) -> None:
         """Recheck identity before signalling each owned group or individual."""

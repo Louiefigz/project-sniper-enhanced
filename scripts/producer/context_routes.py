@@ -13,11 +13,13 @@ ROUTE_READS = {
     "native-short": (".claude/skills/producer/SKILL.md",
                      "docs/producer/NATIVE_SHORTS_WORKFLOW.md",
                      "docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md",
+                     "docs/producer/NATIVE_PREFLIGHT.md",
                      "docs/producer/STUDIO_REVIEW_LANE.md"),
     "native-long": (".claude/skills/producer/SKILL.md",
                     "docs/producer/NATIVE_LONG_EXPORT.md",
                     "docs/producer/NATIVE_LONG_SELECTED_SOURCES.md",
                     "docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md",
+                    "docs/producer/NATIVE_PREFLIGHT.md",
                     "docs/producer/STUDIO_REVIEW_LANE.md"),
 }
 
@@ -27,6 +29,8 @@ COMMANDS = {
     "nativeExportHelp": "python3 scripts/producer/studio/native_export.py --help",
     "nativePreview": "python3 scripts/producer/studio/managed_preview.py open /absolute/native-project",
     "legacyStudioContext": "python3 scripts/producer/studio/studio_review.py context /absolute/producer-dir",
+    "nativeRolePacket": "python3 -B scripts/producer/context.py --role plan-critic|motion-critic|final-critic|clip-owner "
+                        "--plan|--preview|--export /absolute/input",
 }
 
 REVIEW_REQUIREMENTS = (
@@ -36,6 +40,7 @@ REVIEW_REQUIREMENTS = (
     "Review encoded picture, continuous motion, source correspondence and sound; technical checks do not certify listening.",
     "Default video handoff includes both checked local MP4 playback and the matching live editable Studio project.",
     "Existing reviews are historical claims until their bindings and actual required checks are verified.",
+    "Native Short owners and critics start from a --role packet and critics finish with its typed submission command.",
 )
 
 PROJECT_FILES = (

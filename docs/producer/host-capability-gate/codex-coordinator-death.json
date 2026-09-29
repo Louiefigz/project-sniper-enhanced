@@ -1,0 +1,138 @@
+{
+  "capturedAt": "2026-09-27T18:23:31-0500",
+  "scenario": "codex-coordinator-death",
+  "plan": {
+    "deadlineS": 20.0,
+    "restartS": 45.0,
+    "observeS": 120.0,
+    "sleepSeconds": 68
+  },
+  "coordinatorExit": -9,
+  "handles": {
+    "host": "codex",
+    "threadId": "01a0e52d-73be-7281-9359-8b12120b3cc5",
+    "turnId": "01a0e52d-786a-7e42-a33d-94f72def46a9",
+    "child": {
+      "pid": 20270,
+      "started": "Sun Sep 27 18:22:35 2026",
+      "pgid": 20270
+    },
+    "sleep": {
+      "pid": 22695,
+      "started": "Sun Sep 27 18:22:44 2026",
+      "pgid": 22695
+    },
+    "commandStartedAt": 8.981,
+    "tree": [
+      {
+        "pid": 20273,
+        "ppid": 20270,
+        "pgid": 20270,
+        "argv": [
+          "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+          "app-server",
+          "--listen",
+          "stdio://",
+          "-c",
+          "mcp_servers={}"
+        ]
+      },
+      {
+        "pid": 20968,
+        "ppid": 20273,
+        "pgid": 20968,
+        "argv": [
+          "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+        ]
+      },
+      {
+        "pid": 22664,
+        "ppid": 20273,
+        "pgid": 22664,
+        "argv": [
+          "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host"
+        ]
+      },
+      {
+        "pid": 22695,
+        "ppid": 20273,
+        "pgid": 22695,
+        "argv": [
+          "sleep",
+          "68"
+        ]
+      }
+    ],
+    "argv": [
+      "/opt/homebrew/bin/codex",
+      "app-server",
+      "--listen",
+      "stdio://",
+      "-c",
+      "mcp_servers={}",
+      "--disable",
+      "plugins",
+      "--disable",
+      "apps"
+    ],
+    "coordinator": {
+      "pid": 20268,
+      "started": "Sun Sep 27 18:22:35 2026",
+      "pgid": 20259
+    }
+  },
+  "afterDeath": {
+    "changes": [
+      {
+        "t": 0.0,
+        "childAlive": true,
+        "sleepAlive": false
+      },
+      {
+        "t": 1.13,
+        "childAlive": false,
+        "sleepAlive": false
+      }
+    ],
+    "deadline": {
+      "t": 20.08,
+      "childAlive": false,
+      "sleepAlive": false
+    },
+    "restart": {
+      "t": 45.45,
+      "childAlive": false,
+      "sleepAlive": false,
+      "replay": {
+        "threadRead": [
+          [
+            "01a0e52d-786a-7e42-a33d-94f72def46a9",
+            "interrupted",
+            [
+              "userMessage",
+              "agentMessage"
+            ]
+          ]
+        ],
+        "error": null,
+        "replayServerExit": 0
+      }
+    }
+  },
+  "reconciledByProbe": {},
+  "finalReplay": {
+    "threadRead": [
+      [
+        "01a0e52d-786a-7e42-a33d-94f72def46a9",
+        "interrupted",
+        [
+          "userMessage",
+          "agentMessage"
+        ]
+      ]
+    ],
+    "error": null,
+    "replayServerExit": 0
+  },
+  "hostVersion": "codex-cli 0.144.1"
+}

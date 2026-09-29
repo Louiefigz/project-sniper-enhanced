@@ -10,3 +10,6 @@ Read and follow
 canonical workflow shared with Claude Code. Run its read-only context command,
 then read the applicable instruction and project files it locates before
 dependent work. Discovery is not completed review or production approval.
+Native Short owners and critics use its `--role` packets exactly as the
+canonical skill describes, finishing critic work with the packet's typed
+`native-review.ts` submission.

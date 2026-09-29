@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildNativeCanvas, nativeVisualExit, type NativeCanvasInput, type NativeTypeStyle } from "../native-short-composition";
+import { missingStudioHostIds } from "../native-studio-host-ids";
 
 function fixture(): NativeCanvasInput {
   const style: NativeTypeStyle = { size: 64, weight: 700, color: "#ffffff", background: "#171923",
@@ -168,4 +169,124 @@ test("source-burned import retains source and clock without drawing duplicate ca
   assert.doesNotThrow(() => buildNativeCanvas(input), "Overlapping source panes may jointly cover the clock");
   Object.assign(input, { captionMode: "hidden" });
   assert.throws(() => buildNativeCanvas(input), /caption mode is unsupported/);
+});
+
+/** Opening title holds frames 0-24: captions resume at 25 in the only caption view. */
+function suppressedOpening(input = fixture()): NativeCanvasInput {
+  input.captionSuppressions = [{ startFrame: 0, endFrame: 25, reason: "TEST opening title card holds these frames" }];
+  input.captionViews[0].startFrame = 25; input.captionViews[0].activeColor = "#ffe44d";
+  return input;
+}
+
+/** Exact caption element windows on the output frame clock, read back from generated HTML. */
+function captionWindows(html: string) {
+  return [...html.matchAll(/<div id="(caption-[^"]+)"[^>]* data-start="([^"]+)" data-duration="([^"]+)"/gu)]
+    .map(([, id, start, duration]) => ({ id, startFrame: Math.round(Number(start) * 25),
+      endFrame: Math.round((Number(start) + Number(duration)) * 25) }));
+}
+
+const media = (html: string) => html.match(/<(?:audio|video)\b[^>]*>/gu);
+
+test("a reasoned suppression removes captions for exact frames and keeps words, groups and the clock", () => {
+  const plain = fixture(); plain.captionViews[0].activeColor = "#ffe44d";
+  const input = suppressedOpening(), original = structuredClone(input);
+  const before = buildNativeCanvas(plain), html = buildNativeCanvas(input);
+  assert.deepEqual(input, original, "Suppression must not rewrite words, groups, cuts or views");
+  assert.deepEqual(captionWindows(html), [{ id: "caption-1-0", startFrame: 25, endFrame: 40 }]);
+  assert.match(html, /id="word-1-0"[^>]+data-word-start-frame="20" data-word-end-frame="40"/u,
+    "A word spanning the resume frame keeps its source window");
+  assert.ok(html.includes('tl.fromTo("#word-1-0",{color:"#ffffff"},{color:"#ffe44d",duration:0,immediateRender:false},1);'),
+    "The spanning word highlights from the resume frame");
+  assert.doesNotMatch(html, /#word-0-0/u);
+  assert.ok(html.includes(nativeVisualExit("caption-1-0", 40, "25/1")));
+  assert.deepEqual(media(html), media(before), "Dialogue and source picture timing are unchanged");
+  assert.match(html, /data-composition-id="native-canvas"[^>]+data-duration="2"/u);
+  assert.ok(html.includes("<!--native-caption-mount-->") && !before.includes("<!--native-caption-mount-->"));
+  assert.deepEqual(missingStudioHostIds(html), [], "Every emitted element keeps a Studio selection id");
+  plain.captionSuppressions = [];
+  assert.equal(buildNativeCanvas(plain), before, "An empty suppression list keeps historical HTML");
+});
+
+test("a mid-phrase suppression splits only the display and keeps both highlight windows exact", () => {
+  const input = fixture();
+  input.captionGroups = [[0, 1]]; input.captionSuppressions = [{ startFrame: 10, endFrame: 30, reason: "TEST full-frame chart" }];
+  input.captionViews = [{ ...input.captionViews[0], endFrame: 10, activeColor: "#ffe44d" },
+    { ...input.captionViews[0], startFrame: 30, activeColor: "#ffe44d" }];
+  const html = buildNativeCanvas(input);
+  assert.deepEqual(captionWindows(html), [{ id: "caption-0-0", startFrame: 0, endFrame: 10 },
+    { id: "caption-0-1", startFrame: 30, endFrame: 40 }]);
+  for (const [id, end] of [["caption-0-0", 10], ["caption-0-1", 40]] as const) {
+    assert.ok(html.includes(nativeVisualExit(id, end, "25/1")), `${id} exits on its exact frame forward and backward`);
+  }
+  assert.ok(html.includes('tl.set("#word-0-0",{color:"#ffffff"},0.4);'));
+  assert.ok(html.includes('tl.fromTo("#word-1-1",{color:"#ffffff"},{color:"#ffe44d",duration:0,immediateRender:false},1.2);'));
+  assert.doesNotMatch(html, /#word-1-0"|#word-0-1"/u, "No highlight is scheduled inside the suppressed window");
+});
+
+test("invalid, overlapping, out-of-range, unreasoned and ineffective suppressions fail closed", () => {
+  const row = (startFrame: number, endFrame: number, reason = "TEST title holds") => ({ startFrame, endFrame, reason });
+  const changes: Array<[(input: NativeCanvasInput) => void, RegExp]> = [
+    [i => { i.captionSuppressions = [row(0, 25), row(20, 30)]; }, /overlap or are out of order/],
+    [i => { i.captionSuppressions = [row(25, 30), row(0, 25)]; }, /overlap or are out of order/],
+    [i => { i.captionSuppressions = [row(0, 51)]; }, /exact in-range/],
+    [i => { i.captionSuppressions = [row(-1, 25)]; }, /exact in-range/],
+    [i => { i.captionSuppressions = [row(0, 24.5)]; }, /exact in-range/],
+    [i => { i.captionSuppressions = [row(25, 25)]; }, /exact in-range/],
+    ...["", "  ", "bad\nreason", "x".repeat(501), "\u200b\u200b", "\u200d\ufeff", "TEST\u0085reason", "TEST\u009breason",
+      "TEST \u202eholds", "\u2066TEST\u2069"].map((reason): [(input: NativeCanvasInput) => void, RegExp] =>
+      [i => { i.captionSuppressions = [row(0, 25, reason)]; }, /bounded, readable editorial reason/]),
+    [i => { i.captionSuppressions = [{ ...row(0, 25), kind: "title" } as never]; }, /caption suppression/],
+    [i => { i.captionSuppressions = [{ startFrame: 0, endFrame: 25 } as never]; }, /caption suppression/],
+    [i => { i.captionSuppressions = ["0-25" as never]; }, /caption suppression must be an object/],
+    [i => { i.captionSuppressions = {} as never; }, /unbounded or malformed/],
+    [i => { i.captionSuppressions = Array.from({ length: 129 }, (_, n) => row(n, n + 1)); }, /unbounded or malformed/],
+    [i => { i.captionViews[0].startFrame = 20; }, /must partition/],
+    [i => { i.captionViews[0].startFrame = 30; }, /omit part of the Short; caption-free frames need a reasoned/],
+    [i => { i.captionSuppressions = [row(30, 35)]; i.captionViews[0].startFrame = 0; }, /must partition/],
+    [i => { i.captionSuppressions = [row(40, 50)]; i.captionViews[0] = { ...i.captionViews[0], startFrame: 0, endFrame: 40 }; },
+      /hides no caption phrase/],
+    [i => { i.captionSuppressions = [row(0, 50)]; i.captionViews = []; }, /cannot hide every caption/],
+    [i => { i.captionMode = "source-burned"; i.captionViews = []; }, /Source-burned captions cannot suppress/],
+  ];
+  for (const [change, pattern] of changes) {
+    const input = suppressedOpening(); change(input);
+    assert.throws(() => buildNativeCanvas(input), pattern, String(pattern));
+  }
+  const burned = fixture(); burned.captionMode = "source-burned"; burned.captionViews = []; burned.captionSuppressions = [];
+  assert.doesNotThrow(() => buildNativeCanvas(burned), "An empty list is not a suppression");
+});
+
+/** Alpha[0,10) Beta[10,30) Gamma[25,40): Beta's tail runs past the resume frame into Gamma's phrase. */
+function tailPastResume(): NativeCanvasInput {
+  const input = suppressedOpening();
+  input.occurrences = [[0, 0, 0, 0, 10, "Alpha", 0], [1, 0, 1, 10, 30, "Beta", 0], [2, 0, 2, 25, 40, "Gamma.", 0]];
+  input.captionGroups = [[0, 1], [2]];
+  return input;
+}
+
+test("a suppressed build schedules word highlights only for rendered spans", () => {
+  const html = buildNativeCanvas(tailPastResume());
+  assert.deepEqual(captionWindows(html), [{ id: "caption-1-0", startFrame: 25, endFrame: 40 }]);
+  const targets = [...html.matchAll(/tl\.(?:fromTo|set)\("#(word-[^"]+)"/gu)].map(([, id]) => id);
+  assert.deepEqual([...new Set(targets)], ["word-2-0"], "Beta's hidden phrase has no span, so no tween targets it");
+  assert.ok(targets.every(id => html.includes(`<span id="${id}"`)), "Every tween target exists");
+  const historical = tailPastResume();
+  delete historical.captionSuppressions;
+  historical.captionViews = [{ ...historical.captionViews[0], startFrame: 0, endFrame: 25 }, { ...historical.captionViews[0] }];
+  assert.match(buildNativeCanvas(historical), /tl\.fromTo\("#word-1-1"/u,
+    "Unsuppressed multi-view HTML keeps its historical tween list byte for byte (cold reads compare it)");
+});
+
+test("a word spoken wholly outside every window cannot lose its whole phrase; readable reasons apply to corrections", () => {
+  const input = suppressedOpening();
+  input.occurrences = [[0, 0, 0, 0, 10, "Alpha", 0], [1, 0, 1, 20, 30, "Beta", 0], [2, 0, 2, 20, 40, "Gamma.", 0]];
+  input.captionGroups = [[0, 1], [2]];
+  input.captionSuppressions![0].endFrame = 20; input.captionViews[0].startFrame = 20;
+  assert.throws(() => buildNativeCanvas(input), /hides word 1's whole phrase although the word is spoken wholly outside every window/);
+  assert.doesNotThrow(() => buildNativeCanvas(tailPastResume()), "A tail partly inside the window is reported, not refused");
+  const corrected = fixture();
+  corrected.captionCorrections = [{ occurrenceId: 0, expectedSourceText: "Actual", displayText: "Confirmed", reason: "\u200b" }];
+  assert.throws(() => buildNativeCanvas(corrected), /bounded review reason/);
+  corrected.captionCorrections[0].reason = "TEST \u202econfirmed";
+  assert.throws(() => buildNativeCanvas(corrected), /bounded review reason/);
 });

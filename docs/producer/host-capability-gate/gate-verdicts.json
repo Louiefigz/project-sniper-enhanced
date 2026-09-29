@@ -1,0 +1,45 @@
+{
+  "gate": "ORCHESTRATION-DESIGN-REVIEW-2026-09-27 section 6 host capability gate",
+  "capturedOn": "2026-09-27",
+  "result": "not-passed",
+  "unattendedAiDeadlineGuarantee": {"claude-code": "unsupported", "codex": "unsupported"},
+  "verdictScale": "PASS = observed on this host; FAIL = observed not to hold; UNPROVEN = not observable within the rules and budget",
+  "hosts": {
+    "claude-code": {
+      "cli": "claude 2.1.247 (installed); the desktop app that hosts the operator conversation bundles 2.1.281",
+      "measuredAgainst": "real endpoint for identity only (no credential available); loopback stub model for every mechanics item",
+      "items": {
+        "subscriptionIdentityWithoutApiFallback": {"verdict": "FAIL", "evidence": ["host-status.json", "claude-identity-no-key.json", "claude-session-binding.json"]},
+        "launchIdempotencyCallerSessionId": {"verdict": "PASS", "evidence": ["claude-session-binding.json"]},
+        "attachExclusiveWhileLive": {"verdict": "FAIL", "evidence": ["claude-resume-while-live.json"]},
+        "knownHostConcurrency": {"verdict": "UNPROVEN", "evidence": []},
+        "exactChildHandle": {"verdict": "PASS", "caveat": "tool processes are not reported in the stream and run in their own process group", "evidence": ["claude-control-interrupt.json"]},
+        "eventReplayAfterDisconnect": {"verdict": "FAIL", "caveat": "only the undocumented on-disk transcript; no terminal result or attach to the live stream", "evidence": ["claude-coordinator-death.json"]},
+        "interruptWithTerminalConfirmation": {"verdict": "PASS", "evidence": ["claude-control-interrupt.json", "claude-control-interrupt-recheck-final-code.json", "claude-signal-sigint.json"]},
+        "toolCleanupAfterCooperativeInterrupt": {"verdict": "PASS", "evidence": ["claude-control-interrupt.json", "claude-signal-sigint.json"]},
+        "toolCleanupAfterHostProcessKilled": {"verdict": "FAIL", "evidence": ["claude-signal-sigkill.json"]},
+        "nestedSubagentCleanup": {"verdict": "UNPROVEN", "evidence": []},
+        "coordinatorDeathDelayedRestart": {"verdict": "FAIL", "caveat": "child keeps working and calling the model past the deadline; nothing host-side stops it", "evidence": ["claude-coordinator-death.json", "claude-coordinator-death-run1-stub-reasked.json"]},
+        "separatedUsageAttribution": {"verdict": "PASS", "caveat": "plumbing measured with stub-reported usage; real-model usage and subagent separation unobserved", "evidence": ["claude-session-binding.json", "claude-control-interrupt.json"]}
+      }
+    },
+    "codex": {
+      "cli": "codex-cli 0.144.1 (Homebrew); the ChatGPT desktop app bundles 0.155.0-alpha.16.3",
+      "measuredAgainst": "real ChatGPT subscription turns on probe-owned app-servers",
+      "items": {
+        "subscriptionIdentityWithoutApiFallback": {"verdict": "PASS", "evidence": ["host-status.json", "codex-identity.json"]},
+        "launchIdempotencyCallerSessionId": {"verdict": "FAIL", "evidence": ["codex-turn-duplicate.json"]},
+        "attachExclusiveWhileLive": {"verdict": "UNPROVEN", "caveat": "thread/resume attach works; exclusivity against a second live client not tested", "evidence": ["codex-socket-coordinator-death.json"]},
+        "knownHostConcurrency": {"verdict": "UNPROVEN", "caveat": "one active turn per thread observed; no declared limit", "evidence": ["codex-turn-duplicate.json", "codex-identity.json"]},
+        "exactChildHandle": {"verdict": "PASS", "caveat": "commandExecution.processId is a PTY session id, not an OS pid; a retried turn/start can return a turn id that never completes", "evidence": ["codex-interrupt.json", "codex-turn-duplicate.json"]},
+        "eventReplayAfterDisconnect": {"verdict": "PASS", "caveat": "persisted/resumed state, not re-delivery of missed notifications; stdio server dies with its client", "evidence": ["codex-socket-coordinator-death.json", "codex-coordinator-death.json"]},
+        "interruptWithTerminalConfirmation": {"verdict": "PASS", "evidence": ["codex-interrupt.json", "codex-socket-coordinator-death.json"]},
+        "toolCleanupAfterCooperativeInterrupt": {"verdict": "FAIL", "evidence": ["codex-interrupt.json", "codex-socket-coordinator-death.json"]},
+        "toolCleanupAfterHostProcessKilled": {"verdict": "UNPROVEN", "caveat": "SIGKILL of the app-server was not tested; its own shutdown on client EOF removed the tool at once", "evidence": ["codex-coordinator-death.json"]},
+        "nestedSubagentCleanup": {"verdict": "UNPROVEN", "evidence": []},
+        "coordinatorDeathDelayedRestart": {"verdict": "FAIL", "caveat": "no expiry field; stdio server fail-stops with its client, a surviving socket server keeps the turn and its tool running until reattach", "evidence": ["codex-coordinator-death.json", "codex-socket-coordinator-death.json"]},
+        "separatedUsageAttribution": {"verdict": "PASS", "evidence": ["codex-interrupt.json"]}
+      }
+    }
+  }
+}

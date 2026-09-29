@@ -1,0 +1,162 @@
+{
+  "capturedAt": "2026-09-27T18:16:43-0500",
+  "scenario": "claude-coordinator-death",
+  "plan": {
+    "deadlineS": 20.0,
+    "restartS": 45.0,
+    "observeS": 120.0,
+    "sleepSeconds": 67
+  },
+  "coordinatorExit": -9,
+  "handles": {
+    "host": "claude",
+    "session": "cb192d0b-4bbb-4a6f-93b1-cd5e6e60b4fa",
+    "child": {
+      "pid": 90531,
+      "started": "Sun Sep 27 18:14:41 2026",
+      "pgid": 90531
+    },
+    "sleep": {
+      "pid": 90705,
+      "started": "Sun Sep 27 18:14:41 2026",
+      "pgid": 90700
+    },
+    "toolUseAt": 0.29,
+    "tree": [
+      {
+        "pid": 90700,
+        "ppid": 90531,
+        "pgid": 90700,
+        "argv": [
+          "/bin/zsh",
+          "-c",
+          "source",
+          "~/.claude/shell-snapshots/snapshot-zsh-1790550881384-8a5fpv.sh",
+          "2>/dev/null",
+          "||"
+        ]
+      },
+      {
+        "pid": 90705,
+        "ppid": 90700,
+        "pgid": 90700,
+        "argv": [
+          "/bin/sleep",
+          "67"
+        ]
+      }
+    ],
+    "argv": [
+      "~/.local/bin/claude",
+      "-p",
+      "--output-format",
+      "stream-json",
+      "--verbose",
+      "--safe-mode",
+      "--model",
+      "sonnet",
+      "--session-id",
+      "cb192d0b-4bbb-4a6f-93b1-cd5e6e60b4fa",
+      "--input-format",
+      "stream-json",
+      "--permission-mode",
+      "bypassPermissions",
+      "--tools",
+      "Bash"
+    ],
+    "coordinator": {
+      "pid": 90504,
+      "started": "Sun Sep 27 18:14:41 2026",
+      "pgid": 90472
+    }
+  },
+  "afterDeath": {
+    "changes": [
+      {
+        "t": 0.0,
+        "childAlive": true,
+        "sleepAlive": true,
+        "stubRequests": 1
+      },
+      {
+        "t": 67.04,
+        "childAlive": true,
+        "sleepAlive": false,
+        "stubRequests": 2
+      }
+    ],
+    "deadline": {
+      "t": 20.45,
+      "childAlive": true,
+      "sleepAlive": true,
+      "stubRequests": 1
+    },
+    "restart": {
+      "t": 45.3,
+      "childAlive": true,
+      "sleepAlive": true,
+      "stubRequests": 1,
+      "replay": {
+        "transcript": {
+          "found": true,
+          "path": "~/.claude/projects/<scratch-slug>-work/cb192d0b-4bbb-4a6f-93b1-cd5e6e60b4fa.jsonl",
+          "lines": 6,
+          "kinds": [
+            "queue-operation",
+            "queue-operation",
+            "user:text",
+            "attachment",
+            "atis-latch",
+            "assistant:tool_use"
+          ]
+        }
+      }
+    }
+  },
+  "reconciledByProbe": {
+    "child": {
+      "stoppedByProbe": true,
+      "goneWithinS": 0.284
+    }
+  },
+  "finalReplay": {
+    "transcript": {
+      "found": true,
+      "path": "~/.claude/projects/<scratch-slug>-work/cb192d0b-4bbb-4a6f-93b1-cd5e6e60b4fa.jsonl",
+      "lines": 12,
+      "kinds": [
+        "queue-operation",
+        "queue-operation",
+        "user:text",
+        "attachment",
+        "atis-latch",
+        "assistant:tool_use",
+        "user:tool_result",
+        "attachment",
+        "assistant:tool_use",
+        "last-prompt",
+        "user:tool_result",
+        "attachment"
+      ]
+    }
+  },
+  "stubRequests": [
+    {
+      "at": 1790550881.372,
+      "method": "POST",
+      "path": "/v1/messages?beta=true",
+      "stream": true,
+      "hasTools": true,
+      "afterToolResult": false
+    },
+    {
+      "at": 1790550948.492,
+      "method": "POST",
+      "path": "/v1/messages?beta=true",
+      "stream": true,
+      "hasTools": true,
+      "afterToolResult": false
+    }
+  ],
+  "hostVersion": "2.1.247 (Claude Code)"
+}

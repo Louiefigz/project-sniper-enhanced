@@ -2,6 +2,12 @@
 
 The supervisor must build its registry from verified live ancestry. This module
 does not treat an arbitrary registry as authority to signal a process.
+
+A recorded identity is its PID plus kernel start time. When a recorded process has
+exited, its PID may be reassigned to any later host process: a different start at
+that PID means the recorded identity is retired, and the new process is foreign
+unless the table shows an owned parent. Only an identity that changed while alive
+(same PID and start, another group) or a changed root is an ownership violation.
 """
 from __future__ import annotations
 
@@ -38,7 +44,12 @@ class MissingProcessFootprint(ResourceMeasurementError):
 
 @dataclass(frozen=True)
 class ProcessFootprint:
-    """Inclusive memory; rusage start/exit evidence binds one sample, not later runs."""
+    """Inclusive memory; rusage start/exit evidence binds one sample, not later runs.
+
+    CPU nanoseconds are this process's own cumulative rusage times (RUSAGE_INFO_V0 has
+    no child totals, so a parent never includes its descendants). None means the
+    sampler collected no CPU for this reading, never zero use.
+    """
 
     pid: int
     parent_pid: int
@@ -51,6 +62,8 @@ class ProcessFootprint:
     process_start_abstime: int | None = None
     process_start_abstime_before: int | None = None
     process_exit_abstime: int | None = None
+    cpu_user_ns: int | None = None
+    cpu_system_ns: int | None = None
 
 
 @dataclass(frozen=True)
@@ -95,26 +108,55 @@ def identity_matches(table: dict, identity: ProcessIdentity) -> bool:
             and row[1] == identity.pgid and row[2] == identity.started)
 
 
-def _anchors(table: dict, request: ProcessRequest) -> tuple[set[int], list[int], list[int], bool]:
-    """Select matched identities, excluding recycled PIDs and unrelated groups."""
-    anchors, missing, reused = set(), [], []
-    identities = request.remembered + ((request.root,) if request.root else ())
-    verified = bool(identities)
-    for identity in identities:
-        if isinstance(identity.pid, bool) or not isinstance(identity.pid, int) or identity.pid <= 1:
-            raise ValueError("Owned root must be an explicit positive render PID")
-        if identity.pid not in table:
-            missing.append(identity.pid)
-            continue
-        if identity.started is None or identity.pgid is None:
-            anchors.add(identity.pid)
-            verified = False
-            continue
-        if identity_matches(table, identity):
-            anchors.add(identity.pid)
-        else:
-            reused.append(identity.pid)
-    return anchors, sorted(set(missing)), sorted(set(reused)), verified
+@dataclass(frozen=True)
+class Anchors:
+    """How each recorded identity relates to one process table.
+
+    Attributes:
+        live: PIDs whose recorded identity is present (or explicitly unbound).
+        missing: Recorded PIDs absent from the table: those processes exited.
+        recycled: Recorded PIDs now held by a process with another start time: the
+            recorded process exited and is retired; the holder is not owned by it.
+        changed: Recorded PIDs whose live identity changed (same start, another
+            group) or whose root no longer matches; each is an ownership violation.
+        verified: Every recorded identity was bound and none changed.
+    """
+
+    live: set[int]
+    missing: tuple[int, ...]
+    recycled: tuple[int, ...]
+    changed: tuple[int, ...]
+    verified: bool
+
+
+def _state(table: dict, identity: ProcessIdentity, root: bool) -> str:
+    """Name one recorded identity's state; a root with another start is never retired."""
+    if isinstance(identity.pid, bool) or not isinstance(identity.pid, int) or identity.pid <= 1:
+        raise ValueError("Owned root must be an explicit positive render PID")
+    row = table.get(identity.pid)
+    if row is None:
+        return 'missing'
+    if identity.started is None or identity.pgid is None:
+        return 'unbound'
+    if identity_matches(table, identity):
+        return 'live'
+    return 'recycled' if row[2] != identity.started and not root else 'changed'
+
+
+def _anchors(table: dict, request: ProcessRequest) -> Anchors:
+    """Select matched identities; retire recorded exits whose PID another process holds.
+
+    A remembered row at the root's PID is judged as the root: it is never retired.
+    """
+    root = request.root.pid if request.root else None
+    states = [(row.pid, _state(table, row, row.pid == root)) for row in request.remembered]
+    if request.root:
+        states.append((request.root.pid, _state(table, request.root, True)))
+    pids = {name: tuple(sorted({pid for pid, state in states if state == name}))
+            for name in ('live', 'unbound', 'missing', 'recycled', 'changed')}
+    verified = bool(states) and not pids['unbound'] and not pids['changed']
+    return Anchors(set(pids['live'] + pids['unbound']), pids['missing'], pids['recycled'],
+                   pids['changed'], verified)
 
 
 def _descendants(table: dict, owned: set[int]) -> set[int]:
@@ -130,16 +172,14 @@ def reconcile_process_request(before_text: str, after_text: str,
                               request: ProcessRequest) -> ProcessRequest:
     """Retain observed orphans and reject live identities unbound across top."""
     table = process_table(before_text)
-    anchors, _, _, _ = _anchors(table, request)
-    observed = _descendants(table, anchors)
+    observed = _descendants(table, _anchors(table, request).live)
     remembered = {(row.pid, row.started, row.pgid): row for row in request.remembered}
     for pid in sorted(observed):
         identity = ProcessIdentity(pid, table[pid][2], table[pid][1])
         remembered.setdefault((pid, identity.started, identity.pgid), identity)
     result = ProcessRequest(request.root, tuple(remembered.values()))
     after = process_table(after_text)
-    anchors, _, _, _ = _anchors(after, result)
-    live = _descendants(after, anchors)
+    live = _descendants(after, _anchors(after, result).live)
     identities = tuple(ProcessIdentity(pid, after[pid][2], after[pid][1])
                        for pid in sorted(live))
     unbound = tuple(row for row in identities if not identity_matches(table, row))
@@ -160,10 +200,9 @@ def select_processes(ps_text: str, top: str, request: ProcessRequest) -> dict:
 def process_selection(ps_text: str, request: ProcessRequest) -> dict:
     """Share authority selection between historical top rows and direct API readings."""
     table = process_table(ps_text)
-    anchors, missing, reused, verified = _anchors(table, request)
-    owned = _descendants(table, anchors)
-    return {'table': table, 'owned': owned, 'missing': tuple(missing), 'reused': tuple(reused),
-            'verified': verified and not reused}
+    anchors = _anchors(table, request)
+    return {'table': table, 'owned': _descendants(table, anchors.live), 'missing': anchors.missing,
+            'recycled': anchors.recycled, 'reused': anchors.changed, 'verified': anchors.verified}
 
 
 def select_footprints(ps_text: str, found: dict[int, dict], request: ProcessRequest) -> dict:

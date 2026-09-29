@@ -66,6 +66,66 @@ reasons. Per-clip status distinguishes wall elapsed, counted production,
 excluded render queue and uncertain intervals, with current forecasts and SLA
 misses. Deadline refusal is not a completed video.
 
+### Pool capacity, qualification profiles and older installs
+
+`start --pool-slots` cannot exceed the host's heavy capacity for Short renders
+from the pool qualification record (one job until `studio/pool_qualification.py`
+records more), so forecasts are never more optimistic than the pool. The legacy
+schema-1 host record keeps serving Short batches, their supporting owners and
+older installations' owners until a schema-2 profile covers Shorts. A schema-2
+profile is bound to the engine identity and to the longest output it exercised:
+`start` caps `--pool-slots` at the best Short capacity, and every launch forecast
+uses the batch's longest known output of each format, so a Short longer than the
+profile forecasts one slot. At admission, work no profile covers (a Short longer
+than its profile, an unexercised stage or class, another engine, a Long) starts
+only on an idle pool; beside running work it fails at once with
+`NativeWorkUnsupportedMix`, never queuing ahead of the batch. The reasons are in
+the owner receipt (`pool.modeRecord.unmatched`).
+`studio/pool_qualification.py show` prints the host identity, the pool mode it
+currently yields and the policy constants.
+
+Write a v2 profile only from a real qualification batch on this host: first
+`studio/pool_qualification.py serial --jobs FILE --evidence DIR --deadline-seconds N`
+for the serial references, then `run` with the same jobs, `--heavy-slots N`,
+`--class-mix heavy-only|mixed` and `--record`. The profile
+(`studio/pool_qualification_profile.py`) is written only when every job passed as
+a complete, non-reused full export that matched its reference, N jobs held heavy
+work at the same instant, every job recorded its format, duration, picture size
+and source-cache state, the engine identity did not change, and a `mixed` claim is
+backed by the jobs' own audio-stage owners overlapping heavy owners. Each owner
+receipt's `queueSeconds`, `pressureWaitSeconds` and `cpu` summary are the
+evidence it reads.
+
+Mixed installations on one host: an older pool client (for example an rc4
+install) reads only the schema-1 record and a member's class, memory and root
+disk, keyed by device. Work it cannot understand (an exclusive Long, schema-2
+members, off-root disk, and any disk reserved in an APFS container, whose other
+volumes it keys separately) holds a compatibility fence: tickets with sequence 0
+that every older request counts as ahead of it. **Trade-off:** this engine's
+fenced work keeps overlapping, and the older client waits (on APFS it never
+starts while any of this engine's members runs; if new work keeps arriving it
+fails with its own capacity error). **Retire older installs (or let their work
+finish) before starting a clocked batch.** Every fenced member records the whole
+memory budget as the charge older clients read, so while any fenced member of
+this engine exists, live or quarantined, older clients do not start until
+`native_work_recovery.py` recovers it. While any fence is held, none of this
+engine's requests waits behind an older client's queued request; counting them
+would deadlock. Upgrade every install before relying on schema-2 profiles.
+
+Test runs: every test method, whether run through `selftest.py` or as a single
+module, gets its own private authority root and pool namespace, created on first
+use and removed after it (`scripts/producer/tests/_live_state_isolation.py`). A
+private namespace also means the host pool qualification record is never read, so
+forecasts in tests see one heavy slot unless a test says otherwise. Any read or
+write of the real `~/.project-sniper/production-budgets`,
+`~/.project-sniper/native-pool` or the host pool namespace, and any write elsewhere
+under `~/.project-sniper`, is refused before the system call: inside a test method
+as `LiveStateTouched`, which fails that test even when it is caught; in a class or
+module fixture as a class-level error. Python child processes a test starts carry a
+child tripwire: a refused child exits 97 and its report fails the test or the run.
+The supervised real-media scripts in `scripts/producer/tests/` use a private
+authority root but the real host pool, so they share its heavy-slot limit.
+
 ## Build, reviews and delivery
 
 Run `context.py --role clip-owner` with the exact plan/project and `--batch

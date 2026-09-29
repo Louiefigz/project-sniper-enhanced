@@ -76,10 +76,36 @@ def real_directory(path: Path) -> None:
             raise RuntimeError("cut preview directory is unsafe")
 
 
+class ArtifactReplaced(RuntimeError):
+    """The path was atomically renamed over while this read held the previous file.
+
+    No bytes of the previous file are returned; only a new open by path can read the
+    replacement, which is validated from the start.
+    """
+
+
 def file_identity(info: os.stat_result) -> tuple[int, ...]:
     """Fields that must stay fixed for one exact read."""
     return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
             info.st_ctime_ns, info.st_nlink)
+
+
+def replaced_at_path(opened: os.stat_result, path: Path) -> bool:
+    """True only when the opened regular file is unlinked and the path names another."""
+    if opened.st_nlink != 0 or not stat.S_ISREG(opened.st_mode):
+        return False
+    try:
+        current = path.lstat()
+    except FileNotFoundError:
+        return False
+    return stat.S_ISREG(current.st_mode) and (current.st_dev, current.st_ino) != (opened.st_dev, opened.st_ino)
+
+
+def _changed_during_read(opened: os.stat_result, path: Path) -> RuntimeError:
+    """Type a changed read: only a rename over the path may be reopened by a caller."""
+    if replaced_at_path(opened, path):
+        return ArtifactReplaced(f"cut preview artifact changed during read: replaced at {path}")
+    return RuntimeError("cut preview artifact changed during read")
 
 
 def read_bytes(path: Path, maximum: int = MAX_JSON) -> bytes:
@@ -90,6 +116,8 @@ def read_bytes(path: Path, maximum: int = MAX_JSON) -> bytes:
     descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         before = os.fstat(descriptor)
+        if replaced_at_path(before, path):
+            raise ArtifactReplaced(f"artifact was replaced at its path before it was read: {path}")
         if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
             raise RuntimeError(f"artifact is not a bounded regular file (unsafe type or link count): {path}")
         if before.st_size == 0:
@@ -105,7 +133,7 @@ def read_bytes(path: Path, maximum: int = MAX_JSON) -> bytes:
             remaining -= len(data)
         if file_identity(before) != file_identity(os.fstat(descriptor)) \
                 or file_identity(before) != file_identity(path.lstat()):
-            raise RuntimeError("cut preview artifact changed during read")
+            raise _changed_during_read(os.fstat(descriptor), path)
         return b"".join(chunks)
     finally:
         os.close(descriptor)

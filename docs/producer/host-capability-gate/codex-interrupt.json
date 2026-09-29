@@ -1,0 +1,131 @@
+{
+  "capturedAt": "2026-09-27T18:22:16-0500",
+  "scenario": "codex-interrupt",
+  "handle": {
+    "pid": 6538,
+    "started": "Sun Sep 27 18:21:50 2026",
+    "pgid": 6538
+  },
+  "threadId": "01a0e52c-c090-7e13-88f0-4084b7ab6da7",
+  "turnId": "01a0e52c-c528-7d53-859b-854e746bc0a9",
+  "model": "gpt-5.6-sol",
+  "commandStartedAt": 8.312,
+  "commandItem": {
+    "type": "commandExecution",
+    "id": "exec-eef45f05-ac5d-4960-9792-ec6b3beb027d",
+    "command": "/bin/zsh -lc 'sleep 302'",
+    "cwd": "<scratch>/work",
+    "processId": "41778",
+    "source": "unifiedExecStartup",
+    "status": "inProgress",
+    "commandActions": [
+      {
+        "type": "unknown",
+        "command": "sleep 302"
+      }
+    ],
+    "aggregatedOutput": null,
+    "exitCode": null,
+    "durationMs": null
+  },
+  "treeAtCommand": [
+    {
+      "pid": 6552,
+      "ppid": 6538,
+      "pgid": 6538,
+      "argv": [
+        "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex",
+        "app-server",
+        "--listen",
+        "stdio://",
+        "-c",
+        "mcp_servers={}"
+      ]
+    },
+    {
+      "pid": 7076,
+      "ppid": 6552,
+      "pgid": 7076,
+      "argv": [
+        "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
+      ]
+    },
+    {
+      "pid": 9310,
+      "ppid": 6552,
+      "pgid": 9310,
+      "argv": [
+        "/opt/homebrew/lib/node_modules/@openai/codex/node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/bin/codex-code-mode-host"
+      ]
+    },
+    {
+      "pid": 9359,
+      "ppid": 6552,
+      "pgid": 9359,
+      "argv": [
+        "sleep",
+        "302"
+      ]
+    }
+  ],
+  "interruptReply": {
+    "sentAt": 10.584,
+    "at": 10.593,
+    "result": {},
+    "error": null
+  },
+  "turnCompleted": [
+    10.594,
+    "interrupted"
+  ],
+  "commandItemsCompleted": [],
+  "sleep": {
+    "identity": {
+      "pid": 9359,
+      "started": "Sun Sep 27 18:21:58 2026",
+      "pgid": 9359
+    },
+    "goneWithinS": null,
+    "leakedAndKilledByProbe": true
+  },
+  "usage": {
+    "turnId": "01a0e52c-c528-7d53-859b-854e746bc0a9",
+    "status": "interrupted",
+    "durationMs": 9085,
+    "error": null,
+    "usageUpdates": [
+      [
+        10.592,
+        {
+          "total": {
+            "totalTokens": 16767,
+            "inputTokens": 16646,
+            "cachedInputTokens": 0,
+            "outputTokens": 121,
+            "reasoningOutputTokens": 0
+          },
+          "last": {
+            "totalTokens": 16767,
+            "inputTokens": 16646,
+            "cachedInputTokens": 0,
+            "outputTokens": 121,
+            "reasoningOutputTokens": 0
+          },
+          "modelContextWindow": 258400
+        }
+      ]
+    ],
+    "completedItemTypes": [
+      "userMessage",
+      "agentMessage"
+    ]
+  },
+  "threadReadTurns": [
+    [
+      "01a0e52c-c528-7d53-859b-854e746bc0a9",
+      "interrupted"
+    ]
+  ],
+  "exitCode": 0,
+  "hostVersion": "codex-cli 0.144.1"
+}

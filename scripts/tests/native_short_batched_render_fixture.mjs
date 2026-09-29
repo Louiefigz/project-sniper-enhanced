@@ -54,9 +54,13 @@ function fakeSdk(fixture) {
 
 function observedPage(fn,session,plan) {
   const source=String(fn);
+  const typography=()=>({titleClip:session.currentFrame>=plan.canvas.titleCard.endFrame?'inset(100%)':'inset(0%)',
+    lines:[],captions:[],words:[]});
+  // The combined per-frame read composes the same readers, so it is matched before their markers.
+  if(source.includes('native-frame-state'))return {visualState:[{id:'TEST state',frame:session.currentFrame}],
+    typography:typography(),mounts:[],checkpoints:[]};
   if(source.includes('new DOMMatrix'))return [{id:'TEST state',frame:session.currentFrame}];
-  if(source.includes('titleClip'))return {titleClip:session.currentFrame>=plan.canvas.titleCard.endFrame?'inset(100%)':'inset(0%)',
-    lines:[],captions:[],words:[]};
+  if(source.includes('titleClip'))return typography();
   return {fonts:[{family:'Inter',status:'loaded'}],images:[{id:'source-0-0',loaded:true,display:'block'}],texts:[]};
 }
 

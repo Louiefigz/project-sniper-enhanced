@@ -143,6 +143,9 @@ EXCLUDE_DIRS: tuple[tuple[str, str], ...] = (
     ("docs/marketing", "source of the buyer guides; the edited guides ship under manual/"),
     ("release", "maintainer release tooling"),
     ("scripts/producer/artifacts", "maintainer's retained acceptance evidence (gitignored)"),
+    ("scripts/producer/studio/production/host_conformance",
+     "maintainer host-capability qualification probes: they launch the operator's host CLIs "
+     "(and a loopback model stub) to measure host controls; not a buyer route"),
     (".git", "history is not part of the product"),
     (".next", "build cache"),
     ("__pycache__", "byte cache"),
@@ -162,6 +165,8 @@ EXCLUDE_GLOBS: tuple[tuple[str, str], ...] = (
     (".sniper-*", "machine-local control-plane state"),
     ("*.bundle", "git bundles"),
     ("docs/studies/GPT56_SOL_C0679_GAP_STUDY.md", "internal model-gap study"),
+    ("scripts/producer/tests/test_host_conformance.py",
+     "tests the withheld host-capability qualification probes"),
     ("vendor/hyperframes-catalog/compositions/components/*.png",
      "catalog texture images; discovery reads item HTML only and nothing renders them; "
      "their terms were not reviewed"),

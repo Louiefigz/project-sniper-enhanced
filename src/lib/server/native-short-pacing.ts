@@ -106,6 +106,11 @@ export function nativeShortPacingReport(input: NativeShortProjectInput, html: st
       "Phone-size comprehension, attention competition and the adequacy of authored minimum holds",
       ...(input.canvas.captionMode === "source-burned"
         ? ["Source-burned caption text, visibility and timing in actual pixels; transcript groups do not measure them"] : []),
+      ...(observations.captionSuppressions
+        ? ["Each caption suppression's stated reason on screen for its whole window, and the speech heard there followable without captions"] : []),
+      ...(observations.shortCaptionFragments?.length
+        ? [`Caption fragments a suppression leaves on screen for under ${observations.readableCaptionFragment.seconds} s `
+          + `(${observations.readableCaptionFragment.source}); see observations.shortCaptionFragments`] : []),
       ...(input.extension ? ["Custom CSS/GSAP visibility and internal developments throughout each selected hold"] : [])],
     audienceComprehension: "not-established", finishedPlaybackReview: "not-performed-by-this-command" };
 }

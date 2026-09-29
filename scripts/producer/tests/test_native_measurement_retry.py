@@ -19,6 +19,7 @@ from native_render_resources import (
 )
 from studio.native_measurement_retry import MeasurementWindow, MeasurementWindowExpired
 from studio.native_run import NativeRun
+from native_render_cpu import CpuTracker
 from test_native_render_resources import REQUEST, START, raw_sample, direct_sample
 
 
@@ -224,6 +225,8 @@ class MeasurementWindowTests(unittest.TestCase):
         run.samples = io.StringIO()
         run.policy, run.baseline = ResourcePolicy(), self.snapshot
         run.resource_guard = None  # This regression deliberately exercises an explicit fixed policy.
+        run.cpu = CpuTracker()  # __new__ skips __init__; CPU evidence never affects the stop below.
+        run.lease, run.lease_recorded = None, {}  # No lease rows to retire; __new__ skips __init__.
         run.registry.remember_measured = Mock()
         current = replace(self.snapshot, kernel_pressure_level=2)
         with patch('studio.native_measurement_retry.read_snapshot',

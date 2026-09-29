@@ -142,8 +142,24 @@ export function flashFindings(series) {
 }
 
 /**
+ * C2(a) candidates (X84 FD1): the declared element and every element whose ancestors include it, each at its
+ * earliest sampled local frame 0 <= k < K with effective opacity > VISIBLE_EPSILON; only the outermost is kept.
+ * @param {{element: string, cue: number, frames: Map<number, Map<string, {opacity: number, ancestors: string[]}>>}} group
+ * @param {number[]} used sampled local frames, ascending
+ * @returns {Array<[string, {k: number, value: {opacity: number, ancestors: string[]}}]>}
+ */
+function earlyVisible(group, used) {
+  const early = new Map(), inside = (key, value) => key === group.element || value.ancestors.includes(group.element);
+  const seen = used.filter(k => k < group.cue).flatMap(k => [...(group.frames.get(k) ?? [])].map(([key, value]) => ({k, key, value})));
+  for (const {k, key, value} of seen) {
+    if (inside(key, value) && value.opacity > VISIBLE_EPSILON && !early.has(key)) early.set(key, {k, value});
+  }
+  return [...early].filter(([, {value}]) => !value.ancestors.some(key => early.has(key)));
+}
+
+/**
  * C2 inside one seek order for one declaration.
- * @param {{mount: string, element: string, cue: number, first: number, order: string, frames: Map<number, Map<string, {opacity: number}>>}} group
+ * @param {{mount: string, element: string, cue: number, first: number, order: string, frames: Map<number, Map<string, {opacity: number, ancestors: string[]}>>}} group
  * @returns {Array<object>}
  */
 function orderReveals(group) {
@@ -151,9 +167,11 @@ function orderReveals(group) {
   const opacity = new Map(used.map(k => [k, group.frames.get(k)?.get(group.element)?.opacity]));
   const missing = used.find(k => opacity.get(k) === undefined);
   if (missing !== undefined) malformed(`${group.order} ${group.mount} lacks declared ${group.element} at local frame ${missing}`);
-  const at = (/** @type {number} */ k) => /** @type {number} */ (opacity.get(k));
-  const rows = [], early = used.find(k => k < cue && at(k) > VISIBLE_EPSILON);
-  if (early !== undefined) rows.push(finding('visible-before-reveal', group, early, [at(early), opacity.has(cue) ? at(cue) : null]));
+  const at = (/** @type {number} */ k) => /** @type {number} */ (opacity.get(k)), rows = [];
+  for (const [key, {k, value}] of earlyVisible(group, used)) {
+    rows.push(finding('visible-before-reveal', {...group, element: key}, k,
+      [value.opacity, group.frames.get(cue)?.get(key)?.opacity ?? null]));
+  }
   if (opacity.has(cue) && opacity.has(cue + 1) && at(cue) > at(cue + 1) + VISIBLE_EPSILON) {
     rows.push(finding('reveal-starts-visible', group, cue, [at(cue), at(cue + 1)]));
   }
@@ -162,9 +180,10 @@ function orderReveals(group) {
 
 /**
  * Condition C2 for declared reveals, each with its mount-local cue frame K:
- * (a) `visible-before-reveal` when a sampled local frame 0 <= k < K has effective opacity > VISIBLE_EPSILON
- *     (one row per declaration and seek order, at the earliest such frame; `opacity` is [o(k), o(K) in that
- *     order, or null when that order did not sample K]);
+ * (a) `visible-before-reveal` when, at a sampled local frame 0 <= k < K, the declared element or an element whose
+ *     ancestors include it (X84 FD1: a descendant made visible early) has effective opacity > VISIBLE_EPSILON
+ *     (one row per seek order and outermost such element, at its earliest such frame; `opacity` is [o(k), its
+ *     o(K) in that order, or null]; identical rows from nested declarations appear once);
  * (b) `reveal-starts-visible` when o(K) > o(K+1) + VISIBLE_EPSILON in an order that sampled both.
  * Every row must lie inside the mount's range, K inside the mount and sampled, K and K+1 sampled in one seek order
  * whenever K+1 lies inside the mount (`sampledCue`), and the declared element reported in every sampled frame 0..K+1.
@@ -176,9 +195,10 @@ function orderReveals(group) {
 export function declaredRevealFindings(series, declarations, mounts) {
   const index = indexSeries(series), ranges = mountRanges(mounts);
   if (!Array.isArray(declarations)) malformed('declarations are not a list');
-  return sortFindings(declarations.map(checkedDeclaration).flatMap(declaration => {
+  const rows = declarations.map(checkedDeclaration).flatMap(declaration => {
     const entry = sampledCue(index, ranges, declaration);
     return [...entry.orders].flatMap(([order, frames]) => orderReveals({mount: declaration.mount,
       element: declaration.hfId, cue: declaration.cueLocalFrame, first: entry.first, order, frames}));
-  }));
+  });
+  return sortFindings([...new Map(rows.map(row => [JSON.stringify(row), row])).values()]);
 }

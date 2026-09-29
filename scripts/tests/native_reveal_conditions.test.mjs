@@ -55,8 +55,15 @@ test('CSS-hidden panel fading in is not a flash', () => {
   assert.deepEqual(flashFindings(forward([0, 1, 2], local => ({panel: [local === 0 ? 0 : 0.2]}))), []);
 });
 
+/** Numbers pattern: `panel` declared at 81 holds `arrow` (declared at 225); `arrowAt(k)` is the arrow's opacity. */
+function nested(arrowAt) {
+  return forward([-1, 0, 1, 79, 80, 81, 82, 150, 224, 225, 226],
+    local => ({panel: [local >= 81 ? 1 : 0], arrow: [arrowAt(local), ['panel']]}));
+}
+const NESTED = [{mount: MOUNT, hfId: 'panel', cueLocalFrame: 81}, {mount: MOUNT, hfId: 'arrow', cueLocalFrame: 225}];
+
 test('declared later value visible before its cue', () => {
-  const frames = [0, 1, 2, 15, 30, 223, 224, 225, 226];
+  const frames = [-1, 0, 1, 2, 15, 30, 223, 224, 225, 226];
   const at = early => forward(frames, local => ({arrow: [local === 0 ? early : local >= 225 ? 1 : 0]}));
   const declared = [{mount: MOUNT, hfId: 'arrow', cueLocalFrame: 225}];
   assert.deepEqual(declaredRevealFindings(at(1), declared, RANGES), [{condition: 'visible-before-reveal', mount: MOUNT,
@@ -64,6 +71,21 @@ test('declared later value visible before its cue', () => {
   // Visible means strictly above VISIBLE_EPSILON.
   assert.deepEqual(declaredRevealFindings(at(VISIBLE_EPSILON), declared, RANGES), []);
   assert.equal(declaredRevealFindings(at(0.0011), declared, RANGES).length, 1);
+  // X84 FD1: a child made visible early inside its still-hidden declared parent is a C2(a) finding on the child.
+  const child = forward([0, 1, 2, 15, 29, 30, 31], local => ({panel: [local >= 30 ? 1 : 0], label: [1, ['panel']]}));
+  assert.deepEqual(declaredRevealFindings(child, [{mount: MOUNT, hfId: 'panel', cueLocalFrame: 30}], RANGES), [{
+    condition: 'visible-before-reveal', mount: MOUNT, element: 'label', frame: 745, localFrame: 0, order: 'forward', opacity: [1, 1]}]);
+  const shown = forward([0, 1, 2, 15, 29, 30, 31], () => ({panel: [1], label: [1, ['panel']]}));
+  assert.deepEqual(declaredRevealFindings(shown, [{mount: MOUNT, hfId: 'panel', cueLocalFrame: 30}], RANGES)
+    .map(value => value.element), ['panel'], 'only the outermost early element is reported');
+  // Nested declarations: an arrow shown with its panel at 81 and at its own cue 225 is fine; shown at 150 it is
+  // early for itself only; forced visible from frame 0 inside the hidden panel it is one finding, not two.
+  const row0 = {condition: 'visible-before-reveal', mount: MOUNT, element: 'arrow', order: 'forward'};
+  assert.deepEqual(declaredRevealFindings(nested(k => (k >= 225 ? 1 : 0)), NESTED, RANGES), []);
+  assert.deepEqual(declaredRevealFindings(nested(k => (k >= 150 ? 1 : 0)), NESTED, RANGES),
+    [{...row0, frame: 745 + 150, localFrame: 150, opacity: [1, 1]}]);
+  assert.deepEqual(declaredRevealFindings(nested(k => (k >= 0 ? 1 : 0)), NESTED, RANGES),
+    [{...row0, frame: 745, localFrame: 0, opacity: [1, 1]}]);
 });
 
 test('declared cue-0 reveal that starts visible', () => {

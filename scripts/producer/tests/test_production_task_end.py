@@ -17,14 +17,14 @@ from studio.production.task_end import (
 PROCESS = {'type': 'process', 'pid': 4242, 'pgid': 4242, 'started': 'Mon Sep 28 20:00:00 2026'}
 CLAUDE = {'type': 'host', 'host': 'claude-code', 'thread': 'thread-1', 'turn': 'turn-1'}
 CODEX = {'type': 'host', 'host': 'codex', 'thread': 'thread-1', 'turn': 'turn-1'}
-DECLARED = {'type': 'declared'}   # a handle type this rule has no evidence row for (M-102 adds it)
+OTHER = {'type': 'unknown'}   # a handle type the rule has no row for: it fails closed (no branch is written for it)
 LAUNCH_ERROR = 'spawn claude ENOENT'
 RECEIPT = {'path': '/private/tmp/result.json', 'sha256': '0' * 64, 'bytes': 2}
+ASSIGNMENT_ENDS = ('closure', 'host-ended', 'interrupt')
 # (kind, handle, revoked, cause) -> (slot released, tool cleanup). The host rows P1 marked freed
 # (claude-code host-ended, interrupt) are unresolved while HOST_END_EVIDENCE is empty (G9, N1).
 TABLE = [
-    (('check', PROCESS, False, 'host-ended'), (True, 'unproven')),
-    (('check', PROCESS, False, 'observed'), (True, 'unproven')),
+    *[(('check', PROCESS, False, cause), (True, 'unproven')) for cause in ('host-ended', 'interrupt', 'observed')],
     (('media', None, False, 'unlaunched'), (True, 'unproven')),
     (('author', None, False, 'unlaunched'), (True, 'unproven')),
     *[(('author', None, False, cause), (False, 'unproven')) for cause in ('host-ended', 'interrupt', 'observed')],
@@ -33,11 +33,12 @@ TABLE = [
     *[(('author', CLAUDE, False, cause), (False, 'proved')) for cause in ('host-ended', 'interrupt')],
     (('author', CLAUDE, False, 'observed'), (False, 'unproven')),
     *[(('author', CODEX, False, cause), (False, 'unproven')) for cause in ('host-ended', 'interrupt', 'observed')],
-    *[(('author', DECLARED, False, cause), (False, 'unproven')) for cause in ('host-ended', 'interrupt', 'observed')],
+    *[(('author', OTHER, False, cause), (False, 'unproven')) for cause in ('host-ended', 'interrupt', 'observed')],
     (('director', CLAUDE, False, 'closure'), (True, 'unproven')),
     (('director', CLAUDE, False, 'host-ended'), (True, 'proved')),
     (('director', CODEX, False, 'interrupt'), (True, 'unproven')),
-    *[(('director', handle, False, 'observed'), (False, 'unproven')) for handle in (CLAUDE, PROCESS)],
+    (('director', CLAUDE, False, 'observed'), (False, 'unproven')),
+    (('director', PROCESS, False, 'observed'), (True, 'unproven')),
     (('director', PROCESS, True, 'observed'), (True, 'unproven')),
     (('director', CLAUDE, True, 'closure'), (False, 'unproven')),
     (('director', CLAUDE, True, 'host-ended'), (False, 'proved')),
@@ -45,10 +46,10 @@ TABLE = [
 
 
 def row(kind: str = 'author', handle: dict | None = None, **fields: object) -> dict:
-    """A task row carrying the fields the end rule reads and writes."""
+    """A task row carrying the fields the end rule reads and writes (claimed until a handle is bound)."""
     task = {'id': 'task-1', 'kind': kind, 'handle': handle, 'revoked': False, 'cancelRequested': False,
-            'state': 'running', 'receipts': [], 'unresolved': False, 'endConfirmed': False, 'charged': True,
-            'reason': None, 'terminalElapsed': None}
+            'state': 'running' if handle else 'claimed', 'receipts': [], 'unresolved': False, 'endConfirmed': False,
+            'charged': True, 'reason': None, 'terminalElapsed': None}
     task.update(fields)
     return task
 
@@ -57,12 +58,13 @@ class EndRuleUnitTests(unittest.TestCase):
     """Every row of the rule, and the calls around it."""
 
     def test_every_table_row(self) -> None:
-        """Each row gives its slot and cleanup results; a note explains exactly the held slots."""
+        """Each row gives its slot and cleanup results; a note explains every held slot and a director's end."""
         for (kind, handle, revoked, cause), (released, cleanup) in TABLE:
             with self.subTest(kind=kind, handle=handle and handle['type'], revoked=revoked, cause=cause):
                 proof = end_proof(row(kind, handle, revoked=revoked), cause)
                 self.assertEqual((proof.cause, proof.slot_released, proof.tool_cleanup), (cause, released, cleanup))
-                self.assertEqual(proof.note is None, released)
+                assignment = kind == 'director' and not revoked and cause in ASSIGNMENT_ENDS
+                self.assertEqual(proof.note is not None, not released or assignment)
                 self.assertEqual(proof.event_fields(), {'endCause': cause, 'slotReleased': released,
                                                         'toolCleanup': cleanup})
 
@@ -95,30 +97,49 @@ class EndRuleUnitTests(unittest.TestCase):
             self.assertEqual(task, {**before, 'endConfirmed': True, 'unresolved': not released})
 
     def test_director_assignment_ends_only_by_closure_or_own_end(self) -> None:
-        """Closure and the director's own end release its assignment; an observation does not (X29)."""
+        """Closure and the director's own end (host-ended or interrupt) release its assignment, with its own
+        note; a host turn seen ended does not (X29); closure is for directors only."""
         director = row('director', CLAUDE)
-        self.assertTrue(end_proof(director, 'closure').slot_released)
-        self.assertTrue(end_proof(director, 'host-ended').slot_released)
+        for cause in ASSIGNMENT_ENDS:
+            proof = end_proof(director, cause)
+            self.assertTrue(proof.slot_released)
+            self.assertIn("director's batch assignment ended", proof.note)
         held = end_proof(director, 'observed')
         self.assertFalse(held.slot_released)
-        self.assertIn('batch assignment', held.note)
+        self.assertIn('HOST_END_EVIDENCE', held.note)
         self.assertFalse(end_proof(row('director', CLAUDE, revoked=True), 'closure').slot_released)
         for kind in ('author', 'check', 'media'):
             with self.assertRaisesRegex(ValueError, 'director'):
                 end_proof(row(kind), 'closure')
 
+    def test_a_process_director_seen_gone_is_released_as_reconcile_releases_it(self) -> None:
+        """G9 (b) for a process handle applies to a director too (X88 m5): the rule agrees with reconcile."""
+        for revoked in (False, True):
+            proof = end_proof(row('director', PROCESS, revoked=revoked), 'observed')
+            self.assertEqual((proof.slot_released, proof.note), (True, None))
+        self.assertEqual(observed_state(PROCESS, TERMINATED), TERMINATED)
+        self.assertFalse(end_proof(row('director', PROCESS, revoked=True), 'host-ended').slot_released)
+
     def test_unlaunched_failure_needs_the_recorded_launch_error(self) -> None:
-        """Only the launch tool's verbatim failure makes a claim unlaunched; a bare failure holds the slot."""
+        """Only the launch tool's verbatim failure makes a claim unlaunched; a bare failure holds the slot.
+
+        The launch error wins over a cancellation request (X88); an abandoned claim is refused."""
         task = row('author')
         self.assertEqual(end_cause(task, 'failed'), 'host-ended')
         self.assertFalse(end_proof(task, end_cause(task, 'failed')).slot_released)
         self.assertEqual(end_cause(task, 'failed', LAUNCH_ERROR), 'unlaunched')
-        self.assertFalse(settle_end(task, end_cause(task, 'failed', LAUNCH_ERROR)).note)
+        self.assertIsNone(settle_end(task, end_cause(task, 'failed', LAUNCH_ERROR)).note)
         self.assertIs(task['unresolved'], False)
+        for state in ('cancel-requested', 'superseded'):
+            self.assertEqual(end_cause(row(state=state, cancelRequested=True), 'failed', LAUNCH_ERROR), 'unlaunched')
         refused = [(row('author', CLAUDE), 'failed', LAUNCH_ERROR), (row(), 'completed', LAUNCH_ERROR),
-                   (row(), 'failed', ''), (row(), 'failed', '   '), (row(), 'failed', 'x' * 513), (row(), 'failed', 7)]
+                   (row('author', CLAUDE, state='cancel-requested', cancelRequested=True), 'failed', LAUNCH_ERROR),
+                   (row(), 'interrupted', LAUNCH_ERROR), (row(state='abandoned'), 'failed', LAUNCH_ERROR),
+                   (row(state='cancelled', cancelRequested=True), 'failed', LAUNCH_ERROR), (row(), 'failed', ''),
+                   (row(), 'failed', '   '), (row(), 'failed', 'x' * 513), (row(), 'failed', '\u00e9' * 86),
+                   (row(), 'failed', 7)]
         for task, report, error in refused:
-            with self.subTest(report=report, error=error), self.assertRaises(ValueError):
+            with self.subTest(state=task['state'], report=report, error=error), self.assertRaises(ValueError):
                 end_cause(task, report, error)
         with self.assertRaisesRegex(ValueError, 'no execution acknowledged'):
             end_proof(row('author', PROCESS), 'unlaunched')
@@ -133,25 +154,37 @@ class EndRuleUnitTests(unittest.TestCase):
     def test_observed_state_counts_a_terminal_state_only_with_evidence(self) -> None:
         """A process's observed end passes through; a host turn seen ended is lost (reconcile's rule)."""
         self.assertEqual(observed_state(PROCESS, TERMINATED), TERMINATED)
-        for handle in (CLAUDE, CODEX, DECLARED):
+        for handle in (CLAUDE, CODEX, OTHER):
             self.assertEqual(observed_state(handle, TERMINATED), LOST)
         for status in ('alive', LOST, None):
             self.assertEqual(observed_state(CLAUDE, status), status)
 
     def test_late_cancel_keeps_the_result_as_history(self) -> None:
-        """A live task ends cancelled with its receipts kept; an ended one keeps its state; others refuse."""
+        """A live task ends cancelled with its receipts kept and its slot held; an ended one keeps its state."""
         task = row('author', CODEX, state='cancel-requested', cancelRequested=True)
-        proof = late_cancel(task, ([RECEIPT], 'completed'), 12.0)
+        proof = late_cancel(task, ([RECEIPT], 'completed', 'interrupt'), 12.0)
         self.assertEqual((proof.cause, proof.slot_released), ('interrupt', False))
         self.assertEqual((task['state'], task['receipts'], task['terminalElapsed']), ('cancelled', [RECEIPT], 12.0))
         self.assertTrue(task['unresolved'] and task['endConfirmed'])
         self.assertIn('reported completed', task['reason'])
         lost = row('author', PROCESS, state='abandoned', cancelRequested=True, reason='host lost', terminalElapsed=5.0)
-        late_cancel(lost, ([], 'launch-failed'), 13.0)
+        late_cancel(lost, ([], 'launch-failed', 'interrupt'), 13.0)
         self.assertEqual((lost['state'], lost['receipts'], lost['terminalElapsed']), ('abandoned', [], 5.0))
         self.assertTrue(lost['reason'].startswith('host lost; cancellation was requested'))
-        with self.assertRaisesRegex(ValueError, 'cancellation was requested'):
-            late_cancel(row(), ([], 'completed'), 1.0)
+        bare = row('author', PROCESS, state='abandoned', cancelRequested=True, terminalElapsed=5.0)
+        late_cancel(bare, ([], 'failed', 'interrupt'), 13.0)
+        self.assertTrue(bare['reason'].startswith('abandoned; cancellation was requested'))
+
+    def test_late_cancel_of_an_unlaunched_claim_releases_its_slot(self) -> None:
+        """A cancel-requested claim whose launch call failed ends cancelled with its slot released (X88)."""
+        task = row('author', state='cancel-requested', cancelRequested=True)
+        proof = late_cancel(task, ([], 'launch-failed', end_cause(task, 'failed', LAUNCH_ERROR)), 7.0)
+        self.assertEqual((proof.cause, proof.slot_released, proof.tool_cleanup), ('unlaunched', True, 'unproven'))
+        self.assertEqual((task['state'], task['unresolved'], task['endConfirmed']), ('cancelled', False, True))
+        self.assertIn('launch call then failed (launch-failed); nothing ran', task['reason'])
+        for task, cause in ((row(), 'interrupt'), (row(state='cancel-requested', cancelRequested=True), 'host-ended')):
+            with self.subTest(cause=cause), self.assertRaisesRegex(ValueError, 'cancellation was requested'):
+                late_cancel(task, ([], 'completed', cause), 1.0)
 
 
 class CancelWinsTests(unittest.TestCase):

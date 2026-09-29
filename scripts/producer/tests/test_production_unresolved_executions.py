@@ -3,13 +3,17 @@ from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import json
 import os
 import stat
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+from itertools import product
 from unittest.mock import patch
 
 from studio import native_budget_store
-from studio.native_budget_store import BudgetAuthorityError
+from studio.native_budget_store import BudgetAuthorityError, canonical
 from studio.production import unresolved_executions as host_record
 from studio.production.unresolved_executions import Execution, append_unresolved, open_rows, recorded_task_ids, resolve
 
@@ -38,18 +42,27 @@ class HostRecordTests(unittest.TestCase):
         return self.path.read_bytes()
 
     def test_rows_stay_open_until_evidence_resolves_them(self) -> None:
-        """Open rows are listed per host; a resolution closes one row once; a second resolution changes nothing."""
+        """Open rows are listed per host (null-host rows under every host); a resolution closes one row once."""
         rows = [closure_row('author-1'), closure_row('review-1', 'review', 'codex'),
                 closure_row('media-1', 'media', None)]
         self.assertEqual(append_unresolved(self.root, 'batch-one', rows), 3)
-        self.assertEqual([row['taskId'] for row in open_rows(self.root, 'claude-code')], ['author-1'])
+        self.assertEqual([row['taskId'] for row in open_rows(self.root, 'claude-code')], ['author-1', 'media-1'])
         self.assertEqual(open_rows(self.root, 'codex')[0], {'schema': 1, 'event': 'execution-unresolved',
                                                            'batchId': 'batch-one', **rows[1]})
         self.assertTrue(resolve(self.root, Execution('batch-one', 'author-1'), EVIDENCE))
-        self.assertEqual(open_rows(self.root, 'claude-code'), [])
+        self.assertEqual([row['taskId'] for row in open_rows(self.root, 'claude-code')], ['media-1'])
         self.assertFalse(resolve(self.root, Execution('batch-one', 'author-1'), EVIDENCE))
         self.assertEqual(recorded_task_ids(self.root, 'batch-one'), {'author-1', 'review-1', 'media-1'})
         self.assertEqual(recorded_task_ids(self.root, 'batch-two'), frozenset())
+
+    def test_a_null_host_ai_row_counts_against_every_host(self) -> None:
+        """An AI task with a process handle or claimer has no host: its row is open for every host (X85)."""
+        append_unresolved(self.root, 'batch-one', [closure_row('review-1', 'review', None)])
+        for host in ('claude-code', 'codex'):
+            self.assertEqual([row['taskId'] for row in open_rows(self.root, host)], ['review-1'])
+        self.assertTrue(resolve(self.root, Execution('batch-one', 'review-1'), EVIDENCE))
+        for host in ('claude-code', 'codex'):
+            self.assertEqual(open_rows(self.root, host), [])
 
     def test_record_is_append_only_private_and_outside_the_batches(self) -> None:
         """Every write keeps the earlier bytes as a prefix; the file is 0600 at the root, beside batches/."""
@@ -77,7 +90,8 @@ class HostRecordTests(unittest.TestCase):
 
     def test_rows_are_checked_before_anything_is_written(self) -> None:
         """A malformed closure is refused whole, and no file is created."""
-        bad = [[closure_row('author-1', host=None)], [closure_row('author-1', host='gemini')],
+        bad = [[closure_row('author-1', host='gemini')], [closure_row('author-1', kind=['author'])],
+               [closure_row(f'author-{index}') for index in range(257)],
                [closure_row('author-1', hostProcess={'type': 'process', **PROCESS})],
                [closure_row('author-1', hostProcess={'pid': 0, 'pgid': 1, 'started': 'x'})],
                [closure_row('author-1', kind='painter')], [closure_row('author-1', state='done')],
@@ -95,7 +109,8 @@ class HostRecordTests(unittest.TestCase):
         append_unresolved(self.root, 'batch-one', [closure_row('author-1')])
         before = self._bytes()
         for evidence in ({'basis': 'operator-statement', 'detail': 'I stopped it'}, {'basis': 'host-end', 'detail': ''},
-                         {'basis': 'host-end'}, {'basis': 'host-end', 'detail': 'x' * 513}, None):
+                         {'basis': 'host-end', 'detail': '   '}, {'basis': 'host-end'},
+                         {'basis': 'host-end', 'detail': 'x' * 513}, None):
             with self.subTest(evidence=evidence), self.assertRaises(ValueError):
                 resolve(self.root, Execution('batch-one', 'author-1'), evidence)
         with self.assertRaisesRegex(ValueError, 'No unresolved execution'):
@@ -106,15 +121,19 @@ class HostRecordTests(unittest.TestCase):
             open_rows(self.root, 'gemini')
 
     def test_a_corrupt_torn_or_inconsistent_record_refuses_every_read(self) -> None:
-        """Unreadable means refuse: garbage, a torn line, another schema, a repeated row or resolution, or a
-        resolution with no row makes admission and closure fail closed instead of guessing."""
+        """Unreadable means refuse by name: garbage, a torn line, another or a non-integer schema, a list kind,
+        a repeated row or resolution, an open resolution key set, or a resolution with no row."""
         append_unresolved(self.root, 'batch-one', [closure_row('author-1'), closure_row('author-2')])
         resolve(self.root, Execution('batch-one', 'author-1'), EVIDENCE)
         good = self._bytes()
         row_line, _, resolution_line = good.splitlines(keepends=True)
-        unknown = resolution_line.replace(b'"taskId":"author-1"', b'"taskId":"author-3"')
-        tails = [b'not json\n', b'{"schema":1}', b'{"schema":2,"event":"execution-unresolved"}\n', row_line,
-                 resolution_line, unknown]
+        row, resolution = json.loads(row_line), json.loads(resolution_line)
+        tails = [b'not json\n', b'{"schema":1}', row_line, resolution_line,
+                 canonical({**resolution, 'taskId': 'author-3'}), canonical({**resolution, 'taskId': 'author-2',
+                                                                             'note': 'extra'}),
+                 canonical({**row, 'taskId': 'author-9', 'schema': 2}),
+                 canonical({**row, 'taskId': 'author-9', 'schema': True}),
+                 canonical({**row, 'taskId': 'author-9', 'kind': ['author']})]
         for tail in tails:
             with self.subTest(tail=tail):
                 self.path.write_bytes(good + tail)
@@ -127,6 +146,38 @@ class HostRecordTests(unittest.TestCase):
         for read in reads:
             with self.assertRaises(BudgetAuthorityError):
                 read()
+
+    def test_an_io_error_is_refused_by_name(self) -> None:
+        """An operating-system error inside the record's lock (here a failed fsync) is a BudgetAuthorityError."""
+        append_unresolved(self.root, 'batch-one', [closure_row('author-1')])   # the root and its children exist
+        before = self._bytes()
+        with patch('os.fsync', side_effect=OSError(5, 'Input/output error')), \
+                self.assertRaises(BudgetAuthorityError):
+            append_unresolved(self.root, 'batch-one', [closure_row('author-2')])
+        self.assertEqual(self._bytes(), before)
+
+    def test_concurrent_closures_record_each_execution_once(self) -> None:
+        """The record's kernel lock serializes read-then-append: racing closers never write a row or a
+        resolution twice, which would make every later read refuse."""
+        rows = [closure_row(f'author-{index}') for index in range(16)]
+        start = threading.Barrier(12)
+
+        def close(offset: int) -> None:
+            """One racing closer: every batch's rows, rotated, one append each; some also resolve."""
+            start.wait(timeout=60)
+            for batch, row in product(('batch-0', 'batch-1', 'batch-2'), rows[offset:] + rows[:offset]):
+                append_unresolved(self.root, batch, [row])
+                if offset % 4 == 0:
+                    resolve(self.root, Execution(batch, row['taskId']), EVIDENCE)
+
+        with ThreadPoolExecutor(12) as pool:
+            for future in [pool.submit(close, index) for index in range(12)]:
+                future.result()
+        lines = [json.loads(line) for line in self._bytes().splitlines()]
+        rows_written = [(line['batchId'], line['taskId']) for line in lines if line['event'] == 'execution-unresolved']
+        self.assertEqual((len(rows_written), len(set(rows_written))), (48, 48))
+        self.assertEqual(len(lines), 96)
+        self.assertEqual(open_rows(self.root, 'claude-code'), [])
 
     def test_a_full_record_refuses_new_rows_but_still_takes_resolutions(self) -> None:
         """New rows stop at the reserve, so evidence can always resolve what is already charged."""

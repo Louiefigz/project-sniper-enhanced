@@ -4,17 +4,23 @@
 batch never moves or removes it. It is append-only. At closure, M-043 appends one
 ``execution-unresolved`` line for each task that still held a slot or an unresolved resource. Later,
 termination evidence appends one ``execution-resolved`` line for it (M-102). No line is ever rewritten
-or removed. Every admission reads the open rows of its host (M-100). The record holds no batch state
-and is not a task store: a row names the execution (batch id and task id) and what closure saw.
-Every line carries this record's own ``schema: 1``.
+or removed. Every admission reads the open rows of its host (M-100); a row whose host is null (a
+process handle or process claimer) is open for every host, so it counts everywhere (fail closed,
+X85). The record holds no batch state and is not a task store: a row names the execution (batch id
+and task id) and what closure saw. Every line carries this record's own ``schema: 1``.
 
 It fails closed. A record that is unreadable, corrupt, torn or inconsistent raises
 ``BudgetAuthorityError``, which callers treat as "refuse new work". An operator's statement is never
 evidence here (G9): a resolution names a G9 basis, the host's end event (a) or the verified absence
-of the process and its descendants (b). New rows stop ``RESOLUTION_RESERVE_BYTES`` below the size
-bound, so a resolution always fits. Limits: a torn last line (a crash during an append) must be
-repaired by hand, and a closure row already recorded for an execution is never appended again, even
-if a retried closure computed it differently.
+of the process and its descendants (b). Limits:
+- this module cannot check that a resolution's detail identifies the execution (a row carries no
+  handle to compare against); M-102 must bind the evidence to the execution before calling ``resolve``;
+- new rows stop ``RESOLUTION_RESERVE_BYTES`` (1 MiB) below the size bound; that reserve holds about
+  1,300 worst-case resolution lines (~780 bytes each), so a resolution is sure to fit only while
+  fewer than that many rows are open when the record reaches the bound;
+- a torn last line (a crash during an append) must be repaired by hand;
+- a closure row already recorded for an execution is never appended again, even if a retried
+  closure computed it differently.
 """
 from __future__ import annotations
 
@@ -58,11 +64,11 @@ def row_problem(row: object) -> str | None:
     """Why a closure row cannot be recorded, or None."""
     if type(row) is not dict or set(row) != ROW_KEYS:
         return 'a row has exactly taskId, kind, state, host, hostProcess and reason'
-    if type(row['taskId']) is not str or TASK_ID.fullmatch(row['taskId']) is None \
+    if type(row['taskId']) is not str or TASK_ID.fullmatch(row['taskId']) is None or type(row['kind']) is not str \
             or row['kind'] not in TASK_KINDS or row['state'] not in TASK_STATES:
         return 'a row names a task id, a task kind and a task state'
-    if row['host'] is not None and row['host'] not in HOSTS or TASK_KINDS[row['kind']] == 'ai' and row['host'] is None:
-        return "a row's host is a known host, and never null for AI work"
+    if row['host'] is not None and row['host'] not in HOSTS:
+        return "a row's host is a known host or null"
     process = row['hostProcess']
     if process is not None and (type(process) is not dict or 'type' in process
                                 or not valid_handle({**process, 'type': 'process'})):
@@ -84,7 +90,8 @@ def _evidence_problem(evidence: object) -> str | None:
 
 def _line_problem(line: object) -> str | None:
     """Why one stored line is not a schema-1 row or resolution, or None."""
-    if type(line) is not dict or line.get('schema') != SCHEMA or line.get('event') not in (UNRESOLVED, RESOLVED):
+    if type(line) is not dict or type(line.get('schema')) is not int or line['schema'] != SCHEMA \
+            or line.get('event') not in (UNRESOLVED, RESOLVED):
         return 'not a schema-1 execution line'
     try:
         require_batch_id(line.get('batchId'))
@@ -158,10 +165,22 @@ def _append(dir_fd: int, lines: list[dict], resolution: bool) -> None:
 
 
 def append_unresolved(root: Path, batch_id: str, rows: list[dict]) -> int:
-    """Record a closing batch's unresolved rows; returns how many were new.
+    """Record a closing batch's unresolved rows.
 
     Retrying after a crash appends nothing twice: an execution already recorded (open or resolved)
     is skipped. Every row is validated before anything is written.
+
+    Args:
+        root: The budget authority root.
+        batch_id: The closing batch.
+        rows: ``production.closure.unresolvedAtClose`` rows (``ROW_KEYS``).
+
+    Returns:
+        How many rows were new.
+
+    Raises:
+        ValueError: A malformed batch id or row, repeated task ids, or more than ``BOUNDS['tasks']`` rows.
+        BudgetAuthorityError: The record is unusable, corrupt or full.
     """
     require_batch_id(batch_id)
     if type(rows) is not list or len(rows) > BOUNDS['tasks']:
@@ -180,7 +199,21 @@ def append_unresolved(root: Path, batch_id: str, rows: list[dict]) -> int:
 
 
 def resolve(root: Path, execution: Execution, evidence: dict) -> bool:
-    """Append the termination evidence that resolves one recorded execution; False if already resolved."""
+    """Append the termination evidence that resolves one recorded execution.
+
+    Args:
+        root: The budget authority root.
+        execution: The recorded execution.
+        evidence: ``{basis: host-end | process-absent, detail: 1-512 bytes}``; the caller (M-102) has
+            already bound it to this execution, which this module cannot check.
+
+    Returns:
+        True when appended; False when the execution was already resolved.
+
+    Raises:
+        ValueError: Malformed evidence (an operator statement included) or an unrecorded execution.
+        BudgetAuthorityError: The record is unusable, corrupt or full.
+    """
     if problem := _evidence_problem(evidence):
         raise ValueError(problem)
     with _locked(root) as dir_fd:
@@ -195,12 +228,16 @@ def resolve(root: Path, execution: Execution, evidence: dict) -> bool:
 
 
 def open_rows(root: Path, host: str) -> list[dict]:
-    """The rows of ``host`` that no evidence has resolved, oldest first (M-100 counts the AI kinds)."""
+    """The rows of ``host``, and the null-host rows, that no evidence has resolved, oldest first.
+
+    A null-host row counts against every host (fail closed, X85); M-100 still counts only the AI kinds.
+    """
     if host not in HOSTS:
         raise ValueError(f'Unknown host {host!r}')
     with _locked(root) as dir_fd:
         table = _executions(_read(dir_fd))
-    return [dict(entry['line']) for entry in table.values() if not entry['resolved'] and entry['line']['host'] == host]
+    return [dict(entry['line']) for entry in table.values()
+            if not entry['resolved'] and entry['line']['host'] in (host, None)]
 
 
 def recorded_task_ids(root: Path, batch_id: str) -> frozenset[str]:

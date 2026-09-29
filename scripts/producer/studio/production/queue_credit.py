@@ -15,11 +15,17 @@ Credit only grows, so a value already read is conservative:
   run of failures is at most ``CREDIT_READ_TOLERANCE_SECONDS`` old. After that it raises
   ``CapacityCreditUnavailable``. The tolerance is the watchdog's grace past a launch grant, so a read gap no
   longer than it extends nothing that grant does not already allow.
-- Credit smaller than the last credit read raises ``CapacityCreditRegressed``: the authority was rolled back or
-  edited. It is never tolerated.
+- Credit smaller than the grant's ``atGrant`` or than the last credit read raises ``CapacityCreditRegressed``: the
+  authority was rolled back or edited. It is never tolerated. ``atGrant`` is itself a credit read (under the lock,
+  when the grant was bound) and credit only grows, so a fresh process's first read is checked against it too.
 
 A batch that is not active, or a clip without an enabled clock, gives no credit (today's rule); that is not a
 regression. The task-row read has the same tolerance and no cache. Readings are kept per process.
+
+Both named errors record when this process first met them (``since``). The owner's monitor stops on them at once,
+by name. The export watchdog is the backstop: ``watchdog_stop`` names the stop only after
+``process.DEADLINE_GRACE_SECONDS`` more, as the watchdog backs up a launch grant, so the owner names, cleans up and
+publishes first, and the watchdog still stops a stuck owner on its graceful path.
 """
 from __future__ import annotations
 
@@ -43,22 +49,42 @@ CREDIT_READ_TOLERANCE_SECONDS = process.DEADLINE_GRACE_SECONDS
 UNREADABLE = (OSError, ValueError, KeyError, DurableFileError)
 
 
-class CapacityCreditUnavailable(BudgetAuthorityError):
+class NamedCreditError(BudgetAuthorityError):
+    """A credit read that stops the render by name, with when this process first met the condition."""
+
+    def __init__(self, message: str, since: float) -> None:
+        """Keep the message and ``since``, the monotonic time this process first met the condition as this error.
+
+        Args:
+            message: The named abort's text.
+            since: Monotonic seconds when the condition began to be this error in this process.
+        """
+        super().__init__(message)
+        self.since = since
+
+
+class CapacityCreditUnavailable(NamedCreditError):
     """The authority stayed unreadable past the read tolerance: the render stops by name (this can clear)."""
 
 
-class CapacityCreditRegressed(BudgetAuthorityError):
+class CapacityCreditRegressed(NamedCreditError):
     """Settled credit went down: the authority was rolled back or edited (never transient)."""
+
+
+CREDIT_ERRORS = (CapacityCreditUnavailable, CapacityCreditRegressed)
+CREDIT_CATEGORIES = ('capacity-credit-unavailable', 'capacity-credit-regressed')
 
 
 @dataclass
 class Reading:
-    """One key's last value read, when it was read, the last credit read, and when the current failures began."""
+    """One key's last value read, when it was read, the last credit read, when the current failures began, and when
+    this process first met a regression it still sees."""
 
     value: object = None
     read_at: float | None = None
     credit: float | None = None
     failed_since: float | None = None
+    regressed_since: float | None = None
 
 
 _CREDIT: dict[tuple[str, str, str], Reading] = {}
@@ -102,7 +128,7 @@ def settled_credit(ref: dict) -> float:
 
     Raises:
         CapacityCreditUnavailable: Every read has failed for longer than ``CREDIT_READ_TOLERANCE_SECONDS``.
-        CapacityCreditRegressed: The credit read is smaller than the last credit read.
+        CapacityCreditRegressed: The credit read is below the grant's ``atGrant`` or the last credit read.
     """
     reading = _CREDIT.setdefault((ref['authority'], ref['batchId'], ref['clipId']), Reading())
     credit = _tolerant(reading, lambda: _read_credit(ref, reading), f'Short {ref["clipId"]} capacity credit',
@@ -121,11 +147,28 @@ def _read_credit(ref: dict, reading: Reading) -> float | None:
     if record['status'] != 'active' or not queue_clock.enabled(clip):
         return None
     credit = queue_clock.excluded(clip)
-    if reading.credit is not None and credit < reading.credit:
-        raise CapacityCreditRegressed(f'Short {ref["clipId"]} capacity credit went down from {reading.credit:.1f}s '
-                                      f'to {credit:.1f}s; the authority was rolled back or edited')
+    _require_no_regression(ref, reading, credit)
     reading.credit = credit
     return credit
+
+
+def _require_no_regression(ref: dict, reading: Reading, credit: float) -> None:
+    """Refuse credit below the grant's ``atGrant`` or the last credit read in this process (fail closed, OQ-2).
+
+    Args:
+        ref: The grant's validated credit reference (its ``atGrant`` was read when the grant was bound).
+        reading: The clip's reading; ``regressed_since`` keeps when this process first met the regression.
+        credit: The credit just read.
+
+    Raises:
+        CapacityCreditRegressed: The credit is below either value; ``since`` is the first sight in this process.
+    """
+    floor = max(ref['atGrant'], reading.credit or 0.0)
+    if credit >= floor:
+        return
+    reading.regressed_since = monotonic() if reading.regressed_since is None else reading.regressed_since
+    raise CapacityCreditRegressed(f'Short {ref["clipId"]} capacity credit went down from {floor:.1f}s to '
+                                  f'{credit:.1f}s; the authority was rolled back or edited', reading.regressed_since)
 
 
 def task_row(root: Path, batch_id: str, task_id: str) -> dict | None:
@@ -180,8 +223,41 @@ def _tolerant(reading: Reading, read: Callable[[], object], label: str, cache: f
     except UNREADABLE as error:
         reading.failed_since = now if reading.failed_since is None else reading.failed_since
         if now - reading.failed_since > CREDIT_READ_TOLERANCE_SECONDS:
-            raise CapacityCreditUnavailable(f'{label} has been unreadable for {now - reading.failed_since:.1f}s') \
-                from error
+            raise CapacityCreditUnavailable(f'{label} has been unreadable for {now - reading.failed_since:.1f}s',
+                                            reading.failed_since + CREDIT_READ_TOLERANCE_SECONDS) from error
         return reading.value
     reading.value, reading.read_at, reading.failed_since = value, now, None
+    reading.regressed_since = None     # a good read is no regression: the next one starts a new watchdog grace
     return value
+
+
+def credit_category(error: NamedCreditError) -> str:
+    """The failure category a named credit error is recorded and published under (P1 B10).
+
+    Args:
+        error: ``CapacityCreditUnavailable`` or ``CapacityCreditRegressed``.
+
+    Returns:
+        ``capacity-credit-regressed`` for a regression, else ``capacity-credit-unavailable``.
+    """
+    return 'capacity-credit-regressed' if isinstance(error, CapacityCreditRegressed) else 'capacity-credit-unavailable'
+
+
+def watchdog_stop(error: NamedCreditError) -> tuple[str, str] | None:
+    """The export watchdog's backstop for a named credit error, the way it backs up a launch grant (X143).
+
+    The owner's monitor meets the same condition within about its own poll and stops by name at once. The watchdog
+    waits ``process.DEADLINE_GRACE_SECONDS`` past its own first sight (``error.since``, in its process), so the owner
+    names, cleans up and publishes first. After that it returns the named stop, which it takes on its graceful path
+    (SIGTERM and the cleanup grace), never the unnamed hard kill of an exception.
+
+    Args:
+        error: ``CapacityCreditUnavailable`` or ``CapacityCreditRegressed`` raised by the watchdog's own credit read.
+
+    Returns:
+        None within the grace; afterwards (category, detail).
+    """
+    waited = monotonic() - error.since
+    if waited <= process.DEADLINE_GRACE_SECONDS:
+        return None
+    return credit_category(error), f'{error} (the owner had not stopped {waited:.1f}s after the watchdog saw it)'

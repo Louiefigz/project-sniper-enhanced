@@ -24,7 +24,7 @@ from _queue_credit_fixture import (
 from studio import native_budget_store as store
 from studio.native_budget_clock import allocation_remaining
 from studio.native_run_lifecycle import monitor_limits
-from studio.production import process, process_watch, queue_credit
+from studio.production import process, process_watch, queue_authority, queue_credit
 from studio.production.process import TaskClaim
 from studio.production.queue_credit import CapacityCreditRegressed, CapacityCreditUnavailable
 
@@ -111,6 +111,50 @@ class CreditReadTests(CreditCase):
         self.now = 2.0
         with self.assertRaises(CapacityCreditRegressed):
             self.delta()
+
+    def test_the_regression_baseline_survives_what_lies_between_reads(self) -> None:
+        """30 read, then a failed read (held) or a no-credit snapshot, then 20: still a regression, named."""
+        for between in (lambda: self.path.write_bytes(TORN), lambda: self.put(self.credit_record(30.0, 'draining'))):
+            queue_credit._CREDIT.clear()
+            self.now = 0.0
+            self.put(self.credit_record(30.0))
+            self.assertEqual(self.delta(), 30.0)
+            between()
+            self.now = 1.0
+            self.assertIn(self.delta(), (30.0, 0.0))
+            self.put(self.credit_record(20.0))
+            self.now = 2.0
+            with self.assertRaisesRegex(CapacityCreditRegressed, 'went down from 30.0s to 20.0s'):
+                self.delta()
+
+    def test_a_first_read_below_the_grant_is_a_regression(self) -> None:
+        """OQ-2, fail closed (X143 m3): a grant bound at 30 s of credit, the authority rolled back to 20 before this
+        process's first read: the monitor stops by name."""
+        at_thirty = self.credit_record(30.0)
+        self.put(at_thirty)
+        self.grant = self.bind(at_thirty, 'A')
+        self.assertEqual(self.grant['capacityCredit']['atGrant'], 30.0)
+        self.put(self.credit_record(20.0))
+        owner = self.owner()
+        self.assertTrue(monitor_limits(owner))
+        self.assertEqual(owner.result['failureCategory'], 'capacity-credit-regressed')
+        self.assertEqual(owner.abort_reason, 'Short A capacity credit went down from 30.0s to 20.0s; the authority '
+                                             'was rolled back or edited')
+
+    def test_readings_are_per_clip(self) -> None:
+        """A's credit of 30 is no baseline for B: B at 10 reads as 10, and B's own later drop is B's regression."""
+        record = self.credit_record(30.0)
+        record['clips']['B']['capacityClock'].update(excludedSeconds=10.0, observedElapsed=10.0)
+        self.put(record)
+        second = self.bind(self.record, 'B')
+        self.assertEqual(self.delta(), 30.0)
+        self.assertEqual(queue_authority.credit_delta(second), 10.0)
+        record['clips']['B']['capacityClock']['excludedSeconds'] = 5.0
+        self.put(record)
+        self.now = 1.0
+        self.assertEqual(self.delta(), 30.0)
+        with self.assertRaisesRegex(CapacityCreditRegressed, 'Short B capacity credit went down from 10.0s'):
+            queue_authority.credit_delta(second)
 
     def test_inactive_batch_gives_no_credit(self) -> None:
         """A draining or closed batch, a clip with no clock and a Long give no credit (unchanged semantics); a batch

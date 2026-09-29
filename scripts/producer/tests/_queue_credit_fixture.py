@@ -1,6 +1,6 @@
 """Shared fixture for the unlocked credit and task-row reads (``test_queue_credit_snapshot``; P1 Step B10, M-053).
 
-One private TEST batch with Short A (a v2 capacity clock with no credit at grant) and one check task, a 600 s
+One private TEST batch with Shorts A and B (v2 capacity clocks with no credit at grant) and one check task, a 600 s
 grant bound to A's clock, and a controlled monotonic clock for ``queue_credit``'s cache and tolerance. Records
 are replaced the way the store leaves them after a commit (whole, private, one link). ``lock_held_by_a_thread``
 holds the batch's real kernel lock from another thread of this process: no child process is started here.
@@ -86,7 +86,7 @@ DAMAGE: dict[str, Callable[[Path], None]] = {
 
 
 class CreditCase(unittest.TestCase):
-    """Short A of a private TEST batch: a v2 clock with no credit at grant, and a 600 s grant bound to it."""
+    """Shorts A and B of a private TEST batch: v2 clocks with no credit at grant, and a 600 s grant bound to A."""
 
     def setUp(self) -> None:
         """Create the batch (one check task) and the grant; readings start empty, the monotonic clock at 0."""
@@ -95,15 +95,19 @@ class CreditCase(unittest.TestCase):
         self.enterContext(mock.patch.object(queue_credit, 'monotonic', lambda: self.now))
         self.enterContext(mock.patch.dict(queue_credit._CREDIT, clear=True))
         self.enterContext(mock.patch.dict(queue_credit._TASKS, clear=True))
-        anchor = start_anchor()
-        record = new_batch_record(BatchSpec(BATCH, ('A',), (), 1), anchor)
+        anchor = self.anchor = start_anchor()
+        record = new_batch_record(BatchSpec(BATCH, ('A', 'B'), (), 1), anchor)
         record['production']['tasks']['check-1'] = new_row(record, task_spec('check-1', 'check', run_id=BATCH), [],
                                                            (0, 0.0))
         create_batch(self.root, record)
         self.record = record
-        reference = {'authority': str(self.root), 'batchId': BATCH, 'clipId': 'A'}
-        self.grant = queue_authority.bind_allocation(allocation(anchor, GRANTED, 45.0), record, reference)
+        self.grant = self.bind(record, 'A')
         self.path = self.root / 'batches' / BATCH / 'authority.json'
+
+    def bind(self, record: dict, clip: str) -> dict:
+        """A 600 s grant bound to ``clip``'s clock in ``record`` (its ``atGrant`` is that clock's credit)."""
+        reference = {'authority': str(self.root), 'batchId': BATCH, 'clipId': clip}
+        return queue_authority.bind_allocation(allocation(self.anchor, GRANTED, 45.0), record, reference)
 
     def credit_record(self, seconds: float, status: str = 'active') -> dict:
         """The batch's record with ``seconds`` of settled credit on A's clock (observed time covers it)."""

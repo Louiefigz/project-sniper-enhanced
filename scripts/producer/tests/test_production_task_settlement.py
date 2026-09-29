@@ -1,4 +1,5 @@
-"""M-043's tests: reconcile's rule (P1 A3), historical rows (A4), settlement and closure (X25, X29, X37).
+"""M-043's settlement and closure tests (X25, X29, X37); its reconcile and historical-row tests are in
+``test_production_task_reconcile``.
 
 ``settle-resource`` records the operator's statement and never releases. Closure ends only the director's batch
 assignment, revokes live AI work, lists every task still holding a slot or an unresolved resource in
@@ -13,76 +14,24 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import unittest
 from unittest.mock import Mock, patch
 
-from _budget_fixture import CHILD, DISPATCHER, private_root, table
+from _budget_fixture import CHILD, DISPATCHER, table
 from _production_task_flow_fixture import (
     BATCH, Batch, close, closure_rows, finish, held_batch, host, rewrite, run_cli,
 )
-from studio import native_budget_launch, native_budget_store
+from studio import native_budget_store
 from studio.native_budget_batches import BudgetRefused, archive_batch
 from studio.native_budget_schema import validate_record
 from studio.native_budget_store import BudgetAuthorityError, canonical
 from studio.production import api, settlement
 from studio.production.callbacks import TaskFailure
-from studio.production.dependencies import refresh
 from studio.production.production_optional import closure_problem
-from studio.production.reconcile import host_key
-from studio.production.task_schema import holds_slot, production_problem
+from studio.production.task_schema import holds_slot
 from studio.production.tasks import active_ai
 from studio.production.unresolved_executions import RECORD, open_rows, recorded_task_ids
 
 STATEMENT = 'TEST operator: the turn ended on the host console'
 ARCHIVE_REFUSAL = ('Batch batch-auth holds unresolved work not recorded at closure '
                    '(production.closure/unresolved-executions.jsonl)')
-
-
-class ReconcileRuleTests(unittest.TestCase):
-    """Reconcile reads evidence through the same rule (P1 A3)."""
-
-    def test_observed_terminal_holds_on_both_hosts(self) -> None:
-        """A host turn seen terminal is lost: abandoned with its slot held, on either host."""
-        for kind in ('codex', 'claude-code'):
-            with self.subTest(host=kind):
-                batch, handle = Batch(self, root=private_root(self)), host('critic', kind)
-                batch.enqueue(('critic', 'specialist', ()))
-                batch.claim('critic', handle)
-                api.reconcile(batch.root, BATCH, {host_key(handle): 'terminal'})
-                task = batch.row('critic')
-                self.assertEqual((task['state'], task['unresolved'], holds_slot(task)), ('abandoned', True, True))
-
-    def test_host_lost_abandons_with_slot_held(self) -> None:
-        """A host that no longer knows the turn: abandoned, slot held."""
-        batch = Batch(self)
-        batch.enqueue(('critic', 'specialist', ()))
-        batch.host_event(batch.claim('critic', host('critic')), 'lost', host('critic'))
-        self.assertEqual((batch.row('critic')['state'], batch.row('critic')['unresolved']), ('abandoned', True))
-
-    def test_unreadable_process_table_changes_nothing(self) -> None:
-        """No evidence means no change: an unreadable process table leaves a process-handle task running."""
-        batch = Batch(self)
-        batch.enqueue(('critic', 'review', ()))
-        batch.claim('critic', CHILD)
-        with patch.object(native_budget_launch, '_process_table', side_effect=OSError('TEST: ps unavailable')):
-            result = api.reconcile(batch.root, BATCH)
-        self.assertEqual(result['changes'], [])
-        self.assertEqual(batch.row('critic')['state'], 'running')
-
-
-class HistoricalRowTests(unittest.TestCase):
-    """A pre-P1 completed-after-cancel row never satisfies its dependents (P1 A4)."""
-
-    def test_completed_cancel_requested_prerequisite_fails_its_dependents(self) -> None:
-        """The pre-P1 row reads valid; refresh fails its dependent as prerequisite-cancelled."""
-        batch = Batch(self)
-        batch.enqueue(('graphics', 'specialist', ()), ('synthesis', 'planning', ('graphics',)))
-        finish(batch, 'graphics')
-        # The row as a pre-P1 engine wrote it (F1 D01): completed, with its cancellation requested.
-        rewrite(batch, lambda record: record['production']['tasks']['graphics'].update(cancelRequested=True))
-        record = batch.record()
-        self.assertIsNone(production_problem(record))
-        self.assertEqual(record['production']['tasks']['synthesis']['state'], 'ready')
-        refresh(record, 20.0)
-        synthesis = record['production']['tasks']['synthesis']
-        self.assertEqual((synthesis['state'], synthesis['failure']['category']), ('failed', 'prerequisite-cancelled'))
 
 
 class SettlementTests(unittest.TestCase):
@@ -188,24 +137,46 @@ class ClosureTests(unittest.TestCase):
         self.assertEqual(recorded_task_ids(batch.root, BATCH), {'critic'})
 
     def test_close_fits_at_the_room_bound(self) -> None:
-        """A batch filled to its room bound still closes; the reserve is the widest valid closure (256 rows)."""
+        """A batch filled to its room bound still closes; each listable task reserves one widest closure row."""
         batch = Batch(self)
-        batch.enqueue(*((f'turn-{index}', 'specialist', ()) for index in range(3)))
+        batch.enqueue(*((f'turn-{index}', 'specialist', ()) for index in range(3)), ('spare', 'check', ()))
         for index in range(3):
-            finish(batch, f'turn-{index}')
+            finish(batch, f'turn-{index}')   # three held completions; the unclaimed spare will be cancelled
         record = batch.record()
+        # Four listable tasks: the three completions and the live director (the close releases its assignment).
+        closure_room = settlement.CLOSURE_BASE_BYTES + 4 * settlement.CLOSURE_ROW_BYTES
+        self.assertEqual(settlement._closure_room(record), closure_room)
+        self.assertGreaterEqual(settlement._lifecycle_room(record), closure_room)
         bound = len(canonical(record)) + settlement.settlement_reserve(record)
-        self.assertGreaterEqual(settlement._lifecycle_room(record), settlement.CLOSURE_ENTRY_BYTES)
         with patch.object(native_budget_store, 'MAX_RECORD_BYTES', bound):
             self.assertEqual(close(batch)['status'], 'closed')
-        widest = settlement.widest_closure()
-        rows = [{**row, 'taskId': f'{index:03d}{row["taskId"][3:]}'}
-                for index, row in enumerate(widest['unresolvedAtClose'])]
-        probe = {'status': 'closed', 'closedAtElapsed': widest['closedElapsed'],
-                 'production': {'closure': {**widest, 'unresolvedAtClose': rows},
-                                'tasks': {row['taskId']: {'kind': row['kind']} for row in rows}}}
+        self.assertEqual(len(closure_rows(batch)), 3)
+        # The widest valid closure (the task bound, every field at its bound) fits the rows reserved for it.
+        rows = [{**settlement.widest_closure_row(), 'taskId': f'{index:03d}' + 'T' * 61} for index in range(256)]
+        closure = {'closedElapsed': 1.2345678901234567e-300, 'unresolvedAtClose': rows}
+        probe = {'status': 'closed', 'closedAtElapsed': closure['closedElapsed'],
+                 'production': {'closure': closure, 'tasks': {row['taskId']: {'kind': row['kind']} for row in rows}}}
         self.assertIsNone(closure_problem(probe))
-        self.assertEqual(settlement.encoded(probe['production']['closure']), settlement.encoded(widest))
+        widest = settlement.encoded({'closure': closure}) - 1   # the closure's key and value, plus its comma
+        self.assertLessEqual(widest, settlement.CLOSURE_BASE_BYTES + 256 * settlement.CLOSURE_ROW_BYTES)
+
+    def test_a_claim_past_the_room_is_refused_and_the_fullest_batch_still_closes(self) -> None:
+        """X104: a claim that would need another closure row past the room is refused before it commits; the batch
+        filled to its room bound with every claimed-unsettled task it admits still closes."""
+        batch = Batch(self)
+        batch.enqueue(*((f'lint-{index:02d}', 'check', ()) for index in range(11)))
+        for index in range(10):
+            batch.claim(f'lint-{index:02d}', claimer=DISPATCHER)   # ten live claims, each a listable task
+        batch.table = table(DISPATCHER)                            # their claimer is alive when the close reconciles
+        record = batch.record()
+        bound = len(canonical(record)) + settlement.settlement_reserve(record) + settlement.CLOSURE_ROW_BYTES // 2
+        with patch.object(native_budget_store, 'MAX_RECORD_BYTES', bound):
+            with self.assertRaisesRegex(BudgetAuthorityError, 'no room left'):
+                batch.claim('lint-10', claimer=DISPATCHER)         # its closure row would not fit
+            self.assertEqual(batch.record(), record)               # nothing was committed
+            self.assertEqual(close(batch)['status'], 'closed')
+        self.assertEqual(len(closure_rows(batch)), 10)
+        self.assertEqual(batch.row('lint-10')['state'], 'cancelled')   # the unclaimed one was frozen, not listed
 
     def test_closure_refused_on_an_open_batch(self) -> None:
         """``production.closure`` belongs to a closed batch, at its closing time, listing its own tasks once."""

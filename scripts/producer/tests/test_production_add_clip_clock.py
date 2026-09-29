@@ -214,6 +214,7 @@ class SameJobTests(AddClipCase):
                                      'recordedBy': 'TEST coordinator'}})
         status = native_batch.cmd_status(ns(batch='batch-auth'))['clips']
         self.assertEqual((status['T']['duplicationCheck'], 'duplicationCheck' in status['A']), (expected, False))
+        self.assertEqual(self.trail('coordination-decision'), decisions)   # status writes no second line
         waited = batch_status(self.record(), 0.0)['clips']        # what wait and close show: no trail, no key
         self.assertEqual(['duplicationCheck' in waited[clip] for clip in ('A', 'T')], [False, False])
 
@@ -230,7 +231,9 @@ class SameJobTests(AddClipCase):
         self.assertEqual((authorized['duplicationCheck'], self.trail('output-authorized')[-1]['duplicationCheck']),
                          (expected, expected))
         self.assertEqual(native_batch.cmd_status(ns(batch='batch-auth'))['clips']['E']['duplicationCheck'], expected)
-        self.assertEqual([item['outputId'] for item in self.trail('coordination-decision')], ['D', 'E'])
+        lines = self.trail('coordination-decision')
+        self.assertEqual([(item['outputId'], item['author']['recordedBy']) for item in lines],
+                         [('D', 'TEST coordinator'), ('E', 'TEST operator')])   # the output row's recorder
 
 
 class ReplayTests(AddClipCase):

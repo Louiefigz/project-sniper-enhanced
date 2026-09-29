@@ -51,6 +51,18 @@ class RecordedCheckTests(AddClipCase):
                          (True, first['duplicationCheck'], first['duplicationCheck']))
         self.assertEqual([item['clip'] for item in first['duplicationCheck']], ['A'])
 
+    def test_the_check_is_read_from_the_committed_adding_event(self) -> None:
+        """A killed add leaves an adding event the record never took; the retry's (last) event is the recorded one."""
+        trim = approval('T', title='TEST trim of A', **script(12, 39, (50, 79)))
+        with mock.patch('studio.native_budget_store.write_pending_replace', side_effect=KeyboardInterrupt):
+            with self.assertRaises(KeyboardInterrupt):
+                self.add('T', trim)                                 # its event names A only
+        self.add('U', approval('U', title='TEST other trim of A', **script(10, 39, (50, 77))))
+        retried = self.add('T', trim)
+        status = native_batch.cmd_status(ns(batch='batch-auth'))['clips']['T']['duplicationCheck']
+        self.assertEqual([[item['clip'] for item in check] for check in (retried['duplicationCheck'], status)],
+                         [['A', 'U'], ['A', 'U']])
+
     def test_an_adding_event_without_the_key_shows_no_key(self) -> None:
         """X144 minor 6: a clip-added event written before M-052 (no duplicationCheck) shows no key, never null."""
         self.add('C', approval('C'))
@@ -88,7 +100,8 @@ class DecisionLineTests(AddClipCase):
         self.assertEqual((added['committed'], added['decisions'], added['pendingDecisions']),
                          (True, [], [{'decisionId': pending, 'refusal': FULL}]))
         self.assertEqual((sorted(self.record()['clips']), self.trail('coordination-decision')), (['A', 'B', 'T'], []))
-        native_batch.cmd_status(ns(batch='batch-auth'))
+        for _ in range(2):                                          # the first status writes it; the second nothing
+            native_batch.cmd_status(ns(batch='batch-auth'))
         self.assertEqual([line['decisionId'] for line in self.trail('coordination-decision')], [pending])
         again = self.add('T', trim)
         self.assertEqual((again['replayed'], again['decisions'], len(self.trail('coordination-decision'))),

@@ -6,6 +6,13 @@ decoded is written to disk. Detection runs on a copy scaled to at most ``DETECTI
 wide. ``face_rows`` maps every box back to source pixels and keeps only faces at or above the
 ``FACE_TRACK`` score threshold. Contact-sheet tiles are cut from the full-resolution frame.
 
+The selection also holds decode-only keepalive frames (``native_speaker_sampling.keepalive_frames``).
+Each decoded frame, keepalive or sampled, prints one advancing ``SNIPER_PROGRESS speaker-frames <n>``
+line for the inspection owner's idle watchdog. A keepalive frame is never measured.
+
+A face box that lies wholly outside the frame is refused (REVIEW m4). It is never recorded, and never
+shown as the whole frame.
+
 A sheet shows, for each retained range of a clip, its first frame, then a sampled frame at least
 ``SHEET_SPACING_SECONDS`` after the previous one, then its last frame. Each tile is one face crop at
 480 px (or the whole frame when no face was found), labelled with source seconds and frame index.
@@ -25,7 +32,7 @@ from cut_preview_io import real_directory
 from producer_config import FACE_TRACK
 from studio.native_runtime import digest as file_digest
 from studio.native_selected_frames import compare_selected_frames
-from studio.native_speaker_sampling import frame_selection
+from studio.native_speaker_sampling import KEEPALIVE_FRAMES, frame_selection
 from studio.native_stage_evidence import require
 
 DETECTION_WIDTH = 1280
@@ -86,7 +93,15 @@ def detection_image(bgr: np.ndarray) -> tuple[np.ndarray, list[float]]:
 
 
 def face_detector(model: Path, threshold: float) -> Callable[[np.ndarray], list[dict]]:
-    """YuNet over a BGR image through ``study_zoom_faces.all_faces`` (imported only where measured)."""
+    """YuNet over a BGR image through ``study_zoom_faces.all_faces`` (imported here, where it is needed).
+
+    Args:
+        model: The FACE_TRACK YuNet model.
+        threshold: The FACE_TRACK score threshold, applied by the detector.
+
+    Returns:
+        ``detect(image) -> [{x, y, w, h, score}]`` in the image's pixels.
+    """
     from study.study_zoom_faces import all_faces
     detector = cv2.FaceDetectorYN.create(str(model), '', (320, 320), score_threshold=threshold)
     return lambda image: all_faces(detector, image)
@@ -102,7 +117,15 @@ def _spaced(inside: list[int], times: dict[int, float]) -> list[int]:
 
 
 def sheet_frames(sampling: dict) -> dict[int, list[str]]:
-    """Frame -> clips whose contact sheets show it: each range's first, spaced and last frames."""
+    """The frames each clip's contact sheets show.
+
+    Args:
+        sampling: ``observation_plan``'s result.
+
+    Returns:
+        Frame -> sorted clip ids: each range's first frame, frames spaced SHEET_SPACING_SECONDS apart, and
+        its last frame.
+    """
     chosen: dict[int, set[str]] = {}
     times = {row['frame']: row['t'] for row in sampling['frames']}
     for span in sampling['ranges']:
@@ -133,19 +156,47 @@ def _tile(image: np.ndarray, label: str) -> bytes:
     return _jpeg(canvas)
 
 
+def require_inside(row: dict, width: int, height: int) -> None:
+    """Refuse a face box that lies wholly outside the frame (a partly outside box is kept, unclamped).
+
+    Args:
+        row: A ``face_rows`` row, in source pixels.
+        width: The frame width in source pixels.
+        height: The frame height in source pixels.
+
+    Raises:
+        ValueError: Naming the frame and the box.
+    """
+    for face in row['faces']:
+        if not (face['x'] < width and face['x'] + face['w'] > 0 and face['y'] < height and face['y'] + face['h'] > 0):
+            raise ValueError(f"Face box at source frame {row['frame']} lies outside the {width}x{height} frame: {face}")
+
+
 def face_tiles(bgr: np.ndarray, row: dict) -> list[bytes]:
-    """One labelled tile per face in a measured frame, or the whole frame when none was found."""
+    """Labelled contact-sheet tiles for one measured frame.
+
+    Args:
+        bgr: The full-resolution frame.
+        row: Its ``face_rows`` row, in source pixels.
+
+    Returns:
+        One JPEG tile per face (the box plus a CROP_MARGIN margin, clamped to the frame), or one tile of the
+        whole frame labelled "no face" when none was found.
+
+    Raises:
+        ValueError: A box lies wholly outside the frame.
+    """
+    height, width = bgr.shape[:2]
+    require_inside(row, width, height)
     label = f"{row['t']:.2f} s  f{row['frame']}"
     if not row['faces']:
         return [_tile(bgr, f'{label}  no face')]
-    height, width = bgr.shape[:2]
     tiles = []
     for index, face in enumerate(row['faces'], start=1):
         margin = CROP_MARGIN * max(face['w'], face['h'])
         x0, y0 = max(0, int(face['x'] - margin)), max(0, int(face['y'] - margin))
         x1, y1 = min(width, int(face['x'] + face['w'] + margin)), min(height, int(face['y'] + face['h'] + margin))
-        crop = bgr[y0:y1, x0:x1] if x1 > x0 and y1 > y0 else bgr
-        tiles.append(_tile(crop, f'{label}  face {index}'))
+        tiles.append(_tile(bgr[y0:y1, x0:x1], f'{label}  face {index}'))
     return tiles
 
 
@@ -170,7 +221,15 @@ def _sheet(chunk: list[tuple[int, bytes]]) -> np.ndarray:
 
 
 def write_sheets(directory: Path, tiles: dict[str, list[tuple[int, bytes]]]) -> list[dict]:
-    """Write ``<clipId>-<n>.jpg`` grids (n from 1) in the new ``directory``; returns ``{path, sha256, frames}``."""
+    """Write each clip's tiles as ``<clipId>-<n>.jpg`` grids of COLUMNS x ROWS tiles, n from 1.
+
+    Args:
+        directory: A new folder (it must not exist).
+        tiles: Clip id -> ``(frame, JPEG bytes)`` in frame order.
+
+    Returns:
+        ``{path, sha256, frames}`` rows, clip by clip.
+    """
     directory.mkdir(mode=0o700)
     rows, per_sheet = [], COLUMNS * ROWS
     for clip in sorted(tiles):
@@ -184,41 +243,51 @@ def write_sheets(directory: Path, tiles: dict[str, list[tuple[int, bytes]]]) -> 
 
 @dataclass
 class FramePass:
-    """Per decoded frame: faces in source pixels, plus sheet tiles for the frames sheets show.
+    """Per decoded frame: progress, then (for a sampled frame) faces in source pixels and sheet tiles.
 
-    Each measured frame prints ``SNIPER_PROGRESS speaker-frames <n>``: the inspection owner's
-    idle watchdog (600 s) counts only advancing progress lines as forward progress.
+    Each decoded frame prints ``SNIPER_PROGRESS speaker-frames <n>``: the inspection owner's idle watchdog
+    (600 s) counts only advancing progress lines. A frame not in ``rows`` is a decode-only keepalive and
+    returns None without detection.
     """
 
     rows: dict[int, dict]
     detect: Callable[[np.ndarray], list[dict]]
     sheets: dict[int, list[str]]
     tiles: dict[str, list[tuple[int, bytes]]] = field(default_factory=dict)
-    measured: int = 0
+    decoded: int = 0
 
-    def __call__(self, frame: int, pixels: np.ndarray) -> dict:
+    def __call__(self, frame: int, pixels: np.ndarray) -> dict | None:
         """Measure one RGB frame (valid only during this call) and keep its tiles as JPEG bytes."""
+        self.decoded += 1
+        print(f'SNIPER_PROGRESS speaker-frames {self.decoded}', flush=True)
+        if frame not in self.rows:
+            return None
         bgr = cv2.cvtColor(pixels, cv2.COLOR_RGB2BGR)
         small, scale = detection_image(bgr)
-        plan = self.rows[frame]
-        row = face_rows([{'frame': frame, 't': plan['t'], 'scale': scale}], lambda _row: self.detect(small))[0]
+        row = face_rows([{'frame': frame, 't': self.rows[frame]['t'], 'scale': scale}], lambda _row: self.detect(small))[0]
+        require_inside(row, bgr.shape[1], bgr.shape[0])
         for clip in self.sheets.get(frame, []):
             self.tiles.setdefault(clip, []).extend((frame, tile) for tile in face_tiles(bgr, row))
-        self.measured += 1
-        print(f'SNIPER_PROGRESS speaker-frames {self.measured}', flush=True)
         return row
 
 
 def measure_frames(request: dict, source: dict, sampling: dict, root: Path) -> tuple[list[dict], list[dict], dict]:
-    """Decode the sampled frames once; returns (face rows, sheet rows, decode summary).
+    """Decode the sampled frames and their keepalives once; detect faces and write the contact sheets.
 
     Args:
         request: The inspection request (``model`` path and ``scoreThreshold`` from FACE_TRACK).
         source: The manifest source row; its bytes were checked against ``sourceSha256``.
-        sampling: ``observation_plan``'s result.
+        sampling: ``observation_plan``'s result plus ``clock`` (``native_speaker_media.stream_clock``).
         root: The inspection directory (the filter script and ``sheets/`` live here).
+
+    Returns:
+        (face rows for the sampled frames only, sheet rows, the reader's decode summary with
+        ``keepaliveFrames`` and ``keepaliveEvery``).
     """
     detect = face_detector(Path(request['model']['path']), request['scoreThreshold'])
+    selection = frame_selection(source, sampling, sampling['clock']['frameCount'])
     frame_pass = FramePass({row['frame']: row for row in sampling['frames']}, detect, sheet_frames(sampling))
-    faces, decode = compare_selected_frames(Path(source['path']), frame_selection(source, sampling), frame_pass, root)
-    return faces, write_sheets(root / 'sheets', frame_pass.tiles), decode
+    rows, decode = compare_selected_frames(Path(source['path']), selection, frame_pass, root)
+    keepalive = {'keepaliveFrames': len(selection.frames) - len(sampling['frames']), 'keepaliveEvery': KEEPALIVE_FRAMES}
+    measured = [row for row in rows if row is not None]
+    return measured, write_sheets(root / 'sheets', frame_pass.tiles), {**decode, **keepalive}

@@ -62,7 +62,7 @@ class StereoTests(unittest.TestCase):
                                    observations.stereo_rows, samples, words, rate)
 
     def test_mono_source_has_no_stereo_cue(self) -> None:
-        """Mono or a dead channel: lrDb is null for every word and the limit is named; activity is still measured."""
+        """Mono, a dead channel or dual mono: lrDb is null for every word and the limit is named (E-S1)."""
         words = _words([(0.2, 0.6), (1.0, 1.4)])
         mono = _tone(2.0, 0.5)
         for samples in (mono, mono.reshape(-1, 1)):
@@ -72,9 +72,23 @@ class StereoTests(unittest.TestCase):
             self.assertIn('Mono source', observations.stereo_cue(samples, RATE))
         dead = np.stack([mono, np.zeros_like(mono)], axis=1)
         rows = observations.stereo_rows(dead, words, RATE)
-        self.assertEqual([row['lrDb'] for row in rows], [None, None])
-        self.assertGreater(rows[0]['leftDb'], rows[0]['rightDb'])
+        self.assertEqual([(row['rightDb'], row['lrDb']) for row in rows], [(None, None), (None, None)])
+        self.assertAlmostEqual(rows[0]['leftDb'], -9.03, delta=0.1)
         self.assertIn('Dead channel', observations.stereo_cue(dead, RATE))
+        dual = np.stack([mono, mono], axis=1)
+        self.assertEqual([row['lrDb'] for row in observations.stereo_rows(dual, words, RATE)], [None, None])
+        self.assertIn('Identical channels', observations.stereo_limits(dual, [], RATE)[0])
+        self.assertEqual(self._word_dropout(), (True, [1.94, None, 1.94], ['Dead channel on source words 1 (']))
+
+    def _word_dropout(self) -> tuple:
+        """Right channel digitally dead for one word inside healthy stereo (review probe D2)."""
+        left = _tone(5.0, 0.5)
+        right = np.concatenate([_tone(2.0, 0.4), np.zeros(RATE), _tone(2.0, 0.4)])
+        samples = np.stack([left, right], axis=1)
+        rows = observations.stereo_rows(samples, _words([(0.5, 0.9), (2.3, 2.7), (3.5, 3.9)]), RATE)
+        limits = observations.stereo_limits(samples, rows, RATE)
+        return (observations.stereo_cue(samples, RATE) is None, [row['lrDb'] for row in rows],
+                [limit[:len('Dead channel on source words 1 (')] for limit in limits])
 
 
 class SamplingTests(unittest.TestCase):
@@ -146,6 +160,7 @@ class WorkerTests(unittest.TestCase):
         guard = AssertionError('the worker reached its inputs or media')
         with patch.dict(os.environ, environment, clear=True), \
                 patch.object(observations, 'current_inputs', side_effect=guard), \
+                patch.object(observations, 'probe_streams', side_effect=guard), \
                 patch.object(observations, 'decode_audio', side_effect=guard), \
                 patch.object(observations, 'measure_frames', side_effect=guard), \
                 self.assertRaisesRegex(ValueError, message):

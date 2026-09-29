@@ -1,17 +1,19 @@
-"""What speaker observations sample, and the 8 kHz audio they are measured on (P2-06).
+"""What speaker observations sample, on which frame clock (P2-06). Everything here is pure.
 
 Each approved script names inclusive transcript word ranges. A range is retained source time from its
 first word's start to its last word's end. Its source frames are the frames on screen during that time,
-from ``floor(start * rate)`` to ``ceil(end * rate)`` exclusive. Inside a range every 6th frame is sampled,
-counted from the range's first frame. Every frame is sampled where a picture can change: the last 1.0 s
-of the range (exits) and the first 0.5 s after its start (cut joins). The last 0.5 s before its end lies
-inside the 1.0 s tail. Frames shared by two clips are sampled once, and dense wins.
+from ``floor(start * rate)`` to ``ceil(end * rate)`` exclusive. Word times are read as the decimals the
+transcript wrote (``repr``), not as binary floats, so no frame outside the range is sampled (REVIEW m1).
 
-The plan is a pure function of the scripts, the transcript words and the source frame rate. So a caller
-can refuse an oversized batch before any media is opened (E-S6: more than 6000 frames is refused).
+Inside a range every 6th frame is sampled, counted from the range's first frame. Every frame is sampled
+where a picture can change: the last 1.0 s of the range (exits) and the first 0.5 s after its start (cut
+joins). The last 0.5 s before its end lies inside the 1.0 s tail. Frames shared by two clips are sampled
+once, and dense wins. More than 6000 frames is refused (E-S6), so a caller can refuse an oversized batch
+before any media is opened.
 
-Audio is decoded at the speech-band filter's own rate. ``audit.dialogue_consistency._window_rms`` designs
-its 120-3400 Hz band-pass at ``SAMPLE_RATE`` (8000 Hz), so any other rate would silently move the band.
+The one decode reads from frame 0 to the stream's last frame. ``keepalive_frames`` adds decode-only frames
+so that no stretch of that decode passes ``KEEPALIVE_FRAMES`` frames without one; each prints progress for
+the inspection owner's idle watchdog and is never measured (REVIEW M1).
 """
 from __future__ import annotations
 
@@ -20,10 +22,6 @@ from fractions import Fraction
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import numpy as np
-
-from audit.dialogue_consistency import SAMPLE_RATE
-from cut_preview_io import MAX_JSON, run_bounded
 from studio.native_budget_schema import SHA256
 from studio.native_budget_selection import expand_words
 from studio.native_budget_store import require_clip_id
@@ -38,8 +36,8 @@ DENSE_TAIL_SECONDS = Fraction(1)
 DENSE_BOUNDARY_SECONDS = Fraction(1, 2)
 MAX_FRAMES = 6000
 CAP_MESSAGE = 'Speaker observation sampling exceeds 6000 frames'
+KEEPALIVE_FRAMES = 1800   # 60 s of 30p source: the 600 s idle deadline then holds down to a 3 fps decode
 SCRIPT_KEYS = frozenset({'clipId', 'scriptIdentity', 'wordRanges'})
-AUDIO_TIMEOUT_SECONDS = 900
 
 
 def checked_scripts(scripts: object, word_count: int) -> list[dict]:
@@ -117,24 +115,46 @@ def _word(words: list[dict], index: int) -> dict:
 
 
 def retained_ranges(scripts: list[dict], words: list[dict]) -> list[dict]:
-    """Each approved word range as retained source seconds: ``{clipId, wordRange, start, end}``."""
+    """Each approved word range as retained source seconds.
+
+    Args:
+        scripts: Checked script rows (``checked_scripts``).
+        words: The transcript's ``{sourceWord, text, start, end}`` rows.
+
+    Returns:
+        ``{clipId, wordRange, start, end}`` rows, clip by clip in script order.
+    """
     return [{'clipId': row['clipId'], 'wordRange': [first, last],
              'start': _word(words, first)['start'], 'end': _word(words, last)['end']}
             for row in scripts for first, last in row['wordRanges']]
 
 
 def retained_words(scripts: list[dict], words: list[dict]) -> list[dict]:
-    """Every word any script keeps, once, in transcript order."""
+    """Every word any script keeps, once, in transcript order.
+
+    Args:
+        scripts: Checked script rows.
+        words: The transcript's word rows.
+
+    Returns:
+        The retained word rows, the ones ``stereo_rows`` measures.
+    """
     indexes = sorted({index for row in scripts for index in expand_words(row['wordRanges'])})
     return [_word(words, index) for index in indexes]
 
 
+def _decimal(seconds: float) -> Fraction:
+    """The decimal a JSON number was written as (its shortest ``repr``), not its binary float value."""
+    return Fraction(repr(float(seconds)))
+
+
 def _range_frames(start: float, end: float, rate: Fraction) -> tuple[int, int, dict[int, bool]]:
     """(first frame, end frame exclusive, {frame: dense}) of one retained range."""
-    first, stop = math.floor(Fraction(start) * rate), math.ceil(Fraction(end) * rate)
+    begin, finish = _decimal(start), _decimal(end)
+    first, stop = math.floor(begin * rate), math.ceil(finish * rate)
     if math.ceil((stop - first) / EVERY_NTH_FRAME) > MAX_FRAMES:
         raise ValueError(CAP_MESSAGE)
-    tail, head = Fraction(end) - DENSE_TAIL_SECONDS, Fraction(start) + DENSE_BOUNDARY_SECONDS
+    tail, head = finish - DENSE_TAIL_SECONDS, begin + DENSE_BOUNDARY_SECONDS
     frames = {}
     for frame in range(first, stop):
         dense = frame / rate >= tail or frame / rate < head
@@ -177,6 +197,12 @@ def observation_plan(request: ObservationRequest, words: list[dict], rate: Fract
 def source_clock(source: dict) -> Fraction:
     """The source's constant frame rate; refuse what frame indices cannot address exactly.
 
+    Args:
+        source: The manifest source row (``frameRate``, ``vfr``, ``rotation``, ``resolution``).
+
+    Returns:
+        The frame rate as a Fraction.
+
     Raises:
         ValueError: A variable frame rate, a rotated picture, or a malformed rate or geometry.
     """
@@ -194,39 +220,39 @@ def source_clock(source: dict) -> Fraction:
     return rate
 
 
-def frame_selection(source: dict, sampling: dict) -> SelectedFrames:
-    """The sampled frames as one exact selection over the source's frame clock."""
-    rate = source_clock(source)
-    total = math.ceil(Fraction(source['duration']) * rate)
-    width, height = source['resolution']
-    return SelectedFrames(tuple(row['frame'] for row in sampling['frames']), width, height, total)
-
-
-def decode_audio(source: dict, ffmpeg: str) -> np.ndarray:
-    """Decode the source's first audio stream once, at 8000 Hz, in its own channel count (1 or 2).
+def keepalive_frames(planned: list[int], frame_count: int) -> list[int]:
+    """Decode-only frames that keep every stretch of the one decode within KEEPALIVE_FRAMES frames.
 
     Args:
-        source: The manifest source row (``path``, ``duration``, ``audio.channels``).
-        ffmpeg: The resolved ffmpeg the inspection owner pinned.
+        planned: The sampled frames, ascending.
+        frame_count: Frames in the video stream (its counted packets).
 
     Returns:
-        Float64 samples shaped (count, channels).
+        Frames not in ``planned``: every KEEPALIVE_FRAMES-th frame from 0, and the last frame. With them the
+        selection starts at frame 0, ends at the last frame, and no two neighbours are further apart.
+    """
+    grid = {*range(0, frame_count, KEEPALIVE_FRAMES), frame_count - 1}
+    return sorted(grid - set(planned))
+
+
+def frame_selection(source: dict, sampling: dict, frame_count: int) -> SelectedFrames:
+    """The sampled frames plus their keepalives, as one exact selection over the counted video frames.
+
+    Args:
+        source: The manifest source row (its ``resolution`` is the decoded geometry).
+        sampling: ``observation_plan``'s result.
+        frame_count: Frames in the video stream, from ``native_speaker_media.stream_clock``.
+
+    Returns:
+        The shared reader's ``SelectedFrames``.
 
     Raises:
-        ValueError: The source has no audio or more than two channels.
-        RuntimeError: The decode failed or returned a partial sample frame.
+        ValueError: A sampled frame lies at or past the stream's last frame.
     """
-    audio = source.get('audio') or {}
-    channels = audio.get('channels')
-    if audio.get('present') is not True or type(channels) is not int or channels not in (1, 2):
-        raise ValueError(f'Speaker observations measure mono or stereo audio; the source has {channels!r} channel(s)')
-    command = [ffmpeg, '-nostdin', '-v', 'error', '-xerror', '-i', source['path'], '-map', '0:a:0', '-vn',
-               '-ac', str(channels), '-ar', str(SAMPLE_RATE), '-f', 'f32le', 'pipe:1']
-    maximum = (math.ceil(source['duration']) + 2) * SAMPLE_RATE * channels * 4 + MAX_JSON
-    result = run_bounded(command, maximum=maximum, timeout=AUDIO_TIMEOUT_SECONDS)
-    if result.returncode or result.stderr.strip() or not result.stdout:
-        raise RuntimeError('Speaker observation audio decode failed: ' + result.stderr[-3000:].decode(errors='replace'))
-    raw = np.frombuffer(result.stdout, dtype='<f4')
-    if raw.size % channels:
-        raise RuntimeError('Speaker observation audio decode returned a partial sample frame')
-    return raw.reshape(-1, channels).astype(np.float64)
+    planned = [row['frame'] for row in sampling['frames']]
+    if type(frame_count) is not int or frame_count <= 0 or (planned and planned[-1] >= frame_count):
+        raise ValueError(f'Speaker observation sampling reaches source frame {planned[-1] if planned else None}, '
+                         f'but the video stream holds {frame_count!r} frames')
+    width, height = source['resolution']
+    return SelectedFrames(tuple(sorted({*planned, *keepalive_frames(planned, frame_count)})), width, height,
+                          frame_count)

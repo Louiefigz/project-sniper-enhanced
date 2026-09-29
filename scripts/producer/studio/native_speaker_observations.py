@@ -15,6 +15,13 @@ reference as ``<output>/SPEAKER-OBSERVATIONS.json``. P2-07 binds that reference 
 ``read_inspection``. It compares ``source.sourceSha256`` with the manifest source, and ``scripts`` with its
 coverage clips.
 
+Sibling modules:
+- ``native_speaker_inputs``: input freezing and script binding;
+- ``native_speaker_sampling``: the pure frame plan and clock;
+- ``native_speaker_media``: the ffprobe and audio-decode subprocesses;
+- ``native_speaker_stereo``: audio levels;
+- ``native_speaker_faces``: the picture pass and contact sheets.
+
 CLI: native_speaker_observations.py --manifest M --transcript T (--batch B | --scripts F) --output DIR
 """
 from __future__ import annotations
@@ -30,28 +37,28 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from audit.dialogue_consistency import SAMPLE_RATE
-from cut_preview_io import bound_json, write_new
-from producer_config import FACE_TRACK
+from cut_preview_io import write_new
 from studio.native_runtime import digest as file_digest
 from studio.native_speaker_faces import DETECTION_WIDTH, face_rows, measure_frames
-from studio.native_speaker_sampling import (checked_scripts, decode_audio, observation_plan, retained_words,
-                                            source_clock, source_words)
-from studio.native_speaker_stereo import stereo_cue, stereo_rows
+from studio.native_speaker_inputs import batch_scripts, current_inputs, file_scripts, inspection_request
+from studio.native_speaker_media import decode_audio, probe_streams, stream_clock
+from studio.native_speaker_sampling import observation_plan, retained_words, source_clock
+from studio.native_speaker_stereo import stereo_cue, stereo_limits, stereo_rows
 from studio.native_stage_evidence import require
 from studio.owned_inspection import read_inspection, require_worker, run_inspection
 
-__all__ = ['ObservationRequest', 'face_rows', 'observation_plan', 'observe', 'stereo_cue', 'stereo_rows', 'worker']
+__all__ = ['ObservationRequest', 'face_rows', 'observation_plan', 'observe', 'stereo_cue', 'stereo_limits',
+           'stereo_rows', 'worker']
 
 KIND = 'sniper-speaker-observations'
-REQUEST_KIND = 'sniper-speaker-observations-request'
 REFERENCE_NAME = 'SPEAKER-OBSERVATIONS.json'
 DETECTOR = 'yunet-2023mar'
 WORKER = Path(__file__).resolve()
-SOURCE_KEYS = ('id', 'path', 'sourceSha256', 'duration', 'frameRate', 'vfr', 'resolution', 'rotation', 'audio')
 CUE_LIMIT = ('Measurements are cues, not attribution; stills do not establish lip synchronization; '
              'nothing here is listening.')
 LEVEL_LIMIT = ("Word levels are 120-3400 Hz signal energy over each word's sample span, not voice activity: they "
-               "include any speech-band music or noise, and the louder channel need not be the speaker's side.")
+               "include any speech-band music or noise, and the louder channel need not be the speaker's side; a "
+               "channel level below -120 dBFS (digital silence) is recorded as null.")
 FACE_LIMIT = (f'Faces are YuNet detections at or above the FACE_TRACK score threshold on frames scaled to at most '
               f'{DETECTION_WIDTH} px wide, mapped to source pixels; only sampled frames were measured, and a '
               'missed detection is not an absence.')
@@ -74,55 +81,15 @@ class ObservationRequest:
     output: Path
 
 
-def single_source(manifest: dict, where: Path) -> dict:
-    """The manifest's one admitted source (its SOURCE_KEYS), with its media path made absolute."""
-    sources = manifest.get('sources')
-    if type(sources) is not list or len(sources) != 1 or not isinstance(sources[0], dict):
-        raise ValueError(f'Speaker observations measure one source; {where} must list exactly one admitted source')
-    row = sources[0]
-    missing = [key for key in SOURCE_KEYS if key not in row]
-    if missing or type(row['path']) is not str or type(row['sourceSha256']) is not str \
-            or type(row['duration']) not in (int, float) or not row['duration'] > 0:
-        raise ValueError(f'{where} source needs {list(SOURCE_KEYS)} with a path, a sourceSha256 and a positive duration')
-    return {**{key: row[key] for key in SOURCE_KEYS}, 'path': str(where.parent / row['path'])}
+def _pinned_decoders(tools: dict) -> None:
+    """Refuse unless ``ffmpeg``/``ffprobe`` on PATH are the pinned tools (the shared frame reader runs those).
 
-
-def inspection_request(request: ObservationRequest) -> dict:
-    """Validate every input and freeze the worker's request; no media is opened.
+    Args:
+        tools: The inspection's resolved tools.
 
     Raises:
-        ValueError: Not one source, a refused transcript or script, or sampling over its cap (E-S6).
+        ValueError: Either PATH tool is missing or resolves elsewhere.
     """
-    manifest, transcript = request.manifest.resolve(strict=True), request.transcript.resolve(strict=True)
-    source = single_source(bound_json(manifest), manifest)
-    transcript_sha = file_digest(transcript)
-    words = source_words(transcript, transcript_sha, source['duration'])
-    scripts = checked_scripts(request.scripts, len(words))
-    observation_plan(request, words, source_clock(source))
-    model = Path(FACE_TRACK['yunet_model_path']).resolve(strict=True)
-    return {'kind': REQUEST_KIND, 'project': str(manifest.parent), 'source': source, 'scripts': scripts,
-            'manifest': {'path': str(manifest), 'sha256': file_digest(manifest)},
-            'transcript': {'path': str(transcript), 'sha256': transcript_sha},
-            'model': {'path': str(model), 'sha256': file_digest(model)},
-            'scoreThreshold': float(FACE_TRACK['yunet_score_threshold'])}
-
-
-def current_inputs(request: dict) -> dict:
-    """Re-observe the manifest, transcript and model the request froze; returns ``{source, words}``."""
-    for key in ('manifest', 'transcript', 'model'):
-        require(file_digest(Path(request[key]['path'])) == request[key]['sha256'], f'Speaker observation {key} changed')
-    require(Path(request['model']['path']) == Path(FACE_TRACK['yunet_model_path']).resolve(strict=True),
-            'Speaker observation model is not the FACE_TRACK model')
-    manifest = Path(request['manifest']['path'])
-    source = single_source(bound_json(manifest), manifest)
-    require(source == request['source'], 'Speaker observation source row changed')
-    words = source_words(Path(request['transcript']['path']), request['transcript']['sha256'], source['duration'])
-    require(checked_scripts(request['scripts'], len(words)) == request['scripts'], 'Speaker observation scripts changed')
-    return {'source': source, 'words': words}
-
-
-def _pinned_decoders(tools: dict) -> None:
-    """The shared frame reader runs ``ffmpeg``/``ffprobe`` from PATH; they must be the pinned tools."""
     for name in ('ffmpeg', 'ffprobe'):
         found = shutil.which(name)
         require(found is not None and Path(found).resolve() == Path(tools[name]).resolve(),
@@ -130,8 +97,18 @@ def _pinned_decoders(tools: dict) -> None:
 
 
 def build_record(request: dict, source: dict, rate: Fraction, measured: dict) -> dict:
-    """The sealed measurement record (P2-06 record keys; P2-07 reads ``source`` and ``scripts``)."""
-    limits = [CUE_LIMIT, LEVEL_LIMIT, FACE_LIMIT] + ([measured['stereoLimit']] if measured['stereoLimit'] else [])
+    """The sealed measurement record, with exactly the P2-06 record keys.
+
+    Args:
+        request: The inspection request (``transcript``, ``scripts``, ``model``, ``tools``, ``scoreThreshold``).
+        source: The manifest source row.
+        rate: The source frame rate.
+        measured: ``words``, ``faces``, ``sampling``, ``sheets`` and ``stereoLimits``.
+
+    Returns:
+        The record. P2-07 binds ``source.sourceSha256``, ``source.transcriptSha256`` and ``scripts``.
+    """
+    limits = [CUE_LIMIT, LEVEL_LIMIT, FACE_LIMIT, *measured['stereoLimits']]
     return {'schemaVersion': 1, 'kind': KIND,
             'source': {'id': source['id'], 'sourceSha256': source['sourceSha256'],
                        'transcriptSha256': request['transcript']['sha256']},
@@ -149,29 +126,39 @@ def _progress(phase: str) -> None:
     print(f'SNIPER_PROGRESS {phase} 1', flush=True)
 
 
+def _same_source(source: dict, when: str) -> None:
+    """Re-hash the source media; its bytes must still be ``sourceSha256``."""
+    require(file_digest(Path(source['path'])) == source['sourceSha256'], f'Speaker observation source bytes changed {when}')
+    _progress(f'speaker-source-{when}')
+
+
 def _measure(request: dict, inputs: dict, root: Path) -> dict:
-    """Decode the audio and the sampled frames once each, then build the record."""
+    """Probe the stream clock, decode the audio and the sampled frames once each, then build the record."""
     source, words = inputs['source'], inputs['words']
     rate = source_clock(source)
     _pinned_decoders(request['tools'])
-    require(file_digest(Path(source['path'])) == source['sourceSha256'], 'Speaker observation source bytes changed')
-    _progress('speaker-source')
+    _same_source(source, 'before')
+    clock = stream_clock(probe_streams(source['path'], request['tools']['ffprobe']), rate)
     samples = decode_audio(source, request['tools']['ffmpeg'])
-    measured = {'words': stereo_rows(samples, retained_words(request['scripts'], words), SAMPLE_RATE),
-                'stereoLimit': stereo_cue(samples, SAMPLE_RATE)}
+    rows = stereo_rows(samples, retained_words(request['scripts'], words), SAMPLE_RATE)
+    measured = {'words': rows, 'stereoLimits': stereo_limits(samples, rows, SAMPLE_RATE)}
     audio = {'sampleRate': SAMPLE_RATE, 'channels': int(samples.shape[1])}
     _progress('speaker-audio')
     planned = ObservationRequest(Path(request['manifest']['path']), Path(request['transcript']['path']),
                                  tuple(request['scripts']), root)
-    sampling = observation_plan(planned, words, rate)
+    sampling = {**observation_plan(planned, words, rate), 'clock': clock}
     faces, sheets, decode = measure_frames(request, source, sampling, root)
-    _progress('speaker-sheets')
+    _same_source(source, 'after')
     measured.update(faces=faces, sheets=sheets, sampling={**sampling, 'audio': audio, 'decode': decode})
     return build_record(request, source, rate, measured)
 
 
 def worker(file: Path) -> None:
-    """Measure only under the live inspection owner; a detached or changed request is refused first."""
+    """Measure only under the live inspection owner; a detached or changed request is refused first.
+
+    Args:
+        file: The owner's ``request.json``; the record is written beside it as ``result.json``.
+    """
     request = require_worker(file, WORKER)
     inputs = current_inputs(request)
     record = _measure(request, inputs, file.parent)
@@ -203,33 +190,6 @@ def observe(request: ObservationRequest) -> dict:
     return reference
 
 
-def batch_scripts(batch: str, manifest: Path, transcript: Path) -> tuple[dict, ...]:
-    """Every clip's current approved script in a batch; each must be on this source and transcript."""
-    from studio import native_budget_store
-    from studio.production.approvals import read_approval
-    from studio.production.session import read_now
-    native_budget_store.require_batch_id(batch)
-    source = single_source(bound_json(manifest.resolve(strict=True)), manifest.resolve(strict=True))
-    identity = {'source': source['sourceSha256'], 'transcript': file_digest(transcript.resolve(strict=True))}
-    root = native_budget_store.default_root()
-    record, _elapsed = read_now(root, batch)
-    rows = []
-    for clip in sorted(record['clips']):
-        current = read_approval(root, batch, clip)['current']
-        require(current is not None and all(current.get(key) == value for key, value in identity.items()),
-                f'Clip {clip} of batch {batch} has no approved script on this source and transcript')
-        rows.append({'clipId': clip, 'scriptIdentity': current['script'], 'wordRanges': current['wordRanges']})
-    return tuple(rows)
-
-
-def file_scripts(path: Path) -> tuple[dict, ...]:
-    """Scripts from a ``{"scripts": [...]}`` file (tests and replays); rows are checked by the request."""
-    value = bound_json(path.resolve(strict=True))
-    require(set(value) == {'scripts'} and type(value['scripts']) is list,
-            f'{path} must be {{"scripts": [{{clipId, scriptIdentity, wordRanges}}, ...]}}')
-    return tuple(value['scripts'])
-
-
 def _parser() -> argparse.ArgumentParser:
     """The CLI's arguments; ``--worker`` is the owner's internal entry."""
     parser = argparse.ArgumentParser(description='Measure speaker observations once for one source.')
@@ -237,14 +197,23 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument('--transcript', type=Path)
     scripts = parser.add_mutually_exclusive_group()
     scripts.add_argument('--batch', help="read every clip's current approved script from this batch")
-    scripts.add_argument('--scripts', type=Path, help='a JSON file {"scripts": [{clipId, scriptIdentity, wordRanges}]}')
+    scripts.add_argument('--scripts', type=Path,
+                         help='a JSON file {"sourceSha256", "transcriptSha256", '
+                              '"scripts": [{clipId, scriptIdentity, wordRanges}]}')
     parser.add_argument('--output', type=Path, help='a new directory')
     parser.add_argument('--worker', type=Path, help=argparse.SUPPRESS)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the worker, or measure one source and print the published reference as one JSON line."""
+    """Run the worker, or measure one source and print the published reference as one JSON line.
+
+    Args:
+        argv: The arguments (``sys.argv[1:]`` when None).
+
+    Returns:
+        0 on success; argument errors exit 2 through argparse.
+    """
     parser = _parser()
     args = parser.parse_args(argv)
     if args.worker:
@@ -252,7 +221,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if not (args.manifest and args.transcript and args.output and (args.batch or args.scripts)):
         parser.error('--manifest, --transcript, --output and one of --batch or --scripts are required')
-    scripts = batch_scripts(args.batch, args.manifest, args.transcript) if args.batch else file_scripts(args.scripts)
+    scripts = batch_scripts(args.batch, args.manifest, args.transcript) if args.batch \
+        else file_scripts(args.scripts, args.manifest, args.transcript)
     reference = observe(ObservationRequest(args.manifest, args.transcript, scripts, args.output.absolute()))
     print(json.dumps(reference, sort_keys=True))
     return 0

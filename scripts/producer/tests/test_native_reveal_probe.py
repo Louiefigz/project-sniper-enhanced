@@ -109,6 +109,11 @@ class RevealCheckTests(unittest.TestCase):
         self.assertIn('frame 745', row['message'])
         passed = self.check_again(result([]))
         self.assertEqual((passed['status'], reveal_defects(passed)), ('reveal-probe-pass', []))
+        later = {**FLASH, 'condition': 'visible-before-reveal', 'element': 'hf-later', 'localFrame': 60, 'frame': 805}
+        self.options = RevealProbeOptions(self.project, self.base / 'reveal-3', (LINT,))
+        both = self.check(result([FLASH, later]))
+        self.assertEqual([(row['condition'], row['element'], row['frame']) for row in reveal_defects(both)],
+                         [('first-frame-flash', 'hf-panel', 745), ('visible-before-reveal', 'hf-later', 805)])
 
     def check_again(self, owned: dict) -> dict:
         """A second run into a fresh output folder."""
@@ -133,6 +138,24 @@ class RevealCheckTests(unittest.TestCase):
         self.assertEqual(value['status'], 'failed')
         self.assertIn('Catalog implementation is missing', value['error'])
         self.assertEqual(reveal_defects(value)[0]['code'], 'reveal-probe-failed')
+        self.options = RevealProbeOptions(self.project, self.base / 'reveal-4', ())
+        slow = subprocess.TimeoutExpired(['TEST node'], probe.PROJECT_SECONDS)
+        with patch('studio.native_run_config.local_environment', return_value=(TOOLS, {})), \
+                patch.object(probe.subprocess, 'run', side_effect=slow):
+            timed_out = reveal_check(self.options)
+        self.assertEqual((timed_out['status'], reveal_defects(timed_out)[0]['code']), ('failed', 'reveal-probe-failed'))
+        self.options = RevealProbeOptions(self.project, self.base / 'reveal-5', ())
+        unlisted = {key: value for key, value in result([]).items() if key != 'visibleAtMount'}
+        self.assertEqual(self.check(unlisted)['status'], 'failed')
+
+    def test_unknown_or_inconsistent_status_blocks(self) -> None:
+        """An entry whose status is unknown, or disagrees with its findings, is one blocking defect (fail closed)."""
+        for entry in ({'status': 'not-run'}, {'status': 'premature-reveal-found', 'findings': []},
+                      {'status': 'reveal-probe-pass', 'findings': [FLASH]}, {'status': 'reveal-probe-pass'},
+                      {'status': 'not-applicable', 'findings': [FLASH]}, {}):
+            [row] = reveal_defects(entry)
+            self.assertEqual((row['code'], row['severity']), ('reveal-probe-failed', 'error'), entry)
+        self.assertEqual(reveal_defects({'status': 'not-applicable', 'reason': 'no catalog mounts'}), [])
 
     def test_lint_warning_is_hint_not_verdict(self) -> None:
         """The lint warning rides on a finding for its file; without a finding it creates no defect."""

@@ -29,6 +29,7 @@ LINT_HINT = 'gsap_timeline_set_initial_hide'
 PROJECT_SECONDS = 60
 PROBE_SECONDS = 300
 PROBE_STATUSES = {True: 'premature-reveal-found', False: 'reveal-probe-pass'}
+NOT_PROBED = 'not-applicable'
 FAILURES = (OSError, RuntimeError, ValueError, KeyError, TypeError, subprocess.SubprocessError)
 
 
@@ -91,7 +92,7 @@ def reveal_check(options: RevealProbeOptions) -> dict:
     started = time.monotonic()
     try:
         if not bound_json(options.project / 'SHORT-PROJECT.json').get('catalogFiles'):
-            return {'status': 'not-applicable', 'reason': 'no catalog mounts'}
+            return {'status': NOT_PROBED, 'reason': 'no catalog mounts'}
         return {**_probe(options), 'elapsedSeconds': time.monotonic() - started}
     except FAILURES as error:
         return {'status': 'failed', 'error': str(error), 'elapsedSeconds': time.monotonic() - started}
@@ -113,8 +114,22 @@ def _defect(finding: dict, hint: dict | None) -> dict:
                        f"{finding['order']} seek), opacity {before} then {after}"}
 
 
+def _unproven(report: dict) -> str | None:
+    """Why a ``revealProbe`` entry proves nothing: it failed, its status is unknown, or disagrees with its findings."""
+    status, findings = report.get('status'), report.get('findings')
+    if status == 'failed':
+        return str(report.get('error'))
+    if (status == NOT_PROBED and findings is None) or (type(findings) is list and status == PROBE_STATUSES[bool(findings)]):
+        return None
+    count = len(findings) if type(findings) is list else 'no list of'
+    return f'reveal probe reported status {status!r} with {count} findings; an unproven probe never passes'
+
+
 def reveal_defects(report: dict) -> list[dict]:
-    """Every probe finding as a blocking defect; a probe that did not run is one blocking ``reveal-probe-failed``.
+    """Every probe finding as a blocking defect; anything but a pass or not-applicable is one ``reveal-probe-failed``.
+
+    A probe that did not run, an unknown status and a status that disagrees with its findings all block (fail
+    closed); the early report never reads such an entry as clean.
 
     Args:
         report: The ``revealProbe`` entry written by ``reveal_check``.
@@ -122,8 +137,9 @@ def reveal_defects(report: dict) -> list[dict]:
     Returns:
         Defect rows for the early report (none when the probe passed or was not applicable).
     """
-    if report['status'] == 'failed':
-        return [{'check': 'revealProbe', 'severity': 'error', 'code': 'reveal-probe-failed', 'message': report['error']}]
+    reason = _unproven(report)
+    if reason is not None:
+        return [{'check': 'revealProbe', 'severity': 'error', 'code': 'reveal-probe-failed', 'message': reason}]
     files = {row['id']: row['file'] for row in report.get('mounts', [])}
     return [_defect(row, _lint_hint(report.get('lintWarnings', []), files.get(row['mount'])))
             for row in report.get('findings', [])]

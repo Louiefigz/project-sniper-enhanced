@@ -6,6 +6,8 @@
  * listed in the lane hand-over and run at M-068's integration. The two X72 cases (a matching animation whose first
  * keyframe is visible; `all: unset`) are ones the static rule accepts (native-reveal-probe-project.test.ts proves
  * that for the same CSS); here the runtime state Chrome computes for them is injected and the probe must block.
+ * Every injected frame also carries the renderer's liveness facts (`readCatalogMounts`); a dead mount must fail
+ * (X128 M1). The owner guard and the in-page read are in native_reveal_probe_guard.test.mjs.
  */
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
@@ -13,10 +15,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {after, test} from 'node:test';
-import {parseHTML} from 'linkedom';
 import {probeFramePlan} from '../producer/studio/native_reveal_conditions.mjs';
-import {assertRevealProbeOwner, probeSessions, readProbeManifest, readRevealElements, runRevealProbe}
-  from '../producer/studio/native_reveal_probe.mjs';
+import {probeSessions, readProbeManifest, runRevealProbe} from '../producer/studio/native_reveal_probe.mjs';
 
 const TITLE = {id: 'sn-title-q1', compositionId: 'title', file: 'compositions/title-q1.html', start: 0, duration: 4.8,
   variables: {}, first: 0, endExclusive: 144};
@@ -37,13 +37,20 @@ function folder(prefix) {
   return made;
 }
 
-/** A new probe project folder holding only its manifest. */
-function project(mounts, declarations) {
+/** A new probe project folder holding its manifest and its two-field `SHORT-PROJECT.json` (30/1). */
+function project(mounts, declarations, schemaVersion = 1) {
   const directory = folder('sniper-reveal-probe-');
-  const manifest = {schemaVersion: 1, source: {plan: '/TEST/plan.json', sha256: '0'.repeat(64)}, rate: 30,
+  const manifest = {schemaVersion, source: {plan: '/TEST/plan.json', sha256: '0'.repeat(64)}, rate: 30,
     totalFrames: 1447, mounts, declarations};
   fs.writeFileSync(path.join(directory, 'REVEAL-PROBE.json'), JSON.stringify(manifest));
+  fs.writeFileSync(path.join(directory, 'SHORT-PROJECT.json'), JSON.stringify({schemaVersion: 1, canvas: {frameRate: '30/1', totalFrames: 1447}}));
   return directory;
+}
+
+/** The renderer's liveness facts for a healthy mount, as `readCatalogMounts` reads them. */
+function liveFacts(mount) {
+  return {id: mount.id, file: mount.file, start: mount.start, duration: mount.duration, width: 1080, height: 1920,
+    timeline: true, clip: 'none', display: 'block', text: ''};
 }
 
 /** One element as the in-page read returns it. */
@@ -52,18 +59,22 @@ function element(key, opacity, ancestors = [], text = '') {
 }
 
 /**
- * The injected capture: `state(spec, local)` gives the elements seen at a mount-local frame of a planned session.
- * Every screenshot is one TEST file under `<output>/capture`, where the real sessions keep theirs.
+ * The injected capture: `state(spec, local)` gives the elements seen at a mount-local frame of a planned session,
+ * and `live(spec, local, facts)` the liveness facts (healthy by default). Every screenshot is one TEST file under
+ * `<output>/capture`, where the real sessions keep theirs.
  */
-function capture(state, calls = []) {
-  return async (request, sessions) => {
+function capture(state, calls = [], live = (spec, local, facts) => facts) {
+  return async (request, sessions, mounts) => {
     calls.push(sessions);
-    const shot = path.join(request.output, 'capture', 'TEST-frame.jpg'), first = new Map([[TITLE.id, 0], [NUMBERS.id, 745]]);
+    const shot = path.join(request.output, 'capture', 'TEST-frame.jpg'), byId = new Map(mounts.map(row => [row.id, row]));
     fs.mkdirSync(path.dirname(shot));
     fs.writeFileSync(shot, 'TEST jpeg bytes; nothing was captured');
+    const frame = (spec, index) => {
+      const mount = byId.get(spec.mount), local = index - mount.first;
+      return {frame: index, screenshot: shot, elements: state(spec, local), live: live(spec, local, liveFacts(mount))};
+    };
     return {runtimeLibrarySha256: 'a'.repeat(64), compiledSha256: 'b'.repeat(64), sessions: sessions.map(spec => ({
-      mount: spec.mount, order: spec.order, transport: {errors: 0},
-      frames: spec.frames.map(frame => ({frame, screenshot: shot, elements: state(spec, frame - first.get(spec.mount))}))}))};
+      mount: spec.mount, order: spec.order, transport: {errors: 0}, frames: spec.frames.map(index => frame(spec, index))}))};
   };
 }
 
@@ -103,6 +114,7 @@ test('the series keeps exactly the D-B shape, with local frames counted from the
   assert.deepEqual(report.series[0], {order: 'forward', mount: NUMBERS.id, frame: 744, localFrame: -1,
     elements: [{key: 'hf-panel', opacity: 0, ancestors: []}]});
   assert.deepEqual([...new Set(report.series.map(row => row.order))], ['forward', 'reverse', 'cold-0']);
+  assert.deepEqual(report.visibleAtMount[0].elements, []);  // text of an invisible element is not "visible"
 });
 
 test('run-1 Q1: the first-frame flash blocks in every order that shows it; evidence is kept', async () => {
@@ -152,23 +164,53 @@ test('each seek order is evaluated on its own (E-R1, E-R2)', async () => {
     ['first-frame-flash', 'hf-panel', 0, 'cold-0', [1, 0]], ['visible-before-reveal', 'hf-later', 60, 'reverse', [0.5, 1]]]);
 });
 
+/** A capture of the run-1 Q1 panel that `change` then alters. */
+function relabel(change) {
+  return async (request, sessions, mounts) => {
+    const value = await capture(numbersPanel)(request, sessions, mounts);
+    change(value);
+    return value;
+  };
+}
+
+/** The probe must refuse `injected` with `message` and leave no report. */
+async function refused(injected, message) {
+  const directory = project([NUMBERS], []), output = path.join(directory, 'out');
+  await assert.rejects(runRevealProbe({probeProject: directory, output, runtime: '/TEST/runtime'}, injected), message);
+  assert.equal(fs.existsSync(path.join(output, 'reveal-probe.json')), false);
+}
+
 test('a capture that differs from its plan fails closed and writes no report', async () => {
   const cases = [
-    [(request, sessions) => capture(numbersPanel)(request, sessions.slice(1)), /session count/],
-    [async (request, sessions) => {
-      const value = await capture(numbersPanel)(request, sessions);
-      value.sessions[0].frames.reverse();
-      return value;
-    }, /differs from its plan: forward sn-numbers-q1/],
-    [async (request, sessions) => ({...await capture(numbersPanel)(request, sessions), compiledSha256: 'TEST'}), /runtime identity/],
-    [(request, sessions) => capture(() => [element('hf-panel', Number.NaN)])(request, sessions), /Reveal series malformed/],
-    [(request, sessions) => capture(() => null)(request, sessions), /differs from its plan/],
+    [(request, sessions, mounts) => capture(numbersPanel)(request, sessions.slice(1), mounts), /session count/],
+    [relabel(value => { value.sessions[0].frames.reverse(); }), /differs from its plan: forward sn-numbers-q1/],
+    [async (request, sessions, mounts) => ({...await capture(numbersPanel)(request, sessions, mounts), compiledSha256: 'TEST'}),
+      /runtime identity/],
+    [(request, sessions, mounts) => capture(() => [element('hf-panel', Number.NaN)])(request, sessions, mounts), /Reveal series malformed/],
+    [(request, sessions, mounts) => capture(() => null)(request, sessions, mounts), /differs from its plan/],
+    [relabel(value => { value.sessions[0].mount = TITLE.id; }), /differs from its plan: forward sn-numbers-q1/],
+    [relabel(value => { value.sessions[0].order = 'reverse'; }), /differs from its plan: forward sn-numbers-q1/],
   ];
-  for (const [injected, message] of cases) {
-    const directory = project([NUMBERS], []), output = path.join(directory, 'out');
-    await assert.rejects(runRevealProbe({probeProject: directory, output, runtime: '/TEST/runtime'}, injected), message);
-    assert.equal(fs.existsSync(path.join(output, 'reveal-probe.json')), false);
-  }
+  for (const [injected, message] of cases) await refused(injected, message);
+});
+
+test('M1: an empty host at an active frame fails closed; only the inactive neighbour may be empty', async () => {
+  await refused(capture((spec, local) => (local === 0 ? [] : [element('hf-panel', 0)])),
+    /shows no element of the mount at active frame 745/);
+  await refused(capture(() => []), /shows no element of the mount at active frame 745/);
+  const {report} = await probe([NUMBERS], [], (spec, local) => (local < 0 ? [] : [element('hf-panel', 0)]));
+  assert.equal(report.status, 'reveal-probe-pass');
+});
+
+test('M1: a mount the renderer would not call live fails its liveness check at any frame', async () => {
+  const dead = change => capture(numbersPanel, [], (spec, local, facts) => (local === 1 ? change(facts) : facts));
+  await refused(dead(facts => ({...facts, timeline: false})), /Catalog mount sn-numbers-q1 is not live/);
+  await refused(dead(facts => ({...facts, width: 0})), /Catalog mount sn-numbers-q1 is not live/);
+  await refused(dead(() => null), /Catalog mount sn-numbers-q1 is absent/);
+  await refused(dead(facts => ({...facts, display: 'none'})), /none/);
+  await refused(dead(facts => ({...facts, file: 'compositions/other.html'})), /other\.html/);
+  const inactive = capture(numbersPanel, [], (spec, local, facts) => (local < 0 ? {...facts, timeline: false} : facts));
+  await refused(inactive, /Catalog mount sn-numbers-q1 is not live/);
 });
 
 test('an existing output is refused before any capture; a manifest must name its mounts', async () => {
@@ -179,42 +221,5 @@ test('an existing output is refused before any capture; a manifest must name its
   assert.equal(calls.length, 0);
   assert.throws(() => readProbeManifest(project([NUMBERS], [{...LATER, mountId: 'sn-other'}])), /manifest is malformed/);
   assert.throws(() => readProbeManifest(project([], [])), /manifest is malformed/);
-});
-
-test('the in-page read keys elements by data-hf-id or index path, ancestors inside the host only', () => {
-  const {document} = parseHTML('<html><body><div id="native-canvas"><div id="sn-x" data-hf-id="hf-host">'
-    + '<div data-hf-id="hf-panel" data-o="1"><span>42</span> users <i data-o="0"></i></div><p>Plain</p></div></div></body></html>');
-  const globals = {document: globalThis.document, window: globalThis.window};
-  Object.assign(globalThis, {document, window: {__sniperRevealOpacity: el => Number(el.getAttribute('data-o') ?? 0.5)}});
-  try {
-    assert.deepEqual(readRevealElements('sn-x'), [
-      {key: 'hf-panel', opacity: 1, ancestors: [], text: 'users'},
-      {key: 'path:0.0', opacity: 0.5, ancestors: ['hf-panel'], text: '42'},
-      {key: 'path:0.1', opacity: 0, ancestors: ['hf-panel'], text: ''},
-      {key: 'path:1', opacity: 0.5, ancestors: [], text: 'Plain'}]);
-    assert.equal(readRevealElements('sn-missing'), null);
-  } finally {
-    Object.assign(globalThis, globals);
-  }
-});
-
-test('the CLI runs only inside its owned inspection', () => {
-  const directory = folder('sniper-reveal-owner-');
-  const file = path.join(directory, 'request.json'), owner = path.join(directory, 'inspection.render.json');
-  fs.writeFileSync(file, JSON.stringify({project: '/TEST/probe-project'}));
-  const pin = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-  const record = {project: '/TEST/probe-project', status: 'running', additionalFilePinsBefore: {[file]: pin}};
-  const live = {SNIPER_INSPECTION_REQUEST: file, SNIPER_INSPECTION_OWNER: owner, SNIPER_INSPECTION_PID: String(process.pid)};
-  const admit = (value, environment = live) => {
-    fs.writeFileSync(owner, JSON.stringify(value));
-    return () => assertRevealProbeOwner(file, environment);
-  };
-  assert.doesNotThrow(admit(record));
-  assert.throws(admit(record, {}), /runs only inside its owned inspection/);
-  assert.throws(admit(record, {...live, SNIPER_INSPECTION_OWNER: path.join(directory, 'other.render.json')}), /owned inspection/);
-  assert.throws(admit(record, {...live, SNIPER_INSPECTION_PID: '1'}), /no live supervisor/);
-  assert.throws(admit({...record, completedAt: 'TEST'}), /does not bind this request/);
-  assert.throws(admit({...record, status: 'failed'}), /does not bind this request/);
-  assert.throws(admit({...record, additionalFilePinsBefore: {[file]: '0'.repeat(64)}}), /does not bind this request/);
-  assert.throws(admit({...record, project: '/TEST/another'}), /does not bind this request/);
+  assert.throws(() => readProbeManifest(project([NUMBERS], [], 2)), /manifest is malformed/);
 });

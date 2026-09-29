@@ -4,12 +4,14 @@
  * Writes a new, graphics-only native project from a plan JSON or a built project: every catalog mount with its
  * exact markup (`data-start`, `data-duration`, `data-variable-values`, host style) and the scene extension's CSS,
  * inside the root skeleton the build emits (`nativeRootDocument`), with no footage, captions or title card. The
- * catalog compositions are staged through `nativeCatalogFiles` (the build's validation); the pinned GSAP and the
- * font files the root or a composition references are copied from the plan's bound assets. `REVEAL-PROBE.json`
- * names each mount's active root frames and its declared reveals for `studio/native_reveal_probe.mjs`, which seeks
- * the project in the pinned runtime. Nothing here renders, decodes or runs a browser.
+ * plan first passes the build's own structural rules (`native-short-build-rules.ts`), so the probe never measures a
+ * page no build could produce; the catalog compositions are staged through `nativeCatalogFiles`; the pinned GSAP
+ * and the font files the root or a composition references are copied from the plan's bound assets, each checked
+ * by the build's asset rule. `REVEAL-PROBE.json` names each mount's active root frames and its declared reveals for
+ * `studio/native_reveal_probe.mjs`, which seeks the project in the pinned runtime. Nothing here renders, decodes or
+ * runs a browser. Native Shorts only (P2:1157).
  */
-import { constants, copyFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { constants, copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { canonicalJson, fileSha256 } from "./auto-edit-hash";
 import type { NativeAssetBinding } from "./native-short-strategy";
@@ -18,6 +20,8 @@ import { assertNativeRevealDeclarations, nativeMountFacts, type NativeMountFacts
   type NativeRevealDeclaration } from "./native-reveal-declarations";
 import { mountFrames } from "./native-review-regions";
 import { nativeRootDocument } from "./native-root-document";
+import { assertCatalogFilesMounted, assertNativeAssetRow, assertNativeSceneExtension, mountNativeSceneExtension,
+  nativeProjectIds } from "./native-short-build-rules";
 import { buildNativeCanvas } from "./native-short-composition";
 import { readNativeShortProject, type NativeShortProjectInput } from "./native-short-project";
 
@@ -34,6 +38,11 @@ export interface RevealProbeManifest {
   declarations: NativeRevealDeclaration[];
 }
 
+/** P2:1157: Long projects are not wired. */
+const SHORTS_ONLY = "reveal probe supports native Shorts only";
+/** Root motion is part of the rendered page; until the plan rules on it (D-C11-3), the probe refuses it by name. */
+const MOTION_REFUSED = "reveal probe refuses extension.motion: root motion would change the page it seeks, "
+  + "and the plan has not ruled how the probe keeps it";
 /** The probe root's title; seeking graphics needs no plan title. */
 const TITLE = "Native reveal probe";
 /** The shared runtime script every native root loads. */
@@ -44,17 +53,36 @@ const FONT = /\.(?:otf|ttf|woff2?)$/iu;
 interface ProbeSource { plan: NativeShortProjectInput; file: string; sha256: string }
 
 /**
- * A built project is read by the cold reader (the full build validation). A plan JSON gets the canvas validation
- * `measure` uses; the rest of assembly is not repeated for it, because assembly hashes every asset (X74).
+ * A built project is read by the cold reader (the full build validation); a plan JSON is parsed here and checked
+ * by the build's structural rules in `checkedCompositions`. A Long project, a `LONG-PROJECT.json` or a Long canvas
+ * (only a Long canvas declares its size) is refused by name.
  */
 function probeSource(input: string): ProbeSource {
   const directory = statSync(input).isDirectory(), file = directory ? path.join(input, "SHORT-PROJECT.json") : input;
+  if (directory ? existsSync(path.join(input, "LONG-PROJECT.json")) : path.basename(input) === "LONG-PROJECT.json") {
+    throw new Error(SHORTS_ONLY);
+  }
   const plan = directory ? readNativeShortProject(input, {}, undefined, "draft")
     : JSON.parse(readFileSync(file, "utf8")) as NativeShortProjectInput;
-  if (!directory) buildNativeCanvas(plan.canvas);
+  if ("width" in plan.canvas || "height" in plan.canvas) throw new Error(SHORTS_ONLY);
   const sha256 = fileSha256(file);
   if (!sha256) throw new Error(`Reveal probe source plan disappeared: ${file}`);
   return { plan, file, sha256 };
+}
+
+/**
+ * The build's structural rules on the plan (a built project already passed them in its cold read): the scene
+ * extension, the assembled page's ids and URLs, and every staged catalog file mounted. Returns the staged files.
+ */
+function checkedCompositions(plan: NativeShortProjectInput): Record<string, string> {
+  const extension = plan.extension ?? { markup: "", css: "", motion: "" };
+  assertNativeSceneExtension(extension);
+  if (extension.motion) throw new Error(MOTION_REFUSED);
+  const built = mountNativeSceneExtension(buildNativeCanvas(plan.canvas), plan.canvas, extension);
+  nativeProjectIds(built);
+  const compositions = nativeCatalogFiles(plan.catalogFiles);
+  assertCatalogFilesMounted(built, compositions);
+  return compositions;
 }
 
 /** The mount's active root frames by the runtime's own snap (`mountFrames`); it must lie inside the Short. */
@@ -66,16 +94,17 @@ function probeMount(mount: NativeMountFacts, rate: number, totalFrames: number):
   return { ...mount, first: range[0], endExclusive: range[1] };
 }
 
-/** The pinned GSAP and each font whose path the root or a composition references, as the plan binds them. */
+/** The pinned GSAP and each font under `assets/` whose path the root or a composition references, by the build's asset rule. */
 function probeAssets(plan: NativeShortProjectInput, documents: string[]): NativeAssetBinding[] {
   const referenced = (file: string) => documents.some(text => text.includes(file));
   const rows = plan.assets.filter(row => path.posix.dirname(row.file) === "assets"
     && (row.file === GSAP || (FONT.test(row.file) && referenced(row.file))));
   if (!rows.some(row => row.file === GSAP)) throw new Error("Reveal probe needs the plan's pinned GSAP runtime asset");
+  rows.forEach(assertNativeAssetRow);
   return rows;
 }
 
-/** Copy each asset exclusively and re-hash the copy against the plan's binding. */
+/** Copy each asset exclusively and re-hash the copy against the plan's binding (a change while staging refuses). */
 function stageAssets(rows: NativeAssetBinding[], directory: string): void {
   mkdirSync(path.join(directory, "assets"), { mode: 0o700 });
   for (const row of rows) {
@@ -94,11 +123,11 @@ function stageAssets(rows: NativeAssetBinding[], directory: string): void {
 export function writeNativeRevealProbeProject(input: string, destination: string): RevealProbeManifest {
   const source = probeSource(path.resolve(input)), plan = source.plan, directory = path.resolve(destination);
   const { frameRate, totalFrames, background } = plan.canvas, [num, den] = frameRate.split("/").map(Number);
-  const markup = plan.extension?.markup ?? "", compositions = nativeCatalogFiles(plan.catalogFiles);
+  const markup = plan.extension?.markup ?? "", compositions = checkedCompositions(plan);
   const declarations = assertNativeRevealDeclarations(plan, compositions);
   const mounts = nativeMountFacts(markup).map(mount => probeMount(mount, num / den, totalFrames));
   if (!mounts.length) throw new Error("Reveal probe needs at least one catalog mount");
-  // P2-03 keeps the mounts' markup and the extension CSS only; the root timeline registers the canvas alone.
+  // P2-03 keeps the mounts' markup and the extension CSS; root motion is refused above, so the timeline is empty.
   const html = nativeRootDocument({ title: TITLE, background, fontFaces: "", head: plan.extension?.css ?? "",
     frameRate, totalFrames, content: markup, timeline: "" });
   const assets = probeAssets(plan, [html, ...Object.values(compositions)]);

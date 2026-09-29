@@ -8,14 +8,19 @@
  * (`native_short_capture_context.mjs`), and reads every element under the mount host: its key (`data-hf-id`, else a
  * DOM index path under the host), its effective opacity (`effectiveOpacitySource`) and its ancestors' keys. The
  * capture is one function (`captureRevealSessions`), passed to `runRevealProbe`; everything after it is data in,
- * data out. `reveal-probe.json` (exclusive create) holds the D-B series, the C1/C2 findings, and `visibleAtMount`:
- * the text visible on each mount's first frame, for the critic (information only), with that frame's screenshot
- * kept as evidence. A malformed capture or series fails closed; there is no partial result.
+ * data out. Every captured frame must show its mount live, by the renderer's own check (`readCatalogMounts`,
+ * `assertCatalogMountValues`, P2 U3), and at least one element under the host while the mount is active: a mount
+ * the page never made live cannot pass as clean (review X128 M1). `reveal-probe.json` (exclusive create) holds the
+ * D-B series, the C1/C2 findings, and `visibleAtMount`: the text visible on each mount's first frame, for the critic
+ * (information only), with that frame's screenshot kept as evidence. A malformed capture or series fails closed;
+ * there is no partial result.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
+import {assertCatalogMountValues, readCatalogMounts} from './native_catalog_checks.mjs';
+import {readRecord} from './runtime/native-export-guard.mjs';
 import {VISIBLE_EPSILON, declaredRevealFindings, effectiveOpacitySource, flashFindings, probeFramePlan}
   from './native_reveal_conditions.mjs';
 import {captureNativeFrame, createNativeCaptureContext, nativeCaptureEvidence, prepareNativeCaptureContext,
@@ -25,6 +30,10 @@ import {captureNativeFrame, createNativeCaptureContext, nativeCaptureEvidence, p
 const OPACITY_GLOBAL = '__sniperRevealOpacity';
 /** A sha256 in hex, as the capture context reports its runtime and compiled documents. */
 const SHA256 = /^[a-f0-9]{64}$/u;
+/** The owned-inspection worker that runs this CLI (`native_reveal_probe.py --worker`). */
+const WORKER = fileURLToPath(new URL('./native_reveal_probe.py', import.meta.url));
+/** Owner states in which a worker may run (as `owned_inspection.require_worker`). */
+const ACTIVE = ['preparing', 'waiting-for-capacity', 'running'];
 
 /**
  * Fail closed on a capture the plan did not ask for.
@@ -64,17 +73,21 @@ export function probeSessions(manifest) {
 }
 
 /**
- * One captured session, checked against its plan: same mount, order and frames, in order, each with elements.
+ * One captured session, checked against its plan: same mount, order and frames, in order, each with elements, and
+ * at least one element at every frame where the mount is active (an empty host is a dead mount, not a clean one).
  * @param {{mount: string, order: string, frames: number[]}} spec planned session
  * @param {any} seen captured session
- * @returns {Array<{frame: number, elements: Array<any>, screenshot: string}>}
+ * @param {{first: number, endExclusive: number}} mount the mount's active root frames
+ * @returns {Array<{frame: number, elements: Array<any>, screenshot: string, live: object}>}
  */
-function capturedFrames(spec, seen) {
+function capturedFrames(spec, seen, mount) {
   const frames = Array.isArray(seen?.frames) ? seen.frames : [];
   if (seen?.mount !== spec.mount || seen?.order !== spec.order || frames.map(row => row?.frame).join() !== spec.frames.join()
       || !frames.every(row => Array.isArray(row.elements))) {
     refuse(`${spec.order} ${spec.mount}`);
   }
+  const empty = frames.find(row => row.frame >= mount.first && row.frame < mount.endExclusive && !row.elements.length);
+  if (empty) refuse(`${spec.order} ${spec.mount} shows no element of the mount at active frame ${empty.frame}`);
   return frames;
 }
 
@@ -88,10 +101,36 @@ function capturedFrames(spec, seen) {
  */
 export function revealSeries(manifest, sessions, observed) {
   if (!Array.isArray(observed?.sessions) || observed.sessions.length !== sessions.length) refuse('session count');
-  const first = new Map(manifest.mounts.map(row => [row.id, row.first]));
-  return sessions.flatMap((spec, index) => capturedFrames(spec, observed.sessions[index]).map(row => ({
-    order: spec.order, mount: spec.mount, frame: row.frame, localFrame: row.frame - first.get(spec.mount),
+  const mounts = new Map(manifest.mounts.map(row => [row.id, row]));
+  return sessions.flatMap((spec, index) => capturedFrames(spec, observed.sessions[index], mounts.get(spec.mount)).map(row => ({
+    order: spec.order, mount: spec.mount, frame: row.frame, localFrame: row.frame - mounts.get(spec.mount).first,
     elements: row.elements.map(({key, opacity, ancestors}) => ({key, opacity, ancestors}))})));
+}
+
+/**
+ * The renderer's own liveness check on every captured frame (P2 U3): the mount's host is present with its file,
+ * start and duration, its composition registered a timeline, it has a box, and while active it is neither
+ * `display:none` nor clipped away (`assertCatalogMountValues`, from the `readCatalogMounts` facts the capture read).
+ * @param {{mounts: Array<{id: string, compositionId: string, file: string, start: number, duration: number}>}} manifest
+ * @param {Array<{mount: string}>} sessions planned sessions
+ * @param {{sessions: Array<{frames: Array<{frame: number, live: object}>}>}} observed the checked capture
+ * @param {string} frameRate the probe project's `num/den` clock
+ * @returns {void}
+ */
+export function assertMountsLive(manifest, sessions, observed, frameRate) {
+  const plan = {canvas: {frameRate}, catalogFiles: manifest.mounts.map(row => ({file: row.file}))};
+  const rows = new Map(manifest.mounts.map(row => [row.id, [catalogRow(row)]]));
+  sessions.forEach((spec, index) => observed.sessions[index].frames.forEach(frame =>
+    assertCatalogMountValues([frame.live], frame.frame, plan, rows.get(spec.mount))));
+}
+
+/**
+ * One manifest mount in `catalogMounts`' row shape, as `readCatalogMounts` and `assertCatalogMountValues` read it.
+ * @param {{id: string, compositionId: string, file: string, start: number, duration: number}} mount
+ * @returns {{id: string, composition: string, file: string, start: number, duration: number}}
+ */
+function catalogRow(mount) {
+  return {id: mount.id, composition: mount.compositionId, file: mount.file, start: mount.start, duration: mount.duration};
 }
 
 /**
@@ -131,15 +170,18 @@ export function visibleAtMount(manifest, sessions, observed, output) {
 /**
  * Run the probe: plan the sessions, capture them with `capture`, evaluate, and write `reveal-probe.json` (`wx`).
  * @param {{probeProject: string, output: string, runtime: string}} request `output` must not exist yet
- * @param {(request: object, sessions: Array<object>) => Promise<object>} capture the one capture step
+ * @param {(request: object, sessions: Array<object>, mounts: Array<object>) => Promise<object>} capture the one capture step
  * @returns {Promise<object>} the report written
  */
 export async function runRevealProbe(request, capture = captureRevealSessions) {
   const manifest = readProbeManifest(request.probeProject), sessions = probeSessions(manifest);
+  const {frameRate} = JSON.parse(fs.readFileSync(path.join(request.probeProject, 'SHORT-PROJECT.json'), 'utf8')).canvas;
   fs.mkdirSync(request.output, {mode: 0o700});
-  const observed = await capture(request, sessions);
+  const observed = await capture(request, sessions, manifest.mounts);
   if (!SHA256.test(observed?.runtimeLibrarySha256 ?? '') || !SHA256.test(observed?.compiledSha256 ?? '')) refuse('runtime identity');
-  const series = revealSeries(manifest, sessions, observed), findings = revealFindings(manifest, series);
+  const series = revealSeries(manifest, sessions, observed);
+  assertMountsLive(manifest, sessions, observed, frameRate);
+  const findings = revealFindings(manifest, series);
   const report = {schemaVersion: 1, scope: 'native-reveal-probe', status: findings.length ? 'premature-reveal-found' : 'reveal-probe-pass',
     runtimeLibrarySha256: observed.runtimeLibrarySha256, compiledSha256: observed.compiledSha256, series, findings,
     visibleAtMount: visibleAtMount(manifest, sessions, observed, request.output)};
@@ -174,18 +216,21 @@ export function readRevealElements(mountId) {
 }
 
 /**
- * One planned sequence inside one fresh session: install the opacity source once, then seek and read each frame.
+ * One planned sequence inside one fresh session: install the opacity source once, then seek each frame and read
+ * the mount's elements and its liveness facts (`readCatalogMounts`).
  * @param {object} context prepared capture context
  * @param {{page: any}} session live capture session
- * @param {{mount: string, frames: number[]}} spec planned session
- * @returns {Promise<Array<{frame: number, screenshot: string, elements: Array<object> | null}>>}
+ * @param {{spec: {mount: string, frames: number[]}, row: object}} planned the session and its mount's catalog row
+ * @returns {Promise<Array<{frame: number, screenshot: string, elements: Array<object> | null, live: object | null}>>}
  */
-async function captureSequence(context, session, spec) {
+async function captureSequence(context, session, planned) {
   await session.page.evaluate(`window.${OPACITY_GLOBAL} = ${effectiveOpacitySource()}; true`);
   const rows = [];
-  for (const frame of spec.frames) {
+  for (const frame of planned.spec.frames) {
     const shot = await captureNativeFrame(context, session, frame);
-    rows.push({frame, screenshot: shot.path, elements: await session.page.evaluate(readRevealElements, spec.mount)});
+    const elements = await session.page.evaluate(readRevealElements, planned.spec.mount);
+    const [live] = await session.page.evaluate(readCatalogMounts, [planned.row]);
+    rows.push({frame, screenshot: shot.path, elements, live});
   }
   return rows;
 }
@@ -195,16 +240,17 @@ async function captureSequence(context, session, spec) {
  * Each session keeps its own frames directory, so every screenshot path stays valid until the report is written.
  * @param {{probeProject: string, output: string, runtime: string}} request
  * @param {Array<{mount: string, order: string, frames: number[]}>} sessions planned sessions
+ * @param {Array<{id: string, compositionId: string, file: string, start: number, duration: number}>} mounts manifest mounts
  * @returns {Promise<{runtimeLibrarySha256: string, compiledSha256: string, sessions: Array<object>}>}
  */
-export async function captureRevealSessions(request, sessions) {
-  const work = path.join(request.output, 'capture');
+export async function captureRevealSessions(request, sessions, mounts) {
+  const work = path.join(request.output, 'capture'), rows = new Map(mounts.map(row => [row.id, catalogRow(row)]));
   const context = await createNativeCaptureContext({project: request.probeProject, runtime: request.runtime}, work);
   await prepareNativeCaptureContext(context);
   const captured = [];
   for (const [index, spec] of sessions.entries()) {
-    const receipt = {}, framesDir = path.join(work, `frames-${index}`);
-    const frames = await withNativeCaptureSession(context, {framesDir, receipt}, session => captureSequence(context, session, spec));
+    const receipt = {}, framesDir = path.join(work, `frames-${index}`), planned = {spec, row: rows.get(spec.mount)};
+    const frames = await withNativeCaptureSession(context, {framesDir, receipt}, session => captureSequence(context, session, planned));
     captured.push({mount: spec.mount, order: spec.order, frames, transport: receipt.transport});
   }
   const {runtimeLibrarySha256, compiledSha256} = nativeCaptureEvidence(context);
@@ -212,33 +258,37 @@ export async function captureRevealSessions(request, sessions) {
 }
 
 /**
- * Refuse a run outside its owned inspection (as `native_short_capture.mjs` refuses one outside its export owner):
- * the request is the live owner's pinned request, the owner is active and its supervisor is alive.
+ * Refuse a run outside its owned inspection, at parity with `assertNativeCaptureOwner` (review X128 m4) and with
+ * `owned_inspection.require_worker`: the request is `SNIPER_INSPECTION_REQUEST`, the owner file its sibling; both
+ * are read safely (`readRecord`: absolute, canonical, regular, unlinked); the supervisor is alive; the owner is active,
+ * names the request's project, pins its exact bytes, writes this inspection's `result.json`, and runs this probe's
+ * own worker on this request.
  * @param {string} file the inspection request (`request.json`)
  * @param {Record<string, string | undefined>} environment the process environment
- * @returns {void}
+ * @returns {object} the request, parsed from the bytes that were checked
  */
 export function assertRevealProbeOwner(file, environment = process.env) {
   const deny = message => { throw new Error(`Reveal probe admission: ${message}`); };
-  if (typeof file !== 'string' || !path.isAbsolute(file) || environment.SNIPER_INSPECTION_REQUEST !== file
-      || environment.SNIPER_INSPECTION_OWNER !== path.join(path.dirname(file), 'inspection.render.json')) {
+  const folder = typeof file === 'string' ? path.dirname(file) : '';
+  if (environment.SNIPER_INSPECTION_REQUEST !== file || environment.SNIPER_INSPECTION_OWNER !== path.join(folder, 'inspection.render.json')) {
     deny('the probe runs only inside its owned inspection');
   }
-  const bytes = fs.readFileSync(file), owner = JSON.parse(fs.readFileSync(environment.SNIPER_INSPECTION_OWNER, 'utf8'));
+  const request = readRecord(file), owner = readRecord(environment.SNIPER_INSPECTION_OWNER).value;
   const pid = Number(environment.SNIPER_INSPECTION_PID);
   if (!Number.isSafeInteger(pid) || pid <= 1) deny('the inspection has no live supervisor');
   process.kill(pid, 0);
-  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
-  if (owner.project !== JSON.parse(bytes).project || owner.completedAt || owner.abortReason
-      || !['preparing', 'waiting-for-capacity', 'running'].includes(owner.status)
-      || owner.additionalFilePinsBefore?.[file] !== sha256) {
+  const args = owner.args, worker = Array.isArray(args) && args.length === 5 && typeof args[0] === 'string'
+    && path.isAbsolute(args[0]) && args[1] === '-B' && args[2] === WORKER && args[3] === '--worker' && args[4] === file;
+  if (owner.project !== request.value.project || owner.completedAt || owner.abortReason || !ACTIVE.includes(owner.status)
+      || owner.additionalFilePinsBefore?.[file] !== request.sha || owner.output !== path.join(folder, 'result.json')) {
     deny('the inspection owner does not bind this request');
   }
+  if (!worker) deny('the inspection did not originate from the reveal probe worker');
+  return request.value;
 }
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
-  assertRevealProbeOwner(process.argv[2]);
-  const request = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+  const request = assertRevealProbeOwner(process.argv[2]);
   const report = await runRevealProbe({probeProject: request.project, runtime: request.runtime,
     output: path.join(path.dirname(process.argv[2]), 'reveal')});
   console.log(JSON.stringify({status: report.status, findings: report.findings.length}));

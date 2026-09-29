@@ -40,7 +40,8 @@ SOURCE = {'id': 'raw-1', 'duration': 4.0, 'frameRate': '30/1', 'vfr': False, 're
           'audio': {'present': True, 'channels': 2, 'sampleRate': 48000}}
 HEADER = [{'codec_type': 'video', 'start_time': '0.000000', 'time_base': '1/600'},
           {'codec_type': 'audio', 'start_time': '0.000000', 'time_base': '1/48000'}]
-PROBE = {'streams': HEADER, 'packets': [(str(20 * n), 'K__' if n % 30 == 0 else '___') for n in range(120) if n != 10]}
+PROBE = {'streams': HEADER, 'packets': [(str(20 * n), 'K__' if n % 30 == 0 else '___') for n in range(120) if n != 10],
+         'audioFirstPts': '0'}
 
 
 def _sha(path: Path) -> str:
@@ -244,6 +245,9 @@ class DualMonoTests(unittest.TestCase):
         limit = observations.stereo_limits(samples, [], RATE)
         self.assertEqual(len(limit), 1)
         self.assertIn('Identical channels up to gain (dual mono: left minus 1.122 x right', limit[0])
+        quiet_tail = np.stack([np.concatenate([_tone(1.0, 0.5), np.zeros(10 * RATE)]),
+                               np.concatenate([0.891 * _tone(1.0, 0.5), _tone(10.0, 0.02, 700.0)])], axis=1)
+        self.assertTrue(observations.stereo_cue(quiet_tail, RATE).startswith('Identical'))  # H18: fit on active windows
 
     def test_residual_threshold_is_40_db(self) -> None:
         """A residual 38 dB below the louder channel still gives a cue; 42 dB below is dual mono."""

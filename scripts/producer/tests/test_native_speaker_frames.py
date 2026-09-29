@@ -33,12 +33,13 @@ from studio import native_speaker_sampling as sampling
 CAP = 'Speaker observation sampling exceeds 6000 frames'
 SOURCE = {'path': '/synthetic.media', 'resolution': [64, 36], 'duration': 4.0, 'frameRate': '30/1'}
 VIDEO = {'codec_type': 'video', 'start_time': '0.000000', 'time_base': '1/600'}
-AUDIO = {'codec_type': 'audio', 'start_time': '0.000000'}
+AUDIO = {'codec_type': 'audio', 'start_time': '0.000000', 'time_base': '1/48000'}
 
 
-def _probe(frames: list[int], video: dict = VIDEO, audio: dict = AUDIO) -> dict:
-    """A probe stub: packets at 20 ticks of 1/600 s per nominal 30p frame index, in the given order."""
-    return {'streams': [video, audio], 'packets': [(str(20 * n), '___') for n in frames]}
+def _probe(frames: list[int], video: dict = VIDEO, audio: dict = AUDIO, first: str = '0') -> dict:
+    """A probe stub: packets at 20 ticks of 1/600 s per nominal 30p frame index, in the given order, and the
+    first decoded audio frame's pts (``first``, in the audio time_base)."""
+    return {'streams': [video, audio], 'packets': [(str(20 * n), '___') for n in frames], 'audioFirstPts': first}
 
 
 def _plan(*bounds: tuple[float, float], rate: Fraction = Fraction(30), clock: object = None) -> dict:
@@ -153,6 +154,7 @@ class PacketClockTests(unittest.TestCase):
         plan = _plan((740.2, 744.068), clock=clock)
         self.assertEqual((plan['ranges'][0]['firstFrame'], plan['ranges'][0]['endFrame']), (22204, 22320))
         self.assertEqual(plan['frames'][0]['t'], 740.2)
+        self.assertEqual(_plan((740.2, 741.2), clock=clock)['ranges'][0]['endFrame'], 22234)  # H02: an end on a frame start
         limits = sampling.clipped_limits(plan, clock)
         self.assertEqual(len(limits), 1)
         self.assertIn('clip A words 0-0 (740.200-744.068 s)', limits[0])
@@ -160,22 +162,29 @@ class PacketClockTests(unittest.TestCase):
             self.assertEqual(sampling.clipped_limits(_plan(inside, clock=clock), clock), [], inside)
 
     def test_container_alignment_discard_and_decode_order(self) -> None:
-        """Audio start aligns the clocks; discard packets are dropped; packets in decode order are sorted."""
+        """The first decoded audio frame aligns the clocks; discard packets drop; decode order is sorted."""
         order = [0, 3, 1, 2] + list(range(4, 240))
-        probe = _probe(order, audio={**AUDIO, 'start_time': '-0.021333'})
+        probe = _probe(order, audio={**AUDIO, 'start_time': '-0.021333'}, first='-1024')
         probe['packets'] = [('-40', 'KD_'), ('-20', '_D_')] + probe['packets']
         clock, info = media.stream_clock(probe, Fraction(60))
         self.assertEqual((info['frameCount'], info['discardedPackets']), (240, 2))
-        self.assertEqual(clock.times[:3], (Fraction('0.021333'), Fraction(1, 30) + Fraction('0.021333'),
-                                           Fraction(2, 30) + Fraction('0.021333')))
+        lead = Fraction(1024, 48000)
+        self.assertEqual(clock.times[:3], (lead, Fraction(1, 30) + lead, Fraction(2, 30) + lead))
+        early = _plan((0.0, 0.5), clock=clock)
+        self.assertEqual((early['ranges'][0]['firstFrame'], len(early['clipped'])), (0, 1))  # H03 clamp, H11 limit
+        dropped, info = media.stream_clock(_probe(order, audio={**AUDIO, 'start_time': '-0.021333'}), Fraction(60))
+        self.assertEqual((dropped.times[0], info['audioStartSeconds'], info['audioStreamStartSeconds']), (0, 0.0, -0.021333))
         mkv = {'codec_type': 'video', 'start_time': '0.000000', 'time_base': '1/1000'}
         packets = [(str(round(n * 1000 / 30)), '___') for n in range(90)]
-        self.assertEqual(media.stream_clock({'streams': [mkv, AUDIO], 'packets': packets}, Fraction(30))[1]['frameCount'], 90)
+        mkv_probe = {'streams': [mkv, AUDIO], 'packets': packets, 'audioFirstPts': '0'}
+        self.assertEqual(media.stream_clock(mkv_probe, Fraction(30))[1]['frameCount'], 90)
 
     def test_only_unreadable_timestamps_refuse(self) -> None:
         """An unreadable timestamp, start_time or time_base, a missing stream, or no presentable packet."""
         good = _probe(list(range(10)))
         cases = (({**good, 'packets': [('N/A', '___')] + good['packets']}, 'no readable presentation timestamp'),
+                 ({**good, 'audioFirstPts': ''}, 'first decoded audio frame has no readable presentation timestamp'),
+                 (_probe(list(range(10)), audio={'codec_type': 'audio', 'start_time': '0'}), 'no readable time_base'),
                  (_probe(list(range(10)), audio={**AUDIO, 'start_time': 'N/A'}), 'no readable start_time'),
                  (_probe(list(range(10)), video={**VIDEO, 'start_time': 'N/A'}), 'no readable start_time'),
                  (_probe(list(range(10)), video={'codec_type': 'video', 'start_time': '0'}), 'no readable time_base'),
@@ -185,12 +194,16 @@ class PacketClockTests(unittest.TestCase):
             self.assertRaisesRegex(ValueError, message, media.stream_clock, probe, Fraction(30))
 
     def test_probe_commands_read_headers_then_packet_timestamps(self) -> None:
-        """Two ffprobe reads: stream headers as JSON, then v:0 packet pts and flags as CSV; nothing decoded."""
+        """Headers as JSON, v:0 packet pts and flags as CSV, then the first decoded a:0 frame's pts (X87 F-m1)."""
         replies = [subprocess.CompletedProcess([], 0, json.dumps({'streams': [VIDEO, AUDIO]}).encode(), b''),
-                   subprocess.CompletedProcess([], 0, b'0,K__\n20,___\n', b'')]
+                   subprocess.CompletedProcess([], 0, b'0,K__\n20,___\n', b''),
+                   subprocess.CompletedProcess([], 0, b'1024\n2048\n', b'')]
         with patch.object(media, 'run_bounded', side_effect=replies) as run:
             probe = media.probe_streams('/synthetic.media', '/pinned/ffprobe')
-        header, packets = (call.args[0] for call in run.call_args_list)
+        header, packets, audio = (call.args[0] for call in run.call_args_list)
+        self.assertEqual(audio[audio.index('-select_streams') + 1:audio.index('-select_streams') + 6],
+                         ['a:0', '-read_intervals', '%+#8', '-show_entries', 'frame=pts'])
+        self.assertEqual(probe['audioFirstPts'], '1024')
         self.assertEqual((header[0], header[header.index('-show_entries') + 1]), ('/pinned/ffprobe', media.HEADER_ENTRIES))
         self.assertEqual(packets[packets.index('-select_streams') + 1:packets.index('-select_streams') + 4],
                          ['v:0', '-show_entries', 'packet=pts,flags'])

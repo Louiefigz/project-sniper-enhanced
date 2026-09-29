@@ -1,37 +1,32 @@
 """M-043's settlement and closure tests (X25, X29, X37); its reconcile and historical-row tests are in
-``test_production_task_reconcile``.
+``test_production_task_reconcile``, its closure room, validator and archive tests in
+``test_production_closure_record``, and a batch's successor in ``test_production_batch_succession``.
 
 ``settle-resource`` records the operator's statement and never releases. Closure ends only the director's batch
 assignment, revokes live AI work, lists every task still holding a slot or an unresolved resource in
-``production.closure``, and appends those rows to the host record inside the closing transaction. Archive keeps
-the charge in the host record. Batches are ``_production_task_flow_fixture.Batch`` (private roots, fake clocks,
-TEST handles and a TEST process table); no test starts a child process.
+``production.closure``, and appends those rows to the host record inside the closing transaction; while media
+work is live or a media launch is running it drains instead. Batches are ``_production_task_flow_fixture.Batch``
+(private roots, fake clocks, TEST handles and a TEST process table); no test starts a child process.
 """
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from _budget_fixture import CHILD, DISPATCHER, table
-from _production_task_flow_fixture import (
-    BATCH, Batch, close, closure_rows, finish, held_batch, host, rewrite, run_cli,
-)
-from studio import native_budget_store
-from studio.native_budget_batches import BudgetRefused, archive_batch
-from studio.native_budget_schema import validate_record
-from studio.native_budget_store import BudgetAuthorityError, canonical
-from studio.production import api, settlement
+from _production_task_flow_fixture import BATCH, Batch, close, closure_rows, finish, held_batch, host, rewrite, run_cli
+from _status_fixture import ALIVE, attempt
+from studio.native_budget_store import BudgetAuthorityError
+from studio.production import api
 from studio.production.callbacks import TaskFailure
-from studio.production.production_optional import closure_problem
 from studio.production.task_schema import holds_slot
 from studio.production.tasks import active_ai
 from studio.production.unresolved_executions import RECORD, open_rows, recorded_task_ids
 
 STATEMENT = 'TEST operator: the turn ended on the host console'
-ARCHIVE_REFUSAL = ('Batch batch-auth holds unresolved work not recorded at closure '
-                   '(production.closure/unresolved-executions.jsonl)')
+DIRECTOR_END = {'taskId': 'director', 'endCause': 'closure', 'slotReleased': True, 'toolCleanup': 'unproven'}
 
 
 class SettlementTests(unittest.TestCase):
@@ -72,7 +67,8 @@ class ClosureTests(unittest.TestCase):
         batch.enqueue(('critic', 'specialist', ()))
         batch.claim('critic', host('critic'))
         result = close(batch)
-        self.assertEqual((result['status'], result['directorEnded']), ('closed', 'director'))
+        self.assertEqual((result['status'], result['directorEnd'], result['revoked']),
+                         ('closed', DIRECTOR_END, ['critic']))
         director = batch.row('director')
         self.assertEqual((director['state'], director['unresolved'], director['endConfirmed']),
                          ('completed', False, True))
@@ -80,6 +76,22 @@ class ClosureTests(unittest.TestCase):
         self.assertIn("director's batch assignment ended", director['reason'])
         self.assertEqual((batch.row('critic')['state'], batch.row('critic')['revoked']), ('cancel-requested', True))
         self.assertEqual(closure_rows(batch), [('critic', 'specialist', 'cancel-requested', 'codex')])
+        # X114 m4: the trail records the director's end (its end fields, M-041) and the revocations.
+        event = batch.events()[-1]
+        self.assertEqual((event['event'], event['directorEnd'], event['revoked']),
+                         ('batch-closed', DIRECTOR_END, ['critic']))
+
+    def test_a_cancel_requested_director_ends_cancelled_at_close(self) -> None:
+        """X114 m3: a director already asked to stop ends ``cancelled`` at closure, its assignment released (X29)."""
+        batch = Batch(self)
+        api.request_cancel(batch.root, BATCH, 'director', 'TEST operator stop')
+        self.assertEqual(close(batch)['directorEnd'], DIRECTOR_END)
+        director = batch.row('director')
+        self.assertEqual((director['state'], director['unresolved'], director['endConfirmed'], director['revoked']),
+                         ('cancelled', False, True, False))
+        self.assertIn("director's batch assignment ended", director['reason'])
+        self.assertFalse(holds_slot(director))
+        self.assertEqual(closure_rows(batch), [])
 
     def test_close_revokes_live_ai_tasks_and_lists_them(self) -> None:
         """Live AI work is revoked with its state and slot kept; a live check is frozen and listed; hosts per M3."""
@@ -102,6 +114,18 @@ class ClosureTests(unittest.TestCase):
         # A null-host row counts against every host (gate M3, X85(4)).
         self.assertEqual([row['taskId'] for row in open_rows(batch.root, 'codex')], ['critic', 'lint', 'writer'])
         self.assertEqual([row['taskId'] for row in open_rows(batch.root, 'claude-code')], ['lint'])
+
+    def test_an_ai_task_on_a_process_handle_is_listed_with_a_null_host(self) -> None:
+        """X114 m9: an AI execution acknowledged by a process handle is a process, not its claimer's host turn: its
+        row's host is null, so it counts against every host (fail closed, X85)."""
+        batch = Batch(self)
+        batch.enqueue(('writer', 'specialist', ()))
+        batch.claim('writer', CHILD)             # claimed by the codex director, acknowledged by a process
+        batch.table = table(CHILD)               # the process is alive when the close reconciles
+        self.assertEqual(close(batch)['revoked'], ['writer'])
+        self.assertEqual(closure_rows(batch), [('writer', 'specialist', 'cancel-requested', None)])
+        for name in ('codex', 'claude-code'):
+            self.assertEqual([row['taskId'] for row in open_rows(batch.root, name)], ['writer'])
 
     def test_close_lists_completed_residue_and_releases_nothing(self) -> None:
         """Ended work still holding its slot is listed and stays unresolved; charges and reservations stay."""
@@ -136,68 +160,21 @@ class ClosureTests(unittest.TestCase):
         self.assertEqual(closure_rows(batch), [('critic', 'specialist', 'completed', 'codex')])
         self.assertEqual(recorded_task_ids(batch.root, BATCH), {'critic'})
 
-    def test_close_fits_at_the_room_bound(self) -> None:
-        """A batch filled to its room bound still closes; each listable task reserves one widest closure row."""
-        batch = Batch(self)
-        batch.enqueue(*((f'turn-{index}', 'specialist', ()) for index in range(3)), ('spare', 'check', ()))
-        for index in range(3):
-            finish(batch, f'turn-{index}')   # three held completions; the unclaimed spare will be cancelled
-        record = batch.record()
-        # Four listable tasks: the three completions and the live director (the close releases its assignment).
-        closure_room = settlement.CLOSURE_BASE_BYTES + 4 * settlement.CLOSURE_ROW_BYTES
-        self.assertEqual(settlement._closure_room(record), closure_room)
-        self.assertGreaterEqual(settlement._lifecycle_room(record), closure_room)
-        bound = len(canonical(record)) + settlement.settlement_reserve(record)
-        with patch.object(native_budget_store, 'MAX_RECORD_BYTES', bound):
-            self.assertEqual(close(batch)['status'], 'closed')
-        self.assertEqual(len(closure_rows(batch)), 3)
-        # The widest valid closure (the task bound, every field at its bound) fits the rows reserved for it.
-        rows = [{**settlement.widest_closure_row(), 'taskId': f'{index:03d}' + 'T' * 61} for index in range(256)]
-        closure = {'closedElapsed': 1.2345678901234567e-300, 'unresolvedAtClose': rows}
-        probe = {'status': 'closed', 'closedAtElapsed': closure['closedElapsed'],
-                 'production': {'closure': closure, 'tasks': {row['taskId']: {'kind': row['kind']} for row in rows}}}
-        self.assertIsNone(closure_problem(probe))
-        widest = settlement.encoded({'closure': closure}) - 1   # the closure's key and value, plus its comma
-        self.assertLessEqual(widest, settlement.CLOSURE_BASE_BYTES + 256 * settlement.CLOSURE_ROW_BYTES)
-
-    def test_a_claim_past_the_room_is_refused_and_the_fullest_batch_still_closes(self) -> None:
-        """X104: a claim that would need another closure row past the room is refused before it commits; the batch
-        filled to its room bound with every claimed-unsettled task it admits still closes."""
-        batch = Batch(self)
-        batch.enqueue(*((f'lint-{index:02d}', 'check', ()) for index in range(11)))
-        for index in range(10):
-            batch.claim(f'lint-{index:02d}', claimer=DISPATCHER)   # ten live claims, each a listable task
-        batch.table = table(DISPATCHER)                            # their claimer is alive when the close reconciles
-        record = batch.record()
-        bound = len(canonical(record)) + settlement.settlement_reserve(record) + settlement.CLOSURE_ROW_BYTES // 2
-        with patch.object(native_budget_store, 'MAX_RECORD_BYTES', bound):
-            with self.assertRaisesRegex(BudgetAuthorityError, 'no room left'):
-                batch.claim('lint-10', claimer=DISPATCHER)         # its closure row would not fit
-            self.assertEqual(batch.record(), record)               # nothing was committed
-            self.assertEqual(close(batch)['status'], 'closed')
-        self.assertEqual(len(closure_rows(batch)), 10)
-        self.assertEqual(batch.row('lint-10')['state'], 'cancelled')   # the unclaimed one was frozen, not listed
-
-    def test_closure_refused_on_an_open_batch(self) -> None:
-        """``production.closure`` belongs to a closed batch, at its closing time, listing its own tasks once."""
-        record = Batch(self).record()
-        row = {'taskId': 'director', 'kind': 'director', 'state': 'running', 'host': 'codex', 'hostProcess': None,
-               'reason': None}
-        cases = [
-            ('active', {'closedElapsed': 0.0, 'unresolvedAtClose': []}, 'belongs to a closed batch only'),
-            ('closed', {'closedElapsed': 9.0, 'unresolvedAtClose': []}, 'closedElapsed must equal the batch'),
-            ('closed', {'closedElapsed': 5.0}, 'must hold exactly closedElapsed and unresolvedAtClose'),
-            ('closed', {'closedElapsed': 5.0, 'unresolvedAtClose': [{**row, 'host': 'other'}]},
-             "row: a row's host is a known host or null"),
-            ('closed', {'closedElapsed': 5.0, 'unresolvedAtClose': [row, row]}, 'lists each task of this batch once'),
-            ('closed', {'closedElapsed': 5.0, 'unresolvedAtClose': [{**row, 'kind': 'author'}]},
-             'lists each task of this batch once, with its kind'),
-        ]
-        for status, closure, text in cases:
-            closed = {**record, 'status': status, 'closedAtElapsed': 5.0 if status == 'closed' else None,
-                      'production': {**record['production'], 'closure': closure}}
-            with self.subTest(text), self.assertRaisesRegex(ValueError, f'production.closure {text}'):
-                validate_record(closed)
+    def test_close_waits_for_a_running_media_launch(self) -> None:
+        """X114 m2: a running launch with no live media task (a watchdog stop keeps its attempt running) drains the
+        batch with no closure; once its supervisor is provably gone, the close abandons it and closes."""
+        batch = held_batch(self)
+        launch = attempt('final', 10.0, status='running')
+        rewrite(batch, lambda record: record['clips']['A']['attempts'].append(launch))
+        batch.table = table({'type': 'process', **ALIVE})   # the launch's supervisor is alive
+        result = close(batch)
+        self.assertEqual((result['status'], result['runningAttempts']), ('draining', [launch['id']]))
+        self.assertNotIn('closure', batch.record()['production'])
+        self.assertFalse((batch.root / RECORD).exists())
+        batch.table = table()                                # the supervisor exited without an outcome
+        self.assertEqual(close(batch)['status'], 'closed')
+        self.assertEqual(batch.record()['clips']['A']['attempts'][-1]['status'], 'abandoned')
+        self.assertEqual(closure_rows(batch), [('critic', 'specialist', 'completed', 'codex')])
 
     def test_close_appends_host_rows_inside_its_transaction(self) -> None:
         """The host record already holds the closure's rows when the closing commit runs (X79(1))."""
@@ -216,32 +193,6 @@ class ClosureTests(unittest.TestCase):
         self.assertEqual([row['taskId'] for row in open_rows(batch.root, 'codex')], ['critic'])
         self.assertEqual(close(batch)['status'], 'closed')
         self.assertEqual(len((batch.root / RECORD).read_text().splitlines()), 1)
-
-    def test_missing_host_rows_are_appended_before_archive_checks(self) -> None:
-        """Archive appends the closure rows the host record lacks before it checks (a no-op normally)."""
-        batch = held_batch(self)
-        close(batch)
-        (batch.root / RECORD).unlink()   # the host record lost the rows (restored from an older copy, say)
-        archive_batch(batch.root, BATCH, 'TEST archive')
-        self.assertEqual(recorded_task_ids(batch.root, BATCH), {'critic'})
-
-    def test_archive_refuses_unresolved_work_missing_from_the_closure(self) -> None:
-        """Unsettled work its closure does not list keeps the batch from archiving, refused by name."""
-        batch = held_batch(self)
-        close(batch)
-        rewrite(batch, lambda record: record['production']['closure'].update(unresolvedAtClose=[]))
-        with self.assertRaises(BudgetRefused) as refused:
-            archive_batch(batch.root, BATCH, 'TEST archive')
-        self.assertEqual(str(refused.exception), ARCHIVE_REFUSAL)
-
-    def test_archive_keeps_the_charge_in_the_host_record(self) -> None:
-        """An archived batch's unresolved work stays open in the host record, charged against its host."""
-        batch = held_batch(self)
-        close(batch)
-        archive_batch(batch.root, BATCH, 'TEST archive')
-        self.assertFalse((batch.root / 'batches' / BATCH).exists())
-        self.assertTrue((batch.root / 'archive' / BATCH).exists())
-        self.assertEqual([row['taskId'] for row in open_rows(batch.root, 'codex')], ['critic'])
 
     def test_drain_leaves_the_director_running(self) -> None:
         """``drain`` freezes every task but the enrolled director; its assignment ends only at the closure."""

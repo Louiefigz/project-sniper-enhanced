@@ -25,12 +25,27 @@ from studio.native_budget_clock import start_anchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
 from studio.native_budget_store import locked_batch, read_batch
 from studio.production import api
-from studio.production.callbacks import TaskResult
+from studio.production.callbacks import TaskFailure, TaskResult
 from studio.production.claims import ClaimRef, Enrollment
+from studio.production.reconcile import host_key
 
 BATCH = 'batch-auth'            # _budget_fixture.task_spec's run id
 REAL_TABLE = native_budget_launch._process_table
 CLOSE_AFTER_SECONDS = 2500      # past the Short's delivery deadline (2400 s), so close_refusal passes
+# P1 A2's D02 rows, (outcome, host, state after), under G9 (N1): while HOST_END_EVIDENCE is empty, every end
+# of a host turn leaves the task unresolved with its slot held, and the charge never moves.
+D02 = [
+    ('failed-event', 'codex', 'failed'),
+    ('fail-callback', 'codex', 'failed'),
+    ('completed-event', 'codex', 'completed'),
+    ('interrupted-event', 'codex', 'cancelled'),
+    ('observed-terminal', 'codex', 'abandoned'),
+    ('failed-event', 'claude-code', 'failed'),
+    ('interrupted-event', 'claude-code', 'cancelled'),
+    ('observed-terminal', 'claude-code', 'abandoned'),
+    ('cancel-then-failed-event', 'codex', 'cancelled'),
+    ('cancel-then-completed-event', 'codex', 'cancelled'),
+]
 
 
 def host(name: str, kind: str = 'codex') -> dict:
@@ -102,6 +117,18 @@ class Batch:
         """The batch's event trail, oldest first."""
         trail = self.root / 'batches' / BATCH / 'events.jsonl'
         return [json.loads(line) for line in trail.read_text().splitlines()]
+
+
+def d02_end(batch: Batch, ref: ClaimRef, handle: dict, outcome: str) -> None:
+    """One D02 end of the running ``critic`` (the probe's rows, ``probe_d01_d02.py:133-178``)."""
+    if outcome.startswith('cancel') or outcome == 'interrupted-event':
+        api.request_cancel(batch.root, BATCH, 'critic', 'deadline')
+    if outcome == 'fail-callback':
+        api.fail_task(batch.root, BATCH, ref, TaskFailure('host-failure', 'adapter reported failed'))
+    elif outcome == 'observed-terminal':
+        api.reconcile(batch.root, BATCH, {host_key(handle): 'terminal'})
+    else:
+        batch.host_event(ref, outcome.split('-')[-2], handle)
 
 
 def finish(batch: Batch, task_id: str) -> None:

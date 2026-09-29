@@ -1,7 +1,8 @@
 """M-042's flows of the one end rule through the locked production API (P1 A2).
 
 Split from ``test_production_task_end`` (MASTER-PLAN M-042, X35(k)); M-043's flows are in
-``test_production_task_settlement``. The batches are ``_production_task_flow_fixture.Batch``: private roots,
+``test_production_task_{settlement,reconcile}``, ``test_production_closure_record`` and
+``test_production_batch_succession``. The batches are ``_production_task_flow_fixture.Batch``: private roots,
 fake clocks, TEST handles and a TEST process table. Only
 ``test_process_handle_ai_completion_holds_until_reconcile_sees_exit`` starts a child (a TEST ``time.sleep``,
 W2-D2) and reads the real process table to see it end.
@@ -16,47 +17,21 @@ import unittest
 from unittest.mock import patch
 
 from _budget_fixture import private_root, receipt
-from _production_task_flow_fixture import BATCH, REAL_TABLE, Batch, host
+from _production_task_flow_fixture import BATCH, D02, REAL_TABLE, Batch, d02_end, host
+from studio import native_budget_milestones
 from studio.production import api, section_results
 from studio.production.callbacks import TaskFailure, TaskResult
 from studio.production.claims import ClaimRef
-from studio.production.reconcile import host_key
 from studio.production.task_schema import holds_slot, production_problem
 from studio.production.tasks import TaskConflict, TaskRefused, active_ai
 
 LAUNCH_ERROR = 'TEST: spawn codex ENOENT'
 RELEASE_REFUSAL = r"^Releasing an unlaunched claim records the launch tool's failure verbatim \(--launch-error\)$"
-# P1 A2's D02 rows, (outcome, host, state after), under G9 (N1): while HOST_END_EVIDENCE is empty, every end
-# of a host turn leaves the task unresolved with its slot held, and the charge never moves.
-D02 = [
-    ('failed-event', 'codex', 'failed'),
-    ('fail-callback', 'codex', 'failed'),
-    ('completed-event', 'codex', 'completed'),
-    ('interrupted-event', 'codex', 'cancelled'),
-    ('observed-terminal', 'codex', 'abandoned'),
-    ('failed-event', 'claude-code', 'failed'),
-    ('interrupted-event', 'claude-code', 'cancelled'),
-    ('observed-terminal', 'claude-code', 'abandoned'),
-    ('cancel-then-failed-event', 'codex', 'cancelled'),
-    ('cancel-then-completed-event', 'codex', 'cancelled'),
-]
 
 
 def launch_failure(launch_error: str | None = LAUNCH_ERROR) -> TaskFailure:
     """A launch-failed report, with the launch tool's verbatim error unless None."""
     return TaskFailure('launch-failed', 'spawn failed', None, launch_error)
-
-
-def d02_end(batch: Batch, ref: ClaimRef, handle: dict, outcome: str) -> None:
-    """One D02 end of the running ``critic`` (the probe's rows, ``probe_d01_d02.py:133-178``)."""
-    if outcome.startswith('cancel') or outcome == 'interrupted-event':
-        api.request_cancel(batch.root, BATCH, 'critic', 'deadline')
-    if outcome == 'fail-callback':
-        api.fail_task(batch.root, BATCH, ref, TaskFailure('host-failure', 'adapter reported failed'))
-    elif outcome == 'observed-terminal':
-        api.reconcile(batch.root, BATCH, {host_key(handle): 'terminal'})
-    else:
-        batch.host_event(ref, outcome.split('-')[-2], handle)
 
 
 class CancelWinsTests(unittest.TestCase):
@@ -271,6 +246,18 @@ class OneCleanupRuleTests(unittest.TestCase):
                 self.assertEqual((row['state'], row['unresolved'], row['endConfirmed']), ('cancelled', False, True))
                 self.assertEqual((event['endCause'], event['slotReleased'], event['launchError']),
                                  ('unlaunched', True, LAUNCH_ERROR))
+
+    def test_a_held_completion_keeps_its_outputs_cleanup_pending(self) -> None:
+        """X114 M2: an output's cleanup milestone names a completed turn that still holds its slot (G9)."""
+        batch = Batch(self)
+        batch.enqueue(('author-A', 'author', ()))
+        ref = batch.claim('author-A', host('author-A'))
+        api.complete_task(batch.root, BATCH, ref, TaskResult((receipt('author-A'),)))
+        record = batch.record()
+        self.assertTrue(holds_slot(record['production']['tasks']['author-A']))
+        milestone = native_budget_milestones.cleanup(record, 'A')
+        self.assertEqual((milestone['status'], milestone['unresolvedTasks']),
+                         ('pending', [{'taskId': 'author-A', 'state': 'completed'}]))
 
     def test_codex_turns_exhaust_four_slots_with_a_named_refusal(self) -> None:
         """X80: codex completions hold their slots, so the claim after the last free slot is refused by name."""

@@ -15,7 +15,6 @@ present, and an absent key is refused, never defaulted.
 """
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
 
@@ -32,16 +31,24 @@ STATUS_BYTES = 128
 DIRECTOR_KEY = 'director'  # the agent part of a director's identity key; never a valid agent
 
 # ----------------------------------------------------------------------------------------------------------
-# PROVISIONAL DATA TABLE: END_TOOLS (P3b-1 [host-observed 09-28]).
-# The host tools whose answer a director may quote as an end observation. The owner fills this table at
-# M-102 from the M-080a host-surface probe record (PROBE.json, X30), which may change these tool or event
-# names; only this table changes. It lists what may be quoted, not what counts as end evidence: that is
-# M-102's HOST_END_EVIDENCE, holding only the events the probe proved (G9).
+# PROVISIONAL DATA TABLE: END_TOOLS, per host and host version (X55).
+# The notice a director may quote verbatim as an end observation: the host's notification element and the
+# host's literal background-work sentence, a protocol marker whose presence in the note makes the notice
+# interim (with its sha256). Rows come only from the M-080a host-surface probe (X30): Claude Code 2.1.281,
+# probed 2026-09-29. Codex has no row (not probed), so no Codex end can be quoted. A new host version needs a
+# new probe and a new row; only this table changes. What counts as end evidence is M-102's HOST_END_EVIDENCE.
 # ----------------------------------------------------------------------------------------------------------
 END_TOOLS = {
-    'claude-code': ('agent-notification', 'TaskStop'),
-    'codex': ('wait_agent', 'list_agents', 'interrupt_agent'),
+    'claude-code': {
+        '2.1.281': {
+            'element': 'task-notification',
+            'backgroundWorkSentence': 'This agent stopped with background work of its own still running.',
+            'backgroundWorkSentenceSha256': '1ed07a3a96f9b503974e7bffd3323ac6c250e13e7470ae0aed251174e9315cff',
+        },
+    },
+    'codex': {},
 }
+HEADER_ELEMENTS = ('task-id', 'status', 'summary', 'note')   # one-line elements before a notice's body
 
 DIRECTOR_REFUSAL = ('A declared director handle names a known host, a Sniper session id, its host thread if known, '
                     f"and 2-{AI_POLICY['slotsCeiling']} slots")
@@ -62,17 +69,28 @@ class HostHandleRefused(TaskRefused):
     """A host-shaped handle was given on the command line; no host adapter observed that turn."""
 
 
+class EndObservationRefused(ValueError):
+    """A quoted end observation is not a verbatim notice of a probed host version; the reason names why."""
+
+
 @dataclass(frozen=True)
 class EndObservation:
-    """What the host's own tool reported when the agent's turn ended, as the director quoted it.
+    """What the host's own notification reported when an agent's turn ended, as the director quoted it.
+
+    Only ``interim == False`` with ``status`` in {completed, killed} may count as G9 (a) evidence (L-A).
+    M-102 encodes that rule; this module only parses.
 
     Attributes:
-        tool: One of ``END_TOOLS[host]``.
-        status: The host tool's own words: one line, at most ``STATUS_BYTES`` bytes.
+        tool: The host's notification element, ``END_TOOLS[host][version]['element']``.
+        status: The notice's ``<status>``: one line, at most ``STATUS_BYTES`` bytes.
+        interim: True iff the notice's note contains that host version's background-work sentence.
+        task_id: The notice's ``<task-id>``: the host's id of the agent execution it reports on.
     """
 
     tool: str
     status: str
+    interim: bool
+    task_id: str
 
 
 def _matches(pattern: re.Pattern, value: object) -> bool:
@@ -87,15 +105,11 @@ def _line(value: object, limit: int) -> bool:
 
 
 def valid_agent(value: object) -> bool:
-    """Whether ``value`` names one agent: a Claude Code agent id or a Codex agent path.
-
-    Args:
-        value: A ``host_contract.HOST_TOKEN`` (Claude Code ``agentId``) or an ``AGENT_PATH`` such as
-            ``/root/author_q1``.
+    """Whether ``value`` names one agent: a Claude Code ``agentId`` (``HOST_TOKEN``) or a Codex ``AGENT_PATH``.
 
     Returns:
-        True when its canonical encoding is at most ``AGENT_BYTES`` bytes. The literal ``director`` is
-        refused so ``identity_key`` never confuses a subagent with its director.
+        True when its canonical encoding fits ``AGENT_BYTES``; the literal ``director`` is refused so
+        ``identity_key`` never confuses a subagent with its director.
     """
     if type(value) is not str or value == DIRECTOR_KEY or host_contract.encoded_length(value) > AGENT_BYTES:
         return False
@@ -124,14 +138,7 @@ def _subagent_ok(value: dict) -> bool:
 
 
 def valid_declared(value: object) -> bool:
-    """Whether ``value`` is a well-formed declared handle.
-
-    Args:
-        value: A candidate handle with exactly ``DECLARED_KEYS``.
-
-    Returns:
-        True for a director (``agent`` is None) or a subagent handle of a known host and a Sniper session.
-    """
+    """Whether ``value`` is a director (``agent`` None) or subagent handle with exactly ``DECLARED_KEYS``."""
     if type(value) is not dict or set(value) != DECLARED_KEYS or value['type'] != 'declared':
         return False
     if value['host'] not in host_contract.HOSTS or not _matches(SESSION, value['session']):
@@ -145,19 +152,11 @@ def _is_director(value: object) -> bool:
 
 
 def director_handle(host: str, session: str, host_thread: str | None, slots: int) -> dict:
-    """Build and validate a director handle; ``hostProcess`` starts as None (M-099 fills it).
-
-    Args:
-        host: One of ``host_contract.HOSTS``.
-        session: A Sniper session id (``SESSION``).
-        host_thread: The director's host thread when known, else None.
-        slots: The session's AI slots, 2 to ``AI_POLICY['slotsCeiling']``.
-
-    Returns:
-        The declared director handle.
+    """Build and validate a director handle; ``hostProcess`` starts as None (M-099 fills it, D-E).
 
     Raises:
-        ValueError: The handle would be invalid.
+        ValueError: An unknown host, a bad session id, a thread that is not a host token, or slots outside
+            2 to ``AI_POLICY['slotsCeiling']``.
     """
     handle = {'type': 'declared', 'host': host, 'session': session, 'agent': None, 'launch': None,
               'hostThread': host_thread, 'slots': slots, 'hostProcess': None}
@@ -167,18 +166,10 @@ def director_handle(host: str, session: str, host_thread: str | None, slots: int
 
 
 def subagent_handle(director: dict, agent: str, launch: str) -> dict:
-    """Build a subagent handle in the director's host and session.
-
-    Args:
-        director: A valid declared director handle.
-        agent: The subagent's agent id or path (``valid_agent``).
-        launch: The 32-hex launch nonce the director put in the subagent's prompt.
-
-    Returns:
-        The declared subagent handle.
+    """Build a subagent handle in ``director``'s host and session, with its agent and 32-hex launch nonce.
 
     Raises:
-        ValueError: ``director`` is not a declared director handle, or the handle would be invalid.
+        ValueError: ``director`` is not a declared director handle, or the agent or nonce is invalid.
     """
     if not _is_director(director):
         raise ValueError(PARENT_REFUSAL)
@@ -199,9 +190,6 @@ def _kind(handle: object) -> str:
 def identity_key(handle: dict) -> str:
     """The one identity string for attach uniqueness, reviewer checks, roster labels and status.
 
-    Args:
-        handle: A valid declared, host or process handle.
-
     Returns:
         ``declared:<host>:<session>:<agent or "director">``, ``host:<host>:<thread>`` (turn ignored) or
         ``process:<pid>:<pgid>:<started>``. A director's ``hostProcess`` never changes its key.
@@ -221,9 +209,6 @@ def identity_key(handle: dict) -> str:
 def identity_basis(handle: dict | None) -> str:
     """How an identity is known; nothing is "observed" for AI work.
 
-    Args:
-        handle: A valid handle, or None.
-
     Returns:
         ``'declared'`` for declared and historical host handles (no host adapter exists in this release,
         so a host-shaped handle was declared too), ``'process-observed'`` for a process handle and
@@ -238,52 +223,76 @@ def identity_basis(handle: dict | None) -> str:
 
 
 def registered_identity(handle: object) -> bool:
-    """Whether a section result may name this identity.
-
-    Args:
-        handle: Any value.
-
-    Returns:
-        True for a declared subagent handle, or a historical host handle with a non-null turn.
-    """
+    """For section results: a declared subagent handle, or a historical host handle with a non-null turn."""
     if valid_declared(handle):
         return handle['agent'] is not None
     return host_contract.valid_handle(handle) and handle['type'] == 'host' and handle['turn'] is not None
 
 
-def _unique_object(pairs: list[tuple[str, object]]) -> dict:
-    """A JSON object whose keys are distinct: a repeated key would make the quoted report ambiguous."""
-    if len({key for key, _ in pairs}) != len(pairs):
-        raise ValueError('A JSON object repeats a key')
-    return dict(pairs)
+def _format(host: object, version: object) -> dict:
+    """The recorded notice format of one probed host version, or the named refusal."""
+    versions = END_TOOLS[host] if host in host_contract.HOSTS else {}
+    row = versions.get(version) if type(version) is str else None
+    if row is None:
+        raise EndObservationRefused(f'No end-observation format is recorded for host {host!r} version {version!r}: '
+                                    'the M-080a host probe must cover this host version first')
+    return row
 
 
-def _end_refusal(host: str) -> ValueError:
-    """The one refusal for a malformed end observation, naming the tools of ``host``."""
-    tools = ', '.join(END_TOOLS[host]) if host in host_contract.HOSTS else 'none (unknown host)'
-    return ValueError(f'--end-observation is {{"tool": one of {tools}, "status": "<the host tool\'s own words, '
-                      f'one line, at most {STATUS_BYTES} bytes>"}}')
+def _header_element(line: str) -> tuple[str, str] | None:
+    """(name, value) of a one-line header element such as ``<status>killed</status>``, else None."""
+    for name in HEADER_ELEMENTS:
+        opening, closing = f'<{name}>', f'</{name}>'
+        if line.startswith(opening) and line.endswith(closing) and len(line) >= len(opening) + len(closing):
+            return name, line[len(opening):len(line) - len(closing)]
+    return None
 
 
-def parse_end_observation(text: str, host: str) -> EndObservation:
-    """Parse the director's quote of the host tool that reported an agent's end.
+def _notice_header(text: object, element: str) -> dict | None:
+    """The header elements of one verbatim ``<element>`` notice (each at most once), or None.
+
+    The header is the run of one-line ``HEADER_ELEMENTS`` after the opening tag; the body after it (the
+    agent's result, usage) is not read, so an agent's own words can never supply a status or note.
+    """
+    lines = text.strip().splitlines() if type(text) is str else []
+    if len(lines) < 3 or lines[0] != f'<{element}>' or lines[-1] != f'</{element}>':
+        return None
+    header = {}
+    for line in lines[1:-1]:
+        row = _header_element(line)
+        if row is None:
+            break
+        if row[0] in header:
+            return None
+        header[row[0]] = row[1]
+    return header
+
+
+def parse_end_observation(text: str, host: str, version: str) -> EndObservation:
+    """Parse the host's verbatim notice that an agent's turn ended, as the director quoted it.
+
+    Only ``interim == False`` with ``status`` in {completed, killed} may count as G9 (a) evidence (L-A).
+    M-102 encodes that rule; this function only parses.
 
     Args:
-        text: JSON ``{"tool": ..., "status": ...}`` with exactly those keys.
-        host: The task's host; ``tool`` must be one of ``END_TOOLS[host]``.
+        text: The host's notification, verbatim: ``<task-notification>`` ... ``</task-notification>`` for
+            Claude Code 2.1.281, with one-line ``<task-id>`` and ``<status>`` elements and an optional note.
+        host: The task's host (``host_contract.HOSTS``).
+        version: The host version the session recorded; it must have an ``END_TOOLS`` row.
 
     Returns:
-        The observation, exactly as quoted.
+        The observation: the element, the status, whether the note marks the notice interim, the task id.
 
     Raises:
-        ValueError: The text, tool, status or host does not fit.
+        EndObservationRefused: No format is recorded for that host version, or the text is not one notice.
     """
-    try:
-        raw = json.loads(text, object_pairs_hook=_unique_object)
-    except ValueError as error:
-        raise _end_refusal(host) from error
-    if host not in host_contract.HOSTS or type(raw) is not dict or set(raw) != {'tool', 'status'} \
-            or type(raw['tool']) is not str or raw['tool'] not in END_TOOLS[host] \
-            or not _line(raw['status'], STATUS_BYTES):
-        raise _end_refusal(host)
-    return EndObservation(raw['tool'], raw['status'])
+    row = _format(host, version)
+    element = row['element']
+    header = _notice_header(text, element)
+    if header is None or not _matches(host_contract.HOST_TOKEN, header.get('task-id')) \
+            or not _line(header.get('status'), STATUS_BYTES) or '<' in header['status']:
+        raise EndObservationRefused(f"--end-observation is the host's verbatim <{element}> notice: one "
+                                    f'<task-id>, one <status> of one line and at most {STATUS_BYTES} bytes, '
+                                    'and its note, each on its own line')
+    interim = row['backgroundWorkSentence'] in header.get('note', '')
+    return EndObservation(element, header['status'], interim, header['task-id'])

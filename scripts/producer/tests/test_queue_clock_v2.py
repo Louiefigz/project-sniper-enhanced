@@ -1,7 +1,5 @@
 """Short capacity clock v2 (P1 Step B1, M-044): the v2 shape, v1 clocks read-only, and the one schema step.
-
-Private TEST records only: every authority root is a private temporary directory and no clock reads the host.
-"""
+Private TEST records only: authority roots are private temporary directories; no clock reads the host."""
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
@@ -64,7 +62,7 @@ def full_v2_clock() -> dict:
     clock.update(excludedSeconds=120.0, observedElapsed=300.0, directorWorking=False,
                  workers={'/TEST/owner-a': copy.deepcopy(V2_ROW)},
                  occupancy={'fingerprint': 'c' * 64, 'sinceElapsed': 200.0},
-                 stall={'state': 'cancelled', 'sinceElapsed': 250.0, 'occupants': ['a' * 32],
+                 stall={'state': 'cancelled', 'sinceElapsed': 250.0, 'occupants': ['a' * 32], 'truncated': False,
                         'decisions': [{'kind': 'cancel', 'reason': 'TEST operator reason', 'elapsed': 260.0}]},
                  orphans={'count': 3, 'recent': [{**V2_ROW, 'state': 'working', 'orphanedElapsed': 280.0}]},
                  checkpoint={'excludedSeconds': 100.0, 'elapsed': 250.0, 'count': 2},
@@ -107,8 +105,11 @@ VIOLATIONS = (
     ('occupancy extra key', _set('occupancy.extra', None), 'Short capacity clock occupancy'),
     ('dropped stall state waiting-kept', _set('stall.state', 'waiting-kept'), STALL),
     ('stall time not finite', _set('stall.sinceElapsed', float('nan')), STALL),
-    ('nine stall occupants', _set('stall.occupants', ['x'] * 9), STALL),
+    ('65 stall occupants', _set('stall.occupants', ['x'] * 65), STALL),
     ('a 65-character stall occupant', _set('stall.occupants', ['x' * 65]), STALL),
+    ('truncated not a bool', lambda clock: clock['stall'].update(occupants=['x'] * 64, truncated=1), STALL),
+    ('truncated below the 64 cap', _set('stall.truncated', True), STALL),
+    ('a stall without truncated', lambda clock: clock['stall'].pop('truncated'), STALL),
     ('2 decisions refused', _set('stall.decisions', [DECISION, DECISION]), DECISIONS),
     ('dropped decision keep-waiting', _set('stall.decisions', [{**DECISION, 'kind': 'keep-waiting'}]), DECISIONS),
     ('a 516-byte decision reason', _set('stall.decisions.0.reason', 'é' * 86), DECISIONS),
@@ -133,6 +134,15 @@ VIOLATIONS = (
     ('nine row occupants', _set('workers./TEST/owner-a.occupants', ['x'] * 9), POOL),
     ('an unknown wait class', _set('workers./TEST/owner-a.waitClass', 'queue'), POOL),
 )
+ACCEPTED = (('an unverified v2 row', _set('workers./TEST/owner-a.state', 'unverified')),
+            ('64 stall occupants', _set('stall.occupants', ['x'] * 64)),
+            ('a union truncated at 64', lambda clock: clock['stall'].update(occupants=['x'] * 64, truncated=True)))
+# The moved v1 checks keep the P0 engine's messages (P1 B1: v1 validates exactly as today).
+V1_VIOLATIONS = (('totals over the observed time', {'pendingSeconds': 200.0}, 'Short capacity clock totals'),
+                 ('a delivery credit not a number', {'deliveryCredits': {'a' * 32: '1'}}, 'Short delivery clock credits'),
+                 ('a task-credit key not text', {'taskCredits': {1: 5.0}}, 'Short capacity task credits'),
+                 ('an owner without its boot', {'workers': {'/TEST/owner-a': {**V1_ROW, 'supervisor': OWNER}}},
+                  'Short capacity worker process identity'))
 
 
 class SchemaTests(unittest.TestCase):
@@ -148,12 +158,12 @@ class SchemaTests(unittest.TestCase):
             'policy': 'short-render-capacity-v2', 'excludedSeconds': 0.0, 'pendingSeconds': 0.0,
             'observedElapsed': 0.0, 'uncertainSeconds': 0.0, 'workers': {}, 'taskCredits': {}, 'deliveryCredits': {},
             'directorWorking': True, 'occupancy': {'fingerprint': None, 'sinceElapsed': 0.0},
-            'stall': {'state': None, 'sinceElapsed': None, 'occupants': [], 'decisions': []},
+            'stall': {'state': None, 'sinceElapsed': None, 'occupants': [], 'truncated': False, 'decisions': []},
             'orphans': {'count': 0, 'recent': []},
             'checkpoint': {'excludedSeconds': 0.0, 'elapsed': 0.0, 'count': 0}, 'handoff': None})
-        self.assertEqual((schema.POLICIES, schema.MAX_WORKERS, schema.MAX_OCCUPANTS, schema.MAX_ORPHAN_ROWS,
-                          schema.MAX_CHECKPOINTS, schema.WORKER_STATES, schema.STALL_STATES),
-                         (('short-render-capacity-v1', 'short-render-capacity-v2'), 64, 8, 16, 32,
+        self.assertEqual((schema.POLICIES, schema.MAX_WORKERS, schema.MAX_OCCUPANTS, schema.MAX_STALL_OCCUPANTS,
+                          schema.MAX_ORPHAN_ROWS, schema.MAX_CHECKPOINTS, schema.WORKER_STATES, schema.STALL_STATES),
+                         (('short-render-capacity-v1', 'short-render-capacity-v2'), 64, 8, 64, 16, 32,
                           ('working', 'waiting', 'unverified'), (None, 'capacity-stalled', 'cancelled')))
         self.assertFalse(hasattr(schema, 'MAX_STALL_DECISIONS'))   # X35(g): one decision kind, one row
         self.assertIs(queue_clock.new_clock, schema.new_clock)
@@ -206,9 +216,25 @@ class SchemaTests(unittest.TestCase):
         record['clips']['A']['capacityClock']['stall']['decisions'] *= 2
         with self.assertRaisesRegex(ValueError, 'budget record is invalid: Short capacity clock stall decisions'):
             validate_record(record)
-        unverified = full_v2_clock()
-        unverified['workers']['/TEST/owner-a']['state'] = 'unverified'
-        self.assertIsNone(schema.problem({**clip, 'capacityClock': unverified}))
+        for name, mutate in ACCEPTED:
+            clock = full_v2_clock()
+            mutate(clock)
+            with self.subTest(name):
+                self.assertIsNone(schema.problem({**clip, 'capacityClock': clock}))
+
+    def test_v1_clock_keeps_its_p0_checks_and_its_earned_credit(self) -> None:
+        """The moved v1 checks keep their P0 messages; deliveries and task deadlines still read v1 credit (W2-D8)."""
+        clip = short_record(V1_CLOCK)['clips']['A']
+        for name, change, message in V1_VIOLATIONS:
+            with self.subTest(name):
+                self.assertEqual(schema.problem({**clip, 'capacityClock': {**V1_CLOCK, **change}}), message)
+        record = short_record({**V1_CLOCK, 'taskCredits': {'author-1': 20.0}, 'deliveryCredits': {'b' * 32: 100.0}})
+        clip = record['clips']['A']
+        queue_clock.record_delivery(clip, 'a' * 32)   # freezes the earned 120 s
+        self.assertEqual(clip['capacityClock']['deliveryCredits'], {'b' * 32: 100.0, 'a' * 32: 120.0})
+        task = {'id': 'author-1', 'kind': 'author', 'clipId': 'A', 'deadlineElapsed': 1800.0}
+        self.assertEqual(queue_clock.task_deadline(record, task), 1900.0)   # 120 earned since its origin at 20
+        self.assertEqual(queue_clock.delivery_deadline(record, clip, {'attemptId': 'b' * 32}), 2500.0)
 
     def test_v7_record_lifts_unchanged(self) -> None:
         """A v7 record (v1 clock, task rows) reads as the new version with every clip and task byte-equal."""

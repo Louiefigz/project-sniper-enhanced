@@ -11,7 +11,7 @@ import re
 import unittest
 
 from _budget_fixture import FakeClock, fake_clock, private_root
-from studio.native_budget_batches import create_batch
+from studio.native_budget_batches import archive_batch, create_batch
 from studio.native_budget_schema import SCHEMA_VERSION, a5_shape, validate_record
 from studio.native_budget_store import BudgetAuthorityError, canonical, read_batch
 from studio.production.production_optional import PRODUCTION_OPTIONAL, VALIDATORS
@@ -86,6 +86,11 @@ class BudgetSchemaShapeTests(unittest.TestCase):
         write_raw(self.root, {**old, 'schemaVersion': 6})   # only a schema-5 record is read as the A5 shape
         with self.assertRaisesRegex(BudgetAuthorityError, 'unreadable or corrupt: .*clip attempts'):
             read_batch(self.root, BATCH)
+        # Closed, with its tasks ended, the refused A5 batch leaves resolution as the message says.
+        write_raw(self.root, {**old, 'status': 'closed', 'closedAtElapsed': 500.0,
+                              'production': {**old['production'], 'tasks': {}}})
+        archive_batch(self.root, BATCH, 'TEST operator archived an A5-forecast batch')
+        self.assertTrue((self.root / 'archive' / BATCH / 'authority.json').is_file())
 
     def test_v7_lifts_to_next_without_field_changes(self) -> None:
         """A version-7 record reads as the next version and nothing else changes."""
@@ -121,6 +126,45 @@ class BudgetSchemaShapeTests(unittest.TestCase):
             record['clips']['A'][kind][0]['late'] = value
             with self.subTest(kind=kind, late=value), self.assertRaisesRegex(ValueError, f'clip {kind}'):
                 validate_record(record)
+
+
+class NoDefaultTests(unittest.TestCase):
+    """X50: an absent required field is refused at every seam, never defaulted (the ledger's opt rows aside)."""
+
+    def setUp(self) -> None:
+        """A private root holding this engine's version-8 record."""
+        self.enterContext(fake_clock(FakeClock()))
+        self.root = private_root(self)
+        self.record = delivered(None)
+        create_batch(self.root, self.record)
+
+    def test_a_row_or_the_production_block_missing_a_required_key_is_refused(self) -> None:
+        """A required attempt, delivery or production key cannot be left out, even beside the optional ones."""
+        cases = [(('clips', 'A', 'attempts', 0), 'status', 'clip attempts'),
+                 (('clips', 'A', 'deliveries', 0), 'elapsed', 'clip deliveries'),
+                 (('production',), 'drain', 'production block fields')]
+        for path, key, text in cases:
+            record = copy.deepcopy(self.record)
+            target = record
+            for step in path:
+                target = target[step]
+            del target[key]
+            with self.subTest(key), self.assertRaisesRegex(ValueError, f'budget record is invalid: {text}$'):
+                validate_record(record)
+
+    def test_a_version_8_record_gains_no_implicit_field(self) -> None:
+        """The lift's implicit fields exist for versions 5-7 only: a version-8 record without them is refused,
+        and the read rewrites nothing."""
+        strips = {'task owners': lambda record: record['production']['tasks']['author-1'].pop('owners'),
+                  'prior authorizations': lambda record: record['production']['authorization'].pop('prior')}
+        for name, strip in strips.items():
+            record = copy.deepcopy(self.record)
+            strip(record)
+            write_raw(self.root, record)
+            before = (self.root / 'batches' / BATCH / 'authority.json').read_bytes()
+            with self.subTest(name), self.assertRaisesRegex(BudgetAuthorityError, 'unreadable or corrupt'):
+                read_batch(self.root, BATCH)
+            self.assertEqual((self.root / 'batches' / BATCH / 'authority.json').read_bytes(), before)
 
 
 GIB = 1024 ** 3

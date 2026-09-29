@@ -9,8 +9,10 @@ changes once (X7). Nothing is defaulted: every v2 key is present on every v2 clo
 A v2 owner row also names its pool evidence (``ticket``, ``occupants``, ``waitClass``: ``None``, ``[]`` and
 ``None`` for a row without any; M-047 supplies it) and its exact owner identity (``supervisor``, ``boot``).
 The stall has three states (X19, X35(g)): none, ``capacity-stalled`` and ``cancelled``. Its only recorded
-decision is the operator's ``cancel``, so at most one decision row exists. An orphan row is a v2 owner row
-plus ``orphanedElapsed``.
+decision is the operator's ``cancel``, so at most one decision row exists. Its ``occupants`` are the sorted
+union of every verified waiting row's occupants, cut at ``MAX_STALL_OCCUPANTS`` with ``truncated`` true
+(X95, X98); a truncated stall is never credited, and a truncated list is exactly that long. An orphan row is a
+v2 owner row plus ``orphanedElapsed``.
 """
 from __future__ import annotations
 
@@ -22,7 +24,8 @@ POLICY_V1 = 'short-render-capacity-v1'
 POLICY = 'short-render-capacity-v2'
 POLICIES = (POLICY_V1, POLICY)
 MAX_WORKERS = 64
-MAX_OCCUPANTS = 8
+MAX_OCCUPANTS = 8           # one owner row's live occupants (B3)
+MAX_STALL_OCCUPANTS = 64    # the stall's union over every waiting row (X95: no pool constant bounds it)
 MAX_ORPHAN_ROWS = 16
 MAX_CHECKPOINTS = 32
 WORKER_STATES = ('working', 'waiting', 'unverified')
@@ -42,7 +45,7 @@ def new_clock() -> dict:
     return {'policy': POLICY, 'excludedSeconds': 0.0, 'pendingSeconds': 0.0, 'observedElapsed': 0.0,
             'uncertainSeconds': 0.0, 'workers': {}, 'taskCredits': {}, 'deliveryCredits': {},
             'directorWorking': True, 'occupancy': {'fingerprint': None, 'sinceElapsed': 0.0},
-            'stall': {'state': None, 'sinceElapsed': None, 'occupants': [], 'decisions': []},
+            'stall': {'state': None, 'sinceElapsed': None, 'occupants': [], 'truncated': False, 'decisions': []},
             'orphans': {'count': 0, 'recent': []},
             'checkpoint': {'excludedSeconds': 0.0, 'elapsed': 0.0, 'count': 0}, 'handoff': None}
 
@@ -112,15 +115,16 @@ def _owner_identity(row: dict) -> bool:
 def _pool_evidence_problem(row: dict) -> str | None:
     """A v2 row's pool ticket, the live occupants it waited behind, and its wait class."""
     ticket = row['ticket']
-    if ticket is not None and (type(ticket) is not int or ticket < 0) or not _occupants_ok(row['occupants']) \
+    if ticket is not None and (type(ticket) is not int or ticket < 0) \
+            or not _occupants_ok(row['occupants'], MAX_OCCUPANTS) \
             or row['waitClass'] not in WAIT_CLASSES:
         return 'Short capacity worker pool evidence'
     return None
 
 
-def _occupants_ok(value: object) -> bool:
-    """At most ``MAX_OCCUPANTS`` pool member names of at most 64 characters."""
-    return type(value) is list and len(value) <= MAX_OCCUPANTS \
+def _occupants_ok(value: object, bound: int) -> bool:
+    """At most ``bound`` pool member names of at most 64 characters."""
+    return type(value) is list and len(value) <= bound \
         and all(type(item) is str and len(item) <= 64 for item in value)
 
 
@@ -143,11 +147,13 @@ def _digest(value: object) -> bool:
 
 
 def _stall_problem(stall: object) -> str | None:
-    """The named stall state, the occupants it stalled behind, and at most one recorded cancellation."""
-    if type(stall) is not dict or set(stall) != {'state', 'sinceElapsed', 'occupants', 'decisions'} \
+    """The named stall state, the occupants it stalled behind (cut at 64, and then marked truncated), and at
+    most one recorded cancellation."""
+    if type(stall) is not dict or set(stall) != {'state', 'sinceElapsed', 'occupants', 'truncated', 'decisions'} \
             or stall['state'] not in STALL_STATES \
             or not (stall['sinceElapsed'] is None or number(stall['sinceElapsed'])) \
-            or not _occupants_ok(stall['occupants']):
+            or not _occupants_ok(stall['occupants'], MAX_STALL_OCCUPANTS) or type(stall['truncated']) is not bool \
+            or stall['truncated'] and len(stall['occupants']) != MAX_STALL_OCCUPANTS:
         return 'Short capacity clock stall'
     decisions = stall['decisions']
     if type(decisions) is not list or len(decisions) > 1 or not all(map(_decision_ok, decisions)):

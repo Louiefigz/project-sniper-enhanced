@@ -72,6 +72,18 @@ class WatchdogBackstopTests(WatchCase):
         self.assertEqual(category, 'capacity-credit-unavailable')
         self.assertIn('Short A capacity credit has been unreadable for', detail)
 
+    def test_a_good_read_restarts_the_watchdogs_grace(self) -> None:
+        """A regression seen at 1, the record back at 30 by 5 (a good read), a new drop at 10: the watchdog names it
+        only a grace after 10, never on the first sight's clock."""
+        self.put(self.credit_record(20.0))
+        self.assertIsNone(self.reason(1.0))
+        self.put(self.credit_record(30.0))
+        self.assertIsNone(self.reason(5.0))
+        self.put(self.credit_record(25.0))
+        for now in (10.0, 10.0 + GRACE):
+            self.assertIsNone(self.reason(now))
+        self.assertEqual(self.reason(10.5 + GRACE)[0], 'capacity-credit-regressed')
+
     def test_a_stuck_owner_is_stopped_gracefully_and_only_after_the_grace(self) -> None:
         """The child never exits: the watchdog terminates it (SIGTERM path) once the grace is over, and only then
         ends its group; the reason is named."""

@@ -4,7 +4,10 @@ The coordinator reads this instead of reconstructing state from history. It
 states SLA misses plainly: an output without a delivery made by its own deadline
 (a Short's minute 40, a Long's 180 minutes) is a miss, never a success because
 work stopped on time or finished late. Each output is reported under its own
-format policy; a run holding a Long also reports the mixed forecast.
+format policy; a run holding a Long also reports the mixed forecast. That
+``slaMiss`` is necessary, not sufficient: the SLA is a visible hand-off, which
+``native_budget_status.production_status`` (``native_batch.py status``) reports per
+output beside it. ``wait`` and ``close`` keep this authority-only ``batch_status``.
 """
 from __future__ import annotations
 
@@ -15,7 +18,8 @@ from studio.production.formats import (
 
 ROUTES = ('preview', 'final', 'draft', 'promote')
 LONG_ROUTES = ('preview', 'final')
-HANDOFF = 'open the delivered MP4 and its Studio project, then run native_batch.py handoff'
+HANDOFF = ('open the delivered MP4 and its Studio project, then record the visible hand-off with native_batch.py '
+           'handoff --confirmation <its visible-handoff confirmation record>')
 
 
 def batch_status(record: dict, elapsed: float) -> dict:

@@ -13,7 +13,7 @@ import unittest
 from datetime import datetime, timezone
 from unittest import mock
 
-from _budget_fixture import FakeClock, fake_clock, handoff_confirmation
+from _budget_fixture import FakeClock, b3_stand_in, fake_clock, handoff_confirmation, test_mp4
 from _status_fixture import (
     attempt, batch_record, deliver, handed_off, handoff_summary, mp4, observe, temporary_directory, views_record,
 )
@@ -172,8 +172,16 @@ class TrailTests(Case):
 class FileTests(Case):
     """A hand-off file (unit A3's real reader, TEST B3 records) is real but never on the batch clock."""
 
+    def setUp(self) -> None:
+        """The Case record with a real delivered MP4 and the TEST B3 stand-in installed (X76)."""
+        self.record, self.dir = observe(batch_record(), 1100.0), temporary_directory(self)
+        self.video = test_mp4(self.dir / 'A-draft')  # X76: src's shared reader re-hashes the delivered MP4
+        self.draft = deliver(self.record, 'A', attempt('draft', 600.0, completed=900.0), self.video)
+        self.enterContext(b3_stand_in())  # X76: src has B3's verifier; the stand-in accepts only fixture records
+
     def test_a_confirmation_file_is_off_the_batch_clock_and_never_meets_the_sla(self) -> None:
-        file = handoff_confirmation(self.dir / 'handoff', self.video)
+        stamp = datetime(2026, 9, 27, 10, 0, 9, tzinfo=timezone.utc).timestamp()  # X76: A6u's fixed confirmation time
+        file = handoff_confirmation(self.dir / 'handoff', self.video, at=stamp)
         found = self.found(self.verdicts(files=(file,)))
         self.assertEqual((found['visibleMp4']['status'], found['timestamps']['visibleHandoffAt']),
                          ('confirmed-not-on-batch-clock', None))
@@ -189,7 +197,7 @@ class FileTests(Case):
     def test_views_ready_and_refused_files(self) -> None:
         views = handoff_confirmation(self.dir / 'views', self.video, visible=False)
         self.assertEqual(self.found(self.verdicts(files=(views,)))['matchingStudio']['status'], 'server-verified')
-        other = handoff_confirmation(self.dir / 'other', (self.video[0], 'e' * 64))
+        other = handoff_confirmation(self.dir / 'other', test_mp4(self.dir / 'other-attempt'))  # X76: a real file
         verdict = self.verdicts(files=(other,))['handoffs'][0]
         self.assertFalse(verdict['accepted'])
         self.assertIn('not a recorded delivery', verdict['reason'])

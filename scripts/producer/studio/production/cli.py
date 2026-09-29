@@ -29,6 +29,7 @@ from pathlib import Path
 from studio import native_budget_store as store
 from studio.native_budget_binding import BudgetRefused
 from studio.native_budget_clock import BudgetClockError
+from studio.native_budget_status import status_arguments
 from studio.native_budget_store import BudgetAuthorityError
 from studio.production import api, commands, dispatch, handover_commands, inputs, media
 from studio.production.callbacks import TaskFailure, TaskResult
@@ -193,6 +194,7 @@ def _batch_parsers(sub: argparse._SubParsersAction) -> None:
                                         help='The native_handoff.py confirm record (visible-handoff)')
     for name in ('status', 'close', 'archive', 'reconcile', 'dispatch', *ROOT_COMMANDS):
         sub.add_parser(name)
+    status_arguments(sub.choices['status'])
     sub.choices['archive'].add_argument('--reason', required=True,
                                         help="The operator's request to release this closed batch's Shorts")
     discard = sub.choices['discard-start']

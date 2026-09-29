@@ -109,7 +109,7 @@ class RunStatusTests(Case):
         self.assertEqual(pool['byClass']['audio'], {'live': 0, 'quarantined': 1, 'waiting': 0})
         self.assertEqual((pool['staleTickets'], pool['liveWithoutProcessTableMatch']), (1, 1))
         self.assertEqual(run['memory']['reservations']['headroomBytes'], 32 * GIB - 7 * GIB)
-        self.assertEqual(run['disk']['reservedBytesByDevice'], {'7': 6 * GIB})
+        self.assertEqual(run['disk']['reservedBytesByDevice'], {'*': 6 * GIB})  # X76: src's space key
         self.assertEqual(run['cleanup']['quarantinedPoolMembers'], [
             {'nonce': 'b' * 32, 'class': 'audio', 'lock': 'free', 'supervisorInProcessTable': True,
              'recover': f'native_work_recovery.py {"b" * 32}'}])
@@ -190,7 +190,7 @@ class ProductionStatusTests(Case):
     def test_the_default_report_is_a_compact_summary(self) -> None:
         full, compact = json.dumps(self.status(True)), self.status(False)
         clip_b = compact['clips']['B']['production']
-        self.assertEqual(sorted(clip_b), ['blockers', 'forecast', 'milestones', 'nextActions', 'state'])
+        self.assertEqual(sorted(clip_b), ['blockers', 'clock', 'forecast', 'milestones', 'nextActions', 'state'])
         self.assertEqual((clip_b['milestones']['visibleMp4'], clip_b['milestones']['timestamps']['visibleHandoffAt']),
                          ('visible', 1001.0))
         self.assertEqual((compact['production']['full'], compact['production']['visibleSlaMisses']), (False, ['A']))

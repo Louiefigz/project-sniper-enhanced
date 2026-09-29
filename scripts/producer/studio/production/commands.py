@@ -5,7 +5,8 @@ operator's approved titles and scripts (``inputs.load_approvals``) and binds the
 authorization instant (without them it is refused, exit 3, before anything is written) and
 declares the run's AI slots and reservations within the policy maximum
 (``native_budget_schema.AI_POLICY``); ``handoff`` requires a visible hand-off confirmation that
-unit B3's verifier accepts (``handoff``); ``status`` adds the task summary and the dispatcher.
+unit B3's verifier accepts (``handoff``); ``status`` reports each output's state and milestones and the
+run's tasks, usage and dispatcher (``native_budget_status``).
 add-clip, change-approval and the staged-start commands are in ``handover_commands``. Every
 handler reads the authority root from ``native_budget_store.default_root`` at call time.
 """
@@ -19,6 +20,7 @@ from pathlib import Path
 
 from studio import native_budget_engine as engine
 from studio import native_budget_forecast as forecast
+from studio import native_budget_status as status
 from studio import native_budget_store as store
 from studio.native_budget_batches import archive_batch
 from studio.native_budget_binding import BudgetRefused, advance_clock, bind_project
@@ -30,7 +32,7 @@ from studio.native_budget_store import BudgetAuthorityError, locked_batch, read_
 from studio.production import api, dispatch, handoff, inputs
 from studio.production.authorization import Setup, authorize, complete_setup
 from studio.production.handover_commands import NO_APPROVALS
-from studio.production.lifecycle import freeze, task_summary
+from studio.production.lifecycle import freeze
 from studio.production.tasks import TaskConflict
 
 REPO = Path(__file__).resolve().parents[4]
@@ -129,10 +131,11 @@ def observed_record(batch_id: str) -> tuple[dict, float]:
 
 
 def cmd_status(args: argparse.Namespace) -> dict:
-    """Elapsed/remaining time, counters, forecasts, required actions, production tasks and the dispatcher."""
-    record, elapsed = observed_record(args.batch)
-    return {**batch_status(record, elapsed), 'tasks': task_summary(record, elapsed),
-            'dispatcher': dispatch.status(store.default_root(), args.batch)}
+    """Counters, forecasts and actions, each output's state and milestones, and the run's tasks, usage and
+    dispatcher (``native_budget_status``; the record and its trail are read under one batch lock)."""
+    record, elapsed, events = status.status_observation(store.default_root(), args.batch)
+    dispatcher = dispatch.status(store.default_root(), args.batch)
+    return status.production_status(record, elapsed, status.status_inputs(args, events, dispatcher))
 
 
 def progress_key(record: dict, clip: str | None, until: str) -> str:

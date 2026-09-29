@@ -119,7 +119,8 @@ class NativeBatchCliTests(unittest.TestCase):
         self.assertEqual(self.run_cli('bind', '--batch', 'bind-batch', '--clip', 'A', str(foreign))['status'], 'bound')
 
     def test_status_reads_only_the_evidence_it_is_given(self) -> None:
-        self.run_cli('start', '--batch', 'ev-batch', '--clips', 'A', '--source', str(self.source))
+        self.run_cli('start', '--batch', 'ev-batch', '--clips', 'A', '--source', str(self.source),
+                     *self.approved('A'))  # X76: src's start requires the handed-over approval (A34, NO_APPROVALS)
         forged = self.home / 'confirm.json'
         forged.write_text(json.dumps({'schemaVersion': 1, 'kind': 'native-visible-handoff-confirmation',
                                       'status': 'visible-handoff', 'failures': [], 'visibleHandoffAt': 'x'}))

@@ -17,7 +17,8 @@ Exit codes: 0 ok/admitted, 3 refused by the budget, 2 invalid or corrupt; run-me
        default 4, at most 16; --ai-reservations at most 256)
   native_batch.py bind --batch ID --clip A /abs/native-project
   native_batch.py admit --batch ID --clip A --kind author|review|planReview|repairCycle [--label TEXT]
-  native_batch.py status --batch ID
+  native_batch.py status --batch ID [--full] [--handoff FILE] [--final-review FILE] [--timing JOURNAL]
+                         [--transcript FILE]      (each evidence option repeatable)
   native_batch.py wait --batch ID [--clip A] --until change|delivery --timeout SECONDS
   native_batch.py hold --batch ID start|end --reason TEXT
   native_batch.py add-clip --batch ID --clip F --reason TEXT --approval FILE

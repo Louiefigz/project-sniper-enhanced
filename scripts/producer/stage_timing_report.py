@@ -246,20 +246,26 @@ def workflow_coverage(spans: list[dict], run_id: str | None = None, open_rows: t
             'qualityApproved': False, 'outsideScope': 'unattributed, not proven idle or removable'}
 
 
+def _row(line: str) -> dict:
+    """One journal line; a malformed line stays an explicit malformed row."""
+    try:
+        return json.loads(line)
+    except json.JSONDecodeError:
+        return {"malformed": True}
+
+
+def read_journals(journals: list[Path]) -> list[dict]:
+    """Every row of the journals in order; each writer's append order is retained."""
+    return [_row(line) for journal in journals for line in journal.read_text(encoding="utf-8").splitlines()]
+
+
 def main() -> None:
     """Print a report, preserving malformed lines as explicit telemetry issues."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("journals", nargs="+", type=Path)
     parser.add_argument("--run-id", help="report this production run's window and attribution")
     args = parser.parse_args()
-    rows = []
-    for journal in args.journals:
-        for line in journal.read_text(encoding="utf-8").splitlines():
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                rows.append({"malformed": True})
-    print(json.dumps(summarize_timings(rows, args.run_id), indent=2))
+    print(json.dumps(summarize_timings(read_journals(args.journals), args.run_id), indent=2))
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ from headless.durable_files import (
     DurableFileError, locked_private_dir, open_private_dir, open_private_file,
     private_child_dir, read_private_file, write_all, write_pending_replace,
 )
-from studio.native_budget_schema import SCHEMA_VERSION, validate_record
+from studio.native_budget_schema import SCHEMA_VERSION, a5_shape, validate_record
 from studio.production.settlement import settlement_reserve
 
 AUTHORITY, PENDING, EVENTS, LOCK = 'authority.json', 'authority.pending.json', 'events.jsonl', 'authority.lock'
@@ -61,6 +61,9 @@ TERMINAL_EVENTS = frozenset({'batch-closed', 'batch-draining', 'launch-completed
 ROOM_EXEMPT = TERMINAL_EVENTS | {'observed', 'capacity-observed', 'capacity-heartbeat'}
 BATCH_ID = re.compile(r'[a-z0-9][a-z0-9-]{2,63}')
 CLIP_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}')
+A5_SHAPE_REFUSAL = ('Schema 5 record written by an A5-forecast build (attempts carry a forecast field): this engine '
+                    'reads only the D1 schema-5 shape. Finish that batch with the engine that wrote it, or archive it '
+                    'once closed.')
 
 
 class BudgetAuthorityError(RuntimeError):
@@ -136,9 +139,11 @@ class BatchSession:
         try:
             raw = read_private_file(self.dir_fd, AUTHORITY, MAX_RECORD_BYTES)
             record = json.loads(raw.decode('utf-8'))
+            if type(record) is dict and record.get('schemaVersion') == 5 and a5_shape(record):
+                raise BudgetAuthorityError(A5_SHAPE_REFUSAL)  # before any lift: the other schema-5 shape (P4-06)
             lift_additive_fields(record)
             validate_record(record)
-            if record['schemaVersion'] in (5, 6):
+            if record['schemaVersion'] in (5, 6, 7):
                 record['schemaVersion'] = SCHEMA_VERSION  # Additive lift; retain clocks and counters.
         except (OSError, DurableFileError, UnicodeError, ValueError) as error:
             raise BudgetAuthorityError(f'Budget authority for {self.batch_id} is unreadable or corrupt: '

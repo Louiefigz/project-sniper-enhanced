@@ -297,7 +297,7 @@ class ApprovalAuthorityTests(AuthorityCase):
 
     def test_the_record_carries_the_approvals_and_the_production_block(self) -> None:
         record = self.record()
-        self.assertEqual(record['schemaVersion'], 7)  # P0 adapt: src's schema 7 lifts 5/6 (native_budget_schema.py:25-26)
+        self.assertEqual(record['schemaVersion'], 8)  # M-044 (X7): schema 8 lifts 5/6/7
         self.assertFalse(any('output' in clip for clip in record['clips'].values()))  # declared Shorts: batch clock
         authorization = record['production'].pop('authorization')
         self.assertEqual(record['production'], {'ai': {'slots': 4, 'reservations': 38, 'charged': 0},

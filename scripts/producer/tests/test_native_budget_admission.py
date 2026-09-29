@@ -83,7 +83,7 @@ class AdmissionTests(unittest.TestCase):
     def test_a_shorts_only_record_keeps_todays_deadlines(self) -> None:
         from studio.production import formats
         record = batch()
-        self.assertEqual(record['schemaVersion'], 7)  # P0 adapt: src's schema 7 lifts 5/6 (native_budget_schema.py:25-26)
+        self.assertEqual(record['schemaVersion'], 8)  # M-044 (X7): schema 8 lifts 5/6/7
         # P0 adapt (M-030): src returns the batch deadlines offset by the Short's authorization and settled credit,
         # 0 here, as a new dict (formats.py:186-195); the values are today's.
         self.assertEqual(formats.clip_deadlines(record, record['clips']['A']), record['deadlines'])

@@ -153,7 +153,7 @@ class VersionTests(FormatCase):
         self.authorize('L')                                      # even with a version-5-only output row
         self.write_raw(lambda record: record.update(schemaVersion=4))
         with self.assertRaisesRegex(BudgetAuthorityError, r'pre-release schema 4 \(a development build that was never '
-                                                          r'released; this engine reads schema 7\)'):  # P0 adapt: schema 7
+                                                          r'released; this engine reads schema 8\)'):  # M-044: schema 8
             self.record()
         with self.assertRaisesRegex(BudgetAuthorityError, 'pre-release schema 4'):
             native_batch.cmd_admit(ns(batch='batch-auth', clip='A', kind='author', label='TEST author'))
@@ -163,7 +163,7 @@ class VersionTests(FormatCase):
 
     def test_another_engine_keeps_a_long_run_until_the_long_deadline(self) -> None:
         self.authorize('L')
-        raw = {**self.raw(), 'schemaVersion': 8}  # a future engine (P0 adapt: src's schema 7 reads 5/6, so 8 is future)
+        raw = {**self.raw(), 'schemaVersion': schema.SCHEMA_VERSION + 1}  # a future engine (M-044, W2-D9)
         for clip in raw['clips'].values():   # P0 adapt (X103): no foreign capacity policy (native_budget_batches:212)
             clip.pop('capacityClock', None)
         self.clock.advance(2500)

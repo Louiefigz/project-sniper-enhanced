@@ -21,8 +21,9 @@ import {
 // while the other reads it. The replacement cases replace the target right after the reader opens it, so the
 // reader's descriptor holds the old file and the path names the new one: the whole race, every time.
 // Cases 1-4 fail on the base and with M-061a alone. Case 5 pins the single-link condition: a linked intent
-// gets only M-061a's 24 waits, never an intent-level retry (624). Case 6: a replaced non-intent record
-// is refused at once.
+// gets only M-061a's 24 waits, never an intent-level retry (624). Case 6 (X106): the path's lstat sees the
+// outgoing file at 0 links mid-rename; that is still a replacement. Case 7: a replaced non-intent record is
+// refused at once.
 interface Replacement { target: string; times: number; replaced: number; waits: number }
 
 function replacingOnOpen<T>(replacement: Replacement, action: () => T): T {
@@ -92,6 +93,27 @@ const REPLACED_READS: [string, (fixture: ReturnType<typeof bootstrap>) => void][
     assert.throws(() => replacingOnOpen(replacement,
       () => recoverProducerCommitSync(fixture.producer, record.idempotencyKey)), /authority record changed while open/);
     assert.equal(replacement.waits, 24);
+  }],
+  ["an intent whose path still names the replaced file (nlink 0) is read again", (fixture) => {
+    const { intent, record } = staged(fixture, "7");
+    const replacement = { target: intent, times: 1, replaced: 0, waits: 0 };
+    const lstat = fs.lstatSync;
+    let unlinked = 0;
+    fs.lstatSync = ((...args: unknown[]) => {
+      const stat = Reflect.apply(lstat, fs, args) as fs.Stats | undefined;
+      const quiet = (args[1] as { throwIfNoEntry?: boolean } | undefined)?.throwIfNoEntry === false;
+      if (args[0] !== intent || !quiet || unlinked || !stat) return stat;
+      unlinked += 1;
+      return { ...stat, nlink: 0 };
+    }) as typeof fs.lstatSync;
+    try {
+      const outcome = replacingOnOpen(replacement,
+        () => recoverProducerCommitSync(fixture.producer, record.idempotencyKey));
+      assert.deepEqual([outcome.status, replacement.waits, unlinked], ["committed", 1, 1]);
+    } finally {
+      fs.lstatSync = lstat;
+      syncBuiltinESMExports();
+    }
   }],
   ["a replaced idempotency record is refused at once", (fixture) => {
     const { idempotency, record } = staged(fixture, "5");

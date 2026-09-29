@@ -3,7 +3,8 @@
 managed_preview.py calls launch() inside its registry transaction and uses the record helpers here;
 this module never imports managed_preview. Startup holds a Studio pool slot
 (native_work_pool_studio), never a render slot: it waits for one only until the open's own deadline
-(the registry transaction's). The slot is released (completed) after a verified start, when nothing
+(the registry transaction's; the wait holds the Studio registry lock, so other projects' opens, stops
+and status calls wait with it). The slot is released (completed) after a verified start, when nothing
 was attempted, and when the start failed before spawning anything (studio_server's
 ``preview_spawned = False``: cleanup verified, X97); it stays quarantined only after a start that may
 have spawned a process. The member records no process: such a start's survivors are the registry's

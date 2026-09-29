@@ -16,6 +16,7 @@ from unittest import mock
 import native_work_lease as work
 import native_work_pool as pool
 import native_work_pool_disk as disk
+import native_work_pool_mix as mix
 from native_render_resources import GIB
 from native_work_pool_credit import MAX_OCCUPANTS, ReasonGroups, classify
 from native_work_pool_state import NativeWorkQueued
@@ -134,6 +135,17 @@ class CreditTests(unittest.TestCase):
         error = self.refused(self.request())
         self.assertIn('legacy exclusive heavy work is running', str(error))
         self.assert_credit(error, True, 'capacity')
+
+    def test_a_qualification_session_wait_is_never_credited(self) -> None:
+        """Beside full live slots the session reason still withholds credit: it is never credited (RC2)."""
+        for _ in range(3):
+            self.admit()
+        session = {'value': {'jobs': []}, 'slots': dict(SLOTS)}  # a TEST session none of these requests belongs to
+        with mock.patch.object(mix, 'session_of', return_value=session):
+            error = self.refused(self.request())
+        self.assertIn('a pool qualification session is running its declared jobs', str(error))
+        self.assertIn('all 3 heavy slot(s) are occupied', str(error))
+        self.assert_credit(error, False, 'other')
 
     def test_own_disk_refusal_and_audio_lane_are_never_credited(self) -> None:
         """Controls: a disk reason beside full live slots, and an audio wait, never earn credit."""

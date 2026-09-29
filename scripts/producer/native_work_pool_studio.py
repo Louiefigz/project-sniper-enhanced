@@ -14,9 +14,12 @@ It is never exclusive, never a mix problem, never fenced and never credited (cap
 Render requests in qualified mode never count Studio members as occupancy
 (native_work_pool._occupancy counts their own class); an exclusive request needs an idle pool, so it
 still waits the seconds a startup takes. The Studio figures are provisional
-(native_work_pool_policy.STUDIO_*) and outside policy_identity(). Rollout: older pool clients read a
-Studio member as an unknown class, charge it maximally and wait while it is live; they cannot
-recover a quarantined one (this engine's native_work_recovery.py can).
+(native_work_pool_policy.STUDIO_*) and outside policy_identity().
+Rollout (X107 M1): the base 4a15560 pool client reads a Studio member, an unknown class, as
+quarantined even while it is live, so its own admission is refused as quarantined for the seconds a
+Studio start runs (fail closed: nothing over-commits; test_native_work_pool_liveness pins it). The
+72de76f3-generation client charges it maximally and waits. Neither can recover a quarantined Studio
+member (this engine's native_work_recovery.py can). Do not upgrade while old-engine batches run.
 """
 from __future__ import annotations
 

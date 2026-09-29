@@ -11,12 +11,15 @@ from __future__ import annotations
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
 import json
+import time
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 import native_work_lease as work
 import native_work_pool as pool
+import native_work_pool_disk as disk
 import native_work_pool_policy as policy
 import native_work_pool_recovery as pool_recovery
 import native_work_recovery as recovery
@@ -137,6 +140,27 @@ class StudioPoolTests(PoolHelpers, unittest.TestCase):
             self.lease('heavy', self.short)
         self.lease(STUDIO_CLASS, self.view, declares_launch=True).complete()
 
+    def test_a_studio_start_waits_for_the_memory_budget_every_member_shares(self) -> None:
+        """Studio is charged against every member: a render reserving 31.5 of 32 GiB makes it wait (M2)."""
+        qualify_fixture_host(self, SLOTS)
+        render = self.lease('heavy', self.short)
+        render._write(dict(render.record, guardReservationBytes=int(31.5 * GIB)))
+        waiting, error = self.queued(STUDIO_CLASS, self.view)
+        self.assertIn('host memory budget is fully reserved by running members', str(error))
+        render.complete()
+        self.admit_queued(waiting)
+
+    def test_a_studio_start_waits_for_disk_headroom_every_member_shares(self) -> None:
+        """Studio reserves disk in the space every member shares: a render's 3 GiB can make it wait (M2)."""
+        space = disk.Filesystem(8, 'filesystem:8', 13 * GIB + 128 * 1024 ** 2)  # room for one render only
+        self.enterContext(mock.patch.object(disk, 'filesystem', return_value=space))
+        qualify_fixture_host(self, SLOTS)
+        render = self.lease('heavy', self.short)
+        waiting, error = self.queued(STUDIO_CLASS, self.view)
+        self.assertIn('disk headroom is reserved by running members', str(error))
+        render.complete()
+        self.admit_queued(waiting)
+
     def test_quarantined_studio_member_is_recoverable_by_nonce(self) -> None:
         """An unverified startup's Studio member declares no launch, so recovery by nonce releases its slot."""
         studio = self.lease(STUDIO_CLASS, self.view, declares_launch=True)
@@ -193,6 +217,15 @@ class StudioOpenTests(PoolHelpers, ManagedPreviewFixture, unittest.TestCase):
         for _ in range(3):
             self.lease('heavy', self.short)
         self.assertIn(self.open(1, wait_seconds=0).pid, self.identities)  # the second Studio slot still opens
+
+    def test_an_open_waits_for_a_studio_slot_until_its_deadline(self) -> None:
+        """Both Studio slots busy: the open waits inside its deadline and starts once one frees (RL6)."""
+        starts = [self.lease(STUDIO_CLASS, plan_project(self, 'short', 45.0), declares_launch=True)
+                  for _ in range(policy.STUDIO_SLOTS)]
+        clock = SimpleNamespace(monotonic=time.monotonic, sleep=lambda _seconds: starts.pop().complete())
+        with mock.patch.object(pool, 'time', clock):
+            self.assertIn(self.open(0, wait_seconds=5).pid, self.identities)
+        self.assertEqual(len(starts), policy.STUDIO_SLOTS - 1)  # exactly one wait freed exactly one slot
 
     def test_failures_before_spawning_release_the_studio_slot(self) -> None:
         """Two consecutive starts that fail before spawning (cleanup verified) quarantine nothing (X97)."""

@@ -4,10 +4,11 @@ managed_preview.py calls launch() inside its registry transaction and uses the r
 this module never imports managed_preview. Startup holds a Studio pool slot
 (native_work_pool_studio), never a render slot: it waits for one only until the open's own deadline
 (the registry transaction's; the wait holds the Studio registry lock, so other projects' opens, stops
-and status calls wait with it). The slot is released (completed) after a verified start, when nothing
-was attempted, and when the start failed before spawning anything (studio_server's
-``preview_spawned = False``: cleanup verified, X97); it stays quarantined only after a start that may
-have spawned a process. The member records no process: such a start's survivors are the registry's
+and status calls wait with it). The slot is released (completed) after a verified start and after a
+failed start whose cleanup is verified: nothing was attempted, the start failed before spawning
+anything (studio_server's ``preview_spawned = False``), or what it spawned is proved gone (X97 ruling
+3, X150). It stays quarantined only when that cleanup is unverified. The member records no process:
+such a start's survivors are the registry's
 'launching' record (managed_preview_state), which fences only this project while one of them runs
 and which ``stop`` discharges. So the member is a declaring owner that never marks a launch (phase
 'admitted'), and native_work_recovery.py <nonce> releases its Studio slot once the opener has exited;
@@ -86,14 +87,15 @@ def spawned(error: BaseException) -> bool:
     return getattr(error, 'preview_spawned', True) is not False
 
 
-def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseException) -> None:
-    """Record a failed launch as stopped only when the preview it started is verified gone.
+def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseException) -> bool:
+    """Record a failed launch as stopped only when the preview it started is verified gone; return whether it is.
 
     A started but unverified server is stopped by its exact identity. Otherwise the 'launching'
     record keeps its survivors, fencing only this project until they exit or ``stop`` stops them.
+    A launch never attempted started nothing, so its cleanup is verified as it stands.
     """
     if not launch['attempted']:
-        return
+        return True
     if not spawned(error):  # studio_server tagged a failure before any child
         cleanup = dict(verified=True, survivors=[], signals=[], reason='startup failed before spawning a process')
     else:
@@ -103,6 +105,7 @@ def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseExcept
         dict(state='launching', settledAt=time.time())
     registry.write_entry(reg, dict(schemaVersion=2, project=launch['project'], port=launch['port'], cli=launch['cli'],
                                    cleanup=cleanup, processes=cleanup.get('survivors', []), **outcome, **registry.owned_by(launch)))
+    return cleanup['verified'] is True
 
 
 def retire(reg: registry.Registry, stale: dict) -> None:
@@ -121,21 +124,25 @@ def _studio_slot(project: str, until: float) -> object:
 
 
 def _record_failure(reg: registry.Registry, attempt: dict, error: BaseException) -> None:
-    """Record a failed launch; a cleanup that cannot be verified is noted on the error and the fence stays."""
+    """Record a failed launch and whether its cleanup is verified; one that cannot be settled is noted on the error.
+
+    attempt['verified'] stays False when settling itself fails: the fence and the Studio slot stay.
+    """
     try:
-        settle_failed_launch(reg, attempt, error)
+        attempt['verified'] = settle_failed_launch(reg, attempt, error)
     except Exception as cleanup_error:  # noqa: BLE001 - the fence stays; both causes are reported.
         error.add_note(f'Studio startup cleanup was not verified: {cleanup_error}')
 
 
 def _release(slot: object, attempt: dict) -> None:
-    """Complete the Studio slot unless a started process may survive, then close it.
+    """Complete the Studio slot unless a process of the start may survive, then close it.
 
-    Nothing attempted, or a start that failed before spawning (cleanup verified), releases it; a start
-    that may have spawned a process leaves it quarantined (its survivors are the registry's).
+    A failed start releases it when its cleanup is verified (X97 ruling 3, X150): nothing was attempted,
+    nothing was spawned (studio_server's tag), or what was spawned is proved gone. Only an unverified
+    cleanup leaves it quarantined (its survivors are the registry's).
     """
     try:
-        if not slot.completed and not (attempt['attempted'] and attempt['spawned']):
+        if not slot.completed and attempt['verified'] is True:
             slot.complete()
     finally:
         slot.close()
@@ -149,7 +156,7 @@ def launch(reg: registry.Registry, project: str, request: dict, stale: dict | No
     """
     require_capacity(reg, project)
     slot = _studio_slot(project, request['until'])
-    attempt = dict(project=project, attempted=False, spawned=True, port=None, pid=None, cli=request['cli'],
+    attempt = dict(project=project, attempted=False, verified=False, port=None, pid=None, cli=request['cli'],
                    owner=request['owner'])
     try:
         if stale:
@@ -171,8 +178,7 @@ def launch(reg: registry.Registry, project: str, request: dict, stale: dict | No
         slot.complete()
         return record
     except BaseException as error:
-        attempt['spawned'] = spawned(error)
         _record_failure(reg, attempt, error)
         raise
     finally:
-        _release(slot, attempt)  # complete after a verified start; quarantined only if a process may survive
+        _release(slot, attempt)  # complete after a verified start or cleanup; quarantined only if unverified

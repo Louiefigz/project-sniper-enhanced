@@ -3,8 +3,8 @@
 A Studio server is one small Node process that renders nothing. Its startup
 (studio/managed_preview_launch.launch) is admitted under the same ledger lock, tickets, memory
 budget and disk accounting as every member, but in its own capacity:
-- STUDIO_SLOTS slots counted over Studio members only. A quarantined Studio member (an attempted,
-  unverified startup) keeps its slot; once every slot is quarantined the open is refused by name
+- STUDIO_SLOTS slots counted over Studio members only. A quarantined Studio member (a failed start
+  whose cleanup is unverified: X150) keeps its slot; once every slot is quarantined the open is refused by name
   until native_work_recovery.py <nonce> recovers one. A render slot is never taken or quarantined.
 - Memory against the aggregate budget with every member charged; disk admission in its own space.
 - The legacy-exclusive and qualification-session reasons, both waitable.

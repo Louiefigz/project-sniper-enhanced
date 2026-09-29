@@ -3,6 +3,7 @@
 StudioPoolTests drive the real pool in a private namespace, without the Studio manager.
 StudioOpenTests drive the real manager, registry and pool through ManagedPreviewFixture (inert TEST
 preview identities; no process starts); they need managed_preview_state's registry API (M-025).
+A failed start keeps its Studio slot quarantined only while its cleanup is unverified (X97 ruling 3, X150).
 Qualified cases use a TEST schema-1 record (three heavy slots, one audio slot) on the TEST host.
 The p11_studio_heavy.py sequence is test_finished_short_studio_opens_behind_full_heavy_pool_and_queue.
 """
@@ -27,6 +28,7 @@ from native_render_processes import process_table
 from native_render_resources import GIB
 from native_work_pool_policy import LEDGER_CLASSES, POOL_CLASSES, STUDIO_CLASS
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued
+from studio import managed_preview_state as state
 from studio.studio_server import StudioServerError
 from _managed_preview_fixture import ManagedPreviewFixture
 from _native_pool_fixture import TEST_HOST, isolate_pool, members, plan_project, qualify_fixture_host
@@ -242,6 +244,21 @@ class StudioOpenTests(PoolHelpers, ManagedPreviewFixture, unittest.TestCase):
         self.assertEqual(self.records(self.pool_root), [])  # both Studio slots are free
         self.mocks[3].side_effect = self.launch
         self.assertIn(self.open(2, wait_seconds=0).pid, self.identities)
+
+    def test_a_spawned_start_that_failed_keeps_its_slot_only_while_cleanup_is_unverified(self) -> None:
+        """X150: a started server that fails verification releases the slot once it is proved gone, not before."""
+        self.mocks[3].side_effect = lambda _cli, project, port, **options: self.launch(
+            '/stock/hyperframes/dist/cli.js', project, port, **options)  # it spawns, then fails verification
+        with mock.patch.object(state.os, 'kill', side_effect=self.stop_signal), \
+                self.assertRaisesRegex(StudioServerError, 'does not use the qualified'):
+            self.open(0, wait_seconds=0)
+        self.assertEqual(self.records(self.pool_root), [])  # stopped by identity, cleanup verified: released
+        with mock.patch.object(state, 'terminate_tree', side_effect=lambda value: dict(
+                verified=False, survivors=state.live_owned(value), signals=[])), \
+                self.assertRaisesRegex(StudioServerError, 'does not use the qualified'):
+            self.open(1, wait_seconds=0)
+        self.assertEqual([row['class'] for row in self.records(self.pool_root)], [STUDIO_CLASS])  # a survivor
+        self.assertEqual(json.loads(self.record(1).read_text())['state'], 'launching')  # it fences its project
 
     def test_second_quarantined_studio_slot_refuses_by_name(self) -> None:
         """Once both Studio slots are quarantined the next open is refused, naming them and the recovery."""

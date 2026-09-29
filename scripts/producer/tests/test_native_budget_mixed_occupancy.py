@@ -145,6 +145,19 @@ class MixedOccupancyTests(OccupancyCase):
         self.assertLessEqual(fit['queueDelaySeconds'], MAX_CAPACITY_WAIT)
         self.assertTrue(admit_launch(self.record, self.request('L'), 250.0).allowed)
 
+    def test_an_admitted_long_waiting_behind_a_short_is_replayed_after_it(self) -> None:
+        """A Long admitted while a Short runs (the pool queues it) starts only once every slot is free."""
+        self.authorize_long()
+        short_end = self.start('A', 0.0)
+        long_end = self.start('L', 10.0)                      # 465 s forecast wait: within patience, admitted
+        self.assertEqual(slot_free_times(self.record, 20.0, 45.0, 'short'), [short_end + long_end - 10.0] * 3)
+
+    def test_a_long_wait_of_exactly_the_patience_launches(self) -> None:
+        """Only a wait longer than MAX_CAPACITY_WAIT is refused."""
+        self.authorize_long()
+        with mock.patch('studio.native_budget_launch.launch_fits', return_value={'fits': True, 'queueDelaySeconds': 600.0}):
+            self.assertTrue(admit_launch(self.record, self.request('L'), 10.0).allowed)
+
     def test_long_launch_refused_by_name_when_wait_exceeds_patience(self) -> None:
         """Four running Shorts on three slots: the Long would wait past 600 s, so it is refused by name, uncharged."""
         clip = self.authorize_long()
@@ -178,6 +191,8 @@ class MixedOccupancyTests(OccupancyCase):
         self.assertEqual(launch_misses(inputs, Demand('L', (2000.0,), 0.0, 9000.0), {'S'}, 0.0)[0], [])
         counted = ForecastInputs((0.0, 0.0, 0.0), (Demand('S', (475.0,), 0.0, 500.0, exclude_capacity_wait=True),))
         self.assertEqual(launch_misses(counted, held, {'S'}, 0.0)[0], [])
+        staggered = ForecastInputs((0.0, 500.0, 500.0), (Demand('S', (100.0,), 0.0, 850.0),))
+        self.assertEqual(launch_misses(staggered, Demand('L', (300.0,), 0.0, 9000.0, exclusive=True), {'S'}, 0.0)[0], ['S'])
 
     def test_long_launch_waits_while_holding_the_pool_would_make_a_wall_clock_short_miss(self) -> None:
         """Only a Short judged on its original clock can hold a Long back: the Long would hold all three slots."""
@@ -205,11 +220,11 @@ class MixedOccupancyTests(OccupancyCase):
         self.authorize_long()
         self.record['clips']['B']['outputSeconds'] = 75.0
         self.cold_caches()
-        snapshot = capture_forecast(self.record, self.request('L'))
+        snapshot = capture_forecast(self.record, self.request('L', 600.0))
         with mock.patch('native_work_pool_policy.host_identity', side_effect=AssertionError('host read after sample')):
-            fit = launch_fits(self.record, ('L', 'final', LONG_SECONDS), 50.0, snapshot)
+            fit = launch_fits(self.record, ('L', 'final', 600.0), 50.0, snapshot)
             inputs = forecast_inputs(self.record, 50.0, None, snapshot)
-            self.assertIsNone(long_launch_refusal(self.record, self.request('L'), 50.0, inputs))
+            self.assertIsNone(long_launch_refusal(self.record, self.request('L', 600.0), 50.0, inputs))
         self.assertEqual((fit['slots'], fit['queueDelaySeconds']), (3, round(end - 50.0, 1)))
 
     def test_prepared_short_admission_behind_a_running_long_reads_nothing_after_capture(self) -> None:
@@ -270,6 +285,12 @@ class OpenShortCapacityTests(OccupancyCase):
         self.assertEqual(slot_count(self.record, 45.0), 2)
         self.record['clock']['elapsed'] = 2400.0
         self.assertEqual(slot_count(self.record, 45.0), 3)
+
+    def test_a_running_launch_keeps_capacity_after_hand_off(self) -> None:
+        """B hands off while its 55 s launch still runs: that launch keeps Short capacity at 2."""
+        self.start('B', 0.0, 55.0)
+        self.record['clips']['B']['state'] = 'handed-off'
+        self.assertEqual(slot_count(self.record, 45.0), 2)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 import time
@@ -26,8 +27,11 @@ FinalQcPipeline = NativeShortPipeline
 
 def prepare_resume(args: argparse.Namespace) -> tuple[dict, dict]:
     """Delegate the legacy CLI to normal exact attempt and capture recovery admission."""
-    capture, _pins = read_capture(args.capture_stage, args.render_stage)
+    from studio.native_capture_reuse import capture_for_render
+    capture, _pins = capture_for_render(args.capture_stage, args.render_stage)
     source = Path(capture['root'])
+    if source != args.render_stage.parent and render_stage_for_attempt(args.render_stage.parent) == args.render_stage:
+        source = args.render_stage.parent  # An adopted standalone seal: resume from the render attempt.
     require(render_stage_for_attempt(source) == args.render_stage, 'capture uses another render seal')
     options = argparse.Namespace(project=Path(capture['project']), output=args.output,
         verify_from=None, resume_from=source, cache=None, reference_map=None,
@@ -64,7 +68,26 @@ def main() -> None:
         return
     require(args.output is not None, 'final QC requires a fresh output directory')
     args.capture_stage = args.capture_root / 'capture-stage.json'
-    raise SystemExit(0 if execute(args) else 1)
+    raise SystemExit(supervised_exit(args))
+
+
+def supervised_exit(args: argparse.Namespace) -> int:
+    """Final QC always runs as the export watchdog's supervised child, under a declared one-output run.
+
+    The parsing process only supervises (``production.process_watch``); the child checks its exact
+    claim and runs the export. Budgeted projects are refused by ``prepare`` as before.
+    """
+    from studio.production.process import ExportLaunch, SupervisionRefused, interrupt_on_termination, supervised_claim
+    try:
+        supervision = supervised_claim()
+    except SupervisionRefused as error:
+        print(json.dumps({'status': 'refused-supervision', 'reason': str(error), 'childLaunched': False}), flush=True)
+        return 2
+    if supervision is None:
+        from studio.production.process_watch import supervise_export
+        return supervise_export(ExportLaunch(tuple(sys.argv[1:]), None, script=Path(__file__).resolve()))
+    with interrupt_on_termination():
+        return 0 if execute(args) else 1
 
 
 if __name__ == '__main__':

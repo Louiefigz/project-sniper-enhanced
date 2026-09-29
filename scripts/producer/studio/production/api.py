@@ -141,11 +141,14 @@ def host_event(root: Path, batch_id: str, raw: object) -> dict:
 
 
 def reconcile(root: Path, batch_id: str, host: dict | None = None) -> dict:
-    """Reconcile launches and tasks against one process-table read and the host's turn states."""
-    observation = current_observation(host)
+    """Reconcile launches and tasks against one process-table read and the host's turn states.
 
+    The table is read while the batch lock is held, so no acknowledgement can land between the
+    read and the transitions it decides (a table read before a child acknowledged would abandon it).
+    """
     def operation(record: dict, elapsed: float) -> Outcome:
-        """Reconcile launches and tasks against the same evidence."""
+        """Reconcile launches and tasks against the same evidence, observed under the lock."""
+        observation = current_observation(host)
         abandoned = reconcile_running(record, elapsed)
         changes = reconcile_tasks(record, observation, elapsed)
         expired = outputs.freeze_expired(record, elapsed)  # a Long never keeps another output's work alive
@@ -169,10 +172,9 @@ def drain(root: Path, batch_id: str, reason: str) -> dict:
 
 def close(root: Path, batch_id: str, host: dict | None = None) -> dict:
     """Close when everything owned has settled, otherwise drain (the same path as ``native_batch.py close``)."""
-    observation = current_observation(host)
-
     def operation(record: dict, elapsed: float) -> Outcome:
-        """Close, or drain until owned work settles."""
+        """Close, or drain until owned work settles (the process table is read under the lock)."""
+        observation = current_observation(host)
         reconcile_running(record, elapsed)
         refusal = close_refusal(record, elapsed)
         if refusal:

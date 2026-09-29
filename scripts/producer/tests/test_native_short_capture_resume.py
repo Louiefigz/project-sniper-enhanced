@@ -12,7 +12,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from _native_short_pipeline_fixture import ShortPipelineFixture, write_json
+from _native_short_pipeline_fixture import ShortPipelineFixture, isolate_early_checks, write_json
 from studio.native_runtime import digest
 from studio.native_short_capture_resume import read_capture
 from studio.native_short_export import main, prepare
@@ -27,6 +27,7 @@ class AutomaticCaptureResumeTests(unittest.TestCase):
         """Keep all effects in a new fixture; no native child is launched."""
         base = Path(self.enterContext(tempfile.TemporaryDirectory(dir='/private/tmp')))
         self.f = ShortPipelineFixture(base)
+        isolate_early_checks(self)
         self.enterContext(mock.patch('studio.native_short_pipeline.NativeRun', side_effect=self.f.owner_factory))
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
 
@@ -43,6 +44,17 @@ class AutomaticCaptureResumeTests(unittest.TestCase):
         """Complete capture while the final TEST verifier rejects the attempt."""
         self.assertFalse(self.execute(self.f.request, 'verification'))
         return self.f.root / 'render-stage.json'
+
+    def legacy_capture(self) -> Path:
+        """Model an attempt made before early sealing, then lose its post-render capture seal."""
+        from studio.native_short_capture_resume import capture_artifacts
+
+        def legacy(root: Path, request: dict) -> dict[str, str]:
+            return {str(path): digest(path) for path in capture_artifacts(root, request).values()}
+        with mock.patch('studio.native_capture_reuse.seal_standalone_capture', side_effect=legacy):
+            render = self.capture()
+        (self.f.root / 'capture-stage.json').unlink()
+        return render
 
     def test_successful_capture_is_sealed_before_failed_final_verification(self) -> None:
         """Capture success remains independently reusable when a later owner fails."""
@@ -97,9 +109,8 @@ class AutomaticCaptureResumeTests(unittest.TestCase):
 
     def test_legacy_successful_unsealed_capture_requires_full_owner_admission(self) -> None:
         """A crash before sealing can preserve work, but no receipt is relabeled."""
-        render = self.capture()
+        render = self.legacy_capture()
         seal = self.f.root / 'capture-stage.json'
-        seal.unlink()
         before = (self.f.root / 'capture.render.json').read_bytes()
         request = prepare_reverification(self.f.current(), render)
         self.assertTrue(seal.exists())
@@ -125,8 +136,7 @@ class AutomaticCaptureResumeTests(unittest.TestCase):
 
     def test_successful_unsealed_capture_with_missing_jpeg_cannot_be_replaced(self) -> None:
         """Evidence corruption is terminal even if a fresh capture could otherwise run."""
-        render = self.capture()
-        (self.f.root / 'capture-stage.json').unlink()
+        render = self.legacy_capture()
         (self.f.root / 'pose-0.jpg').unlink()
         with self.assertRaises((ValueError, FileNotFoundError)):
             prepare_reverification(self.f.current(), render)
@@ -164,8 +174,7 @@ class AutomaticCaptureResumeTests(unittest.TestCase):
 
     def test_incomplete_owner_or_mutated_ordered_schedule_cannot_seal(self) -> None:
         """Success labels cannot replace cleanup, worker identity or exact occurrences."""
-        render = self.capture()
-        (self.f.root / 'capture-stage.json').unlink()
+        render = self.legacy_capture()
         owner_file = self.f.root / 'capture.render.json'
         owner = json.loads(owner_file.read_text())
         write_json(owner_file, {**owner, 'leaseCleanupVerified': False})

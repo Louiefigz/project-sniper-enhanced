@@ -24,6 +24,7 @@ from native_render_processes import process_table
 from native_render_resources import GIB
 from native_work_pool_policy import LEDGER_CLASSES, POOL_CLASSES, STUDIO_CLASS
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued
+from studio.studio_server import StudioServerError
 from _managed_preview_fixture import ManagedPreviewFixture
 from _native_pool_fixture import TEST_HOST, isolate_pool, members, plan_project, qualify_fixture_host
 
@@ -192,6 +193,22 @@ class StudioOpenTests(PoolHelpers, ManagedPreviewFixture, unittest.TestCase):
         for _ in range(3):
             self.lease('heavy', self.short)
         self.assertIn(self.open(1, wait_seconds=0).pid, self.identities)  # the second Studio slot still opens
+
+    def test_failures_before_spawning_release_the_studio_slot(self) -> None:
+        """Two consecutive starts that fail before spawning (cleanup verified) quarantine nothing (X97)."""
+        def before_spawn(*_args: object, **_options: object) -> None:
+            """The launcher failing before any child exists, tagged as studio_server tags it."""
+            error = StudioServerError('TEST startup failed before spawning')
+            error.preview_spawned = False  # studio_server's tag: no child exists
+            raise error
+        self.mocks[3].side_effect = before_spawn
+        for index in (0, 1):
+            with self.assertRaisesRegex(StudioServerError, 'before spawning'):
+                self.open(index, wait_seconds=0)
+            self.assertEqual(json.loads(self.record(index).read_text())['state'], 'stopped')
+        self.assertEqual(self.records(self.pool_root), [])  # both Studio slots are free
+        self.mocks[3].side_effect = self.launch
+        self.assertIn(self.open(2, wait_seconds=0).pid, self.identities)
 
     def test_second_quarantined_studio_slot_refuses_by_name(self) -> None:
         """Once both Studio slots are quarantined the next open is refused, naming them and the recovery."""

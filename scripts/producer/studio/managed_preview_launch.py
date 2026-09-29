@@ -3,12 +3,14 @@
 managed_preview.py calls launch() inside its registry transaction and uses the record helpers here;
 this module never imports managed_preview. Startup holds a Studio pool slot
 (native_work_pool_studio), never a render slot: it waits for one only until the open's own deadline
-(the registry transaction's), completes it after a verified start or when nothing was attempted, and
-leaves it quarantined after an attempted, unverified start. The member records no process: an
-unverified start's survivors are the registry's 'launching' record (managed_preview_state), which
-fences only this project while one of them runs and which ``stop`` discharges. So the member is a
-declaring owner that never marks a launch (phase 'admitted'), and native_work_recovery.py <nonce>
-releases its Studio slot once the opener has exited; that frees capacity only, never a process.
+(the registry transaction's). The slot is released (completed) after a verified start, when nothing
+was attempted, and when the start failed before spawning anything (studio_server's
+``preview_spawned = False``: cleanup verified, X97); it stays quarantined only after a start that may
+have spawned a process. The member records no process: such a start's survivors are the registry's
+'launching' record (managed_preview_state), which fences only this project while one of them runs
+and which ``stop`` discharges. So the member is a declaring owner that never marks a launch (phase
+'admitted'), and native_work_recovery.py <nonce> releases its Studio slot once the opener has exited;
+that frees capacity only, never a process.
 """
 from __future__ import annotations
 
@@ -78,6 +80,11 @@ def require_capacity(reg: registry.Registry, project: str) -> None:
                             f'{views}. Nothing was stopped; stop one with managed_preview.py stop <project>.')
 
 
+def spawned(error: BaseException) -> bool:
+    """False only when studio_server tagged the failure as raised before the preview child existed."""
+    return getattr(error, 'preview_spawned', True) is not False
+
+
 def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseException) -> None:
     """Record a failed launch as stopped only when the preview it started is verified gone.
 
@@ -86,7 +93,7 @@ def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseExcept
     """
     if not launch['attempted']:
         return
-    if getattr(error, 'preview_spawned', True) is False:  # studio_server tagged a failure before any child
+    if not spawned(error):  # studio_server tagged a failure before any child
         cleanup = dict(verified=True, survivors=[], signals=[], reason='startup failed before spawning a process')
     else:
         pid = launch['pid'] or getattr(error, 'preview_pid', None)
@@ -121,9 +128,13 @@ def _record_failure(reg: registry.Registry, attempt: dict, error: BaseException)
 
 
 def _release(slot: object, attempt: dict) -> None:
-    """Complete the Studio slot when nothing was attempted, then close it (an attempted start is already settled)."""
+    """Complete the Studio slot unless a started process may survive, then close it.
+
+    Nothing attempted, or a start that failed before spawning (cleanup verified), releases it; a start
+    that may have spawned a process leaves it quarantined (its survivors are the registry's).
+    """
     try:
-        if not attempt['attempted'] and not slot.completed:
+        if not slot.completed and not (attempt['attempted'] and attempt['spawned']):
             slot.complete()
     finally:
         slot.close()
@@ -137,7 +148,8 @@ def launch(reg: registry.Registry, project: str, request: dict, stale: dict | No
     """
     require_capacity(reg, project)
     slot = _studio_slot(project, request['until'])
-    attempt = dict(project=project, attempted=False, port=None, pid=None, cli=request['cli'], owner=request['owner'])
+    attempt = dict(project=project, attempted=False, spawned=True, port=None, pid=None, cli=request['cli'],
+                   owner=request['owner'])
     try:
         if stale:
             retire(reg, stale)
@@ -158,7 +170,8 @@ def launch(reg: registry.Registry, project: str, request: dict, stale: dict | No
         slot.complete()
         return record
     except BaseException as error:
+        attempt['spawned'] = spawned(error)
         _record_failure(reg, attempt, error)
         raise
     finally:
-        _release(slot, attempt)  # after a verified start the slot is complete; after an unverified one, quarantined
+        _release(slot, attempt)  # complete after a verified start; quarantined only if a process may survive

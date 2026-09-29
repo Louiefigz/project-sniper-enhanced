@@ -35,6 +35,11 @@ class FamilyRepairTests(unittest.TestCase):
         self.enterContext(patch('studio.native_budget_family_reservation.own_identity', return_value=SUPERVISOR))
         self.enterContext(patch('studio.native_budget_family_state._process_table',
                                 return_value={7001: (1, 7001, 'TEST supervisor')}))
+        # P0 adapt (M-030): the admission check moved to the preparation module, which binds both names itself
+        # (native_budget_family_preparation.py:14, 53-56).
+        self.enterContext(patch('studio.native_budget_family_preparation.own_identity', return_value=SUPERVISOR))
+        self.enterContext(patch('studio.native_budget_family_preparation._process_table',
+                                return_value={7001: (1, 7001, 'TEST supervisor')}))
         packet = h.budget.base / 'LONG-REQUEST.json'
         write_new(packet, {'sources': [{'sha256': 'f' * 64}]})
         file = h.fixture.project / 'LONG-PROJECT.json'

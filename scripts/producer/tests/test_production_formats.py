@@ -50,6 +50,14 @@ def short_request(clip: str, **values: object) -> OutputAuthorization:
                                approval=values.pop('approval', None) or approval(clip), **values)
 
 
+def historical_shorts() -> object:
+    """P0 adapt (M-030): these A12 cases keep a Short's wall-clock forecast, the rule src keeps for historical
+    Shorts. A capacity-clock Short's forecast counts its work without its queue wait (native_budget_forecast.py:191-192,
+    mixed_forecast.py:122-123 and 277-287; shorts-completion STATUS.md rows 7 and 10, line 18), so it is never
+    refused for waiting behind a Long. Whether that mix may still be refused is M7, owned by P1 (HANDOVER-P1.md)."""
+    return mock.patch('studio.production.queue_clock.enabled', return_value=False)
+
+
 class PolicyTests(unittest.TestCase):
     """The Short policy is today's; the Long policy is its own, with its evidence."""
 
@@ -156,6 +164,8 @@ class VersionTests(FormatCase):
     def test_another_engine_keeps_a_long_run_until_the_long_deadline(self) -> None:
         self.authorize('L')
         raw = {**self.raw(), 'schemaVersion': 8}  # a future engine (P0 adapt: src's schema 7 reads 5/6, so 8 is future)
+        for clip in raw['clips'].values():   # P0 adapt (X103): no foreign capacity policy (native_budget_batches:212)
+            clip.pop('capacityClock', None)
         self.clock.advance(2500)
         self.assertFalse(batches.foreign_released(raw))          # the Shorts' 40 minutes are over; the Long's are not
         self.clock.advance(10800)
@@ -279,6 +289,7 @@ class ClockTests(FormatCase):
 
     def test_add_clip_in_a_run_holding_a_long_passes_the_mixed_forecast(self) -> None:
         self.authorize('L')
+        self.enterContext(historical_shorts())                   # P0 adapt (M-030): wall-clock Shorts
 
         def long_final(record: dict) -> None:
             record['clips']['L']['attempts'].append({
@@ -290,7 +301,7 @@ class ClockTests(FormatCase):
         self.clock.advance(600)
         # A and B (ahead by least slack) already miss behind the Long's non-preemptible final; C would miss too.
         with self.assertRaisesRegex(registry.BudgetRefused, r'C \(short\) would finish at 3650s, after its latest 2280s, '
-                                                            r'behind A, B\. Heavy slots: L long final launch bbbbbbbb'):
+                                                            r'behind A, B\. Heavy slots: L long final owner bbbbbbbb'):  # P0 adapt: owner
             api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip('fourth Short', approval('C')))
         self.assertNotIn('C', self.record()['clips'])
 
@@ -454,19 +465,21 @@ class MixedForecastTests(unittest.TestCase):
             record['clips'][clip]['state'] = 'handed-off'
 
     def test_short_admission_is_refused_by_name_when_a_running_long_makes_it_miss(self) -> None:
+        self.enterContext(historical_shorts())                   # P0 adapt (M-030): wall-clock Shorts
         record = self.record()
         self.expire_shorts(record)
         self.finished(record, 'L', 'preview', 100.0)
         final = self.launch(record, ('L', 'final', 600.0), 3000.0)  # non-preemptible until about 5275 s
         self.assertTrue(final.allowed, final.reason)
         with self.assertRaisesRegex(TaskRefused, r'N \(short\) would finish at 5600s, after its latest 5380s.*'
-                                                 r'Heavy slots: L long final launch'):
+                                                 r'Heavy slots: L long final owner'):  # P0 adapt: owner
             authorize_output(record, short_request('N'), 3100.0)
         self.assertNotIn('N', record['clips'])
         record['poolSlots'] = 3                                 # a free slot: the same Short fits its 40 minutes
         self.assertFalse(authorize_output(record, short_request('N'), 3100.0)['replayed'])
 
     def test_a_long_waits_behind_urgent_shorts_for_a_bounded_time(self) -> None:
+        self.enterContext(historical_shorts())                   # P0 adapt (M-030): wall-clock Shorts
         record = self.record()
         waiting = self.launch(record, ('L', 'preview', 600.0), 600.0)
         self.assertFalse(waiting.allowed)
@@ -529,6 +542,7 @@ class MixedForecastTests(unittest.TestCase):
         self.assertTrue(self.launch(record, ('L', 'preview', 600.0), 1400.0).allowed)
 
     def test_a_new_short_cannot_starve_a_long_with_less_slack(self) -> None:
+        self.enterContext(historical_shorts())                   # P0 adapt (M-030): wall-clock Shorts
         record = self.record(seconds=900.0)
         self.expire_shorts(record)
         self.finished(record, 'L', 'preview', 100.0)
@@ -543,7 +557,7 @@ class MixedForecastTests(unittest.TestCase):
         self.finished(record, 'L', 'preview', 50.0)
         self.assertTrue(self.launch(record, ('L', 'final', 900.0), 100.0).allowed)
         with self.assertRaisesRegex(TaskRefused, r'M \(long\) would finish at 10435s, after its latest 9080s.*'
-                                                 r'L long final launch'):
+                                                 r'L long final owner'):  # P0 adapt: owner (mixed_forecast.py:206)
             authorize_output(record, long_request('M', 900.0), 200.0)
 
     def test_long_launches_use_long_routes_limits_and_deadlines(self) -> None:

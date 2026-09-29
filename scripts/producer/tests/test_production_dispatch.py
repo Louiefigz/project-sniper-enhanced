@@ -307,6 +307,7 @@ class RecoveryAndExitTests(DispatchCase):
     def test_a_full_trail_stops_new_claims_but_still_reconciles(self) -> None:
         self.media('draft-a')
         self.media('draft-b', 'B')
+        self.media('draft-a2')    # P0 adapt (B-19): the claim bound takes both drafts; this one stays ready
         self.dispatcher().step()
         with (self.root / 'batches/batch-auth/events.jsonl').open('ab') as handle:
             handle.truncate(store.MAX_EVENT_BYTES - 10)
@@ -314,7 +315,8 @@ class RecoveryAndExitTests(DispatchCase):
         runner = self.dispatcher(OTHER)
         self.assertIsNone(runner.step())
         self.assertEqual(self.state('draft-a'), 'abandoned')             # the dead claimer's claim is fenced
-        self.assertEqual(self.state('draft-b'), 'ready')                 # but nothing new is claimed
+        self.assertEqual(self.state('draft-b'), 'abandoned')             # P0 adapt (B-19): it claimed B too
+        self.assertEqual(self.state('draft-a2'), 'ready')                # but nothing new is claimed
         self.assertIn('trail is full', json.dumps(self.logged()))
 
     def test_exit_after_hand_off_the_deadline_or_draining(self) -> None:

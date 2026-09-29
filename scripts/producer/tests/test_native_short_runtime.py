@@ -22,11 +22,13 @@ class NativeRuntimeTests(unittest.TestCase):
     def test_cold_cache_is_explicit_and_requires_bounded_batches(self):
         """Existing export requests cannot silently trigger additional extraction work."""
         from argparse import Namespace
-        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'acquire-sdk-preflight')
+        # P0 adapt (M-030): new Shorts read the content-addressed store; cold acquisition is its sequential SDR
+        # mode and refuses streaming (native_short_export.py:164-170; STATUS 'Source reuse integration correction').
+        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'acquire-content-store')
         self.assertEqual(source_cache_mode(Namespace(cached_native_batches=True,
-                         acquire_source_cache=True)), 'acquire-sequential-sdr')
-        with self.assertRaisesRegex(ValueError, '--cached-native-batches'):
-            source_cache_mode(Namespace(cached_native_batches=False, acquire_source_cache=True))
+                         acquire_source_cache=True)), 'acquire-content-store-sequential-sdr')
+        with self.assertRaisesRegex(ValueError, '--sdk-streaming'):
+            source_cache_mode(Namespace(sdk_streaming=True, acquire_source_cache=True))
 
     def test_export_profile_reaches_delivery_before_media_work(self):
         """Default and explicit legacy retain distinct processing and reuse authority."""
@@ -95,7 +97,9 @@ class NativeRuntimeTests(unittest.TestCase):
             self.assertNotIn('--hdr', command)
             self.assertEqual(command[command.index('--crf') + 1], '15')
             self.assertEqual(command[command.index('--video-frame-format') + 1], 'png')
-            self.assertEqual(command[command.index('--frames-cache-dir') + 1], '/test/cache')
+            # P0 adapt (M-030): streaming reads the request's private content-store view (native_short_worker.py:34).
+            from studio.native_source_store import source_view_path
+            self.assertEqual(command[command.index('--frames-cache-dir') + 1], str(source_view_path(selected)))
             self.assertIn('--no-best-effort', command)
 
     def test_patch_refuses_a_different_input_or_output(self):

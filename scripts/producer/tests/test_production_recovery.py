@@ -132,11 +132,13 @@ class AttachAndChargeBoundaryTests(RecoveryCase):
         other = {**CHILD, 'pid': 7005, 'pgid': 7005}
         self.start_task('preview', other)
         self.reconcile(table(survivors=(7005,)))                            # preview left a live descendant
-        self.assertEqual((self.state('draft'), self.task('draft')['unresolved']), ('abandoned', False))
+        # P0 adapt (M-030): acknowledged media stays unresolved until its watchdog confirms cleanup (reconcile.py:
+        # 172-178; B-26; G9): no owners were recorded, so nothing proves the draft's cleanup either.
+        self.assertEqual((self.state('draft'), self.task('draft')['unresolved']), ('abandoned', True))
         self.assertEqual((self.state('preview'), self.task('preview')['unresolved']), ('abandoned', True))
         self.assertEqual(self.record()['clips']['A']['counters']['exportAttempt'], 0)
         self.reconcile(table())                                             # the descendant ended
-        self.assertFalse(self.task('preview')['unresolved'])
+        self.assertTrue(self.task('preview')['unresolved'])                 # P0 adapt: no watchdog evidence (G9)
 
     def test_the_launch_charge_and_the_task_binding_commit_together_once(self) -> None:
         self.enqueue(task_spec('draft', 'media'))
@@ -177,7 +179,8 @@ class AttachAndChargeBoundaryTests(RecoveryCase):
         grant = self.reserve_for(self.start_task('draft', CHILD))
         changes = self.reconcile(table())                       # exporter and child died mid-launch
         self.assertEqual(changes['abandonedLaunches'], [grant['attemptId']])
-        self.assertEqual((self.state('draft'), self.task('draft')['unresolved']), ('abandoned', False))
+        # P0 adapt (M-030): unresolved until the watchdog's cleanup evidence (reconcile.py:172-178; B-26; G9).
+        self.assertEqual((self.state('draft'), self.task('draft')['unresolved']), ('abandoned', True))
         self.assertEqual(self.record()['clips']['A']['counters']['exportAttempt'], 1)
         with self.assertRaisesRegex(TaskRefused, 'is abandoned'):
             self.claim('draft')
@@ -311,11 +314,18 @@ class ExportChildBoundaryTests(RecoveryCase):
             with self.assertRaises(BudgetAuthorityError):
                 self.settle(ref)                                  # the watchdog's settlement did not commit
         self.assertEqual(self.state('draft'), 'running')
-        self.reconcile(table())                                   # the exact receipt in the authority decides
-        self.assertEqual(self.state('draft'), 'completed')
-        replay = api.complete_task(self.root, BATCH, ref, TaskResult(({'path': result['output'], 'sha256': 'c' * 64,
-                                                                       'bytes': None},)))
-        self.assertFalse(replay['committed'])
+        # P0 adapt (M-030): reconcile never completes acknowledged media from the receipt; only the watchdog confirms
+        # cleanup (reconcile.py:172-178; B-1, B-26; G9). The delivery is kept on its attempt, the slot stays held
+        # (closure records it, M-043), and a generic completion is refused (callbacks.py:77-81).
+        self.reconcile(table())
+        task = self.task('draft')
+        self.assertEqual((task['state'], task['unresolved']), ('abandoned', True))
+        attempt = self.record()['clips']['A']['attempts'][-1]
+        self.assertEqual((attempt['id'], attempt['status'], attempt['resultStatus']),
+                         (grant['attemptId'], 'succeeded', 'native-short-review-draft'))
+        with self.assertRaisesRegex(TaskRefused, 'acknowledged media|abandoned'):
+            api.complete_task(self.root, BATCH, ref, TaskResult(({'path': result['output'], 'sha256': 'c' * 64,
+                                                                  'bytes': None},)))
 
     def test_a_child_of_a_released_claim_is_fenced(self) -> None:
         self.enqueue(task_spec('draft', 'media'))

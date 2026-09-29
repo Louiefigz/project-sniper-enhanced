@@ -135,8 +135,10 @@ class SettlementTests(TaskCase):
         self.reserve()
         self.settle((DEADLINE, 'TEST past the grant'), (SURVIVOR,))
         task = self.task('draft')
+        # P0 adapt (M-030): survivors leave the task abandoned and unresolved as their owner (process_settle.py:
+        # 111-133; B-8), still holding the slot.
         self.assertEqual((task['state'], task['owners'], task['endConfirmed'], holds_slot(task)),
-                         ('running', [SURVIVOR], False, True))
+                         ('abandoned', [SURVIVOR], False, True))
         with mock.patch('studio.production.api.current_observation', return_value=Observation(table(SURVIVOR))), \
                 mock.patch('studio.production.api.reconcile_running', return_value=[]):
             api.reconcile(self.root, BATCH)
@@ -145,7 +147,10 @@ class SettlementTests(TaskCase):
                 mock.patch('studio.production.api.reconcile_running', return_value=[]):
             api.reconcile(self.root, BATCH)
         task = self.task('draft')
-        self.assertEqual((task['state'], task['failure']['category'], holds_slot(task)), ('failed', DEADLINE, False))
+        # P0 adapt (M-030): once the survivors are gone the slot is released; the watchdog's deadline stop had
+        # superseded the task (B-8), and its launch keeps the deadline category (process_settle.py:124-133).
+        self.assertEqual((task['state'], holds_slot(task), task['unresolved']), ('superseded', False, False))
+        self.assertEqual(self.record()['clips']['A']['attempts'][-1]['failure']['category'], DEADLINE)
 
     def test_a_settled_or_foreign_task_is_left_alone(self) -> None:
         self.attach()

@@ -133,7 +133,10 @@ class ReviewDraftExportTests(unittest.TestCase):
         """A final export never discovers a completed draft as reusable final media."""
         output = self.draft()
         self.f.terminal()  # The fixture's own unrelated initial attempt ends as a TEST failure.
-        current = self.f.current(self.f.base / 'final')
+        # P0 adapt (M-030): the final carries the exporter's own defaults, as the draft does: retained capture (X41) and
+        # the content store (native_short_export.py:77-78, 164-167). The fixture's request predates both.
+        current = {**self.f.current(self.f.base / 'final'), 'captureMode': 'cached-native-batches',
+                   'sourceCacheMode': 'acquire-content-store'}
         request = json.loads((output / 'export-request.json').read_text())
         self.assertEqual([key for key in ('cache', 'captureMode', 'sourceCacheMode', 'audioProfile', 'runtime', 'tools')
                           if request.get(key) != current.get(key)], [])

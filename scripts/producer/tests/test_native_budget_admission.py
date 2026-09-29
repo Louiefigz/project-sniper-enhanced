@@ -84,7 +84,9 @@ class AdmissionTests(unittest.TestCase):
         from studio.production import formats
         record = batch()
         self.assertEqual(record['schemaVersion'], 7)  # P0 adapt: src's schema 7 lifts 5/6 (native_budget_schema.py:25-26)
-        self.assertIs(formats.clip_deadlines(record, record['clips']['A']), record['deadlines'])
+        # P0 adapt (M-030): src returns the batch deadlines offset by the Short's authorization and settled credit,
+        # 0 here, as a new dict (formats.py:186-195); the values are today's.
+        self.assertEqual(formats.clip_deadlines(record, record['clips']['A']), record['deadlines'])
         self.assertEqual(formats.clip_deadlines(record, None), record['deadlines'])
         self.assertIs(formats.clip_limits(record, record['clips']['A']), record['limits'])
         self.assertIs(formats.clip_rates(record, record['clips']['A']), record['rates'])
@@ -298,6 +300,9 @@ class AdmissionTests(unittest.TestCase):
         self.assertEqual(record['clips']['A']['outputSeconds'], 55.0)
 
     def test_queue_ahead_on_one_slot_is_sequential(self) -> None:
+        # P0 adapt (M-030): a wall-clock Short, as in A12; a capacity-clock Short's counted finish excludes its queue
+        # delay (native_budget_forecast.py:191-192; shorts-completion STATUS.md line 18).
+        self.enterContext(mock.patch('studio.production.queue_clock.enabled', return_value=False))
         record = batch()
         for clip in 'BCDE':
             record['clips'][clip]['attempts'].append(running('final', 0, 2280, seconds=60.0))
@@ -553,9 +558,14 @@ class MediaRequestTests(unittest.TestCase):
 
     def test_every_route_maps_to_the_exporters_own_arguments(self) -> None:
         from studio.production import media
+        # P0 adapt (M-030): option validation reads the review bundle (native_short_export.py:144-146), so the
+        # final and promote cases name a real, empty TEST bundle.
+        import json
+        reviews = self.base / 'TEST-reviews.json'
+        reviews.write_text(json.dumps({'schemaVersion': 1, 'reviews': []}))
         cases = {'draft': {'draftFindings': '/TEST/findings.json', 'cache': '/TEST/cold-cache'},
-                 'final': {'previewReviews': '/TEST/reviews.json', 'cachedNativeBatches': True},
-                 'promote': {'promoteDraft': '/TEST/draft', 'previewReviews': '/TEST/reviews.json'},
+                 'final': {'previewReviews': str(reviews), 'cachedNativeBatches': True},
+                 'promote': {'promoteDraft': '/TEST/draft', 'previewReviews': str(reviews)},
                  'verify': {'verifyFrom': '/TEST/a/render-stage.json'}, 'resume': {'resumeFrom': '/TEST/a'}}
         for route, options in cases.items():
             with self.subTest(route=route):
@@ -592,8 +602,11 @@ class MediaRequestTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'preserves the sealed route, cache'):
             media.check_route(media.exporter_arguments(self.request('verify', verifyFrom='/TEST/a/render-stage.json',
                                                                     cache='/TEST/cache')), 'verify')
-        with self.assertRaisesRegex(ValueError, 'requires --cached-native-batches'):
-            media.check_route(media.exporter_arguments(self.request('draft', acquireSourceCache=True)), 'draft')
+        # P0 adapt (M-030): sources come from the content store, so cold acquisition no longer needs cached batches;
+        # the exporter's own check refuses it with --sdk-streaming instead (native_short_export.py:164-170).
+        with self.assertRaisesRegex(ValueError, 'cannot use --sdk-streaming'):
+            media.check_route(media.exporter_arguments(self.request('draft', acquireSourceCache=True,
+                                                                    sdkStreaming=True)), 'draft')
         (self.base / 'attempt').mkdir()
         with self.assertRaisesRegex(ValueError, 'new directory outside the authored project'):
             media.check_route(media.exporter_arguments(self.request('draft')), 'draft')

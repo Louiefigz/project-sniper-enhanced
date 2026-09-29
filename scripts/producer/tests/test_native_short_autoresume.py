@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from _native_short_pipeline_fixture import ShortPipelineFixture, write_json
+from _native_short_pipeline_fixture import ShortPipelineFixture, isolate_early_checks, write_json
 from studio.native_export_history import candidate_attempts, register_attempt, known_attempts
 from studio.native_runtime import digest
 from studio.native_short_autoresume import STUDIO, recover_automatically
@@ -26,6 +26,9 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
         self.f = ShortPipelineFixture(self.base)
         self.enterContext(patch('studio.native_export_history.history_directory', return_value=self.base / 'history'))
         self.enterContext(contextlib.redirect_stdout(io.StringIO()))
+        # P0 adapt (M-030): like every inert-project export test, exclude the early checks and the audio-stage binding
+        # (native_short_export.py:106-108), which their own modules test with real validators.
+        isolate_early_checks(self)
 
     def completed(self) -> Path:
         """Publish a genuine shared stage seal around clearly synthetic media bytes."""
@@ -45,8 +48,15 @@ class AutomaticShortRecoveryTests(unittest.TestCase):
 
     def test_normal_command_reuses_media_then_capture_across_repeated_retries(self) -> None:
         """Use the actual CLI execute path; only preflight/environment and children are stubs."""
+        # P0 adapt (M-030): the completed attempt is one src's exporter records: the explicit streaming route, the
+        # content store and its disk projection (native_short_export.py:77-79, 164-167; native_budget_owner.py:209,
+        # 226-236), so recovery matches it and the reused request can acquire sources.
+        from studio.native_budget_owner import short_disk_projection
+        self.f.request = {**self.f.request, 'sourceCacheMode': 'acquire-content-store',
+                          'diskProjection': short_disk_projection({'totalFrames': 25})}
+        self.f.write_request(self.f.request)
         self.completed()
-        options = self.review_options(cache=Path(self.f.request['cache']))
+        options = self.review_options(cache=Path(self.f.request['cache']), sdk_streaming=True)
         with patch('studio.native_short_export.local_environment', return_value=(self.f.request['tools'], {})), \
                 patch('studio.native_short_export.subprocess.run') as validator, \
                 patch('studio.native_short_export.install_runtime', return_value=self.f.runtime), \

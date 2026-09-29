@@ -225,7 +225,9 @@ class ApprovedStartTests(unittest.TestCase):
         declared = (*self.approvals('A', 'B'), '--ai-slots', '6', '--ai-reservations', '40')
         self.start(*declared, '--pool-slots', '2', expect=3)            # authorized; setup refused, clock kept
         again = self.start(*self.approvals('A', 'B'), '--ai-slots', '8', '--pool-slots', '1', expect=3)
-        self.assertIn('was authorized with 6 AI slots and 40 reservations', again['reason'])
+        # P0 adapt (M-030): A12 R4 keeps the refused setup as a staged authorization, and a restart with other AI
+        # settings is refused by name before the slot check (production/authorization.py:72).
+        self.assertIn('A staged authorization of batch cli-tasks exists with other AI settings', again['reason'])
         started = self.start(*declared, '--pool-slots', '1')
         self.assertEqual((started['resumed'], started['ai']['slots'], started['ai']['reservations'],
                           started['ai']['slotsMaximum'], started['ai']['hostQualified']), (True, 6, 40, 16, False))
@@ -271,11 +273,13 @@ class ApprovedStartTests(unittest.TestCase):
         return json.loads(result.stdout)
 
     def test_staged_start_commands_are_refused_until_their_api_exists(self) -> None:
-        listed = self.root_cli('staged-starts', expect=3)
-        self.assertIn('production.api.staged_starts (unit A12), which is not in this engine', listed['reason'])
+        # P0 adapt (M-030): src has A12's API (appendix A12-A34 B-15), so the commands run it: no staged start is
+        # listed, and a name that is not one is refused by A12's own check (production/authorization.py:198).
+        listed = self.root_cli('staged-starts')
+        self.assertEqual((listed['status'], listed['staged']), ('staged-starts', []))
         refused = self.root_cli('discard-start', '--name', '.creating-cli-tasks-0123456789ab', '--reason',
                                 'operator discards the refused start', expect=3)
-        self.assertIn('production.api.discard_staged (unit A12), which is not in this engine', refused['reason'])
+        self.assertIn('.creating-cli-tasks-0123456789ab is not a staged start', refused['reason'])
 
     def test_staged_start_commands_call_a12s_api_by_its_exact_names(self) -> None:
         from unittest import mock

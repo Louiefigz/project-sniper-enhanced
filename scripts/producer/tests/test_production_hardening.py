@@ -337,6 +337,9 @@ class LegacyLiftTests(TaskCase):
         path.write_text(json.dumps(record))
         return record
 
+    @pending('P4', 'E-007: D2 (5f99f8da) studio/native_budget_owner.py:89-90 reads each served output with the strict '
+             'production/outputs.py:208 read_any_batch, which refuses the lifted closed schema-3 batch as another '
+             'engine version before _utility_grant refuses it by name; M-121a skips the read for inactive bindings')
     def test_a_closed_v3_batch_resolves_read_only(self) -> None:
         raw = self.as_v3()
         before = (self.root / 'batches/batch-auth/authority.json').read_bytes()

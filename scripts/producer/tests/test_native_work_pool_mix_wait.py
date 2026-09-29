@@ -6,7 +6,9 @@ loop's clock and sleep are fake: each fake sleep advances the clock and lets the
 (probe_la06.py's cases A, B and C, without real waiting or threads). Records: a TEST Short-only schema-2
 profile (three heavy slots), or a TEST schema-1 record where audio must be covered (legacy-v1). X107's
 rules are here too: a self-conflict is refused at once (m1), and audio passes a waiting uncovered ticket
-at most PASS_LIMIT times while a live member's own work always does (m2).
+at most PASS_LIMIT times while a live member's own work always does (m2). X123: the pass tally keeps the
+workload refresh_ticket wrote (d1), the m1 refusal names what to wait for (d3), and a request that passes
+an uncovered ticket skips only the younger tickets that ticket holds back (d4).
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ from native_work_pool_policy import STUDIO_CLASS
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued
 from studio import native_run_admission as admission
 from _native_pool_fixture import (
-    fixture_profile, isolate_pool, plan_project, qualify_fixture_host, qualify_fixture_profiles,
+    TEST_ENGINE, fixture_profile, isolate_pool, plan_project, qualify_fixture_host, qualify_fixture_profiles,
 )
 
 SLOTS = {'heavy': 3, 'audio': 1}
@@ -175,14 +177,18 @@ class MixWaitTests(unittest.TestCase):
         self.admit(self.request(self.shorts[1])).complete()  # nothing was left queued ahead of it
 
     def test_a_covered_stage_beside_its_own_projects_exclusive_member_is_refused_at_once(self) -> None:
-        """m1 (X107): a self-conflict never resolves by waiting: refused by name, never queued or credited."""
+        """m1 (X107): refused by name, never queued or credited; an independent sibling runs once it ends (d3)."""
         qualify_fixture_profiles(self, [fixture_profile(SLOTS)])
         parent = self.admit(self.request(self.shorts[0], 'preview-picture-4'))  # an unexercised stage: exclusive
         self.assertEqual(parent.admission['mode'], 'exclusive')
-        error = self.refusal(self.request(self.shorts[0]), NativeWorkUnsupportedMix)
-        self.assertIn(f"its own project's member(s) {parent.nonce} run exclusive", str(error))
+        sibling = self.request(self.shorts[0])
+        error = self.refusal(sibling, NativeWorkUnsupportedMix)
+        self.assertIn(f"its own project's member(s) {parent.nonce} run exclusive: it can be admitted once they end",
+                      str(error))
         self.assertNotIn('already active', str(error))
         self.assertIn('waiting for member(s)', str(self.refusal(self.request(self.shorts[1]))))  # others wait
+        parent.complete()
+        self.assertEqual(self.admit(sibling).admission['mode'], 'qualified')  # the sibling stage runs now (X123 d3)
 
     def test_a_stream_of_audio_cannot_starve_an_uncovered_long(self) -> None:
         """m2 (X107): audio passes a waiting uncovered Long PASS_LIMIT times, then queues; nested work passes."""
@@ -202,6 +208,32 @@ class MixWaitTests(unittest.TestCase):
         holder.complete()
         self.admit(long).complete()
         self.admit(late).complete()
+
+    def test_the_pass_tally_keeps_the_engine_refresh_ticket_wrote(self) -> None:
+        """X123 d1 (the reviewer's R2-REFRESH): a profile appears while X waits; the tally keeps X's engine."""
+        records = qualify_fixture_host(self, SLOTS)  # schema 1 only: no engine is needed yet
+        self.admit(self.request(self.shorts[0]))
+        long = self.request(self.long)
+        self.refusal(long)
+        ticket = self.root / 'pool-v1' / long.ticket.name
+        self.assertIsNone(json.loads(ticket.read_text())['workload']['engine'])
+        passer = self.admit(self.request(plan_project(self, 'short', 45.0), 'audio-stage', 'audio'))
+        qualify_fixture_profiles(self, [fixture_profile(SLOTS)], directory=records)  # now the engine is needed
+        self.refusal(long)  # refresh_ticket writes X's engine; in the same poll the tally records the passer
+        record = json.loads(ticket.read_text())
+        self.assertEqual((record['workload']['engine'], record['passedBy']), (TEST_ENGINE['identity'], [passer.nonce]))
+
+    def test_a_request_passing_x_skips_only_the_younger_tickets_x_holds_back(self) -> None:
+        """X123 d4: a nested render passes X, yet queues behind an older render and a younger one passing X."""
+        qualify_fixture_profiles(self, [fixture_profile(SLOTS)])
+        for _ in range(SLOTS['heavy']):
+            self.admit(self.request(self.shorts[0]))  # the parent Short holds every heavy slot
+        self.refusal(self.request(self.shorts[1]))  # R: another project's render, older than X (X never holds it)
+        self.refusal(self.request(self.long))  # X: uncovered, waits for an idle pool
+        passing = self.request(self.shorts[0], 'capture')  # the parent's own render, younger than X: it passes X
+        self.assertIn('queued behind 1 earlier request(s)', str(self.refusal(passing)))  # behind R only
+        error = self.refusal(self.request(self.shorts[0], 'preview'))
+        self.assertIn('queued behind 2 earlier request(s)', str(error))  # behind R and `passing`, never X
 
     def test_an_uncovered_request_waits_beside_its_own_projects_studio_start(self) -> None:
         """A Studio start takes part in no mix decision: the Long waits for its slot, never refused at once."""

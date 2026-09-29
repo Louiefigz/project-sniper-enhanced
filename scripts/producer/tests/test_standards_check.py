@@ -95,6 +95,17 @@ class TypeScriptRuleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stderr)
         reported = {line.split()[2] + ':' + line.split()[3] for line in result.stdout.splitlines() if line.startswith('VIOLATION')}
         self.assertEqual(reported, {'function-lines:longOne', 'jsdoc:longOne', 'parameters:many', 'nesting:deep'})
+        self.assertIn('ts standards: 4 new, 0 recorded in the baseline, 1 file(s)', result.stdout)
+
+    def test_a_checker_that_cannot_run_exits_2_not_1(self) -> None:
+        """An unreadable input is a crash (2), never a violation report (1) (CS1-REVIEW m5)."""
+        missing = Path(tempfile.mkdtemp(prefix='ts-standards-')) / 'absent.ts'
+        self.addCleanup(shutil.rmtree, missing.parent)
+        result = subprocess.run([NODE, str(TESTS / 'ts_standards_check.cjs'), str(missing)], capture_output=True,
+                                text=True, timeout=60, check=False)
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn('ts standards checker could not run', result.stderr)
+        self.assertNotIn('ts standards:', result.stdout)
 
     def test_write_and_use_a_baseline(self) -> None:
         """A written baseline suppresses the same violations."""

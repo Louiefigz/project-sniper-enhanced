@@ -27,6 +27,10 @@ Every refusal or scope misuse outside a test method is also held until the end o
 If the error for it was swallowed, ``stopTestRun`` reports it as an error. If no runner ever
 reported it, the process exits with status 1. Re-importing or reloading this module keeps
 the installed state.
+
+Python children are armed with the child tripwire (``_live_state_children``). A child refused a live
+path writes a report file and exits 97; each report fails the test that was running when the check ran
+(after every test method) or, later, the run itself, even when the child's exit status was ignored.
 """
 from __future__ import annotations
 
@@ -38,6 +42,8 @@ import unittest
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import _live_state_children as children
+import _live_state_paths
 import native_work_lease
 from _live_state_paths import (ACCOUNT_STATE, LIVE_BUDGET_ROOT, LIVE_POOL_RECORDS, LIVE_POOL_ROOT,
                                PATH_EVENTS, refused_path)
@@ -180,7 +186,16 @@ def _run_with_private_roots(test: unittest.TestCase,
         STATE.scopes.remove(scope)
         scope.close()
     _report_swallowed(test, scope, outcome)
+    _report_children(test, outcome)
     return outcome
+
+
+def _report_children(test: object, result: object) -> None:
+    """Fail ``test`` (or the run) for every child refusal report not reported yet."""
+    lines = children.new_reports()
+    if lines and result is not None:
+        error = LiveStateTouched('a child process was refused live per-user state: ' + '; '.join(lines))
+        result.addError(test, (LiveStateTouched, error, None))
 
 
 def _start_test_run(result: unittest.TestResult) -> None:
@@ -198,12 +213,15 @@ def _stop_test_run(result: unittest.TestResult) -> None:
     if missing:
         error = LiveStateTouched('outside test methods: ' + '; '.join(missing))
         result.addError(_RunCheck(), (LiveStateTouched, error, None))
+    _report_children(_RunCheck(), result)
     STATE.originals['stop'](result)
 
 
 def _exit_check() -> None:
     """Fail the process when a touch outside test methods was never reported by a runner."""
     STATE.scopes[0].close()
+    STATE.unreported.extend(children.new_reports())
+    children.remove_own_directory()
     if not STATE.unreported:
         return
     sys.stdout.flush()
@@ -213,18 +231,12 @@ def _exit_check() -> None:
     os._exit(1)
 
 
-CHILD_TRIPWIRE = str(Path(__file__).resolve().parent / '_child_live_state')
-
-
-def _arm_children() -> None:
-    """Put the child tripwire first on the PYTHONPATH children inherit (this process has already started)."""
-    entries = [entry for entry in os.environ.get('PYTHONPATH', '').split(os.pathsep) if entry and entry != CHILD_TRIPWIRE]
-    os.environ['PYTHONPATH'] = os.pathsep.join([CHILD_TRIPWIRE, *entries])
+CHILD_TRIPWIRE = children.CHILD_TRIPWIRE
 
 
 def _install() -> None:
     """Patch the roots, wrap test runs and runs, add the audit hook and arm the child tripwire, once per process."""
-    _arm_children()
+    children.arm(_live_state_paths)
     if _INSTALLED is not None:
         return
     rebind(native_budget_store, 'default_root', isolated_budget_root)

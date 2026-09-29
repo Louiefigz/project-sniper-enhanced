@@ -30,8 +30,14 @@ _REAL = (_REAL_HOME + '/.project-sniper/production-budgets', _REAL_HOME + '/.pro
          f'/sniper-native-work-{os.geteuid()}')
 
 
-def _real_guard(_event: str, args: tuple) -> None:
-    """Stop the probe (status 3) before any argument names the operator's real live state."""
+def _real_guard(event: str, args: tuple) -> None:
+    """Stop the probe (status 3) before any argument names the operator's real live state.
+
+    Setting an environment variable touches nothing: the isolation passes the refused live prefixes to its
+    children in one (p0-records E-001, reviews/CS1-REVIEW.md F1).
+    """
+    if event in ('os.putenv', 'os.unsetenv'):
+        return
     for value in args:
         if isinstance(value, (str, bytes, os.PathLike)) and any(
                 needle in os.fsdecode(os.fspath(value)).casefold() for needle in _REAL):

@@ -10,12 +10,27 @@
  *   node ts_standards_check.cjs --write-baseline FILE FILE...
  *
  * Keys are path + rule + name, so a line shift is not a new violation; a recorded violation fails only when it
- * got worse. Exit 0 when nothing new, 1 otherwise. It cannot judge semantics or JSDoc content.
+ * got worse. Exit 0 when nothing new, 1 when a new violation exists, 2 when the checker itself cannot run (no
+ * `typescript` module, an unreadable file): a crash is never mistaken for a violation report. It cannot judge
+ * semantics or JSDoc content.
  */
 "use strict";
 const fs = require("node:fs");
 const path = require("node:path");
-const ts = require(path.resolve(__dirname, "../../../node_modules/typescript"));
+const CRASHED = 2;
+
+/** Report why the checker cannot run and exit 2. */
+function crash(error) {
+  console.error(`ts standards checker could not run: ${error && error.message ? error.message : error}`);
+  process.exit(CRASHED);
+}
+
+let ts;
+try {
+  ts = require(path.resolve(__dirname, "../../../node_modules/typescript"));
+} catch (error) {
+  crash(error);
+}
 
 const LIMITS = { lines: 50, params: 4, nesting: 2 };
 const CONTROL = new Set([ts.SyntaxKind.IfStatement, ts.SyntaxKind.ForStatement, ts.SyntaxKind.ForInStatement,
@@ -121,4 +136,8 @@ function main(argv) {
   return fresh ? 1 : 0;
 }
 
-process.exitCode = main(process.argv.slice(2));
+try {
+  process.exitCode = main(process.argv.slice(2));
+} catch (error) {
+  crash(error);
+}

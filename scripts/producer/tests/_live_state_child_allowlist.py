@@ -48,7 +48,9 @@ REVIEWED: dict[str, str] = {
     'test_ingest_execution_authority.py': NO_OWNER,
     'test_live_grade_v2_launch.py': STDLIB,
     'test_live_grade_v2_supervisor.py': NO_OWNER,
-    'test_live_state_child_tripwire.py': OWN_ROOTS,  # one child is refused by the tripwire; the other sets its own root
+    'test_live_state_child_tripwire.py': ('every child is armed: the ones that touch live state are refused by the tripwire '
+                                          '(exit 97, report into the test\'s own directory), one sets its own root, one '
+                                          'installs the isolation, the rest call no owner'),  # CS1-REVIEW F1/F2 (C1-fix)
     'test_live_state_isolation.py': DECOY,
     'test_local_asr_callers.py': NO_OWNER,
     'test_local_asr_worker.py': NO_OWNER,

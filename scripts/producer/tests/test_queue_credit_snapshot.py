@@ -161,7 +161,8 @@ class WatchdogTaskRowTests(CreditCase):
 
     def test_watchdog_task_row_has_the_same_tolerance(self) -> None:
         """A failed read keeps the last row for the tolerance; past it the watchdog gets None (its existing stop).
-        Before any row is read, and for a task the readable record lacks, the answer is None at once, as before."""
+        Before any row is read the answer is None at once, as before. A task the readable record lacks is an answer
+        (None), never a failed read, so it never becomes 'unreadable' however long it stays absent."""
         row = process_watch._task_row(CLAIM)
         self.path.write_bytes(TORN)
         for self.now in (5.0, 5.0 + TOLERANCE):
@@ -175,6 +176,8 @@ class WatchdogTaskRowTests(CreditCase):
         self.assertIsNone(process_watch._task_row(CLAIM))
         self.put(self.record)
         self.assertIsNone(process_watch._task_row(TaskClaim(BATCH, 'check-2', 0, 'TEST-token', 'e' * 64)))
+        for self.now in (21.0, 21.0 + 2 * TOLERANCE):
+            self.assertIsNone(queue_credit.task_row(self.root, BATCH, 'check-2'))
         self.assertEqual(process_watch._task_row(CLAIM), row)
 
 

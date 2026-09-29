@@ -51,6 +51,9 @@ REVIEWED: dict[str, str] = {
     'test_ingest_execution_authority.py': NO_OWNER,
     'test_live_grade_v2_launch.py': STDLIB,
     'test_live_grade_v2_supervisor.py': NO_OWNER,
+    'test_live_state_child_hardening.py': ('every child is armed with a decoy folder added to its refused prefixes and '
+                                           'reports into the test\'s own folder; the one unguarded D2 control writes '
+                                           'only a decoy file; no child calls an owner'),
     'test_live_state_child_parity.py': ('spec_from_file_location of the child sitecustomize under another name '
                                         '(nothing installed); no child is started'),
     'test_live_state_child_tripwire.py': ('children that touch live state are armed and refused (exit 97, report into '

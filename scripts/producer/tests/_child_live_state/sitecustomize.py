@@ -18,7 +18,10 @@ test, at the end of its run, and the suite wrappers check it again after the pro
 malformed variable also exits 97 (fail closed) and, when the reports folder is usable, leaves an install-failure
 report. The interpreter's own ``sitecustomize`` (Homebrew's) is chained after installation. Not covered: a child
 started with ``-I``, ``-S`` or ``-E``, or whose environment drops ``PYTHONPATH``; a non-Python child; a ``ctypes``
-call (no audit event); an open through a symlink that already existed. Nothing in the product imports it.
+call (no audit event); ``os.posix_spawn`` file actions; an open through a symlink that already existed. The report
+file is written before stderr, and exit 97 follows whatever either write does. A forked child gets a fresh gate.
+The arming sets ``PYTHONPYCACHEPREFIX`` to an empty folder, so no ``__pycache__`` beside this file is ever read.
+Nothing in the product imports it.
 
 The path matching mirrors ``_live_state_paths`` (``test_live_state_child_tripwire`` checks that both refuse the
 same spellings). Loaded under any other module name (that test does), nothing is installed.
@@ -34,6 +37,7 @@ import sys
 CONFIG, REPORTS, CURRENT = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS', 'SNIPER_TEST_CURRENT'
 LIVE_MARKS = ('/.project-sniper', '/sniper-native-work')  # the live roots' own names; never a reports folder
 REFUSED_EXIT = 97
+BIND = 'socket.bind'  # an AF_UNIX bind creates a file; the parent's tables do not list it (child-side only)
 DATA_VOLUME = '/system/volumes/data'
 WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -146,7 +150,11 @@ class Tripwire:
         self.reporter, self.report_file, self.gate = None, None, _thread.allocate_lock()
 
     def event_paths(self, event: str, args: tuple) -> list[str]:
-        """Every canonical path an audit event names."""
+        """Every canonical path an audit event names (``socket.bind`` of an AF_UNIX path creates a file too)."""
+        if event == BIND:
+            address = args[1] if len(args) > 1 else None
+            path = absolute(address, None) if isinstance(address, (str, bytes, os.PathLike)) else None
+            return [canonical(path)] if path is not None else []
         fds, rows = self.config['dirFds'].get(event, {}), []
         for position in self.config['pathEvents'].get(event, ()):
             if position >= len(args):
@@ -176,7 +184,7 @@ class Tripwire:
         Only the reporting thread re-enters, and only for its own report file; any other event of that thread
         exits at once. Every other thread that reaches a refused path blocks on the gate before its system call.
         """
-        if event not in self.config['pathEvents']:
+        if event not in self.config['pathEvents'] and event != BIND:
             return
         if self.reporter == _thread.get_ident():
             if self.event_paths(event, args) == [canonical(self.report_file)]:
@@ -186,11 +194,17 @@ class Tripwire:
         if path is None:
             return
         self.gate.acquire()  # never released: the holder exits the process
-        self.report_file = report_name(self.reports)
-        self.reporter = _thread.get_ident()
-        write_report(self.report_file, f'live-state child tripwire: {event} {path} (pid {os.getpid()}; '
-                                       f'test {os.environ.get(CURRENT) or "unknown"})')
-        os._exit(REFUSED_EXIT)
+        try:
+            self.report_file = report_name(self.reports)
+            self.reporter = _thread.get_ident()
+            write_report(self.report_file, f'live-state child tripwire: {event} {path} (pid {os.getpid()}; '
+                                           f'test {os.environ.get(CURRENT) or "unknown"})')
+        finally:
+            os._exit(REFUSED_EXIT)
+
+    def after_fork(self) -> None:
+        """A forked child gets a fresh gate: a fork during another thread's report must not inherit a held lock."""
+        self.reporter, self.report_file, self.gate = None, None, _thread.allocate_lock()
 
 
 def report_name(folder: str) -> str:
@@ -199,17 +213,17 @@ def report_name(folder: str) -> str:
 
 
 def write_report(name: str, line: str) -> None:
-    """One stderr line and one report file for the parent; a failure to write does not stop the exit."""
-    try:
-        sys.stderr.write(line + '\n')
-        sys.stderr.flush()
-    except (OSError, ValueError):
-        pass
+    """The report file first, then one stderr line; nothing raised here can stop the caller's exit 97."""
     try:
         descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         os.write(descriptor, (line + '\n').encode('utf-8', 'surrogateescape'))
         os.close(descriptor)
-    except OSError:
+    except BaseException:  # noqa: B036  the caller exits 97 regardless (C1FIX-REVIEW D3)
+        pass
+    try:
+        sys.stderr.write(line + '\n')
+        sys.stderr.flush()
+    except BaseException:  # noqa: B036  stderr may be None, closed, or a writer that raises
         pass
 
 
@@ -226,6 +240,7 @@ def install() -> None:
     """Validate the parent's variables and add the refusing audit hook."""
     tripwire = Tripwire(load_config(os.environ.get(CONFIG)), '')
     tripwire.reports = reports_directory(os.environ.get(REPORTS), tripwire)
+    os.register_at_fork(after_in_child=tripwire.after_fork)
     sys.addaudithook(tripwire)
 
 

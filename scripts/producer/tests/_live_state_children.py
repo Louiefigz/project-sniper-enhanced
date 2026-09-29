@@ -6,7 +6,9 @@
 - ``SNIPER_TEST_CHILD_REFUSED``: JSON with this process's refused path prefixes and audit-event tables, taken
   from ``_live_state_paths`` (the child imports no engine code and computes nothing itself);
 - ``SNIPER_TEST_CHILD_REPORTS``: a directory where a refused child writes one report file before it exits 97;
-- ``PYTHONDONTWRITEBYTECODE=1``, so children never write bytecode into the checkout.
+- ``PYTHONDONTWRITEBYTECODE=1``, so children never write bytecode into the checkout;
+- ``PYTHONPYCACHEPREFIX`` set to an empty private folder (an inherited one is kept), so children never read a
+  ``__pycache__`` in the tree: a crafted cached ``sitecustomize`` cannot replace the tripwire (C1FIX-REVIEW D2).
 
 An inherited reports directory and inherited prefixes are kept (a child that imports the isolation over decoy
 roots refuses both sets); a malformed inherited prefix value exits 97. ``set_current`` names the running test in
@@ -72,6 +74,9 @@ def arm(paths: object, environ: dict = os.environ) -> None:
     environ[CONFIG] = json.dumps(child_config(paths, environ), sort_keys=True)
     environ[REPORTS] = _reports_directory(environ)
     environ['PYTHONDONTWRITEBYTECODE'] = '1'
+    prefix = environ.get('PYTHONPYCACHEPREFIX', '')
+    environ['PYTHONPYCACHEPREFIX'] = prefix if os.path.isabs(prefix) and os.path.isdir(prefix) \
+        else tempfile.mkdtemp(prefix='sniper-pycache-')
 
 
 def set_current(label: str, environ: dict = os.environ) -> None:

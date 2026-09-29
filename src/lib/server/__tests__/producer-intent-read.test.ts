@@ -18,9 +18,11 @@ import {
 } from "./_producer-revision-fixture";
 
 // M-061b (X94): two processes recovering one commit replace its intent by atomic rename (transitionIntent)
-// while the other reads it. Each case replaces the target file right after the reader opens it, so the
+// while the other reads it. The replacement cases replace the target right after the reader opens it, so the
 // reader's descriptor holds the old file and the path names the new one: the whole race, every time.
-// Before the fix every intent case failed with "authority record changed while open".
+// Cases 1-4 fail on the base and with M-061a alone. Case 5 pins the single-link condition: a linked intent
+// gets only M-061a's 24 waits, never an intent-level retry (624). Case 6: a replaced non-intent record
+// is refused at once.
 interface Replacement { target: string; times: number; replaced: number; waits: number }
 
 function replacingOnOpen<T>(replacement: Replacement, action: () => T): T {
@@ -82,6 +84,14 @@ const REPLACED_READS: [string, (fixture: ReturnType<typeof bootstrap>) => void][
     assert.throws(() => replacingOnOpen(replacement,
       () => recoverProducerCommitSync(fixture.producer, record.idempotencyKey)), /authority record changed while/);
     assert.deepEqual([replacement.replaced, replacement.waits], [25, 24]);
+  }],
+  ["an intent with a lasting second link gets only the reader's 24 waits", (fixture) => {
+    const { intent, record } = staged(fixture, "6");
+    fs.linkSync(intent, path.join(path.dirname(intent), `.${path.basename(intent)}.held.tmp`));
+    const replacement = { target: intent, times: 0, replaced: 0, waits: 0 };
+    assert.throws(() => replacingOnOpen(replacement,
+      () => recoverProducerCommitSync(fixture.producer, record.idempotencyKey)), /authority record changed while open/);
+    assert.equal(replacement.waits, 24);
   }],
   ["a replaced idempotency record is refused at once", (fixture) => {
     const { idempotency, record } = staged(fixture, "5");

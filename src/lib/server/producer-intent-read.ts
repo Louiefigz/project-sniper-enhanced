@@ -28,10 +28,13 @@ function readIntentAfter(filePath: string, waits: number): CommitIntentV1 {
 /**
  * Read one producer commit intent (M-061b, X94). An intent is the one mutable authority record of a
  * commit: `transitionIntent` replaces it by atomic rename, so a second process recovering the same commit
- * can replace it while this one reads it. That read is repeated after a 2 ms wait, at most 24 times.
- * Anything else is refused at once: a malformed intent, a missing file, a second link, and every other
- * authority record (their reader keeps its immediate refusal). An intent still being replaced after the
- * last wait is refused too.
+ * can replace it while this one reads it. Such a read is repeated after a 2 ms wait, at most 24 times; an
+ * intent still being replaced after the last wait is refused. Not repeated here: a malformed intent, a
+ * missing file, and a second link (the authority reader's own 24 waits apply, then it refuses). A symlink
+ * or special file swapped in during a read has one link, so it is refused one 2 ms wait later, by the
+ * reader's regular-file check. Worst case, with the reader's waits composed (a second link that keeps
+ * appearing and going): 25 x 25 attempts and 624 waits, about 1.25 s. Every other authority record keeps
+ * the reader's immediate refusal of a replacement.
  */
 export function readCommitIntentSync(filePath: string): CommitIntentV1 {
   return readIntentAfter(filePath, 0);

@@ -3,7 +3,9 @@
 Ported from ``plan-sources/dr-03-07/probe_la04.py`` (P1 Step D1) with the same patches: a fake ``locked_batch``
 session, a null ``attempt_reservation``, a fixed ``assembly_snapshot``, and ``revalidate_context`` replaced by the
 saved context plus an injected delay, which stands for the slow cold proof read (plan rehash and ancestry). The
-batch clock is the real ``advance_clock`` on the real continuous clock; the tests only trace its samples.
+batch clock is the real ``advance_clock`` (with the real ``observe`` and ``checkpoint``); only its time sources are
+injected (``continuous_now``, ``time.time`` and ``boot_id``), and the proof delay advances them instead of sleeping.
+So no result depends on how fast the host runs, and no ``sysctl`` child is started for the boot identity.
 
 The control also patches the two proofs that need real media or repair state (``require_checked_media`` and
 ``retained_current_sections``), so the real ``apply_family_outcome`` commits. The assembly test patches the media
@@ -17,14 +19,13 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import contextlib
 import json
 import tempfile
-import time
 import unittest
 from collections.abc import Iterator
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 import cut_preview_io
-from studio import native_budget_clock as clock
 from studio.native_budget_batches import BudgetRefused
 from studio.native_runtime import digest
 from studio.native_segments import assemble
@@ -34,6 +35,8 @@ GRANT_SECONDS = 1.5  # the original grant ends this long after the fixture's sta
 PROOF_DELAY = 2.5  # the injected slow proof read, longer than the remaining grant
 CHECKED = 'native-long-checked-for-review'
 START = 1000.0
+EPOCH = 1_750_000_000.0  # the injected wall clock at the fixture's start sample
+BOOT = '0a0a0a0a-0000-4000-8000-000000000060'  # the injected boot identity
 
 
 class Session:
@@ -58,6 +61,7 @@ class PublicationFixture:
     def __init__(self, root: Path) -> None:
         """Build the project, output, record and request of probe_la04 under ``root``."""
         self.log: list[tuple] = []
+        self.now = 0.0  # injected seconds since the start sample; only the proof delay advances it
         self.project, self.output = root / 'project', root / 'out'
         self.project.mkdir()
         self.output.mkdir()
@@ -74,8 +78,8 @@ class PublicationFixture:
                   'outputSeconds': 600}
         clip = {'state': 'active', 'attempts': [attempt], 'sectionFamilies': [family], 'deliveries': [],
                 'output': output}
-        self.record = {'batchId': 'b1', 'status': 'active', 'startEpoch': time.time() - START,
-                       'clock': {**clock.start_anchor().record(), 'elapsed': START},
+        self.record = {'batchId': 'b1', 'status': 'active', 'startEpoch': EPOCH - START,
+                       'clock': {'boot': BOOT, 'continuous': 0.0, 'epoch': EPOCH, 'elapsed': START},
                        'production': {'authorization': {'setup': 'complete'}, 'tasks': {}},
                        'clips': {'c1': clip}, 'holds': [], 'deadlines': {}}
         self.request = self._request(root, plan_ref, plan_sha)
@@ -106,7 +110,7 @@ class PublicationFixture:
 
         def slow_context(request: dict) -> dict:
             """Stand for the cold plan read and ancestry proof."""
-            time.sleep(delay)
+            self.now += delay
             self.log.append(('proof-read-done',))
             return request['sectionProduction']
 
@@ -124,7 +128,10 @@ class PublicationFixture:
                     ('studio.native_segments.reviews.assembly_snapshot', lambda _request, _record=None: {'s': 1}),
                     ('studio.production.section_plan.revalidate_context', slow_context),
                     ('studio.production.section_plan.require_context', lambda _record, _context: None),
-                    ('cut_preview_io.write_new', write)):
+                    ('cut_preview_io.write_new', write),
+                    ('studio.native_budget_clock.continuous_now', lambda: self.now),
+                    ('studio.native_budget_clock.boot_id', lambda: BOOT),
+                    ('studio.native_budget_clock.time', SimpleNamespace(time=lambda: EPOCH + self.now))):
                 stack.enter_context(mock.patch(target, value))
             yield
 
@@ -151,6 +158,9 @@ class PublicationOrderTests(unittest.TestCase):
         """Before ``publication_event`` (or in the whole log) no proof read follows the last clock sample.
 
         With an event named, that event comes immediately after the last sample: only the write follows it.
+        Only ``section_publication.advance_clock`` is traced. After the write, ``apply_family_outcome`` samples
+        again through ``native_budget_binding.advance_clock`` (untraced) before its own grant check, so the
+        control's log shows proof reads after the last traced sample; they follow the write and are out of scope.
         """
         names = self.fixture.names()
         names = names[:names.index(publication_event)] if publication_event else names

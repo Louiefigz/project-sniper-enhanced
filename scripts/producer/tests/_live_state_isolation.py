@@ -203,6 +203,7 @@ def _report_children(test: object, result: object) -> None:
 def _start_test_run(result: unittest.TestResult) -> None:
     """Mark the start of a run; roots now belong to test methods only."""
     STATE.runs.append(len(STATE.unreported))
+    children.note_test_run()
     STATE.originals['start'](result)
 
 

@@ -11,6 +11,8 @@ from studio.native_runtime import digest
 from studio.native_review_regions import region_packet, preview_windows
 from studio.native_preview_history import prior_preview
 from studio.native_stage_evidence import StageEvidence, seal_stage, read_stage, require
+from studio.native_budget_binding import charge_request
+from studio.native_budget_clock import stage_allowance
 
 STATUS = 'native-preview-section-complete'
 
@@ -51,7 +53,8 @@ def execute_section(request: dict, plan: dict, phase: str) -> dict:
         write_new(root / f'{phase}-input.json', {'window': windows[index]})
         command = [request['tools']['node'], str(Path(__file__).with_name('native_motion_previews.mjs')),
                    str(root / 'export-request.json'), str(index)]
-        subprocess.run(command, check=True, timeout=request.get('budget', {}).get('sampleSeconds', 600) - 30)
+        limit = request.get('budget', {}).get('sampleSeconds', 600) - 30
+        subprocess.run(command, check=True, timeout=stage_allowance(request, limit))
         row = bound_json(root / f'{phase}-picture.json')
     else:
         from studio.native_preview_recovery import current_section
@@ -88,5 +91,7 @@ def prepare_sections(pipeline: object) -> None:
     for phase in phases:
         if restore_section(pipeline, phase):
             continue
+        if phase.startswith('preview-package-'):
+            charge_request(pipeline.request, 'previewPackage')
         pipeline.supervise(phase, pipeline.worker(phase), section_output(phase), STATUS)
         seal_section(pipeline, phase)

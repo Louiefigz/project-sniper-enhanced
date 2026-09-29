@@ -28,6 +28,7 @@ from studio.native_budget_policy import Approval, BatchSpec
 from studio.native_preview_history import STATUS as PREVIEW_STATUS
 from studio.native_runtime import digest
 from studio.production import api as authority
+from studio.production.approvals import ApprovalChange
 from studio.production.authorization import Setup, authorize, complete_setup
 from test_review_player import make_attempt
 
@@ -245,7 +246,8 @@ class GateFixture(ApprovedChainFixture):
                             source_seconds=60.0, word_ranges=tuple(tuple(item) for item in row["wordRanges"]),
                             word_texts=tuple(row["wordTexts"]), ranges=tuple(tuple(item) for item in row["ranges"]),
                             recorded_by="TEST operator change")
-        return authority.record_script_change(native_budget_store.default_root(), BATCH, CLIP, approval)
+        change = ApprovalChange(approval, "TEST operator retitled")  # P0 adapt: src takes one typed change
+        return authority.record_script_change(native_budget_store.default_root(), BATCH, CLIP, change)
 
     def forged_packet(self, result: dict, change, tag: str) -> dict:
         """A copy of the published packet with its given block changed, and an observations draft answering the copy."""

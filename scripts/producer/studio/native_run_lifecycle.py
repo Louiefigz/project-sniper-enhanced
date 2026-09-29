@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import signal
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING
 from studio.native_run_disk import CATEGORIES as DISK_CATEGORIES
 
@@ -80,11 +81,58 @@ def failure_category(result: dict) -> str | None:
     if result.get('failureCategory') in (*DISK_CATEGORIES, 'host-inspection-timeout', 'budget-exhausted',
                                          'process-registry-overflow'):
         return result['failureCategory']
+    if 'Disk admission refused' in reason and not result.get('pid'):
+        return 'disk-space'
+    if 'Admission refused' in reason and not result.get('pid'):
+        return 'capacity-timeout'
     if any(word in reason for word in ('kernel-warning', 'kernel memory pressure', 'low-headroom')):
         return 'host-memory-pressure'
     if 'footprint exceeds' in reason:
         return 'render-memory-limit'
     return 'renderer-failure'
+
+
+def owner_pins_changed(owner: NativeRun, boundary: str) -> bool:
+    """Compare every additional pin, recording this boundary's hashed and memoized bytes."""
+    from studio.native_digest_memo import integrity_boundary
+    from studio.native_runtime import digest
+    with integrity_boundary(owner.root, f'{boundary}:{owner.label}'):
+        return any(digest(Path(path)) != expected for path, expected in owner.additional_pins.items())
+
+
+def verify_final_pins(owner: NativeRun) -> None:
+    """Re-hash sources, SDK, sandbox and every additional pin after the child exits.
+
+    Same-process repeats re-read only files whose exact identity changed
+    (``studio/native_digest_memo.py``); the child cannot change content without that.
+    """
+    from studio.native_digest_memo import integrity_boundary
+    from studio.native_run_config import source_hashes
+    from studio.native_runtime import digest
+    result = owner.result
+    result['additionalFilePinsAfter'] = None
+    try:
+        with integrity_boundary(owner.root, f'owner-final:{owner.label}'):
+            result['sourceHashesAfter'] = source_hashes(owner.project)
+            result['sourceStable'] = result['sourceHashesBefore'] == result['sourceHashesAfter']
+            result['sdkStable'] = owner.admission['sdkSha256'] == digest(owner.cli)
+            result['sandboxStable'] = owner.admission['sandboxSha256'] == digest(owner.settings.sandbox)
+            result['additionalFilePinsAfter'] = {path: digest(Path(path)) for path in owner.additional_pins}
+            result['additionalFilesStable'] = owner.additional_pins == result['additionalFilePinsAfter']
+    except OSError as error:
+        result['pinVerificationError'] = {'type': type(error).__name__, 'message': str(error)}
+        result.update(sourceStable=False, sdkStable=False, sandboxStable=False, additionalFilesStable=False)
+        owner.abort_reason = owner.abort_reason or f'Final pin verification failed: {error}'
+        result['abortReason'] = owner.abort_reason
+
+
+def owner_succeeded(owner: NativeRun, output: Path) -> bool:
+    """Success needs a clean exit, verified cleanup, the output and every stability proof."""
+    result = owner.result
+    stable = all(result.get(key) for key in ('sourceStable', 'sdkStable', 'sandboxStable', 'additionalFilesStable'))
+    return (owner.child is not None and owner.child.returncode == 0 and not owner.abort_reason
+            and bool(result.get('cleanup', {}).get('verified')) and output.is_file() and stable
+            and bool(result.get('leaseCleanupVerified', False)))
 
 
 def production_remaining(owner: NativeRun) -> float | None:

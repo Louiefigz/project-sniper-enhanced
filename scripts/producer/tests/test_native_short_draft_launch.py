@@ -4,6 +4,8 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -23,6 +25,26 @@ from studio import native_short_draft_worker as worker
 
 OUTPUTS = {'capture': 'native-frames.json', 'preview': 'motion-previews.json', 'render': 'review.mp4',
            'verify': 'checks.json', 'draft': DRAFT_OUTPUT, 'promote': 'review.mp4'}
+
+GUARD = STUDIO / 'runtime/native-export-guard.mjs'
+GUARD_PROBE = """import {assertNativeRenderOwner} from %s;
+const [request, owner, project, output] = process.argv.slice(1);
+try {
+  assertNativeRenderOwner(['render', project, '--output', output], {SNIPER_NATIVE_EXPORT_REQUEST: request,
+    SNIPER_NATIVE_EXPORT_OWNER: owner, SNIPER_NATIVE_EXPORT_PID: String(process.pid)});
+  console.log('admitted');
+} catch (error) { console.log(`refused: ${error.message}`); }"""
+
+
+def guard_verdict(request: Path, owner: Path, project: Path, output: Path) -> str:
+    """Run the export guard's render check once in node: 'admitted' or 'refused: <reason>'."""
+    node = shutil.which('node')
+    if node is None:
+        raise AssertionError('M15 needs node: the export guard is a node module')
+    script = GUARD_PROBE % json.dumps(GUARD.as_uri())
+    result = subprocess.run([node, '--input-type=module', '-e', script, str(request), str(owner), str(project),
+                             str(output)], capture_output=True, text=True, timeout=60, check=True)
+    return result.stdout.strip()
 
 
 class DraftLaunchVocabularyTests(unittest.TestCase):
@@ -64,6 +86,21 @@ class DraftLaunchVocabularyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Review-draft'):
             self.admit({**draft, 'previewReviews': '/TEST/reviews.json'}, 'draft')
         self.gate.assert_not_called()
+
+    def test_draft_capture_worker_passes_the_guard_phase(self) -> None:
+        """(M15) The draft worker command admitted here passes the export guard; as 'render' the guard refuses it."""
+        draft = {**self.base, 'reviewDraft': True}
+        self.assertEqual(self.admit(draft, 'draft'), draft)
+        worker = ['/usr/bin/sandbox-exec', '-f', str(STUDIO / 'native_localhost_only.sb'), sys.executable,
+                  str(STUDIO / 'native_short_worker.py'), str(self.file)]
+        verdicts = {}
+        for phase in ('draft', 'render'):
+            owner = self.root / f'owner-{phase}.json'
+            write_json(owner, {'project': str(self.project), 'status': 'running', 'args': [*worker, phase],
+                               'additionalFilePinsBefore': {str(self.file): digest(self.file)}})
+            verdicts[phase] = guard_verdict(self.file, owner, self.project, self.output / 'picture.mp4')
+        self.assertEqual(verdicts, {'draft': 'admitted', 'render': 'refused: Native export admission: '
+                                    'render did not originate from the shared export worker'})
 
     def test_draft_built_project_cannot_launch_final_phases_even_with_a_crafted_request(self) -> None:
         """The launch boundary reads the project's own draft authority, not the request's claim."""

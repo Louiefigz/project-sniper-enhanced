@@ -13,11 +13,13 @@ from pathlib import Path
 from datetime import datetime, timezone
 from uuid import uuid4
 from cut_preview_io import write_new
-from studio.native_runtime import digest
 from studio.native_owned_processes import OwnedRegistry
 from studio.native_measurement_retry import MeasurementWindow
 from studio.native_run_config import owner_file_pins, NativeRunConfig, launch_environment, policy_for_baseline, source_hashes
-from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt, publish_completed_attempt
+from studio.native_run_lifecycle import (
+    NativeSignalHandlers, finalize_attempt, owner_pins_changed, owner_succeeded, publish_completed_attempt,
+    verify_final_pins,
+)
 from studio.native_workload import ProgressWatch
 from studio.native_run_admission import acquire_capacity
 from studio.native_run_disk import serve_disk_request
@@ -98,7 +100,7 @@ class NativeRun:
         if self.settings.admission != self.admission:
             raise ValueError('Native admission changed after owner preparation')
         self.persist(initial=True)
-        if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
+        if owner_pins_changed(self, 'owner-prepare'):
             raise RuntimeError('Prepared native input or supervision code changed before launch')
         self.signal_handlers.install()
         acquire_capacity(self)
@@ -115,7 +117,7 @@ class NativeRun:
             raise RuntimeError('Independent render-only deadline exceeded before launch')
         if owner_file_pins() != self.owner_pins:
             raise RuntimeError('Native supervision code changed during admission')
-        if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
+        if owner_pins_changed(self, 'owner-launch'):
             raise RuntimeError('Native input changed while waiting for capacity')
         environment = launch_environment(worker_environment(self.settings, self.path))  # + timing lineage only
         from studio.native_run_lifecycle import bind_launch_allocation, require_launch_time
@@ -242,26 +244,8 @@ class NativeRun:
         self.result['elapsedSeconds'] = time.monotonic() - self.started
         self.result['completedAt'] = utc()
         self.result['abortReason'] = self.abort_reason
-        self.result['additionalFilePinsAfter'] = None
-        try:
-            self.result['sourceHashesAfter'] = source_hashes(self.project)
-            self.result['sourceStable'] = self.result['sourceHashesBefore'] == self.result['sourceHashesAfter']
-            self.result['sdkStable'] = self.admission['sdkSha256'] == digest(self.cli)
-            self.result['sandboxStable'] = self.admission['sandboxSha256'] == digest(self.settings.sandbox)
-            self.result['additionalFilePinsAfter'] = {path: digest(Path(path)) for path in self.additional_pins}
-            self.result['additionalFilesStable'] = self.additional_pins == self.result['additionalFilePinsAfter']
-        except OSError as error:
-            self.result['pinVerificationError'] = {'type': type(error).__name__, 'message': str(error)}
-            self.result.update(sourceStable=False, sdkStable=False, sandboxStable=False, additionalFilesStable=False)
-            self.abort_reason = self.abort_reason or f'Final pin verification failed: {error}'
-            self.result['abortReason'] = self.abort_reason
-        output = Path(self.result['output'])
-        success = (self.child is not None and self.child.returncode == 0 and not self.abort_reason
-                   and self.result.get('cleanup', {}).get('verified') and output.is_file()
-                   and self.result['sourceStable'] and self.result['sdkStable'] and self.result['sandboxStable']
-                   and self.result['additionalFilesStable'])
-        success = success and self.result.get('leaseCleanupVerified', False) and self.result['additionalFilesStable']
-        publish_completed_attempt(self, success)
+        verify_final_pins(self)
+        publish_completed_attempt(self, owner_succeeded(self, Path(self.result['output'])))
 
     def execute(self) -> bool:
         """Keep lifecycle cleanup mandatory after every launch/error path."""

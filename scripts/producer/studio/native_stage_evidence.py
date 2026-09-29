@@ -12,6 +12,7 @@ from pathlib import Path
 
 from cross_runtime_canonical_json import canonical_compact_json
 from cut_preview_io import MAX_JSON, bound_json, file_hash, real_directory, write_new
+from studio.native_digest_memo import integrity_boundary, pinned_file_hash
 from studio.native_run_config import authored_source_hashes, source_hashes
 
 MAX_NATIVE_FILE_BYTES = 1024 ** 4  # Stream large originals without the preview's 2 GiB cap.
@@ -48,8 +49,8 @@ def read_native_capture_receipt(path: Path, expected: str | None = None) -> dict
 
 
 def _hash(file: Path) -> str:
-    """Hash regular canonical bytes with an explicit large-original limit."""
-    return file_hash(file, maximum=MAX_NATIVE_FILE_BYTES)
+    """Hash regular canonical bytes with an explicit large-original limit (same-process memo)."""
+    return pinned_file_hash(file, maximum=MAX_NATIVE_FILE_BYTES)
 
 
 def _pin_map(value: object) -> dict[str, str]:
@@ -145,7 +146,7 @@ def _validate_spec(spec: StageEvidence) -> None:
 
 def _binding(file: Path, maximum: int = MAX_NATIVE_FILE_BYTES) -> dict[str, str]:
     """Retain the exact path and bytes of an artifact or supervision receipt."""
-    return {'path': str(file), 'sha256': file_hash(file, maximum=maximum)}
+    return {'path': str(file), 'sha256': pinned_file_hash(file, maximum=maximum)}
 
 
 def _build_record(spec: StageEvidence) -> tuple[dict, dict[str, str]]:
@@ -173,11 +174,12 @@ def _build_record(spec: StageEvidence) -> tuple[dict, dict[str, str]]:
 
 def seal_stage(spec: StageEvidence) -> dict:
     """Exclusively seal completed work; a failed owner never receives a new seal."""
-    record, pins = _build_record(spec)
-    path = spec.root / f'{spec.stage}-stage.json'
-    require(len(canonical_compact_json(record).encode()) + 1 <= MAX_JSON, 'stage receipt exceeds JSON limit')
-    write_new(path, record)
-    verify_pins(pins)
+    with integrity_boundary(spec.root, f'stage-seal:{spec.stage}'):
+        record, pins = _build_record(spec)
+        path = spec.root / f'{spec.stage}-stage.json'
+        require(len(canonical_compact_json(record).encode()) + 1 <= MAX_JSON, 'stage receipt exceeds JSON limit')
+        write_new(path, record)
+        verify_pins(pins)
     return record
 
 
@@ -207,6 +209,8 @@ def read_stage(receipt_path: Path, current_inputs: dict[str, str], expected_stag
     require(spec.stage == expected_stage and receipt_path == spec.root / f'{spec.stage}-stage.json',
             'stage receipt belongs to another stage or root')
     require(spec.inputs == _pin_map(current_inputs), 'current stage input dependencies differ')
+    # A donor root may belong to another attempt: reads are counted in the process
+    # totals of the current attempt's next telemetry row, never written beside the donor.
     rebuilt, pins = _build_record(spec)
     require(rebuilt == record, 'stage evidence changed after sealing')
     pins[str(receipt_path)] = receipt_hash

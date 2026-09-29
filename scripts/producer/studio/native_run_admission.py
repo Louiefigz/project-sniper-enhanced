@@ -113,7 +113,10 @@ def acquire_capacity(owner: NativeRun) -> None:
     with child_span('native_queue_admission', {'activity': 'native-queue-wait'}):
         join_queue(owner, until)
     until = min(owner.started + owner.deadline, time.monotonic() + owner.settings.capacity_wait_seconds)
-    owner.result['pool'] = owner.lease.admission
+    admission = owner.lease.admission
+    if not isinstance(admission, dict):
+        raise RuntimeError('Native pool lease did not report its admission record')
+    owner.result['pool'] = admission
     if owner.settings.disk_expansion:
         owner.result['diskExpansion'] = {'status': 'available', 'request': str(disk_request_path(owner.path))}
     with child_span('native_pressure_admission', {'activity': 'pressure-wait'}):

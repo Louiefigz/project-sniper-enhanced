@@ -15,6 +15,7 @@ from transcript_timing_quality import timing_quality_report
 from cut_preview_io import bound_json, real_directory, write_new
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_owner_queue import queued_owner
 from studio.native_runtime import digest, install_runtime
 from studio.native_stage_evidence import require, verify_pins
 
@@ -92,10 +93,10 @@ def execute(audio: Path, output: Path) -> dict:
     write_new(request, {'root': str(output), 'audio': str(audio), 'audioSha256': pins[str(audio)],
                         'recognizer': asdict(runtime), 'pins': pins})
     cli, sandbox = install_runtime() / 'dist/cli.js', HERE / 'native_localhost_only.sb'
-    settings = NativeRunConfig(project, output, cli,
+    settings = queued_owner(NativeRunConfig(project, output, cli,
         ['/usr/bin/sandbox-exec', '-f', str(sandbox), sys.executable, str(Path(__file__).resolve()), '--worker', str(request)],
         environment, {'output': str(output / 'recognition.json'), 'sdkSha256': digest(cli), 'sandboxSha256': digest(sandbox)},
-        additional_pins={**pins, str(request): digest(request)}, deadline=300, success_status=STATUS)
+        additional_pins={**pins, str(request): digest(request)}, deadline=300, success_status=STATUS))
     owner = NativeRun('review-recognition', settings)
     require(owner.execute() and owner.result.get('cleanup', {}).get('verified') is True
             and owner.result.get('leaseCleanupVerified') is True, 'recognition owner failed; preserve attempt')

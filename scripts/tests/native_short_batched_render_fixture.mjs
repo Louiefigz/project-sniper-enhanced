@@ -18,8 +18,21 @@ function writeFrames(directory, totalFrames) {
   for(let frame=0;frame<totalFrames;frame++)fs.writeFileSync(path.join(directory,`frame_${String(frame+1).padStart(5,'0')}.png`),`TEST PNG frame ${frame}`);
 }
 
-/** Seed the shared content store through its real publication primitive (TEST frames only). */
+/** Seed the shared content store through its real publication primitive (TEST frames only).
+ *
+ * M-029e (X93): a seeded request takes the exporter's default content-store route and carries what that route
+ * admits: the source and tool digests the export pins (native_source_identity.mjs nativeSourceContentIdentity,
+ * toolDigest), sourceCacheMode 'acquire-content-store' (native_short_export.py source_cache_mode) and a supervising
+ * owner deadline for source waits (native_source_identity.mjs sourceCacheUntilMs). The fixture's cleanup restores
+ * the owner variable. Unseeded fixtures keep the legacy path cache and no pins.
+ */
 export function seedStoreEntry(request, video, totalFrames, rate=25) {
+  request.sourceCacheMode??='acquire-content-store';request.tools.ffprobe??='TEST ffprobe';
+  request.pins={...request.pins,[path.join(request.project,video.src)]:sha('TEST source bytes'),
+    ...Object.fromEntries(Object.values(request.tools).map(tool=>[tool,sha(tool)]))};
+  const owner=path.join(path.dirname(request.output),'owner.render.json');
+  if(!fs.existsSync(owner))fs.writeFileSync(owner,JSON.stringify({startedAt:new Date().toISOString(),runDeadlineSeconds:600}));
+  process.env.SNIPER_NATIVE_EXPORT_OWNER=owner;
   const store=openSourceStore(request.cache);
   const context={project:request.project,request,fps:{num:rate,den:1},rate,runtimeLibrarySha256:sha('TEST SDK library')};
   const identity=nativeSourceContentIdentity(context,video,store.views),staging=path.join(store.views,'test-seed',identity.pathName);
@@ -49,6 +62,7 @@ function fakeSdk(fixture) {
   const {calls,plan,video,entry}=fixture;
   return {
     VIRTUAL_TIME_SHIM:'TEST shim',resolveConfig:cfg=>{calls.config=cfg;return cfg;},
+    isHdrColorSpace:space=>['smpte2084','arib-std-b67'].includes(space?.colorTransfer),
     runCompileStage:async options=>{
       calls.compiles.push(options);fs.mkdirSync(path.join(options.workDir,'compiled'));
       fs.writeFileSync(path.join(options.workDir,'compiled/index.html'),'TEST compiled');
@@ -101,10 +115,14 @@ export function batchFixture(totalFrames=100) {
   for(let frame=0;frame<totalFrames;frame++)fs.writeFileSync(path.join(entry,`frame_${String(frame+1).padStart(5,'0')}.png`),`TEST PNG frame ${frame}`);
   const calls={compiles:[],sessions:[],frames:[],cacheEntries:[],transports:[],injectors:[],encodes:[],serverCloses:0,sessionCloses:0,poolDrains:0};
   const request={schemaVersion:1,project,runtime,cache,output,captureMode:'cached-native-batches',tools:{ffmpeg:'TEST ffmpeg'}};
+  const previousOwner=process.env.SNIPER_NATIVE_EXPORT_OWNER;  // seedStoreEntry may set it (M-029e)
   const fixture={root,request,plan,video,entry,calls,failFrame:null};
   fixture.sdk=fakeSdk(fixture);
   fixture.encode=async(command,args)=>{assert.equal(command,'TEST ffmpeg');calls.encodes.push(args);
     fs.writeFileSync(args.at(-1),'TEST encoded picture',{flag:'wx'});return {exitCode:0,elapsedMs:1};};
-  fixture.cleanup=()=>fs.rmSync(root,{recursive:true,force:true});
+  fixture.cleanup=()=>{
+    if(previousOwner===undefined)delete process.env.SNIPER_NATIVE_EXPORT_OWNER;else process.env.SNIPER_NATIVE_EXPORT_OWNER=previousOwner;
+    fs.rmSync(root,{recursive:true,force:true});
+  };
   return fixture;
 }

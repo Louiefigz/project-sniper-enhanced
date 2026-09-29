@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_owner_queue import queued_owner
 from studio.native_runtime import REPO, digest
 
 
@@ -26,12 +27,12 @@ def execute(args: argparse.Namespace) -> bool:
     sandbox = Path(__file__).with_name('web_capture.sb')
     pins = [plan_path, request, script, sandbox, script.with_name('web_capture_policy.mjs')]
     pins += [Path(value) for value in tools.values()]
-    settings = NativeRunConfig(REPO, output, script,
+    settings = queued_owner(NativeRunConfig(REPO, output, script,
         ['/usr/bin/sandbox-exec', '-f', str(sandbox), tools['node'], str(script), str(request)], environment,
         {'output': str(output / 'capture.json'), 'sdkSha256': digest(script), 'sandboxSha256': digest(sandbox)},
         sandbox=sandbox, deadline=240, compressor_admission='short-headroom',
         additional_pins={str(file): digest(file) for file in pins},
-        success_status='public-web-capture-awaiting-editorial-review', unused_ram_advisory=args.unused_ram_advisory)
+        success_status='public-web-capture-awaiting-editorial-review', unused_ram_advisory=args.unused_ram_advisory))
     if not NativeRun('capture', settings).execute():
         return False
     if plan['mode'] == 'capture':

@@ -40,6 +40,10 @@ def dialogue_premaster(request: dict, canvas: dict, audio_finishing: object) -> 
 
 def prepare_dialogue(request: dict, canvas: dict, audio_finishing: object = None) -> dict:
     """Check mastered dialogue before expensive picture; retain final AAC/mux gates."""
+    if request.get('audioStage'):
+        # A bound sealed audio stage is imported (copied and re-verified), never recomputed.
+        from studio.native_audio_import import import_stage_audio
+        return import_stage_audio(request, canvas, audio_finishing)
     profile = resolve_mastering_profile(request.get('audioProfile', NATIVE_SHORT_MASTERING_PROFILE.identity))
     reference = dialogue_premaster(request, canvas, audio_finishing)
     samples = clock(canvas).sample_at_frame(canvas['totalFrames'])

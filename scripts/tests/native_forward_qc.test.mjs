@@ -88,6 +88,26 @@ test('explicit donor reuse requires the exact pinned receipt and retains its sou
   assert.ok(result.frames.filter(row=>!row.repeat).every(row=>row.sourcePath.startsWith(donor)));
 }));
 
+// X82 (M-029a): only a donor picture that carries a revision proof makes forward QC read the donor's request.
+test('a donor picture with a revision proof is checked against its own pinned export request',()=>withPicture(async(f,picture)=>{
+  const donor=f.request.output,proof={schemaVersion:1,kind:'TEST revision proof'};
+  picture.pictureRevision=proof;rewrite(f,picture);
+  const receipt=path.join(donor,'batched-picture.json'),file=path.join(donor,'export-request.json');
+  const attempt=async(donorRequest,pin)=>{
+    const output=fs.mkdtempSync(path.join(f.root,'retry-'));
+    fs.copyFileSync(path.join(donor,'picture.mp4'),path.join(output,'picture.mp4'));
+    if(donorRequest)fs.writeFileSync(file,JSON.stringify(donorRequest));
+    const pins={[receipt]:nativeCaptureHash(receipt),...(donorRequest?{[file]:pin??nativeCaptureHash(file)}:{})};
+    const sessions=f.calls.sessions.length;
+    const result=await runNativeShortCapture({...f.request,output,pictureDonor:donor,pins},{sdk:f.sdk,encode:f.encode});
+    assert.equal(result.status,'failed');assert.equal(f.calls.sessions.length,sessions);
+    return result.error;
+  };
+  assert.match(await attempt(null),/ENOENT/);
+  assert.match(await attempt({...f.request,pictureRevision:{...proof,kind:'TEST other'}}),/Picture revision proof differs/);
+  assert.match(await attempt({...f.request,pictureRevision:proof},'0'.repeat(64)),/AssertionError/);
+}));
+
 test('receipt size is bounded before publishing a new file',()=>{
   const f=batchFixture();try{
     const target=path.join(f.root,'oversized.json');

@@ -16,9 +16,11 @@ roots refuses both sets); a malformed inherited prefix value exits 97. ``set_cur
 ``SNIPER_TEST_CURRENT`` so a child's report says which test started it. ``new_reports`` returns the report lines
 this process has not reported yet, so the isolation fails the test run even when the child's caller swallowed
 its exit status. Reports are never moved or removed, so every ancestor sees them; a suite wrapper that passes its
-own kept folder checks it again after the process exits (a late child's report), and a run without a wrapper
-names the folder it made on stderr at exit, so a report written after it exits can still be found. Standard
-library only; nothing in the product imports this module.
+own kept folder checks it again after the process exits (a late child's report), and a test run without a wrapper
+names the folder it made on stderr at exit, so a report written after it exits can still be found. A process that
+only imports the isolation and starts no test run (a supervised owner's child in a closed environment, whose
+output is its log) keeps its folder without naming it (M-C4F3). Standard library only; nothing in the product
+imports this module.
 
 Not covered: a child started with ``-I``, ``-S`` or ``-E``, or with an environment that drops ``PYTHONPATH``,
 never loads the tripwire.
@@ -33,7 +35,8 @@ from pathlib import Path
 CHILD_TRIPWIRE = str(Path(__file__).resolve().parent / '_child_live_state')
 CONFIG, REPORTS, CURRENT = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS', 'SNIPER_TEST_CURRENT'
 SCHEMA = 1
-_OWN = {'created': None, 'reported': set()}  # the reports directory this process made; report files it reported
+# The reports directory this process made; report files it reported; whether it started a test run.
+_OWN = {'created': None, 'reported': set(), 'run': False}
 
 
 def _inherited(environ: dict) -> dict:
@@ -102,7 +105,12 @@ def new_reports(environ: dict = os.environ) -> list[str]:
     return list(fresh.values())
 
 
+def note_test_run() -> None:
+    """Record that this process started a test run, so it names its kept folder at exit."""
+    _OWN['run'] = True
+
+
 def announce_own_directory() -> None:
-    """At exit, name the reports directory this process made (it is kept: a late child may still report there)."""
-    if _OWN['created']:
+    """At exit, a test run names the reports directory it made (kept: a late child may still report there)."""
+    if _OWN['created'] and _OWN['run']:
         os.write(2, f'live-state isolation: child refusal reports are kept in {_OWN["created"]}\n'.encode())

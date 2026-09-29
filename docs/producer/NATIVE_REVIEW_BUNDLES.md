@@ -57,6 +57,16 @@ verification before delivery. Automatic Studio proxies must remain disabled.
 - Exact source audio spans become one continuous checked AAC track. Other HTML
   bytes remain unchanged except separately recorded media-wrapper display sets.
   Source or cut changes require rebuilding that audio and renewing verification.
+- Current native builds mount the catalog title and graphics as nested
+  `data-composition-src` hosts inside the generated root. Preparation accepts
+  exactly one top-level inline composition. Every other composition element must
+  be an empty mount host on the root clock (no timed container between it and the
+  root), with a window inside the canvas and a `compositions/*.html` file admitted
+  with the checked export. Mounted files may not contain audio, video, frames or
+  further mounts, because the review can neither replace nor gate them. A mount
+  outside the root, a second root, an inline nested composition, a changed clock
+  or an unadmitted/changed mounted file is refused before the bundle folder is
+  created. Each composition's `proof.mounts` records the preserved mounts.
 - The canvas supplies duration, dimensions, frame rate and frame/sample mapping.
   Checkpoint extraction selects frame indices in one decode, including rational
   rates such as `30000/1001`; it does not infer time from rounded frame seeks.

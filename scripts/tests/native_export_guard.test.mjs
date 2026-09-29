@@ -78,3 +78,19 @@ test('preview picture section requires its exact phase and output owner',t=>{
   f.owner.args[6]='preview-picture-0';f.owner.completedAt='TEST completed';f.save();
   assert.throws(()=>assertNativePreviewOwner(f.file,f.environment),/owner\/request/);
 });
+
+test('a short review draft renders only from its draft owner; a promotion never renders',t=>{
+  const f=fixture(t),request={project:'/TEST/project',output:path.dirname(f.file),reviewDraft:true};
+  fs.writeFileSync(f.file,JSON.stringify(request));
+  f.owner.additionalFilePinsBefore[f.file]=sha(f.file);
+  f.owner.args=['/usr/bin/sandbox-exec','-f','/TEST/sandbox','/TEST/python','/TEST/native_short_worker.py',f.file,'draft'];f.save();
+  assert.doesNotThrow(()=>assertNativeRenderOwner(f.args,f.environment));
+  f.owner.args[6]='render';f.save();
+  assert.throws(()=>assertNativeRenderOwner(f.args,f.environment),/shared export worker/);
+  fs.writeFileSync(f.file,JSON.stringify({project:'/TEST/project',output:request.output}));
+  f.owner.additionalFilePinsBefore[f.file]=sha(f.file);f.owner.args[6]='draft';f.save();
+  assert.throws(()=>assertNativeRenderOwner(f.args,f.environment),/shared export worker/);
+  fs.writeFileSync(f.file,JSON.stringify({project:'/TEST/project',output:request.output,promoteDraft:{draftSha256:'a'.repeat(64)}}));
+  f.owner.additionalFilePinsBefore[f.file]=sha(f.file);f.owner.args[6]='render';f.save();
+  assert.throws(()=>assertNativeRenderOwner(f.args,f.environment),/cannot render picture/);
+});

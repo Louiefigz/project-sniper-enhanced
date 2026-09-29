@@ -71,6 +71,12 @@ is valid only while both are open. `--full` prints every section; the default is
 
 ### Pool capacity, qualification profiles and older installs
 
+Utility owners (selected-source preparation, review recognition, source-cache aliasing, public web
+capture and review-bundle media preparation, which is ffmpeg-only and uses the `audio` class) wait in the
+pool FIFO like any owner (`studio/native_owner_queue.queued_owner`). They carry no
+production task, so their wait earns no capacity credit and counts against the Short they serve; P1
+reviews that accounting (P0 Step 5.11).
+
 `start --pool-slots` cannot exceed the host's heavy capacity for Short renders
 from the pool qualification record (one job until `studio/pool_qualification.py`
 records more), so forecasts are never more optimistic than the pool. The legacy

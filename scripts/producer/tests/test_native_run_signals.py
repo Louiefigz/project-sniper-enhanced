@@ -207,5 +207,57 @@ class NativeRunSignalTests(unittest.TestCase):
         self.assertEqual(json.loads((self.output / 'delivery.json').read_text())['failureCategory'], 'cancelled')
 
 
+
+class AdmissionCategoryTests(unittest.TestCase):
+    """(M6) A refusal before launch keeps its own category, so its one transient retry is granted."""
+
+    @staticmethod
+    def refused(reason: str, **extra: object) -> dict:
+        """A TEST owner result that ended before any child ran, with this abort reason."""
+        return {'status': 'failed', 'cleanup': {'verified': True}, 'abortReason': reason, **extra}
+
+    def test_admission_timeout_is_a_capacity_timeout(self) -> None:
+        """Capacity never freed within the wait: capacity-timeout; the same text after a launch is not."""
+        from studio.native_run_lifecycle import failure_category
+        reason = 'RuntimeError: Admission refused: heavy lane busy'
+        self.assertEqual(failure_category(self.refused(reason)), 'capacity-timeout')
+        self.assertEqual(failure_category(self.refused(reason, pid=4242)), 'renderer-failure')
+
+    def test_disk_refusal_before_launch_is_disk_space(self) -> None:
+        """A disk refusal at admission is disk-space, never the capacity text it also contains."""
+        from studio.native_run_lifecycle import failure_category
+        reason = 'RuntimeError: Disk admission refused: free disk is below the reserve'
+        self.assertEqual(failure_category(self.refused(reason)), 'disk-space')
+
+    def test_capacity_timeout_gets_its_one_transient_retry(self) -> None:
+        """An unchanged relaunch after a capacity-timeout is the clip's one transient retry, then refused."""
+        from studio.native_budget_launch import LaunchRequest, _retry_decision
+        from studio.native_run_lifecycle import failure_category
+        category = failure_category(self.refused('RuntimeError: Admission refused: heavy lane busy'))
+        clip = {'counters': {'transientRetry': 0}, 'attempts': [
+            {'id': 'a1', 'route': 'final', 'status': 'failed', 'identity': 'TEST-identity',
+             'failure': {'category': category, 'signature': 'TEST'}}]}
+        launch = LaunchRequest('A', 'final', 'TEST-identity', ('/TEST/project', '/TEST/out'), 60.0)
+        self.assertEqual((_retry_decision(clip, launch).allowed, _retry_decision(clip, launch).reason),
+                         (True, 'transient-retry'))
+        clip['counters']['transientRetry'] = 1
+        self.assertIn('one transient-failure retry', _retry_decision(clip, launch).reason)
+
+    def test_a_lease_without_its_admission_record_is_refused(self) -> None:
+        """(e63ab9c8) A pool lease that reports no admission record is refused before any pressure wait."""
+        from studio import native_run_admission as admission
+        owner = SimpleNamespace(started=0.0, deadline=1e9, hard_deadline=None, result={}, lease=None,
+                                settings=SimpleNamespace(capacity_wait_seconds=5.0, disk_expansion=False))
+
+        def joined(target: object, until: float) -> None:
+            """TEST queue join whose lease reports no admission record."""
+            target.lease = SimpleNamespace(admission=None)
+        with patch.object(admission, 'join_queue', side_effect=joined), \
+                patch.object(admission, '_await_pressure') as pressure:
+            with self.assertRaisesRegex(RuntimeError, 'did not report its admission record'):
+                admission.acquire_capacity(owner)
+        pressure.assert_not_called()
+
+
 if __name__ == '__main__':
     unittest.main()

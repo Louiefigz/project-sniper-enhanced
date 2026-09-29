@@ -8,6 +8,7 @@ import json
 import re
 
 from studio.native_media_visibility import NativeElements, MARKER, additions, decimal_text, seconds, wrapper_for
+from studio.native_review_mounts import composition_root
 from studio.native_short_delivery import clock
 from studio.native_stage_evidence import require
 
@@ -77,18 +78,28 @@ def canvas_clock(canvas: dict) -> tuple:
 
 def validate_canvas(source: str, canvas: dict) -> tuple:
     """Require one named native root matching the admitted rational canvas."""
+    elements, root, timeline, duration, _mounts = checked_canvas(source, canvas)
+    return elements, root, timeline, duration
+
+
+def checked_canvas(source: str, canvas: dict) -> tuple:
+    """Check the root clock and geometry; nested catalog mounts must sit inside that root."""
     elements = NativeElements(source)
-    roots = [node for node in elements.elements if 'data-composition-id' in node.attrs]
-    require(len(roots) == 1, 'review requires one standalone native composition')
-    root = roots[0]; attrs = root.attrs
+    timeline, duration = canvas_clock(canvas)
+    root, mounts = composition_root(elements, duration)
+    attrs = root.attrs
     require(re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', attrs['data-composition-id']) is not None,
             'invalid native composition identity')
-    timeline, duration = canvas_clock(canvas)
     require(abs(Fraction(attrs['data-duration']) - duration) <= Fraction(1, 10**9)
             and abs(Fraction(attrs['data-fps']) - timeline.fps.fraction) <= Fraction(1, 10**9), 'HTML canvas clock differs')
     require(all(str(attrs.get(key, '')).isdigit() and 0 < int(attrs[key]) <= 16384
                 for key in ('data-width', 'data-height')), 'invalid native review dimensions')
-    return elements, root, timeline, duration
+    return elements, root, timeline, duration, mounts
+
+
+def review_mounts(source: str, canvas: dict) -> list[dict]:
+    """Return the validated catalog mounts of one native review entry."""
+    return checked_canvas(source, canvas)[4]
 
 
 def adapt_visibility(source: str, canvas: dict) -> tuple[str, dict]:
@@ -121,7 +132,7 @@ def adapt_visibility(source: str, canvas: dict) -> tuple[str, dict]:
 
 def adapt_html(source: str, canvas: dict, native_long: bool = False) -> tuple[str, dict]:
     """Replace checked dialogue with one continuous final AAC while retaining pictures."""
-    _elements, _root, timeline, duration = validate_canvas(source, canvas)
+    _elements, _root, timeline, duration, mounts = checked_canvas(source, canvas)
     spans = AudioSpans(source).spans
     require(len(spans) == len(canvas['segments']) and AUDIO_ID not in source, 'unexpected or previously adapted dialogue')
     ids = [attrs.get('id') for _, attrs, _ in spans]

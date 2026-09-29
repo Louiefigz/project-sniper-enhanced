@@ -67,7 +67,10 @@ function verifyPicture(context, picture, root, points) {
   assert.deepEqual(picture.frames.map(row=>row.frame),frames,'Incomplete original picture inventory');
   const groups=nativeCaptureBatches(frames,context.batchPlan.maximumFrames);
   assert.equal(picture.batches.length,groups.length);
-  const revisionRequest=context.request.pictureDonor
+  // X82: only a donor picture that carries a revision proof is checked against the donor's own request. An
+  // explicit donor binds no revision of its own, and picture reuse pinned the receipt after verify_picture
+  // tied its proof to that request.
+  const revisionRequest=context.request.pictureDonor&&Object.hasOwn(picture,'pictureRevision')
     ?readReceipt(path.join(root,'export-request.json')):null;
   if(revisionRequest)assert.equal(revisionRequest.sha256,context.request.pins[path.join(root,'export-request.json')]);
   assert.deepEqual(picture.pictureRevision,(revisionRequest?.value??context.request).pictureRevision,'Picture revision proof differs');

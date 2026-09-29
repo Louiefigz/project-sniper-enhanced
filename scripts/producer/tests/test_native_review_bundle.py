@@ -99,6 +99,22 @@ class NativeReviewBundleTests(unittest.TestCase):
         self.assertFalse(result['browserPlaybackVerified'] or result['humanListeningApproved'])
         self.assertEqual((Path(result['studio']) / 'assets/studio-dialogue.m4a').read_bytes(), audio.read_bytes())
 
+    def test_a_review_draft_is_published_and_labelled_as_a_draft(self) -> None:
+        """(M14) A draft row publishes <id>.review-draft.mp4, and the local page shows its draft label."""
+        draft = replace(self.row, review_state='draft', label='REVIEW DRAFT: TEST open findings')
+        row = bundle.clone_composition(draft, self.output)
+        root = Path(row['root']); audio = root / 'studio-dialogue.m4a'; audio.write_bytes(b'TEST AAC packets')
+        media = {'id': row['id'], 'videoSha256': row['videoSha256'], 'frames': [],
+                 'audio': {'path': str(audio), 'sha256': digest(audio), 'audioPacketsIdentical': True,
+                           'additionalAudioEncodes': 0, 'additionalVideoEncodes': 0}}
+        row['frames'] = []; (self.output / 'media').mkdir()
+        result = bundle.publish_composition(row, media, self.output)
+        self.assertEqual(Path(result['localVideo']).name, f"{row['id']}.review-draft.mp4")
+        self.assertEqual(Path(result['localVideo']).read_bytes(), self.row.video.read_bytes())
+        page = bundle.local_page([result])
+        self.assertIn(f'src="media/{row["id"]}.review-draft.mp4"', page)
+        self.assertIn('REVIEW DRAFT: TEST open findings', page)
+
     def test_fractional_frame_rate_uses_frame_indices_in_one_decode(self) -> None:
         """Fractional frame rate uses frame indices in one decode."""
         row = bundle.clone_composition(self.row, self.output)
@@ -154,18 +170,43 @@ class NativeReviewBundleTests(unittest.TestCase):
 
     def test_open_uses_managed_studio_and_reports_edits_without_approving_playback(self) -> None:
         """Managed preview opens edited files while preserving the separate MP4 status."""
-        state = {'status': 'edited-since-preparation', 'exportConsistencyVerified': False}
-        row = {'id': 'example', 'studio': '/TEST/studio', 'studioState': state,
-               'localVideoStatus': 'checked-bytes-unchanged'}
+        state = {'status': 'edited-since-preparation', 'exportConsistencyVerified': False,
+                 'changedOrMissingFiles': [], 'addedFiles': [], 'newExportRequiredForEdits': True}
+        row = {'id': 'example', 'studio': str(self.output), 'studioState': state, 'forkFiles': {},
+               'localVideo': '/TEST/example.mp4', 'localVideoStatus': 'checked-bytes-unchanged'}
         preview = mock.Mock(); preview.to_json.return_value = {'url': 'http://localhost:3991'}
         with mock.patch.object(bundle, 'read_bundle', return_value={'runtime': '/TEST/runtime', 'compositions': [row]}), \
              mock.patch('studio.native_runtime.install_runtime', return_value=Path('/TEST/runtime')), \
-             mock.patch('studio.managed_preview.open_preview', return_value=preview) as opened:
+             mock.patch('studio.managed_preview.open_view', return_value=(preview, True)) as opened, \
+             mock.patch('studio.native_handoff_checks.studio_served', return_value={'verified': True}) as served:
             result = bundle.open_bundle(self.output, 'example')
-        opened.assert_called_once_with('/TEST/studio')
+        opened.assert_called_once_with(str(self.output), None, Path('/TEST/example.mp4'))
+        served.assert_called_once()
         self.assertEqual(result['surface'], 'managed-hyperframes-studio')
-        self.assertEqual(result['studioState'], state)
+        self.assertEqual((result['launched'], result['served'], result['studioChangedOnOpen']), (True, {'verified': True}, []))
+        self.assertEqual(result['studioStateBeforeOpen'], state)
         self.assertFalse(result['browserPlaybackVerified'])
+
+    def test_studio_rewriting_the_fork_on_open_is_reported_apart_from_user_edits(self) -> None:
+        """A fork Studio re-serializes while loading is named as Studio's change, not the operator's edit."""
+        row = bundle.clone_composition(self.row, self.output)
+        row = {**row, 'localVideo': str(self.row.video), 'studioState': bundle.studio_state(row),
+               'localVideoStatus': 'checked-bytes-unchanged'}
+        entry = Path(row['studio']) / row['entry']
+        preview = mock.Mock(); preview.to_json.return_value = {'url': 'http://localhost:3991'}
+        def load(studio: str, record: object, seconds: float) -> dict:
+            """TEST stand-in for Studio's load, which stamps a missing selection id and writes back."""
+            entry.write_text(entry.read_text().replace('<p>', '<p data-hf-id="hf-p-0">', 1))
+            return {'verified': True}
+        with mock.patch.object(bundle, 'read_bundle', return_value={'runtime': '/TEST/runtime', 'compositions': [row]}), \
+             mock.patch('studio.native_runtime.install_runtime', return_value=Path('/TEST/runtime')), \
+             mock.patch('studio.managed_preview.open_view', return_value=(preview, False)), \
+             mock.patch('studio.native_handoff_checks.studio_served', side_effect=load):
+            result = bundle.open_bundle(self.output, row['id'])
+        self.assertEqual(result['studioChangedOnOpen'], [row['entry']])
+        self.assertEqual(result['studioStateBeforeOpen']['status'], 'prepared-files-unchanged')
+        self.assertEqual(result['studioState']['changedOrMissingFiles'], [row['entry']])
+        self.assertFalse(result['launched'])
 
     def test_visible_studio_additions_are_reported_but_runtime_caches_are_ignored(self) -> None:
         """User assets change editable status while hidden Studio cache files do not."""

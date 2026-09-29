@@ -1,9 +1,11 @@
 """The child tripwire holds against a crafted cache file, a broken stderr, a fork and an AF_UNIX bind.
 
-C1FIX-REVIEW delta D2, D3, D4 and D7, and CS4-REVIEW mi5. Every child here is armed like any test child, but its
-refused prefixes also hold a decoy folder of this test's own, so the only paths a child tries to write are decoy
-paths; reports go to this test's own folder. The deliberately unguarded children (the D2 control, with no
-bytecode prefix, and the mi5 control, with a crafted inherited prefix) write a decoy file only.
+C1FIX-REVIEW delta D2, D3, D4 and D7, CS4-REVIEW mi5, and M-C4F3 (which process names its kept reports folder).
+Every child here but the M-C4F3 pair is armed like any test child, but its refused prefixes also hold a decoy
+folder of this test's own, so the only paths a child tries to write are decoy paths; reports go to this test's own
+folder. The deliberately unguarded children (the D2 control, with no bytecode prefix, and the mi5 control, with a
+crafted inherited prefix) write a decoy file only. The M-C4F3 pair runs in a closed environment, as a supervised
+owner's child does, with its temporary folder inside a folder of this test.
 """
 from __future__ import annotations
 
@@ -126,6 +128,21 @@ class ChildHardeningTests(unittest.TestCase):
         code = (f'import socket\ns = socket.socket(socket.AF_UNIX)\ntry:\n    s.bind({str(decoy / "s")!r})\n'
                 'except BaseException:\n    pass\nprint("continued")\n')
         self.assert_refused(self.child(code, environ), decoy, reports)
+
+    def test_only_a_test_run_names_its_kept_reports_folder(self) -> None:
+        """(M-C4F3) An importer that starts no test run keeps its folder silently, so a supervised child's log stays
+        its own; an unwrapped test run names its kept folder on stderr at exit."""
+        temporary, tests = self.folder('p0-own-reports-'), Path(__file__).resolve().parent
+        environ = {'PATH': '/usr/bin:/bin', 'TMPDIR': str(temporary),
+                   'PYTHONPATH': os.pathsep.join([str(tests.parent), str(tests)])}
+        quiet = self.child('import _live_state_isolation\nprint("status")\n', environ)
+        empty_run = 'unittest.TextTestRunner().run(unittest.TestSuite())'
+        run = self.child(f'import _live_state_isolation, unittest\n{empty_run}\n', environ)
+        self.assertEqual((quiet.returncode, quiet.stdout, quiet.stderr), (0, 'status\n', ''))
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertIn(f'live-state isolation: child refusal reports are kept in {temporary}/', run.stderr)
+        kept = [path for path in temporary.iterdir() if path.name.startswith('sniper-child-refusals-')]
+        self.assertEqual(len(kept), 2)
 
 
 if __name__ == '__main__':

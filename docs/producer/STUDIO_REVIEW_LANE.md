@@ -241,9 +241,8 @@ Reuse the managed preview entry points below: native projects use
 
 A native review draft (`review-draft.mp4`, status `native-short-review-draft`) may be
 handed off the same way, labeled **REVIEW DRAFT - editorial review pending; not
-final**. Review bundles do not yet keep the draft's name or show its label on the local
-page: they publish it as an ordinary `media/<id>.mp4`, so check the file name and the
-export receipt before calling a bundled video final. `managed_preview.py open` of a draft-built project reports
+final**. Review bundles accept it, keep its `.review-draft.mp4` name and show the label
+on the local page. `managed_preview.py open` of a draft-built project reports
 `reviewState: "draft"` and prints the label; the composition is not altered and
 nothing is burned into the video. Keep the last checked MP4 visible beside a draft.
 If a project is sealed as verification evidence, prepare a separate editable

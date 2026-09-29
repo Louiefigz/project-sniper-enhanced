@@ -15,6 +15,7 @@ from edit.selected_sources_contract import selection_request, source_pins, sourc
 from edit.selected_sources_media import SectionJob, media_info, prepare_section
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_owner_queue import queued_owner
 from studio.native_runtime import install_runtime
 from studio.native_stage_evidence import StageEvidence, read_stage, require, seal_stage
 
@@ -93,11 +94,11 @@ def prepare(value: dict, destination: Path) -> dict:
     request = {'project': str(control), 'output': str(root), 'selection': selected, 'tools': tools, 'pins': pins}
     request_path = root / 'request.json'
     write_new(request_path, request)
-    settings = NativeRunConfig(project=control, root=root, cli=cli, environment=environment,
+    settings = queued_owner(NativeRunConfig(project=control, root=root, cli=cli, environment=environment,
         command=['/usr/bin/sandbox-exec', '-f', str(sandbox), sys.executable, str(Path(__file__).resolve()),
                  'worker', str(request_path)],
         admission={'output': str(root / 'result.json'), 'sdkSha256': file_hash(cli), 'sandboxSha256': file_hash(sandbox)},
-        additional_pins={**pins, str(request_path): file_hash(request_path)}, success_status=STATUS)
+        additional_pins={**pins, str(request_path): file_hash(request_path)}, success_status=STATUS))
     owner = NativeRun('selected-sources', settings)
     require(owner.execute(), f'selected-source preparation failed; inspect {owner.path}')
     result = bound_json(root / 'result.json')

@@ -12,8 +12,10 @@ from cut_preview_io import bound_json, real_directory, write_new
 from studio.native_review_contract import read_manifest, relative_file
 from studio.native_review_html import adapt_html, canvas_clock, frame_points
 from studio.native_review_media import STATUS, worker
+from studio.native_review_mounts import require_media_free
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_owner_queue import queued_owner
 from studio.native_runtime import digest
 from studio.native_short_picture_reuse import copy_picture
 from studio.native_stage_evidence import require, verify_pins
@@ -41,6 +43,7 @@ def clone_composition(row: object, output: Path) -> dict:
     (root / 'index.adapted.html').write_text(adapted)
     timeline, _duration = canvas_clock(row.plan['canvas'])
     return {'id': row.identity, 'title': row.title, 'studio': str(studio), 'root': str(root),
+        'reviewState': row.review_state, 'label': row.label,
         'entry': row.entry, 'project': str(row.project), 'originalFiles': row.files,
         'video': str(row.video), 'videoSha256': row.video_sha256,
         'samples': timeline.sample_at_frame(row.plan['canvas']['totalFrames']),
@@ -59,6 +62,20 @@ def implementation_pins() -> dict[str, str]:
     return {str(file): digest(file) for file in files}
 
 
+def admit_review_entry(row: object) -> list[dict]:
+    """Adapt the admitted entry in memory and admit each catalog mount before any output exists."""
+    entry = relative_file(row.project, row.entry)
+    require(digest(entry) == row.files[row.entry], 'review entry differs from its checked export')
+    source = entry.read_text()
+    _adapted, proof = adapt_html(source, row.plan['canvas'], row.native_long)
+    for mount in proof['mounts']:
+        require(mount['file'] in row.files, 'catalog mount names a file outside the checked export')
+        file = relative_file(row.project, mount['file'])
+        require(digest(file) == row.files[mount['file']], 'catalog mount differs from its checked export')
+        require_media_free(file.read_text())
+    return proof['mounts']
+
+
 def prepare(manifest: Path, output: Path) -> tuple[dict, Path]:
     """Validate all entries before creating a fresh bundle or acquiring heavy work."""
     manifest = manifest.resolve(strict=True); output = output.absolute()
@@ -68,6 +85,7 @@ def prepare(manifest: Path, output: Path) -> tuple[dict, Path]:
     for row in rows:
         require(all(output != root and not output.is_relative_to(root) and not root.is_relative_to(output)
                     for root in (row.project, row.export)), 'review output overlaps original work')
+        admit_review_entry(row)
     tools, environment = local_environment()
     pins = {str(manifest): manifest_sha, **implementation_pins(), **{str(Path(value)): digest(Path(value)) for value in tools.values()}}
     for row in rows:
@@ -94,12 +112,11 @@ def supervise(request: dict, file: Path) -> NativeRun:
     require(_tools == request['tools'], 'review media tools changed')
     root = Path(request['root']); cli = Path(request['runtime']) / 'dist/cli.js'
     sandbox = HERE / 'native_localhost_only.sb'
-    settings = NativeRunConfig(file.parent, root, cli,
+    settings = queued_owner(NativeRunConfig(file.parent, root, cli,
         ['/usr/bin/sandbox-exec', '-f', str(sandbox), sys.executable, str(Path(__file__).resolve()), '--worker', str(file)],
         environment, {'output': str(root / 'media-preparation.json'), 'sdkSha256': digest(cli), 'sandboxSha256': digest(sandbox)},
         additional_pins={**request['pins'], str(file): digest(file)}, deadline=600, success_status=STATUS,
-        lane='audio', capacity_wait_seconds=600,
-        serves=tuple(Path(row['project']) for row in request['compositions']))
+        serves=tuple(Path(row['project']) for row in request['compositions'])), 'audio')
     owner = NativeRun('native-review', settings)
     require(owner.execute(), 'review preparation owner failed; preserve the attempt')
     return owner
@@ -123,11 +140,16 @@ def publish_composition(row: dict, media: dict, output: Path) -> dict:
     require(digest(adapted) == row['htmlAfterSha256'], 'adapted Studio HTML changed')
     (studio / row['entry']).write_bytes(adapted.read_bytes())
     require(digest(studio / row['entry']) == row['htmlAfterSha256'], 'Studio HTML publication differs')
-    video = output / 'media' / f'{row["id"]}.mp4'
+    video = output / 'media' / media_name(row)
     copy_picture(Path(row['video']), video, row['videoSha256'])
     fork = {**row['forkFiles'], row['entry']: row['htmlAfterSha256'], 'assets/studio-dialogue.m4a': audio['sha256']}
     return {**row, 'audio': audio, 'frames': media['frames'], 'forkFiles': fork, 'localVideo': str(video),
             'localVideoSha256': row['videoSha256'], 'browserPlaybackVerified': False, 'humanListeningApproved': False}
+
+
+def media_name(row: dict) -> str:
+    """A review draft keeps its draft file name wherever it is published."""
+    return f'{row["id"]}.review-draft.mp4' if row.get('reviewState') == 'draft' else f'{row["id"]}.mp4'
 
 
 def local_page(rows: list[dict]) -> str:
@@ -136,8 +158,10 @@ def local_page(rows: list[dict]) -> str:
     require(source.count('export class SelectionPlayback') == 1, 'shared review player contract changed')
     player = source.replace('export class SelectionPlayback', 'class SelectionPlayback', 1)
     require('</script' not in player.lower(), 'shared player cannot be embedded safely')
-    cards = ''.join(f'<section><h2>{escape(row["title"])}</h2><video controls preload="metadata" playsinline '
-                    f'data-duration="{row["samples"] / 48000}" src="media/{row["id"]}.mp4"></video>'
+    cards = ''.join(f'<section><h2>{escape(row["title"])}</h2>'
+                    + (f'<p class="draft">{escape(row["label"])}</p>' if row.get('reviewState') == 'draft' else '')
+                    + f'<video controls preload="metadata" playsinline '
+                    f'data-duration="{row["samples"] / 48000}" src="media/{media_name(row)}"></video>'
                     '<p><button data-action="play">Play / replay</button> <button data-action="resume">Resume</button> '
                     '<button data-action="reload">Reload video</button></p><p role="status">Ready</p></section>' for row in rows)
     controls = """document.querySelectorAll('section').forEach(section=>{
@@ -150,7 +174,8 @@ section.querySelector('[data-action="reload"]').addEventListener('click',()=>pla
 });"""
     return ('<!doctype html><html><head><meta charset="utf-8"><title>Video review</title><style>'
             'body{font:18px system-ui;background:#171717;color:#fff;margin:32px}section{margin-bottom:48px}'
-            'video{max-width:100%;max-height:80vh}button{font:inherit}</style></head><body><h1>Video review</h1>'
+            'video{max-width:100%;max-height:80vh}button{font:inherit}.draft{color:#ffd166;font-weight:700}'
+            '</style></head><body><h1>Video review</h1>'
             + cards + '<script>' + player + '\n' + controls + '</script></body></html>')
 
 
@@ -226,7 +251,7 @@ def read_bundle(directory: Path) -> dict:
     for row in record['compositions']:
         studio = directory / 'studio' / row['id']
         require(row['studio'] == str(studio) and studio.resolve(strict=True) == studio, 'review Studio path escaped bundle')
-        video = directory / 'media' / f'{row["id"]}.mp4'
+        video = directory / 'media' / media_name(row)
         require(row['localVideo'] == str(video) and digest(video) == row['localVideoSha256'], 'local review MP4 changed')
         require(bound_json(studio / 'hyperframes.json').get('media', {}).get('autoProxy') is False, 'Studio automatic proxies were enabled')
         row['localVideoStatus'] = 'checked-bytes-unchanged'

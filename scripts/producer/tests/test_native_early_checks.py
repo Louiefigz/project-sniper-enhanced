@@ -190,6 +190,28 @@ class CanaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'neither its own nor a reused'):
             canary.packaged_audio(later)
 
+    def preview(self) -> Path:
+        """A TEST preview attempt with one window clip and its packet (nothing is rendered or played)."""
+        preview = self.root / 'run/preview'
+        preview.mkdir(parents=True)
+        packet = {'schemaVersion': 1, 'project': str(self.project), 'units': [{'id': 'project', 'hash': 'f' * 64}]}
+        clip = preview / 'window-0' / 'core.mp4'
+        clip.parent.mkdir()
+        clip.write_bytes(b'TEST window bytes; nobody played them')
+        clips = [{'path': str(clip), 'sha256': digest(clip), 'startFrame': 0, 'endFrameExclusive': 60}]
+        write_test_json(preview / 'motion-previews.json', {'status': canary.PREVIEW_STATUS, 'packet': packet, 'clips': clips})
+        write_test_json(preview / 'export-request.json', {'project': str(self.project)})
+        write_test_json(self.root / 'run/packet.json', packet)
+        return preview
+
+    def test_route_canary_reviews_are_typed_and_admitted(self) -> None:
+        """(M8) The canary writes typed TEST rows, and the pre-reservation reader admits them for its own project."""
+        from studio.native_motion_review import require_typed_short_reviews
+        reviews = canary.write_test_reviews(self.root, self.root / 'run', self.preview())
+        rows = json.loads(reviews.read_text())['reviews']
+        self.assertTrue(rows and all(isinstance(row.get('inspection'), dict) for row in rows))
+        require_typed_short_reviews(reviews, self.project)  # refused before M-022: "carry no typed inspection"
+
     def test_generated_reviews_are_test_labeled_and_pass_the_real_validator(self) -> None:
         """The TS motion-review validator admits the TEST record only for this preview's units."""
         preview = self.root / 'run/preview'

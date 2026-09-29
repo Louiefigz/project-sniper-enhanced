@@ -5,6 +5,7 @@ import copy
 import json
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import test_production_sections as sections_fixture
@@ -124,6 +125,24 @@ class FamilyAdmissionTests(unittest.TestCase):
         before = self.h.budget.record()
         record_family_outcome(request, {'status': 'native-motion-previews-complete'})
         self.assertEqual(before, self.h.budget.record())
+
+    def test_joined_preview_packages_charge_the_family_attempt(self) -> None:
+        """(M-029d, M18) prepare_sections pre-charges every preview package; under the Long family binding
+        (attemptId = the family id) each charge is admitted and counted on the family's attempt."""
+        from studio.native_preview_sections import prepare_sections, section_windows
+        for request in [self.reserve(section) for section in ('first', 'last')]:
+            self.verify(request)
+            self.finish_preview(request)
+        joined = self.reserve(None)
+        self.verify(joined, 'preview-picture-0')
+        self.assertEqual(joined['productionBudget']['attemptId'], joined['productionBudget']['familyId'])
+        pipeline = SimpleNamespace(request=joined, worker=lambda phase: None, supervise=lambda *args: None)
+        with patch('studio.native_preview_recovery.restore_section', return_value=False), \
+                patch('studio.native_preview_sections.seal_section'):
+            prepare_sections(pipeline)
+        clip = self.h.budget.record()['clips']['A']
+        self.assertEqual(clip['counters'].get('previewPackage', 0), len(section_windows(joined)[1]))
+        self.assertEqual(clip['attempts'][0]['status'], 'running')
 
     def test_duplicate_and_incomplete_integration_are_refused(self) -> None:
         first = self.reserve('first')

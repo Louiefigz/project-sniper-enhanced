@@ -32,7 +32,9 @@ export function assertNativeRenderOwner(argv = process.argv.slice(2), environmen
   requireValue(['preparing', 'waiting-for-capacity', 'running'].includes(owner.status)
     && !owner.abortReason && !owner.completedAt, 'owner is not active');
   const expectedWorker = record.adapter === 'native-long' ? 'native_long_worker.py' : 'native_short_worker.py';
-  const phase = record.adapter === 'native-long' ? 'picture' : 'render';
+  // A review draft renders only from its own 'draft' owner; a promotion copies draft bytes and never renders.
+  requireValue(!record.promoteDraft, 'draft promotion copies sealed bytes and cannot render picture');
+  const phase = record.adapter === 'native-long' ? 'picture' : record.reviewDraft === true ? 'draft' : 'render';
   const args = owner.args;
   requireValue(Array.isArray(args) && args.length === 7 && args[0] === '/usr/bin/sandbox-exec'
     && path.basename(args[4]) === expectedWorker && args[5] === file && args[6] === phase,

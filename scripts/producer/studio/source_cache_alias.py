@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from cut_preview_io import bound_json, real_directory, write_new
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, local_environment
+from studio.native_owner_queue import queued_owner
 from studio.native_runtime import digest
 from studio.native_short_resume import media_result
 from studio.native_short_sdk_picture_reuse import sdk_picture_reuse_pins
@@ -71,10 +72,10 @@ def execute(receipt: Path, output: Path) -> dict:
     require(tools == original['tools'], 'cache alias tools differ from the sealed runtime')
     cli, sandbox = Path(request['runtime']) / 'dist/cli.js', HERE / 'native_localhost_only.sb'
     pins = {**request['pins'], **{str(path): digest(path) for path in (Path(__file__), WORKER, file)}}
-    settings = NativeRunConfig(Path(request['project']), output, cli,
+    settings = queued_owner(NativeRunConfig(Path(request['project']), output, cli,
         ['/usr/bin/sandbox-exec', '-f', str(sandbox), tools['node'], str(WORKER), str(file)], environment,
         {'output': str(output / 'result.json'), 'sdkSha256': digest(cli), 'sandboxSha256': digest(sandbox)},
-        additional_pins=pins, deadline=300, success_status=STATUS)
+        additional_pins=pins, deadline=300, success_status=STATUS))
     owner = NativeRun('source-cache-alias', settings)
     require(owner.execute(), 'cache alias owner failed; preserve the attempt')
     result = bound_json(output / 'result.json')

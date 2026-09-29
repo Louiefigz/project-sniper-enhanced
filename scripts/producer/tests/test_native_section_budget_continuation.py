@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 from _native_section_budget_fixture import SectionBudgetFixture
@@ -95,6 +96,28 @@ class ReviewContinuationTests(unittest.TestCase):
         with self.assertRaises(BudgetExhausted):
             aac_budget_hook(request, 'f' * 64, 'TEST')(1)
         self.assertEqual(self.fixture.record()['clips']['A']['counters']['aacCandidate'], 0)
+
+    def test_review_continuation_preview_sections_restore_or_are_refused(self) -> None:
+        """(M-029d, M18) A continuation reaches prepare_sections only to restore sealed sections; a package it would
+        have to render is refused by the continuation charge before any owner starts, and nothing is charged."""
+        from studio import native_preview_sections as sections
+        budget = self.reserve()
+        request = {**self.fixture.request, 'productionBudget': budget, 'output': budget['continuationOutput']}
+        launched = []
+        pipeline = SimpleNamespace(request=request, worker=lambda phase: None,
+                                   supervise=lambda phase, *args: launched.append(phase))
+        windows = [{'startFrame': 0, 'endFrame': 25}, {'startFrame': 25, 'endFrame': 50}]
+        restored = mock.patch('studio.native_preview_recovery.restore_section', return_value=True)
+        missing = mock.patch('studio.native_preview_recovery.restore_section',
+                             side_effect=lambda pipeline, phase: phase != 'preview-package-1')
+        with mock.patch.object(sections, 'section_windows', return_value=({}, windows)), \
+                mock.patch.object(sections, 'seal_section'):
+            with restored:
+                sections.prepare_sections(pipeline)
+            with missing, self.assertRaisesRegex(BudgetRefused, 'only bound final audio candidates'):
+                sections.prepare_sections(pipeline)
+        self.assertEqual(launched, [])
+        self.assertEqual(self.fixture.record()['clips']['A']['counters'].get('previewPackage', 0), 0)
 
     def test_review_continuation_cannot_charge_picture_or_another_output(self) -> None:
         """The supporting-work exception remains limited to exact continuation audio."""

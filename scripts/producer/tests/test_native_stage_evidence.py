@@ -248,7 +248,7 @@ class NativeStageEvidenceTests(unittest.TestCase):
 
     def test_native_hashing_uses_a_streaming_limit_above_large_long_form_sources(self) -> None:
         """The shared utility does not inherit preview-only media size restrictions."""
-        with patch.object(stages, 'file_hash', return_value='a' * 64) as hash_file:
+        with patch.object(stages, 'pinned_file_hash', return_value='a' * 64) as hash_file:  # memoized file_hash
             self.assertEqual(stages._hash(self.source), 'a' * 64)
         hash_file.assert_called_once_with(self.source, maximum=stages.MAX_NATIVE_FILE_BYTES)
         self.assertGreater(stages.MAX_NATIVE_FILE_BYTES, 2 * 1024 ** 3)

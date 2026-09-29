@@ -20,9 +20,11 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
 PATCH_ROOT = Path(__file__).resolve().parent / 'runtime'
-if str(REPO / 'scripts/infra') not in sys.path:
-    sys.path.insert(0, str(REPO / 'scripts/infra'))
+for _path in (REPO / 'scripts/infra', REPO / 'scripts/producer'):  # also run as the installer's script
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 import sniper_lock  # noqa: E402  (stdlib-only helper shared with the installer)
+from studio.native_digest_memo import file_digest  # noqa: E402
 
 BUILD_WAIT_SECONDS = 600.0
 LAST_ACTION = {"action": ""}  # what the latest install_runtime did, for the installer's log
@@ -40,9 +42,12 @@ def runtime_identity(cli: str) -> str | None:
 
 
 def digest(file: Path) -> str:
-    """Hash files without loading source recordings into memory."""
-    with file.open('rb') as handle:
-        return hashlib.file_digest(handle, 'sha256').hexdigest()
+    """Hash files without loading source recordings into memory.
+
+    A same-process repeat returns the earlier full read only while the file's exact
+    lstat/stat identity is unchanged (``native_digest_memo``); any change re-reads it.
+    """
+    return file_digest(file)
 
 
 def apply_bytes(content: bytes, row: dict) -> bytes:

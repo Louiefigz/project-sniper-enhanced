@@ -49,10 +49,11 @@ def authorize_output(root: Path, batch_id: str, request: outputs.OutputAuthoriza
     def operation(record: dict, elapsed: float) -> Outcome:
         """Record the authorization event, or recognise an identical repeat."""
         result = outputs.authorize_output(record, request, elapsed)
-        row = result['output']
+        row, approvals = result['output'], record['clips'][result['clipId']]['approvals']
         event = {'event': 'output-authorized', 'clipId': result['clipId'], 'format': row['format'],
                  'identity': row['identity'], 'authorizedElapsed': row['authorizedElapsed'],
-                 'deadlineElapsed': row['deadlineElapsed'], 'derivedFrom': row['derivedFrom']}
+                 'deadlineElapsed': row['deadlineElapsed'], 'derivedFrom': row['derivedFrom'],
+                 'approval': approvals[0]['identity'] if approvals else None}  # read_approval checks the chain
         return Outcome(not result['replayed'], event, result)
     return transact(root, batch_id, operation)
 

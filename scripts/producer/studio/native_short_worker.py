@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from stage_timing import stage_span
 from cut_preview_io import bound_json, write_new
 from studio.native_preflight import preflight
+from studio.native_digest_memo import integrity_boundary
 from studio.native_runtime import digest
 from studio.native_source_store import prepare_source_view, source_view_path
 from studio.native_short_delivery import finish_dialogue, native_srgb_delivery, prepare_dialogue, qualify_picture, run
@@ -38,12 +39,12 @@ def verify_files(request: dict) -> None:
     """Guard the executable package, SDK, inputs and tool identity between stages."""
     root = request.get('output')
     span = stage_span(root, 'native_input_integrity') if root else contextlib.nullcontext()
-    with span:
+    with span, integrity_boundary(root, 'worker-input-integrity'):  # studio/native_digest_memo.py
         _verify_input_bytes(request['pins'])
 
 
 def _verify_input_bytes(pins: dict[str, str]) -> None:
-    """Keep authoritative full reads; timing exposes their cost before optimization."""
+    """Full reads on this process's first check; later checks re-read only changed identities."""
     for file, expected in pins.items():
         if digest(Path(file)) != expected:
             raise RuntimeError(f'Native export input changed: {file}')

@@ -61,8 +61,9 @@ export function prepareNativeSourceMedia(input: NativeShortProjectInput, html: s
   mkdirSync(root, { mode: 0o700 });
   const request = path.join(root, "selection.json");
   writeFileSync(request, JSON.stringify(selection), { flag: "wx", mode: 0o600 });
+  // The Python owner allows 600 s of work plus 600 s in the host pool queue (native_owner_queue.py); 60 s cleanup margin.
   execFileSync(pythonInterpreter(), [path.resolve("scripts/producer/edit/selected_sources.py"), "prepare", request, path.join(root, "package")],
-    { cwd: process.cwd(), encoding: "utf8", timeout: 660_000, maxBuffer: 16 * 1024 * 1024 });
+    { cwd: process.cwd(), encoding: "utf8", timeout: 1_260_000, maxBuffer: 16 * 1024 * 1024 });
   const receipt = path.join(root, "package/run/selected-sources-stage.json");
   const sha256 = fileSha256(receipt);
   if (!sha256) throw new Error("Selected preparation did not produce a sealed package");

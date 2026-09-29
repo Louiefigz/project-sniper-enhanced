@@ -6,6 +6,7 @@ from pathlib import Path
 from cut_preview_io import bound_json
 from studio.native_runtime import digest
 from studio.native_short_picture_reuse import copy_picture, picture_reuse_pins
+from studio.native_short_draft import refuse_draft_media
 from studio.native_stage_evidence import read_stage, require
 from studio.native_reference_reuse import bind_reference_map
 
@@ -46,6 +47,7 @@ def prepare_reverification(current: dict, receipt: Path, attempt: Path | None = 
     """Reconstruct the original route and compare its complete current dependency map."""
     record = bound_json(receipt)
     original = bound_json(Path(record['request']['path']), record['request']['sha256'])
+    refuse_draft_media(record, original)  # A review draft is never final media; use --promote-draft.
     project, output = Path(current['project']), Path(current['output'])
     donor = Path(record['root'])
     require(output != donor and not output.is_relative_to(donor)
@@ -95,6 +97,7 @@ def render_stage_for_attempt(attempt: Path) -> Path:
     real_directory(attempt)
     request = bound_json(attempt / 'export-request.json')
     require(request.get('output') == str(attempt), 'resume request belongs to another attempt')
+    refuse_draft_media(None, request)
     return Path(request['verifyStage']) if request.get('verifyStage') else attempt / 'render-stage.json'
 
 

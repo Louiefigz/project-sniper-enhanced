@@ -6,7 +6,6 @@ does not track this runtime record; ``parked_record`` hides it during diffs.
 from __future__ import annotations
 
 import contextlib
-import dataclasses
 import datetime
 import json
 import os
@@ -15,30 +14,15 @@ import subprocess
 import time
 from typing import BinaryIO, Iterator
 from graphics.render_tools import resolve_tools
+from studio.studio_server_protocol import ServerRecord, StudioServerError, started_record  # noqa: F401 (re-exported)
 
 SERVER_RECORD_NAME = ".studio-server.json"
 PORT_RANGE = (3990, 3999)
 _LOG_REL = os.path.join(".hyperframes", "preview-server.log")
 _STARTUP_SECONDS, _CLEANUP_RESERVE, _STARTUP_BYTES = 10.0, 2.0, 65_536
-
-
-class StudioServerError(RuntimeError):
-    """The review lane cannot proceed (inputs, server, or sync module)."""
-
-
-@dataclasses.dataclass(frozen=True)
-class ServerRecord:
-    """One launched preview server, as persisted in ``.studio-server.json``."""
-
-    port: int
-    pid: int
-    url: str
-    started_at: str
-
-    def to_json(self) -> dict:
-        """The record's on-disk JSON shape."""
-        return {"port": self.port, "pid": self.pid, "url": self.url,
-                "startedAt": self.started_at}
+# Every Studio ps read: C-format lstart (LC_TIME) and raw UTF-8 paths (LC_CTYPE; the C character set
+# would print non-ASCII bytes in M- notation), whatever the caller's locale.
+PS_ENVIRONMENT = {'PATH': '/usr/bin:/bin', 'LC_CTYPE': 'UTF-8', 'LC_TIME': 'C'}
 
 
 def record_path(studio_dir: str) -> str:
@@ -108,9 +92,9 @@ def pick_free_port(port_range: tuple[int, int] = PORT_RANGE) -> int:
 
 def pid_command(pid: int) -> str | None:
     """The pid's full command line via ``ps``; None when the pid is gone."""
-    proc = subprocess.run(["ps", "-o", "command=", "-p", str(pid)],
-                          capture_output=True, text=True, check=False)
-    line = proc.stdout.strip()
+    proc = subprocess.run(["/bin/ps", "-o", "command=", "-p", str(pid)],
+                          capture_output=True, check=False, env=PS_ENVIRONMENT)
+    line = proc.stdout.decode("utf-8", errors="replace").strip()
     return line or None
 
 
@@ -166,39 +150,6 @@ def local_sdk_environment() -> tuple[str, dict[str, str]]:
         "HYPERFRAMES_NO_TELEMETRY": "1", "DO_NOT_TRACK": "1"}
 
 
-def _validate_ready(value: object, expected: tuple[str, int, int]) -> None:
-    """Accept only the SDK's own started foreground PID, project and port."""
-    studio_dir, port, pid = expected
-    if type(value) is not dict or set(value) != {"schemaVersion", "operation", "ok", "result"} \
-            or type(value["schemaVersion"]) is not int or value["schemaVersion"] != 1 \
-            or value["operation"] != "start" or value["ok"] is not True:
-        raise StudioServerError("Studio preview did not report successful startup")
-    result = value["result"]
-    required = {"state", "mode", "projectName", "projectDir", "host", "port", "pid",
-                "serverUrl", "studioUrl", "ready"}
-    if type(result) is not dict or set(result) != required \
-            or any(result[key] != item for key, item in {
-                "state": "started", "mode": "foreground", "projectDir": studio_dir,
-                "host": "127.0.0.1", "port": port, "pid": pid,
-                "serverUrl": f"http://127.0.0.1:{port}", "ready": True}.items()) \
-            or type(result["port"]) is not int or type(result["pid"]) is not int \
-            or result["ready"] is not True:
-        raise StudioServerError("Studio preview readiness has foreign PID/project/port or reused mode")
-
-
-def _started_record(data: bytes, expected: tuple[str, int, int]) -> bool:
-    """Read complete SDK lifecycle lines; a truncated line is never readiness."""
-    for line in data.split(b"\n")[:-1]:
-        if not line.startswith(b"{"):
-            continue
-        value = json.loads(line)
-        if type(value) is not dict or value.get("operation") != "start":
-            continue
-        _validate_ready(value, expected)
-        return True
-    return False
-
-
 def _wait_ready(proc: subprocess.Popen, log: BinaryIO, context: tuple) -> None:
     """Hold the original log offset and one cutoff across bounded startup reads."""
     studio_dir, port, offset, deadline = context
@@ -211,7 +162,7 @@ def _wait_ready(proc: subprocess.Popen, log: BinaryIO, context: tuple) -> None:
         _startup_remaining(deadline)
         if len(data) > _STARTUP_BYTES:
             raise StudioServerError("Studio preview startup output exceeds its bound")
-        ready = _started_record(data, (studio_dir, port, proc.pid))
+        ready = started_record(data, (studio_dir, port, proc.pid))
         _startup_remaining(deadline)
         if ready and proc.poll() is not None:
             raise StudioServerError("Studio preview exited after readiness")
@@ -242,6 +193,21 @@ def _failed_launch(proc: subprocess.Popen, deadline: float, publication: tuple) 
         _stop_failed_preview(proc, deadline)
 
 
+@contextlib.contextmanager
+def _before_spawn(tagged: tuple[type[BaseException], ...] = (BaseException,)) -> Iterator[None]:
+    """Tag a failure raised before the preview child exists (``preview_spawned = False``).
+
+    A managed caller can then settle the launch as verified: nothing was started. Around Popen only
+    ordinary errors are tagged (a failed exec leaves no live child); an interrupt there may land after
+    the fork, so it stays untagged and the launch stays unverified.
+    """
+    try:
+        yield
+    except tagged as error:
+        error.preview_spawned = False
+        raise
+
+
 def launch_preview(cli: str, studio_dir: str, port: int, open_browser: bool = True) -> ServerRecord:
     """Keep an owned foreground PID; publish only exact SDK-confirmed readiness.
 
@@ -250,20 +216,23 @@ def launch_preview(cli: str, studio_dir: str, port: int, open_browser: bool = Tr
     become records; only this call's own child is stopped on startup failure.
     """
     deadline = time.monotonic() + _STARTUP_SECONDS
-    if not os.path.isfile(cli):
-        raise StudioServerError(f"pinned hyperframes CLI missing: {cli}")
-    node, environment = local_sdk_environment()
-    studio_dir = os.path.abspath(studio_dir)
-    log_path = os.path.join(studio_dir, _LOG_REL)
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    with open(log_path, "a+b") as log:
-        offset = log.tell()
-        _startup_remaining(deadline)
-        proc = subprocess.Popen(
-            [node, cli, "preview", studio_dir, "--port", str(port), "--foreground", "--json"]
-            + ([] if open_browser else ["--no-open"]),
-            cwd=studio_dir, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
-            start_new_session=True, env=environment)
+    with _before_spawn():
+        if not os.path.isfile(cli):
+            raise StudioServerError(f"pinned hyperframes CLI missing: {cli}")
+        node, environment = local_sdk_environment()
+        studio_dir = os.path.abspath(studio_dir)
+        log_path = os.path.join(studio_dir, _LOG_REL)
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        log = open(log_path, "a+b")
+    with log:
+        with _before_spawn((Exception,)):
+            offset = log.tell()
+            _startup_remaining(deadline)
+            proc = subprocess.Popen(
+                [node, cli, "preview", studio_dir, "--port", str(port), "--foreground", "--json"]
+                + ([] if open_browser else ["--no-open"]),
+                cwd=studio_dir, stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                start_new_session=True, env=environment)
         published = False
         record = None
         try:
@@ -276,7 +245,8 @@ def launch_preview(cli: str, studio_dir: str, port: int, open_browser: bool = Tr
             published = True
             _startup_remaining(deadline)
             return record
-        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError, KeyboardInterrupt):
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError, KeyboardInterrupt) as error:
+            error.preview_pid = proc.pid  # Lets a managed caller verify this exact child is gone.
             _failed_launch(proc, deadline, (studio_dir, record, published))
             raise
 

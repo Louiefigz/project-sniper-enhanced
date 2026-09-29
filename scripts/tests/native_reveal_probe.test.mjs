@@ -12,7 +12,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {test} from 'node:test';
+import {after, test} from 'node:test';
 import {parseHTML} from 'linkedom';
 import {probeFramePlan} from '../producer/studio/native_reveal_conditions.mjs';
 import {assertRevealProbeOwner, probeSessions, readProbeManifest, readRevealElements, runRevealProbe}
@@ -26,9 +26,20 @@ const NUMBERS = {id: 'sn-numbers-q1', compositionId: 'numbers', file: 'compositi
 /** `hf-later` reveals at 2.7 s: mount-local frame 81. */
 const LATER = {mountId: NUMBERS.id, file: NUMBERS.file, hfId: 'hf-later', cue: '2.7', cueSeconds: 2.7, cueLocalFrame: 81};
 
+/** Every temporary folder a test makes; all are removed when the file's tests end. */
+const folders = [];
+after(() => folders.forEach(folder => fs.rmSync(folder, {recursive: true, force: true})));
+
+/** A new temporary folder, removed after the run. */
+function folder(prefix) {
+  const made = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), prefix)));
+  folders.push(made);
+  return made;
+}
+
 /** A new probe project folder holding only its manifest. */
 function project(mounts, declarations) {
-  const directory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'sniper-reveal-probe-')));
+  const directory = folder('sniper-reveal-probe-');
   const manifest = {schemaVersion: 1, source: {plan: '/TEST/plan.json', sha256: '0'.repeat(64)}, rate: 30,
     totalFrames: 1447, mounts, declarations};
   fs.writeFileSync(path.join(directory, 'REVEAL-PROBE.json'), JSON.stringify(manifest));
@@ -188,7 +199,7 @@ test('the in-page read keys elements by data-hf-id or index path, ancestors insi
 });
 
 test('the CLI runs only inside its owned inspection', () => {
-  const directory = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'sniper-reveal-owner-')));
+  const directory = folder('sniper-reveal-owner-');
   const file = path.join(directory, 'request.json'), owner = path.join(directory, 'inspection.render.json');
   fs.writeFileSync(file, JSON.stringify({project: '/TEST/probe-project'}));
   const pin = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');

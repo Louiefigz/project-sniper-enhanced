@@ -82,6 +82,7 @@ test('the guard refuses an inspection that runs any other worker or request', ()
   const value = inspection(), {record, file} = value;
   for (const args of [[process.execPath, '-B', path.join(path.dirname(WORKER), 'ordinary_previews.py'), '--worker', file],
     [process.execPath, '-B', WORKER, '--worker', `${file}.other`], ['python3', '-B', WORKER, '--worker', file],
+    [process.execPath, '-B', WORKER, '--worker', file, 'extra'],
     ['/usr/bin/sandbox-exec', '-f', 'TEST.sb', process.execPath, WORKER, file, 'capture'], undefined]) {
     assert.throws(admit(value, {...record, args}), /did not originate from the reveal probe worker/, JSON.stringify(args));
   }

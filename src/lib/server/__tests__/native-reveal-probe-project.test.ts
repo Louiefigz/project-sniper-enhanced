@@ -195,6 +195,19 @@ test("refuses a Long project, a LONG-PROJECT.json and a Long canvas (P2:1157)", 
   writeFileSync(named, JSON.stringify(value.plan));
   assert.throws(() => writeNativeRevealProbeProject(named, path.join(value.directory, "probe")), SHORTS_ONLY);
   refused(value, () => { Object.assign(value.plan.canvas, { width: 1920, height: 1080 }); }, SHORTS_ONLY);
+  refused(value, () => { Object.assign(value.plan.canvas, { height: 1080 }); }, SHORTS_ONLY);  // either size field alone
+}));
+
+test("a built project is read in draft mode, so a review draft is not refused as a draft (review X142)", () => withFixture((value) => {
+  // A draft-shaped TEST directory passes the review-mode gate and fails later; a "final" read would refuse it at the
+  // gate with the review-draft text. No build, no child process, no media (the delta review's test, adopted).
+  const project = path.join(value.directory, "project");
+  mkdirSync(project);
+  writeFileSync(path.join(project, "PROJECT-MANIFEST.json"), JSON.stringify({ schemaVersion: 1, reviewState: "draft", files: [] }));
+  writeFileSync(path.join(project, "SHORT-PROJECT.json"), JSON.stringify({ schemaVersion: 1, strategy: { schemaVersion: 2 },
+    draft: { state: "review-pending" }, canvas: { frameRate: "30/1" } }));
+  assert.throws(() => writeNativeRevealProbeProject(project, path.join(value.directory, "probe")),
+    (error: Error) => !/review-draft project/u.test(error.message));
 }));
 
 test("refuses extension.motion by name until the plan rules on root motion (X128 m3)", () => withFixture((value) => {

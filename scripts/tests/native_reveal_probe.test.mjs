@@ -198,6 +198,7 @@ test('M1: an empty host at an active frame fails closed; only the inactive neigh
   await refused(capture((spec, local) => (local === 0 ? [] : [element('hf-panel', 0)])),
     /shows no element of the mount at active frame 745/);
   await refused(capture(() => []), /shows no element of the mount at active frame 745/);
+  await refused(capture((spec, local) => (local === 1 ? [] : [element('hf-panel', 0)])), /at active frame 746/);  // not only the first
   const {report} = await probe([NUMBERS], [], (spec, local) => (local < 0 ? [] : [element('hf-panel', 0)]));
   assert.equal(report.status, 'reveal-probe-pass');
 });
@@ -211,6 +212,14 @@ test('M1: a mount the renderer would not call live fails its liveness check at a
   await refused(dead(facts => ({...facts, file: 'compositions/other.html'})), /other\.html/);
   const inactive = capture(numbersPanel, [], (spec, local, facts) => (local < 0 ? {...facts, timeline: false} : facts));
   await refused(inactive, /Catalog mount sn-numbers-q1 is not live/);
+});
+
+test('M1: each mount is checked against its own row; a dead second mount fails', async () => {
+  const healthy = await probe([TITLE, NUMBERS], [], () => [element('hf-panel', 0)]);
+  assert.equal(healthy.report.status, 'reveal-probe-pass');
+  const directory = project([TITLE, NUMBERS], []), output = path.join(directory, 'out');
+  const dead = capture(() => [element('hf-panel', 0)], [], (spec, local, facts) => (spec.mount === NUMBERS.id ? {...facts, timeline: false} : facts));
+  await assert.rejects(runRevealProbe({probeProject: directory, output, runtime: '/TEST/runtime'}, dead), /Catalog mount sn-numbers-q1 is not live/);
 });
 
 test('an existing output is refused before any capture; a manifest must name its mounts', async () => {

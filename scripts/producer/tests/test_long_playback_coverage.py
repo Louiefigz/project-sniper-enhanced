@@ -247,25 +247,25 @@ class CaptureIdentityTests(unittest.TestCase):
     def test_identity_is_the_delivery_output_its_sha_and_stat_bytes(self) -> None:
         """path = delivery.output, sha256 = delivery.sha256, bytes from lstat; seconds from the player's plan clock."""
         with patch(READER, self.reader), patch(CLOCK, return_value=100.3) as clock:
-            mp4, seconds = playback.delivery_mp4(self.attempt)
+            mp4, seconds = playback.delivery_mp4(self.attempt, None)
         self.assertEqual((mp4, seconds, self.calls), (self.identity, 100.3, [self.attempt]))
         self.assertEqual(clock.call_args.args, ({'adapter': 'native-long'}, None))
 
     def test_refused_or_unreadable_delivery_is_named(self) -> None:
         """The real reader refuses a bare delivery.json; a stand-in refusal and a non-file output are named too."""
         with self.assertRaises(playback.CoverageRefused) as caught:
-            playback.delivery_mp4(self.attempt)
+            playback.delivery_mp4(self.attempt, None)
         self.assertEqual(caught.exception.code, 'COVERAGE_DELIVERY_REFUSED')
         with patch(READER, side_effect=ValueError('unchecked review delivery')), \
                 self.assertRaisesRegex(playback.CoverageRefused, 'COVERAGE_DELIVERY_REFUSED.*unchecked'):
-            playback.delivery_mp4(self.attempt)
+            playback.delivery_mp4(self.attempt, None)
         with patch(READER, self.reader), self.assertRaisesRegex(playback.CoverageRefused, 'DELIVERY_REFUSED.*KeyError'):
-            playback.delivery_mp4(self.attempt)  # the stand-in request names no project, so no plan clock
+            playback.delivery_mp4(self.attempt, None)  # the stand-in request names no project, so no plan clock
         self.video.unlink()
         self.video.mkdir()
         with patch(READER, self.reader), patch(CLOCK, return_value=100.3), \
                 self.assertRaisesRegex(playback.CoverageRefused, 'not a regular MP4'):
-            playback.delivery_mp4(self.attempt)
+            playback.delivery_mp4(self.attempt, None)
 
     def test_capture_writes_one_new_record_from_the_verified_player_log(self) -> None:
         """The identity goes to player_row; the CLI writes one record (O_EXCL) and prints the SHA-256 check binds."""
@@ -278,7 +278,7 @@ class CaptureIdentityTests(unittest.TestCase):
             with contextlib.redirect_stdout(printed):
                 self.assertEqual(playback.main(argv), 0)
             with self.assertRaises(FileExistsError):
-                playback.capture(self.attempt, url, output)
+                playback.capture(self.attempt, url, output, None)
         reported = json.loads(printed.getvalue())
         record = bound_json(output, reported['record']['sha256'])
         self.assertEqual(rows.call_args.args[:3], (url, self.attempt, self.identity))
@@ -292,7 +292,7 @@ class CaptureIdentityTests(unittest.TestCase):
         output = self.root / 'coverage.json'
         with patch(READER, self.reader), patch(CLOCK, return_value=100.3), \
                 self.assertRaises(playback.CoverageRefused) as caught:
-            playback.capture(self.attempt, 'http://example.com/', output)
+            playback.capture(self.attempt, 'http://example.com/', output, None)
         self.assertEqual((caught.exception.code, output.exists()), ('COVERAGE_PLAYER_NOT_VERIFIED', False))
 
 

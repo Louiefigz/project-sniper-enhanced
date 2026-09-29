@@ -2,12 +2,12 @@
 
 ``capture`` reads the review player's own log (``review_player_activity``) through the visible hand-off's
 verified-server path (``native_handoff_checks.player_row``) and writes one new record; ``check`` cold-reads a
-record whose bytes a reader bound (M-141 spawns it). Not provable here: that a person watched or listened, or that
-the window was visible; a local program that fetches the page can imitate its reports (E-FORGE-3), and a forward
-wall-clock step widens one pair's speed bound. Each command prints one JSON line and exits 0 when it held, 1 on a
-named refusal (``code``), 2 on any other error:
+record whose bytes a reader bound (M-141 spawns it). Each report pair and each span as a whole (X61) keep
+``Δelement <= 1.05·Δserver + 0.5``. Not provable: that a person watched or listened; a local program can imitate
+the page's reports (E-FORGE-3), and a forward wall-clock step widens the bound. Each command prints one JSON line
+and exits 0 when it held, 1 on a named refusal (``code``), 2 on any other error (argparse usage errors: 2, no JSON):
 
-  native_playback_coverage.py capture <attempt> --player <url> --output <file>
+  native_playback_coverage.py capture <attempt> --player <url> --output <file> [--plan <name the player lists>]
   native_playback_coverage.py check <file> --record-sha256 <hex> --mp4-sha <hex> --route <path> --seconds <P>
 """
 from __future__ import annotations
@@ -63,8 +63,8 @@ class Report:
 
 
 def is_seconds(value: object) -> bool:
-    """A finite, non-negative JSON number (never a bool)."""
-    return type(value) in (int, float) and math.isfinite(value) and value >= 0
+    """A finite, non-negative JSON number (never a bool); an integer above 2**53 is refused, never overflowed."""
+    return (type(value) is float and math.isfinite(value) or type(value) is int and value <= 2 ** 53) and value >= 0
 
 
 def is_hex64(value: object) -> bool:
@@ -99,11 +99,12 @@ def counts(before: Report, after: Report) -> bool:
 
 
 def token_spans(rows: list[Report]) -> list[tuple[float, float]]:
-    """One token's maximal chains of counted consecutive pairs, as element-time spans of positive length."""
-    spans, chain = [], None
+    """One token's maximal chains of counted pairs, each also within the speed bound as a whole (X61), as spans."""
+    spans, chain, first = [], None, None
     for before, after in zip(rows, rows[1:]):
-        if counts(before, after):
-            chain = (before.element if chain is None else chain[0], after.element)
+        first = before if chain is None else first
+        if counts(before, after) and counts(first, after):  # the chain as a whole also keeps the speed bound
+            chain = (first.element, after.element)
         elif chain is not None:
             spans, chain = spans + [chain], None
     return [span for span in spans + [chain] if span and span[1] > span[0]]
@@ -152,13 +153,14 @@ def coverage_record(attempt: Path, mp4: dict, row: dict, cover: dict) -> dict:
             'coverage': cover, 'capturedAt': now(), 'meaning': MEANING}
 
 
-def delivery_mp4(attempt: Path) -> tuple[dict, float]:
-    """The MP4 identity from ``delivery.json`` through the player's own reader (D-F a), and the seconds it plays."""
+def delivery_mp4(attempt: Path, plan: str | None) -> tuple[dict, float]:
+    """The MP4 identity via the player's own reader (D-F a), and the seconds the page plays for the listed ``plan``."""
     from studio.native_review_contract import checked_delivery  # imported here: the cold reader never loads it
-    from studio.review_player_inventory import EVIDENCE_ERRORS, duration_seconds
+    from studio.review_player_inventory import EVIDENCE_ERRORS, attempt_row, duration_seconds
     try:
+        listed = attempt_row({'id': 'coverage', 'export': str(attempt), 'plan': plan})  # the player's own row rules
         delivery, request, _pins = checked_delivery(attempt)
-        path, seconds = Path(delivery['output']), duration_seconds(request, None)
+        path, seconds = Path(delivery['output']), duration_seconds(request, listed.plan)
         info = path.lstat()
     except EVIDENCE_ERRORS as error:
         raise CoverageRefused('COVERAGE_DELIVERY_REFUSED', f'{attempt}: {type(error).__name__}: {error}') from error
@@ -179,9 +181,9 @@ def verified_row(attempt: Path, player_url: str, mp4: dict) -> dict:
     return row
 
 
-def capture(attempt: Path, player_url: str, output: Path) -> dict:
-    """Read the live player's log for this attempt's exact MP4 and publish one new record (O_EXCL); return it."""
-    mp4, duration = delivery_mp4(attempt)
+def capture(attempt: Path, player_url: str, output: Path, plan: str | None) -> dict:
+    """Publish one new record (O_EXCL) from the live log of this attempt as the player lists it (``plan``)."""
+    mp4, duration = delivery_mp4(attempt, plan)
     row = verified_row(attempt, player_url, mp4)
     try:
         cover = coverage(row['activity']['playback'], row['route'], duration)
@@ -203,14 +205,14 @@ class CoverageBinding:
 def record_problem(record: dict) -> str | None:
     """Why parsed JSON is not a coverage record as ``capture`` writes it, or None."""
     mp4, server, cover = record.get('mp4'), record.get('server'), record.get('coverage')
-    if set(record) != RECORD_KEYS or type(record['schemaVersion']) is not int \
-            or record['schemaVersion'] != SCHEMA_VERSION:
+    if set(record) != RECORD_KEYS or (type(record['schemaVersion']), record['schemaVersion']) != (int, SCHEMA_VERSION):
         return f'not a schema-{SCHEMA_VERSION} coverage record (keys {sorted(record)})'
     if record['kind'] != KIND or record['meaning'] != MEANING:
         return f'kind or meaning is not {KIND!r} with the page-reported meaning'
     if not (isinstance(mp4, dict) and set(mp4) == {'path', 'sha256'} and is_hex64(mp4['sha256'])
-            and all(isinstance(record[key], str) for key in ('route', 'attempt', 'capturedAt'))
-            and isinstance(server, dict) and set(server) == {'pid', 'port', 'started'}):
+            and isinstance(mp4['path'], str) and isinstance(server, dict) and set(server) == {'pid', 'port', 'started'}
+            and type(server['pid']) is int and type(server['port']) is int and isinstance(server['started'], str)
+            and all(isinstance(record[key], str) for key in ('route', 'attempt', 'capturedAt'))):
         return 'the media, attempt, capture time or server identity is malformed'
     if not (isinstance(cover, dict) and set(cover) == COVERAGE_KEYS and type(cover['normalSpeed']) is bool
             and all(value is None or isinstance(value, str) for value in (cover['first'], cover['last']))):
@@ -266,6 +268,7 @@ def parser() -> argparse.ArgumentParser:
     commands = root.add_subparsers(dest='command', required=True)
     take, read = commands.add_parser('capture'), commands.add_parser('check')
     take.add_argument('attempt', type=Path)
+    take.add_argument('--plan', metavar='NAME.json', help='the plan name the player lists this attempt with, if any')
     read.add_argument('file', type=Path)
     for command, flag, kind in ((take, '--player', str), (take, '--output', Path), (read, '--record-sha256', str),
                                 (read, '--mp4-sha', str), (read, '--route', str), (read, '--seconds', float)):
@@ -275,15 +278,15 @@ def parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     """Print one JSON line; exit 0 when it held, 1 on a named refusal (``code``), 2 on any other error."""
-    args = parser().parse_args(argv)
+    args, code = parser().parse_args(argv), 0
     try:
         if args.command == 'check':
             result = check(CoverageBinding(args.file, args.record_sha256), args.mp4_sha, args.route, args.seconds)
         else:
-            record, sha = capture(args.attempt, args.player, args.output), file_hash(args.output, RECORD_LIMIT)
+            record = capture(args.attempt, args.player, args.output, args.plan)
+            sha = file_hash(args.output, RECORD_LIMIT)
             result = {'status': 'captured', 'record': {'path': str(args.output), 'sha256': sha}, 'mp4': record['mp4'],
                       'route': record['route'], 'coverage': record['coverage'], 'meaning': MEANING}
-        code = 0
     except CoverageRefused as error:
         result, code = {'status': 'refused', 'code': error.code, 'message': str(error)}, 1
     except (OSError, RuntimeError, ValueError) as error:

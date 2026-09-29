@@ -248,16 +248,19 @@ class OneCleanupRuleTests(unittest.TestCase):
                                  ('unlaunched', True, LAUNCH_ERROR))
 
     def test_a_held_completion_keeps_its_outputs_cleanup_pending(self) -> None:
-        """X114 M2: an output's cleanup milestone names a completed turn that still holds its slot (G9)."""
+        """X114 M2, X125 N6: an output's cleanup milestone names every ended turn that still holds its slot (G9),
+        a completed one and a failed one alike."""
         batch = Batch(self)
-        batch.enqueue(('author-A', 'author', ()))
+        batch.enqueue(('author-A', 'author', ()), ('author-A2', 'author', ()))
         ref = batch.claim('author-A', host('author-A'))
         api.complete_task(batch.root, BATCH, ref, TaskResult((receipt('author-A'),)))
+        batch.host_event(batch.claim('author-A2', host('author-A2')), 'failed', host('author-A2'))
         record = batch.record()
-        self.assertTrue(holds_slot(record['production']['tasks']['author-A']))
+        self.assertTrue(all(holds_slot(record['production']['tasks'][key]) for key in ('author-A', 'author-A2')))
         milestone = native_budget_milestones.cleanup(record, 'A')
         self.assertEqual((milestone['status'], milestone['unresolvedTasks']),
-                         ('pending', [{'taskId': 'author-A', 'state': 'completed'}]))
+                         ('pending', [{'taskId': 'author-A', 'state': 'completed'},
+                                      {'taskId': 'author-A2', 'state': 'failed'}]))
 
     def test_codex_turns_exhaust_four_slots_with_a_named_refusal(self) -> None:
         """X80: codex completions hold their slots, so the claim after the last free slot is refused by name."""

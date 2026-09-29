@@ -138,6 +138,11 @@ class ClosureTests(unittest.TestCase):
         after = batch.record()
         self.assertEqual(closure_rows(batch), [('critic', 'specialist', 'completed', 'codex'),
                                                ('writer', 'specialist', 'failed', 'codex')])
+        # X125: each row carries its task's reason (the failure's detail, or the G9 note of a held slot).
+        rows = after['production']['closure']['unresolvedAtClose']
+        self.assertEqual([row['reason'] for row in rows],
+                         [after['production']['tasks'][key]['reason'] for key in ('critic', 'writer')])
+        self.assertIn('no launch error', rows[1]['reason'])
         self.assertTrue(all(after['production']['tasks'][key]['unresolved'] for key in ('critic', 'writer')))
         self.assertEqual(after['production']['ai'], before['production']['ai'])
         self.assertEqual((active_ai(before), active_ai(after)), (3, 2))   # only the director's assignment ended

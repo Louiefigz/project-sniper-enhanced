@@ -34,7 +34,7 @@ function suppliedImage(f: ReturnType<typeof nativeV10Fixture>, input: ReturnType
     acquisition: { kind: "provided", accessScope: "operator-private", evidence: [{ path: f.receiptPath, sha256: fileSha256(f.receiptPath)! }] } },
   path.join(f.directory, "image-origin.json"));
   input.assets.push(asset);
-  input.extension = { css: "", motion: "", markup: '<img id="show-image" class="clip" src="assets/supplied.png" data-start="0" data-duration="2">' };
+  input.extension = { css: "", motion: "", markup: '<img id="show-image" data-hf-id="hf-show-image" class="clip" src="assets/supplied.png" data-start="0" data-duration="2">' };
   input.strategy.scenes[0].visibleIds.push("show-image");
 }
 

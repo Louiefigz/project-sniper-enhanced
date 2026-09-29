@@ -183,7 +183,7 @@ function suppliedPicture(f: ReturnType<typeof fixture>, include = true) {
     writeFileSync(manifestFile, JSON.stringify(manifest));
   }
   f.plan.assets.push(asset);
-  f.plan.extension = { css: "", motion: "", markup: `<img id="provided-picture" class="clip" src="${asset.file}" data-start="0" data-duration="2">` };
+  f.plan.extension = { css: "", motion: "", markup: `<img id="provided-picture" data-hf-id="hf-provided-picture" class="clip" src="${asset.file}" data-start="0" data-duration="2">` };
   f.plan.request.mediaPolicy = { placement: "auto", sources: "provided-only" };
   refreshNativePacingFixture(f.plan);
   return asset;

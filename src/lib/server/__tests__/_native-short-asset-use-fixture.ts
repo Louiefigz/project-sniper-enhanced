@@ -55,7 +55,7 @@ export function assetUseFixture() {
       sha256: fileSha256(file)!, role: kind === "image" ? "image" : "supporting-video" };
     input.assets.push(asset); addOrigin(asset);
     const tag = kind === "image" ? "img" : "video";
-    input.extension = { css: "", motion: "", markup: `<${tag} id="test-insert" class="clip" src="${asset.file}" data-start="0" data-duration="2"${kind === "video" ? ' data-media-start="0" muted' : ""}></${tag}>` };
+    input.extension = { css: "", motion: "", markup: `<${tag} id="test-insert" data-hf-id="hf-test-insert" class="clip" src="${asset.file}" data-start="0" data-duration="2"${kind === "video" ? ' data-media-start="0" muted' : ""}></${tag}>` };
     const decision = input.strategy.assetUse!.decisions[0];
     decision.decision = "insert"; decision.purpose = "illustrate";
     decision.selection = { assetFile: asset.file, targetId: "test-insert", kind, startFrame: 0, endFrame: 50,

@@ -5,16 +5,32 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test, type TestContext } from "node:test";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "../auto-edit-hash";
-import { assertNativeShortPrebuildReview, nativeShortPrebuildPlanHash, type NativePrebuildReview } from "../native-short-prebuild-review";
+import { assertNativeShortPrebuildReview, NATIVE_PREBUILD_COVERAGE, nativeShortPrebuildPlanHash, readNativeShortPrebuildRecord,
+  type NativePrebuildReview } from "../native-short-prebuild-review";
 import { readNativeShortProject, writeNativeShortProject, type NativeShortProjectInput } from "../native-short-project";
 import { executeNativeShortCommand } from "../../../../scripts/producer/native-short";
-import { nativeShortFixture } from "./_native-short-project-fixture";
+import { nativeShortFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
+import { typedRecordParts } from "./_native-review-fixture";
 
 function fixture(t: TestContext) {
   const directory = realpathSync(mkdtempSync(path.join(tmpdir(), "TEST-prebuild-review-")));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const input = nativeShortFixture(directory), destination = path.join(directory, "project");
   return { directory, input, destination };
+}
+
+/** A historical schema-1 receipt (as written before typed plan reviews): readable, never admitted by a build. */
+function writeLegacyReceipt(input: NativeShortProjectInput): void {
+  const directory = path.dirname(input.assets[0].path), evidence = path.join(directory, "TEST-legacy-evidence.txt");
+  writeFileSync(evidence, "TEST legacy evidence; nobody inspected anything.");
+  const receipt = { schemaVersion: 1, scope: "native-short-full-plan", planHash: nativeShortPrebuildPlanHash(input),
+    reviewer: { identity: "TEST legacy reviewer", sessionId: "TEST-legacy-review", plannerSessionId: "TEST-plan-session", independent: true },
+    coverage: Object.fromEntries(NATIVE_PREBUILD_COVERAGE.map(key => [key, "TEST legacy assessment"])),
+    evidence: [{ path: evidence, sha256: fileSha256(evidence)! }],
+    review: { schemaVersion: 1, stage: "plan", verdict: "pass", summary: "TEST legacy fixture", materialIssues: [], findings: [] } };
+  const file = path.join(directory, "TEST-legacy-prebuild.json");
+  writeFileSync(file, canonicalJson(receipt));
+  input.prebuildReview = { path: file, sha256: fileSha256(file)! };
 }
 
 function reviseReceipt(input: NativeShortProjectInput, change: (review: NativePrebuildReview) => void): void {
@@ -128,6 +144,7 @@ test("historical v3 without a review cold reads as unreviewed and cannot be rebu
 
 test("Long export uses the same complete independent review semantics and exact project digest", async t => {
   const f = fixture(t), hash = "a".repeat(64);
+  writeLegacyReceipt(f.input);  // native Long reviews are complete-project schema-1 records (no Short role packet)
   reviseReceipt(f.input, review => { review.scope = "native-long-full-project"; review.planHash = hash; });
   const file = f.input.prebuildReview!.path;
   const result = await executeNativeShortCommand(["check-long-review", file, hash]);
@@ -139,6 +156,7 @@ test("Long export uses the same complete independent review semantics and exact 
 
 test("scoped Long snapshot review cannot become full-project final admission", async t => {
   const f = fixture(t), hash = "c".repeat(64);
+  writeLegacyReceipt(f.input);  // as the Long export test above (1490c9d9): native Long reviews are schema-1 records
   reviseReceipt(f.input, review => { review.scope = "native-long-section-snapshot"; review.planHash = hash; });
   const file = f.input.prebuildReview!.path;
   const scoped = await executeNativeShortCommand(["check-long-section-review", file, hash]);
@@ -172,5 +190,43 @@ test("linked, oversized and duplicate review evidence cannot enter a receipt", t
     });
     assert.throws(() => assertNativeShortPrebuildReview(f.input));
     assert.equal(existsSync(f.destination), false);
+  }
+});
+
+test("schema-2 records carry typed inspection through publication; schema 1 stays readable without gaining any", t => {
+  const f = fixture(t);
+  const still = path.join(f.directory, "TEST-source-still.jpg");
+  writeFileSync(still, "TEST still; nobody looked at it");
+  const inspection = { schemaVersion: 1, approves: [], entries: [{ kind: "still-frames", artifact: { path: still,
+    sha256: fileSha256(still)! }, span: "whole", method: "TEST fixture: nothing was inspected", samples: [0] }] };
+  writeLegacyReceipt(f.input);
+  const legacy = readNativeShortPrebuildRecord(f.input);
+  assert.equal(legacy.schemaVersion, 1);
+  assert.equal("inspection" in legacy, false);
+  assert.throws(() => assertNativeShortPrebuildReview(f.input), /needs a schema-2 plan review from a role packet/);
+  refreshNativePrebuildReviewFixture(f.input);
+  const typed = (review: NativePrebuildReview) => {
+    const parts = typedRecordParts(f.directory, "plan-critic", { reviewer: review.reviewer, verdict: review.review.verdict, inspection },
+      { plan: { planHash: review.planHash } });
+    Object.assign(review, { schemaVersion: 2, inspection, submission: parts.submission, approvedContent: parts.approvedContent,
+      evidence: [...parts.evidence, ...review.evidence] });
+  };
+  reviseReceipt(f.input, typed);
+  const built = writeNativeShortProject(f.input, f.destination);
+  assert.deepEqual(JSON.parse(readFileSync(path.join(built.directory, "PREBUILD-REVIEW.json"), "utf8")).inspection, inspection);
+  assert.deepEqual(readNativeShortProject(built.directory), f.input);
+  const refusals: Array<[(review: Record<string, unknown>) => void, RegExp]> = [
+    [review => { review.inspection = { ...inspection, approves: ["motion"] }; }, /A plan review approves the plan only/],
+    [review => { delete review.inspection; }, /is missing fields: inspection/],
+    [review => { delete review.submission; }, /is missing fields: submission/],
+    [review => { (review.submission as { submittedAt: string }).submittedAt = new Date(Date.now() + 60_000).toISOString(); },
+      /submission time is in the future/],
+    [review => { review.inspection = { ...inspection, entries: [{ ...inspection.entries[0], span: { frames: [0, 5] } }] }; },
+      /frame spans are program frames of a reviewed rendering/],
+    [review => { review.schemaVersion = 1; }, /unsupported fields: approvedContent, inspection, submission/]];
+  for (const [change, refusal] of refusals) {
+    const g = fixture(t);
+    reviseReceipt(g.input, review => { typed(review); change(review as unknown as Record<string, unknown>); });
+    assert.throws(() => assertNativeShortPrebuildReview(g.input), refusal);
   }
 });

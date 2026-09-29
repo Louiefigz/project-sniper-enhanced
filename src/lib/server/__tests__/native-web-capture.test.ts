@@ -34,7 +34,7 @@ test("web capture binding survives actual project assembly/cold read and rejects
   try {
     const plan = nativeShortFixture(f.directory); plan.assets.push(f.asset);
     plan.request.mediaPolicy = { placement: "auto", sources: "public-web" };
-    plan.extension = { css: "", motion: "", markup: `<video id="web-broll" class="clip" src="${f.asset.file}" data-start="0" data-duration="2" data-media-start="1" muted></video>` };
+    plan.extension = { css: "", motion: "", markup: `<video id="web-broll" data-hf-id="hf-web-broll" class="clip" src="${f.asset.file}" data-start="0" data-duration="2" data-media-start="1" muted></video>` };
     plan.strategy.supportingSearch.candidates.push({ assetFile: f.asset.file, sourceStart: 1, sourceEnd: 3,
       observed: "TEST synthetic web scroll", role: "context", claimLimit: "TEST no product-use proof", selected: true,
       reason: "TEST reveal the page", visibleId: "web-broll", startFrame: 0, endFrame: 50 });

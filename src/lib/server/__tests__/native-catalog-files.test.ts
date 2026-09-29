@@ -8,6 +8,7 @@ import { writeNativeShortProject, readNativeShortProject } from "../native-short
 import { fileSha256 } from "../auto-edit-hash";
 import { VISUAL_SOURCE_POLICY } from "@/lib/producer/visual-source-policy";
 import { nativeCatalogFiles } from "../native-catalog-files";
+import { stampStudioHostIds } from "../native-studio-host-stamp";
 
 test("native project stages a mounted catalog title and binds it on cold read", () => {
   const directory = realpathSync(mkdtempSync(path.join(os.tmpdir(), "sniper-catalog-project-")));
@@ -15,13 +16,13 @@ test("native project stages a mounted catalog title and binds it on cold read", 
     const input = nativeShortFixture(directory), policy = VISUAL_SOURCE_POLICY.integrated["count-up"];
     const source = path.join(directory, "counter.html");
     // Real upstream source, with its network script dependency localized; no playback claim.
-    writeFileSync(source, readFileSync(path.join(process.cwd(), policy.upstreamPath), "utf8")
-      .replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/gsap@[^"']+/gu, "../assets/gsap.min.js").replace('id="root"', 'id="root" data-width="1080" data-height="1920"'));
+    writeFileSync(source, stampStudioHostIds(readFileSync(path.join(process.cwd(), policy.upstreamPath), "utf8")
+      .replace(/https:\/\/cdn\.jsdelivr\.net\/npm\/gsap@[^"']+/gu, "../assets/gsap.min.js").replace('id="root"', 'id="root" data-width="1080" data-height="1920"')));
     const file = "compositions/counter.html";
     input.catalogFiles = [{ file, path: source, sha256: fileSha256(source)!, catalogId: "count-up", sourceSha256: policy.upstreamSha256 }];
     input.catalogTitle = { file, copy: input.canvas.titleCard!.copy };
     delete input.canvas.titleCard;
-    input.extension = { markup: `<div id="catalog-counter" class="clip" data-composition-src="${file}" data-start="0" data-duration="1" data-track-index="1"></div>`, css: "", motion: "" };
+    input.extension = { markup: `<div id="catalog-counter" data-hf-id="hf-catalog-counter" class="clip" data-composition-src="${file}" data-start="0" data-duration="1" data-track-index="1"></div>`, css: "", motion: "" };
     refreshNativePacingFixture(input);
     const output = path.join(directory, "project");
     writeNativeShortProject(input, output);

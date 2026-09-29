@@ -818,6 +818,11 @@ unless the request chooses a simpler/restricted treatment. Produce independent
 clips in parallel by default, sharing source preparation and respecting resource
 supervision; reduce concurrency when memory, CPU/disk or tool conflicts require it.
 These defaults never skip retained selection/script/treatment checkpoints.
+When several native Shorts are authorized together, run them as a deadline batch:
+follow `docs/producer/NATIVE_SHORTS_DEADLINE_BATCH.md` from authorization onward
+(`native_batch.py start` with the approved titles and scripts, then the task route that document
+describes; review draft at minute 20, complete MP4s and handoff by minute 40). A budget refusal
+ends that path; never work around it.
 Group same-story variants under their idea; keep distinct narratives separately
 selectable even when they reuse footage. Record shared ranges and the different
 role they serve, and review each complete assembly. Reuse watchable source previews where
@@ -1404,6 +1409,8 @@ that lane on); only the engaging lanes differ.
    visual review; `scripts/frameio/` contains API-backed machinery and is not
    authorized by a subscription-only request. Deterministic
    full-frame glitch screens (blackdetect/freezedetect) ride Audit B.
+   For a checked native Short, resolve the `--role final-critic` packet and finish
+   with its `submit-final` command (see Executable readiness above).
 8. **Feedback** — operator notes reference OUTPUT time; use
    `timeline_map.json` (`to_source`) to find the source ranges; produce plan
    v(n+1) with a change log; re-lint; re-render. Max 2 auto-rounds, then ask.

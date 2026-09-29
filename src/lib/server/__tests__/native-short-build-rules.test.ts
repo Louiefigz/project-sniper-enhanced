@@ -142,15 +142,16 @@ function writeDraft(input: NativeShortProjectInput, directory: string): () => un
 }
 
 test("the build's verifyAssets refuses an asset that is not a canonical regular file with its bound bytes", () => {
-  const cases: Array<[string, (row: NativeAssetBinding, directory: string) => void]> = [
-    ["symlinked path", (row, directory) => { symlinkSync(row.path, path.join(directory, "linked.js")); row.path = path.join(directory, "linked.js"); }],
-    ["relative path", row => { row.path = path.relative(process.cwd(), row.path); }],
-    ["directory path", (row, directory) => { row.path = directory; }],
-    ["changed bytes", row => { writeFileSync(row.path, "TEST changed after binding"); }],
-    ["unknown role", row => { row.role = "illustration" as NativeAssetBinding["role"]; }],
-    ["unsafe name", row => { row.file = "assets/My Font$&.js"; }]];
-  for (const [name, change] of cases) {
-    const { input, directory } = plan(), row = input.assets[1];
+  // [case, which bound row (1 = GSAP, 3 = a reference image), the change]; a runtime row may not be renamed (its own rule).
+  const cases: Array<[string, number, (row: NativeAssetBinding, directory: string) => void]> = [
+    ["symlinked path", 1, (row, directory) => { symlinkSync(row.path, path.join(directory, "linked.js")); row.path = path.join(directory, "linked.js"); }],
+    ["relative path", 1, row => { row.path = path.relative(process.cwd(), row.path); }],
+    ["directory path", 1, (row, directory) => { row.path = directory; }],
+    ["changed bytes", 1, row => { writeFileSync(row.path, "TEST changed after binding"); }],
+    ["unknown role", 3, row => { row.role = "illustration" as NativeAssetBinding["role"]; }],
+    ["unsafe name", 3, row => { row.file = "references/My Image$&.jpg"; }]];
+  for (const [name, index, change] of cases) {
+    const { input, directory } = plan(), row = input.assets[index];
     change(row, directory);
     assert.throws(writeDraft(input, directory), ASSET_TEXT(row.file), name);
     assert.equal(existsSync(path.join(directory, "project")), false, name);

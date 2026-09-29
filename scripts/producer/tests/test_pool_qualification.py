@@ -50,6 +50,13 @@ class PoolQualificationHarnessTests(unittest.TestCase):
         (Path(self.project) / 'SHORT-PROJECT.json').write_text(json.dumps(
             {'scope': 'TEST plan', 'canvas': {'totalFrames': 60, 'frameRate': '30/1'}}))
 
+    def test_show_names_the_mode_a_short_render_gets(self) -> None:
+        """(M-031) `show` reports the mode a Short render of not yet known length gets, from an empty TEST record."""
+        with mock.patch('builtins.print') as printed:
+            self.assertEqual(harness.command_show(argparse.Namespace()), 0)
+        shown = json.loads(printed.call_args.args[0])
+        self.assertEqual((shown['engine'], shown['shortRenderForecast']['name']), (TEST_ENGINE['identity'], 'exclusive'))
+
     def command(self, job: runner.Job) -> list[str]:
         """Point the stand-in at this test's namespace and record folder."""
         return [sys.executable, '-B', str(STAND_IN), job.project, job.attempt, '--test-root', str(self.root),

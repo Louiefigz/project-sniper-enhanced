@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "note": "Curated writer -> reader record contracts (P0 Step 7.2). Keys are the ones each reader reads today; a reader-side key added later needs a row. 'owners': keys written into those record expressions; 'event': keys of dict literals with that 'event' value; 'literal': keys of dict literals that carry that anchor key.",
+  "contracts": [
+    {"name": "owner receipt -> audio worker",
+     "writers": ["studio/native_run.py", "studio/native_run_lifecycle.py", "studio/native_run_admission.py", "studio/native_run_lease.py"],
+     "owners": ["self.result", "owner.result"],
+     "required": ["supervisorPid", "productionAllocation", "admission", "output"],
+     "readers": ["studio/native_audio_owner.py:require_owned_audio_worker"]},
+    {"name": "owner receipt -> pool evidence",
+     "writers": ["studio/native_run.py", "studio/native_run_lifecycle.py", "studio/native_run_admission.py", "studio/native_run_lease.py"],
+     "owners": ["self.result", "owner.result"],
+     "required": ["queueSeconds", "pressureWaitSeconds", "cpu", "pool", "cleanup", "leaseCleanupVerified", "elapsedSeconds", "completedAt", "failureCategory", "status"],
+     "readers": ["studio/pool_qualification_evidence.py:_owner"]},
+    {"name": "output-authorized event",
+     "writers": ["studio/production/api.py"],
+     "event": "output-authorized",
+     "required": ["approval", "clipId"],
+     "readers": ["studio/production/approvals.py:_added_problem"]},
+    {"name": "clip-added event",
+     "writers": ["studio/production/approvals.py"],
+     "event": "clip-added",
+     "required": ["approval", "clipId"],
+     "readers": ["studio/production/approvals.py:_added_problem"]},
+    {"name": "canary TEST motion review row",
+     "writers": ["studio/native_route_canary.py"],
+     "literal": "reviewer",
+     "required": ["inspection"],
+     "readers": ["studio/native_motion_review.py:require_typed_short_reviews"]}
+  ]
+}

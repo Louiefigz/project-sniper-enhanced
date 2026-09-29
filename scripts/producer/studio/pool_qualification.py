@@ -120,7 +120,8 @@ def command_show(_args: argparse.Namespace) -> int:
     """Print host identity, the committed profiles, what a Short render forecast gets and the policy."""
     host = policy.host_identity()
     record, engine = qualification.committed(host), workloads.current_engine()
-    forecast = qualification.mode_for(record, workloads.forecast_workload(engine))[0]
+    # A Short render whose length is not yet known (M-031: the call omitted the required output_seconds).
+    forecast = qualification.mode_for(record, workloads.forecast_workload(engine, None))[0]
     print(json.dumps({'host': host, 'policy': policy.policy_identity(), 'engine': engine,
                       'record': record.source, 'rejected': record.rejected,
                       'profiles': [_profile_view(profile, engine) for profile in record.profiles],

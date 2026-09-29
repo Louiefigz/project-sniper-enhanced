@@ -51,9 +51,12 @@ REVIEWED: dict[str, str] = {
     'test_ingest_execution_authority.py': NO_OWNER,
     'test_live_grade_v2_launch.py': STDLIB,
     'test_live_grade_v2_supervisor.py': NO_OWNER,
-    'test_live_state_child_tripwire.py': ('every child is armed: the ones that touch live state are refused by the tripwire '
-                                          '(exit 97, report into the test\'s own directory), one sets its own root, one '
-                                          'installs the isolation, the rest call no owner'),  # CS1-REVIEW F1/F2 (C1-fix)
+    'test_live_state_child_parity.py': ('spec_from_file_location of the child sitecustomize under another name '
+                                        '(nothing installed); no child is started'),
+    'test_live_state_child_tripwire.py': ('children that touch live state are armed and refused (exit 97, report into '
+                                          'the test\'s own folder; writes only under decoy prefixes); one sets its own '
+                                          'root; the nested runs install the isolation; the plain child of (a) and the '
+                                          'broken-variable children of (c) are deliberately not armed and call no owner'),
     'test_live_state_isolation.py': DECOY,
     'test_local_asr_callers.py': NO_OWNER,
     'test_local_asr_worker.py': NO_OWNER,

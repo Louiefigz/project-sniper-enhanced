@@ -9,12 +9,15 @@
 - ``PYTHONDONTWRITEBYTECODE=1``, so children never write bytecode into the checkout.
 
 An inherited reports directory and inherited prefixes are kept (a child that imports the isolation over decoy
-roots refuses both sets). ``new_reports`` returns the report lines this process has not reported yet, so the
-isolation fails the test run even when the child's caller swallowed its exit status. Reports are never moved,
-so every ancestor sees them. Standard library only; nothing in the product imports this module.
+roots refuses both sets); a malformed inherited prefix value exits 97. ``set_current`` names the running test in
+``SNIPER_TEST_CURRENT`` so a child's report says which test started it. ``new_reports`` returns the report lines
+this process has not reported yet, so the isolation fails the test run even when the child's caller swallowed
+its exit status. Reports are never moved, so every ancestor sees them, and a suite wrapper that passes its own
+kept folder checks it again after the process exits (a late child's report). Standard library only; nothing in
+the product imports this module.
 
-Not covered: a child started with ``-I`` or ``-S``, or with an environment that drops ``PYTHONPATH``, never
-loads the tripwire (p0-records/live-root-readers.md).
+Not covered: a child started with ``-I``, ``-S`` or ``-E``, or with an environment that drops ``PYTHONPATH``,
+never loads the tripwire.
 """
 from __future__ import annotations
 
@@ -24,19 +27,22 @@ import tempfile
 from pathlib import Path
 
 CHILD_TRIPWIRE = str(Path(__file__).resolve().parent / '_child_live_state')
-CONFIG, REPORTS = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS'
+CONFIG, REPORTS, CURRENT = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS', 'SNIPER_TEST_CURRENT'
 SCHEMA = 1
 _OWN = {'created': None, 'reported': set()}  # the reports directory this process made; report files it reported
 
 
 def _inherited(environ: dict) -> dict:
-    """The prefixes an armed parent passed down, or empty lists when there are none (or they do not parse)."""
+    """The prefixes an armed parent passed down (none when the variable is absent); a malformed value exits 97."""
     try:
         value = json.loads(environ.get(CONFIG) or '{}')
-    except ValueError:
-        return {'refused': [], 'writeRefused': []}
-    value = value if isinstance(value, dict) else {}
-    return {key: [item for item in value.get(key, []) if isinstance(item, str)] for key in ('refused', 'writeRefused')}
+        rows = {key: list(value.get(key, [])) for key in ('refused', 'writeRefused')}
+        if not all(isinstance(item, str) and item.startswith('/') for items in rows.values() for item in items):
+            raise ValueError('an inherited prefix is not an absolute path')
+        return rows
+    except (ValueError, AttributeError, TypeError) as error:
+        os.write(2, f'live-state isolation: malformed inherited {CONFIG}: {error}\n'.encode())
+        os._exit(97)
 
 
 def child_config(paths: object, environ: dict) -> dict:
@@ -66,6 +72,11 @@ def arm(paths: object, environ: dict = os.environ) -> None:
     environ[CONFIG] = json.dumps(child_config(paths, environ), sort_keys=True)
     environ[REPORTS] = _reports_directory(environ)
     environ['PYTHONDONTWRITEBYTECODE'] = '1'
+
+
+def set_current(label: str, environ: dict = os.environ) -> None:
+    """Name the test (or phase) that children started from now on belong to."""
+    environ[CURRENT] = label
 
 
 def reports(directory: str) -> dict[str, str]:

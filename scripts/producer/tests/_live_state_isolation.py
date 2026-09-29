@@ -180,9 +180,11 @@ def _run_with_private_roots(test: unittest.TestCase,
     """Run one test with fresh private roots, then remove them."""
     scope = _Scope(test.id(), test)
     STATE.scopes.append(scope)
+    children.set_current(test.id())
     try:
         outcome = STATE.originals['run'](test, result)
     finally:
+        children.set_current('outside test methods')
         STATE.scopes.remove(scope)
         scope.close()
     _report_swallowed(test, scope, outcome)

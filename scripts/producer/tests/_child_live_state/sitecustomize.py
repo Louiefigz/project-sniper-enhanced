@@ -10,23 +10,29 @@ This module imports only the standard library, adds nothing to ``sys.path`` and 
 runs exactly the code its own path selects. It only **refuses**, never redirects: an open, listing or write under
 the operator's live budget authority, pool record or pool namespace, or a write anywhere under
 ``~/.project-sniper``, prints ``live-state child tripwire: ...`` to stderr, writes one ``*.report`` file into the
-reports directory and ends the process with ``os._exit(97)`` before the system call. No ``except`` can absorb it,
-and the parent fails the run from the report file even when the child's exit status is ignored. A missing or
-malformed variable also exits 97 (fail closed). The interpreter's own ``sitecustomize`` (Homebrew's) is chained
-after installation. Not covered: a child started with ``-I`` or ``-S``, or whose environment drops
-``PYTHONPATH``, never loads this file (p0-records/live-root-readers.md). Nothing in the product imports it.
+reports directory and ends the process with ``os._exit(97)`` before the system call. No ``except`` can absorb it.
+The refusal is per thread: the reporting thread may only open its own report file, and any other thread that
+reaches a refused path waits on a lock before its system call until the process has exited. Each report names the
+test that was running when the child started (``SNIPER_TEST_CURRENT``); the parent checks the folder after each
+test, at the end of its run, and the suite wrappers check it again after the process exits. A missing or
+malformed variable also exits 97 (fail closed) and, when the reports folder is usable, leaves an install-failure
+report. The interpreter's own ``sitecustomize`` (Homebrew's) is chained after installation. Not covered: a child
+started with ``-I``, ``-S`` or ``-E``, or whose environment drops ``PYTHONPATH``; a non-Python child; a ``ctypes``
+call (no audit event); an open through a symlink that already existed. Nothing in the product imports it.
 
 The path matching mirrors ``_live_state_paths`` (``test_live_state_child_tripwire`` checks that both refuse the
 same spellings). Loaded under any other module name (that test does), nothing is installed.
 """
 from __future__ import annotations
 
+import _thread
 import fcntl
 import json
 import os
 import sys
 
-CONFIG, REPORTS = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS'
+CONFIG, REPORTS, CURRENT = 'SNIPER_TEST_CHILD_REFUSED', 'SNIPER_TEST_CHILD_REPORTS', 'SNIPER_TEST_CURRENT'
+LIVE_MARKS = ('/.project-sniper', '/sniper-native-work')  # the live roots' own names; never a reports folder
 REFUSED_EXIT = 97
 DATA_VOLUME = '/system/volumes/data'
 WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND
@@ -136,7 +142,8 @@ class Tripwire:
 
     def __init__(self, config: dict, reports: str) -> None:
         """Keep the validated tables and the reports directory; nothing is refused yet."""
-        self.config, self.reports, self.refusing = config, reports, False
+        self.config, self.reports = config, reports
+        self.reporter, self.report_file, self.gate = None, None, _thread.allocate_lock()
 
     def event_paths(self, event: str, args: tuple) -> list[str]:
         """Every canonical path an audit event names."""
@@ -164,30 +171,46 @@ class Tripwire:
         return None
 
     def __call__(self, event: str, args: tuple) -> None:
-        """Audit hook: a refused event is reported and ends the process before the system call."""
-        if self.refusing or event not in self.config['pathEvents']:
+        """Audit hook: a refused event is reported and ends the process before the system call.
+
+        Only the reporting thread re-enters, and only for its own report file; any other event of that thread
+        exits at once. Every other thread that reaches a refused path blocks on the gate before its system call.
+        """
+        if event not in self.config['pathEvents']:
             return
+        if self.reporter == _thread.get_ident():
+            if self.event_paths(event, args) == [canonical(self.report_file)]:
+                return
+            os._exit(REFUSED_EXIT)
         path = self.refused(event, args)
         if path is None:
             return
-        self.refusing = True  # the report's own open() re-enters this hook
-        self.report(f'live-state child tripwire: {event} {path} (pid {os.getpid()})')
+        self.gate.acquire()  # never released: the holder exits the process
+        self.report_file = report_name(self.reports)
+        self.reporter = _thread.get_ident()
+        write_report(self.report_file, f'live-state child tripwire: {event} {path} (pid {os.getpid()}; '
+                                       f'test {os.environ.get(CURRENT) or "unknown"})')
         os._exit(REFUSED_EXIT)
 
-    def report(self, line: str) -> None:
-        """One stderr line and one report file for the parent; a failure to write does not stop the exit."""
-        try:
-            sys.stderr.write(line + '\n')
-            sys.stderr.flush()
-        except (OSError, ValueError):
-            pass
-        name = os.path.join(self.reports, f'{os.getpid()}-{os.urandom(6).hex()}.report')
-        try:
-            descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            os.write(descriptor, (line + '\n').encode('utf-8', 'surrogateescape'))
-            os.close(descriptor)
-        except OSError:
-            pass
+
+def report_name(folder: str) -> str:
+    """A fresh report file name in ``folder``."""
+    return os.path.join(folder, f'{os.getpid()}-{os.urandom(6).hex()}.report')
+
+
+def write_report(name: str, line: str) -> None:
+    """One stderr line and one report file for the parent; a failure to write does not stop the exit."""
+    try:
+        sys.stderr.write(line + '\n')
+        sys.stderr.flush()
+    except (OSError, ValueError):
+        pass
+    try:
+        descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.write(descriptor, (line + '\n').encode('utf-8', 'surrogateescape'))
+        os.close(descriptor)
+    except OSError:
+        pass
 
 
 def reports_directory(text: str | None, tripwire: Tripwire) -> str:
@@ -218,11 +241,19 @@ def chain() -> None:
     spec.loader.exec_module(module)
 
 
+def install_failed(error: Exception) -> None:
+    """Fail closed: report the install failure (when the reports folder is usable) and exit 97."""
+    line = (f'live-state child tripwire could not install: {type(error).__name__}: {error} '
+            f'(pid {os.getpid()}; test {os.environ.get(CURRENT) or "unknown"})')
+    folder = os.environ.get(REPORTS) or ''
+    usable = os.path.isabs(folder) and os.path.isdir(folder) and not any(mark in canonical(folder) for mark in LIVE_MARKS)
+    write_report(report_name(folder) if usable else os.devnull, line)
+    os._exit(REFUSED_EXIT)
+
+
 if __name__ == 'sitecustomize':
     try:
         install()
-    except Exception as error:  # fail closed: a child without the tripwire must not run
-        sys.stderr.write(f'live-state child tripwire could not install: {type(error).__name__}: {error}\n')
-        sys.stderr.flush()
-        os._exit(REFUSED_EXIT)
+    except Exception as error:  # a child without the tripwire must not run
+        install_failed(error)
     chain()

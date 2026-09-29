@@ -33,10 +33,10 @@ _REAL = (_REAL_HOME + '/.project-sniper/production-budgets', _REAL_HOME + '/.pro
 def _real_guard(event: str, args: tuple) -> None:
     """Stop the probe (status 3) before any argument names the operator's real live state.
 
-    Setting an environment variable touches nothing: the isolation passes the refused live prefixes to its
-    children in one (p0-records E-001, reviews/CS1-REVIEW.md F1).
+    One exception: the isolation sets ``SNIPER_TEST_CHILD_REFUSED`` to the refused live prefixes for its children;
+    setting that one variable touches nothing (reviews/CS1-REVIEW.md F1, C1FIX-REVIEW.md n1).
     """
-    if event in ('os.putenv', 'os.unsetenv'):
+    if event == 'os.putenv' and args and os.fsdecode(args[0]) == 'SNIPER_TEST_CHILD_REFUSED':
         return
     for value in args:
         if isinstance(value, (str, bytes, os.PathLike)) and any(

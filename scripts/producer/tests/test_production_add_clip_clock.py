@@ -1,9 +1,10 @@
-"""M-052 (P1 Step B9, C8; C-2, X2, X121): an added Short gets its own clock; one same-job function.
+"""M-052 (P1 Step B9, C8; C-2, X2, X121, X144): an added Short gets its own clock; one same-job function.
 
 A Short added with ``add-clip`` is authorized as its own output: its 40 counted minutes start when it is added,
-the forecast admits it by name at any minute, and the same job (the same stable approval identity, or one in
-another clip's recorded lineage) is refused by name. Overlapping source seconds alone never refuse; the check
-is recorded on the adding event, shown in status and recorded as one ``coordinator-note`` decision.
+the forecast admits it by name at any minute, and the same job (the same folded title, source, transcript, word
+ranges and texts, whatever its derived seconds, or one in another clip's recorded lineage) is refused by name.
+Overlapping source seconds alone never refuse; the check is recorded on the adding event, shown in status and
+recorded as one ``coordinator-note`` decision (the recorded-check details: ``test_production_duplication_check``).
 
 Authority tests use real private files and kernel locks under a temporary root (``RegistryCase``); every
 approval, handle and recording is a TEST fixture.
@@ -16,13 +17,14 @@ from dataclasses import replace
 from unittest import mock
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
-from _budget_fixture import CHANGE_REASON, DIRECTOR, FINGERPRINT, approval, host_turn, table, task_spec
+from _budget_fixture import CHANGE_REASON, DIRECTOR, FINGERPRINT, approval, host_turn, source_sha, table, task_spec
 from test_native_budget_registry import RegistryCase, ns
 import native_batch
 from studio import native_budget_forecast as forecast
 from studio import native_budget_launch as launch
 from studio import native_budget_registry as registry
 from studio.native_budget_policy import admit_new_clip
+from studio.native_budget_report import batch_status
 from studio.production import api
 from studio.production.approvals import ADDED_REASON, ApprovalChange
 from studio.production.claims import ClaimRef, Enrollment
@@ -90,6 +92,15 @@ class OwnClockTests(AddClipCase):
                           status['C']['countedProductionSeconds']), ('own', 60.0, 60.0))
         self.assertEqual((status['A']['deadlineElapsed'], status['C']['deadlineElapsed']), (2400, 3600.0))
 
+    def test_status_full_wall_budget_counts_from_the_added_shorts_own_clock(self) -> None:
+        """X144 minor 4: at 2500 s (past the batch's minute 40), C added at 1200 s still has 1100 s to deliver."""
+        self.clock.advance(1200)
+        self.add('C', approval('C'))
+        self.clock.advance(1300)
+        budget = native_batch.cmd_status(ns(batch='batch-auth', full=True))['clips']['C']['production']['wallBudget']
+        self.assertEqual((budget['preparationRemainingSeconds'], budget['launchCutoffRemainingSeconds'],
+                          budget['deliveryRemainingSeconds']), (200.0, 980.0, 1100.0))
+
     def test_add_after_minute_25_is_admitted_by_name(self) -> None:
         """No batch-wall minute 25: an add at 1600 s is admitted; a Short that cannot fit is refused by name."""
         self.clock.advance(1600)
@@ -120,7 +131,7 @@ class OwnClockTests(AddClipCase):
 
 
 class SameJobTests(AddClipCase):
-    """C-2: only an effective duplicate (the same identity, or one in a clip's lineage) is refused."""
+    """C-2: only an effective duplicate (the same job identity, or one in a clip's lineage) is refused."""
 
     def test_same_identity_readd_refused(self) -> None:
         """Another clip's exact title and script under a new id is refused by name (add-clip and authorize-output)."""
@@ -134,6 +145,43 @@ class SameJobTests(AddClipCase):
             api.authorize_output(self.root, 'batch-auth', OutputAuthorization(
                 'Z', 'short', 'TEST own-clock Short', 'TEST operator', approval=approval('C')))
         self.assertEqual((sorted(self.record()['clips']), len(self.trail('clip-added'))), (['A', 'B', 'C'], 1))
+
+    def test_same_words_and_title_with_other_seconds_is_the_same_job(self) -> None:
+        """X144 MAJOR-1: A's title and words with every cut nudged 0.05 s into the word gaps are still A's job."""
+        nudged = approval('A', ranges=((9.95, 39.95), (49.95, 79.95)))
+        with self.assertRaisesRegex(registry.BudgetRefused, SAME_JOB.format('A')):
+            self.add('X', nudged)
+        self.assertNotIn('X', self.record()['clips'])
+
+    def test_a_whitespace_or_nfc_only_retitle_is_the_same_job(self) -> None:
+        """X144 O-7: titles compare after NFC, trimming and collapsing whitespace; a real new title is distinct."""
+        self.add('C', approval('C', title='TEST caf\u00e9 C'))
+        for title in ('  TEST   caf\u00e9 C ', 'TEST cafe\u0301 C'):
+            with self.subTest(title=title), self.assertRaisesRegex(registry.BudgetRefused, SAME_JOB.format('C')):
+                self.add('D', approval('C', title=title))
+        self.assertEqual(self.add('D', approval('C', title='TEST caf\u00e9 D'))['committed'], True)
+
+    def test_a_lineage_three_renames_back_is_the_same_job(self) -> None:
+        """Every earlier approval of C (four rows, the bound) stays C's job; each re-add is refused naming C."""
+        titles = ('TEST title C', 'TEST rename 1', 'TEST rename 2', 'TEST rename 3')
+        self.add('C', approval('C'))
+        for title in titles[1:]:
+            api.record_script_change(self.root, 'batch-auth', 'C', ApprovalChange(approval('C', title=title),
+                                                                                  CHANGE_REASON))
+        for title in titles:
+            with self.subTest(title=title), self.assertRaisesRegex(registry.BudgetRefused, SAME_JOB.format('C')):
+                self.add('D', approval('C', title=title))
+
+    def test_a_derived_short_gets_the_same_job_guard(self) -> None:
+        """E-LS-5: a Short derived from a Long of this run is refused as another clip's job like any Short."""
+        api.authorize_output(self.root, 'batch-auth', OutputAuthorization('L', 'long', 'TEST Long', 'TEST operator',
+                                                                          output_seconds=600.0))
+        self.mutate('batch-auth', lambda record: record['clips']['L']['output'].update(
+            lineage={'request': 'a' * 64, 'sources': [source_sha()]}))       # the Long's bound recording is A's
+        with self.assertRaisesRegex(registry.BudgetRefused, SAME_JOB.format('A')):
+            api.authorize_output(self.root, 'batch-auth', OutputAuthorization(
+                'X', 'short', 'TEST derived Short', 'TEST operator', approval=approval('A'), derived_from='L'))
+        self.assertNotIn('X', self.record()['clips'])
 
     def test_change_approval_rename_keeps_lineage_and_clock(self) -> None:
         """A rename goes through change-approval: the clock stays; the old and new identities both stay that job."""
@@ -158,14 +206,16 @@ class SameJobTests(AddClipCase):
         event = self.trail('clip-added')[-1]
         self.assertEqual((added['duplicationCheck'], event['duplicationCheck']), (expected, expected))
         decisions = self.trail('coordination-decision')
-        self.assertEqual((len(decisions), added['decision']), (1, decisions[0]))
+        self.assertEqual((added['decisions'], added['pendingDecisions']), (decisions, []))
         self.assertEqual({key: decisions[0][key] for key in ('decisionId', 'outputId', 'kind', 'author', 'refs')},
                          {'decisionId': 'duplication-check.' + event['approval'][:32], 'outputId': 'T',
                           'kind': 'coordinator-note', 'refs': [],
                           'author': {'role': 'operator', 'taskId': None, 'epoch': None, 'handle': None,
                                      'recordedBy': 'TEST coordinator'}})
         status = native_batch.cmd_status(ns(batch='batch-auth'))['clips']
-        self.assertEqual((status['T']['duplicationCheck'], status['A']['duplicationCheck']), (expected, None))
+        self.assertEqual((status['T']['duplicationCheck'], 'duplicationCheck' in status['A']), (expected, False))
+        waited = batch_status(self.record(), 0.0)['clips']        # what wait and close show: no trail, no key
+        self.assertEqual(['duplicationCheck' in waited[clip] for clip in ('A', 'T')], [False, False])
 
     def test_same_script_new_title_via_add_clip_is_a_distinct_job_with_recorded_duplication_check(self) -> None:
         """The title is part of the identity: the same script under a new title is a distinct job on its own clock."""
@@ -179,6 +229,7 @@ class SameJobTests(AddClipCase):
         expected = [row('C', 30.0, 'same', 'different'), row('D', 30.0, 'same', 'different')]
         self.assertEqual((authorized['duplicationCheck'], self.trail('output-authorized')[-1]['duplicationCheck']),
                          (expected, expected))
+        self.assertEqual(native_batch.cmd_status(ns(batch='batch-auth'))['clips']['E']['duplicationCheck'], expected)
         self.assertEqual([item['outputId'] for item in self.trail('coordination-decision')], ['D', 'E'])
 
 
@@ -192,8 +243,10 @@ class ReplayTests(AddClipCase):
         before = [path.read_bytes() for path in files]
         self.clock.advance(5)                                               # a lost acknowledgement, then a retry
         again = self.add('D', approval('D', title='TEST trim of A', **script(12, 39, (50, 79))))
-        self.assertEqual((again['committed'], again['replayed'], again['output'], again['approval'], again['decision']),
-                         (False, True, first['output'], first['approval'], None))
+        self.assertEqual((again['committed'], again['replayed'], again['output'], again['approval']),
+                         (False, True, first['output'], first['approval']))
+        self.assertEqual((again['duplicationCheck'], again['decisions'], again['pendingDecisions']),
+                         (first['duplicationCheck'], [], []))
         self.assertEqual([path.read_bytes() for path in files], before)    # nothing committed, nothing recorded
 
     def test_same_id_other_approval_conflicts(self) -> None:
@@ -207,7 +260,7 @@ class ReplayTests(AddClipCase):
     def test_a_new_script_is_admitted(self) -> None:
         """A script no clip overlaps is admitted with a null check and no decision."""
         added = self.add('C', approval('C'))
-        self.assertEqual((added['committed'], added['duplicationCheck'], added['decision']), (True, None, None))
+        self.assertEqual((added['committed'], added['duplicationCheck'], added['decisions']), (True, None, []))
         self.assertEqual((self.trail('clip-added')[-1]['duplicationCheck'], self.trail('coordination-decision')),
                          (None, []))
 

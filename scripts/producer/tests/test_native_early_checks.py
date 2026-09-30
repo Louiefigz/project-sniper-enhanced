@@ -101,7 +101,7 @@ class EarlyReportTests(FontProjectCase):
         self.assertEqual(report['checks']['fonts']['status'], 'fonts-ready')
         self.assertEqual([row['code'] for row in report['defects']], ['audio-stage-failed'])
         self.assertFalse(any(report['claims'].values()))
-        self.assertEqual(report['checks']['componentSamples']['status'], 'not-run')
+        self.assertEqual(report['checks']['revealProbe'], {'status': 'not-applicable', 'reason': 'no catalog mounts'})
         saved = json.loads((self.base / 'early/early-check-report.json').read_text())
         self.assertEqual(saved['defects'], report['defects'])
 
@@ -114,6 +114,63 @@ class EarlyReportTests(FontProjectCase):
         self.assertEqual(report['checks']['staticPreflight']['status'], 'blocked')
         self.assertTrue(any(row['check'] == 'staticPreflight' and 'mark.svg' in json.dumps(row)
                             for row in report['defects']))
+
+
+class RevealReportTests(unittest.TestCase):
+    """Report schema 2: the runtime reveal probe is one more early check (M-068); every other check is stubbed."""
+
+    def setUp(self) -> None:
+        """A project folder with every non-reveal check stubbed clean, so no child process or font tool runs."""
+        self.base = Path(self.enterContext(tempfile.TemporaryDirectory(dir='/private/tmp'))).resolve()
+        self.project = self.base / 'project'
+        self.project.mkdir()
+        self.hint = {'check': 'staticPreflight', 'severity': 'warning', 'code': 'gsap_timeline_set_initial_hide',
+                     'file': 'compositions/numbers-q1.html', 'message': 'TEST initial hide inside the paused timeline'}
+        stubs = {'static_check': {'status': 'static-checks-pass', 'findings': [self.hint]},
+                 'audio_check': {'status': 'sealed-compatible', 'audioReviewRequired': False},
+                 'capture_check': {'status': 'not-run'}, 'canary_check': {'status': 'pass-current'}}
+        for name, value in stubs.items():
+            self.enterContext(mock.patch.object(checks, name, return_value=value))
+        self.enterContext(mock.patch('studio.native_font_readiness.font_readiness',
+                                     return_value={'status': 'fonts-ready', 'defects': []}))
+        self.enterContext(mock.patch('studio.native_font_readiness.declared_text_sizes', return_value={'declarations': []}))
+
+    def early(self, probe: dict, name: str) -> tuple[dict, mock.Mock]:
+        """One early report into a new folder with the reveal check returning ``probe``."""
+        with mock.patch.object(checks, 'reveal_check', return_value=probe) as reveal:
+            return checks.early_report(checks.EarlyCheckOptions(self.project, self.base / name)), reveal
+
+    def test_reveal_probe_defect_sets_defects_found(self) -> None:
+        """A probe finding blocks; the lint warning is passed as a hint only; a probe that did not run blocks too."""
+        finding = {'condition': 'first-frame-flash', 'mount': 'sn-numbers-q1', 'element': 'hf-panel', 'frame': 745,
+                   'localFrame': 0, 'order': 'forward', 'opacity': [1, 0]}
+        clean, reveal = self.early({'status': 'reveal-probe-pass', 'findings': []}, 'clean')
+        self.assertEqual((clean['status'], [row['code'] for row in clean['defects']]),
+                         ('no-early-defects-found', ['gsap_timeline_set_initial_hide']))
+        options = reveal.call_args.args[0]
+        self.assertEqual((options.project, options.output, options.lint_warnings),
+                         (self.project, self.base / 'clean/reveal', (self.hint,)))
+        found, _ = self.early({'status': 'premature-reveal-found', 'findings': [finding], 'lintWarnings': [self.hint],
+                               'mounts': [{'id': 'sn-numbers-q1', 'file': 'compositions/numbers-q1.html'}]}, 'found')
+        self.assertEqual(found['status'], 'defects-found')
+        [row] = [row for row in found['defects'] if row['check'] == 'revealProbe']
+        self.assertEqual((row['code'], row['severity'], row['frame'], row['lintHint']),
+                         ('premature-reveal', 'error', 745, self.hint))
+        failed, _ = self.early({'status': 'failed', 'error': 'TEST browser crashed'}, 'failed')
+        self.assertEqual(failed['status'], 'defects-found')
+        self.assertIn({'check': 'revealProbe', 'severity': 'error', 'code': 'reveal-probe-failed',
+                       'message': 'TEST browser crashed'}, failed['defects'])
+
+    def test_report_schema_version_two(self) -> None:
+        """Schema 2 carries ``revealProbe`` in place of the component-samples stub; claims stay false."""
+        probe, error = {'status': 'not-applicable', 'reason': 'no catalog mounts'}, {**self.hint, 'severity': 'error'}
+        with mock.patch.object(checks, 'static_check', return_value={'status': 'blocked', 'findings': [self.hint, error]}):
+            report, reveal = self.early(probe, 'early')
+        self.assertEqual((report['schemaVersion'], report['checks']['revealProbe']), (2, probe))
+        self.assertEqual(reveal.call_args.args[0].lint_warnings, (self.hint,))  # an error row is never a hint
+        self.assertNotIn('componentSamples', report['checks'])
+        self.assertFalse(any(report['claims'].values()))
+        self.assertEqual(json.loads((self.base / 'early/early-check-report.json').read_text()), report)
 
 
 class CanaryTests(unittest.TestCase):

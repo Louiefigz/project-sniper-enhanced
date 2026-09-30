@@ -78,20 +78,35 @@ def _frame_files(frames_dir: str) -> list[tuple[int, str]]:
     return out
 
 
-def _largest_face(detector: "cv2.FaceDetectorYN", frame) -> "FaceSample | None":
-    """Dominant (largest-area) YuNet face in a BGR frame, or None."""
+def all_faces(detector: "cv2.FaceDetectorYN", frame: "cv2.typing.MatLike") -> list[dict]:
+    """Every YuNet face in a BGR frame as ``{x, y, w, h, score}``, in frame pixels.
+
+    The detector's own score threshold is already applied. The caller creates the
+    detector, so the model path is the caller's (speaker observations pass
+    ``FACE_TRACK["yunet_model_path"]``; this function reads no environment).
+    """
     h, w = frame.shape[:2]
     detector.setInputSize((w, h))
     _, faces = detector.detect(frame)
-    if faces is None or len(faces) == 0:
+    if faces is None:
+        return []
+    return [{"x": float(face[0]), "y": float(face[1]), "w": float(face[2]),
+             "h": float(face[3]), "score": float(face[14])} for face in faces]
+
+
+def _largest_face(detector: "cv2.FaceDetectorYN", frame: "cv2.typing.MatLike") -> "FaceSample | None":
+    """Dominant (largest-area) YuNet face in a BGR frame, or None."""
+    h, w = frame.shape[:2]
+    faces = all_faces(detector, frame)
+    if not faces:
         return None
-    best = max(faces, key=lambda f: float(f[2]) * float(f[3]))
-    fw, fh = float(best[2]), float(best[3])
+    best = max(faces, key=lambda f: f["w"] * f["h"])
+    fw, fh = best["w"], best["h"]
     return FaceSample(
         t=0.0, present=True, area=round((fw * fh) / float(w * h), 5),
-        cx=round((float(best[0]) + fw / 2.0) / w, 4),
-        cy=round((float(best[1]) + fh / 2.0) / h, 4),
-        score=round(float(best[14]), 3), n_faces=len(faces))
+        cx=round((best["x"] + fw / 2.0) / w, 4),
+        cy=round((best["y"] + fh / 2.0) / h, 4),
+        score=round(best["score"], 3), n_faces=len(faces))
 
 
 def sample_face_areas(frames_dir: str, fps: float, score: float) -> list[FaceSample]:

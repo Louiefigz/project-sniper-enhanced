@@ -7,7 +7,13 @@ function requireValue(value, message) {
   if (!value) throw new Error(`Native export admission: ${message}`);
 }
 
-function readRecord(file) {
+/**
+ * Read one owner or request record safely: an absolute, canonical, regular file (not a link) of at most 64 MiB.
+ * Shared with the reveal probe's owned-inspection guard (M-068).
+ * @param {string} file absolute path
+ * @returns {{value: any, sha: string}} the parsed JSON and the sha256 of the bytes read
+ */
+export function readRecord(file) {
   requireValue(typeof file === 'string' && path.isAbsolute(file), 'missing absolute owner/request path');
   const stat = fs.lstatSync(file);
   requireValue(stat.isFile() && !stat.isSymbolicLink() && stat.size <= 64 * 1024 ** 2

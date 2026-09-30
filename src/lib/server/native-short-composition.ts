@@ -5,6 +5,8 @@ import type { ProposalWordOccurrence } from "./guided-proposal-speech";
 import { renderNativeTitleCard, type NativeTitleCard } from "./native-title-card";
 import { assertNativeCaptionPresentation, nativeCaptionDisplayMap, nativeCaptionSuppressions,
   type NativeCaptionDisplayCorrection, type NativeCaptionSuppression } from "./native-caption-display";
+import { NativeCheckError } from "./native-check-error";
+import { nativeFrameSeconds as seconds, nativeRootDocument } from "./native-root-document";
 
 export type NativeBox = [number, number, number, number];
 export interface NativeWindow { startFrame: number; endFrame: number }
@@ -48,9 +50,6 @@ const escape = (value: string) => value.replaceAll("&", "&amp;").replaceAll("<",
   .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 const identity = (id: string) => `id="${id}" data-hf-id="hf-${id}"`;
 const geometry = ([x, y, width, height]: NativeBox) => `left:${x}px;top:${y}px;width:${width}px;height:${height}px;`;
-function seconds(frame: number, frameRate: string): number {
-  const [num, den] = frameRate.split("/").map(Number); return frame * den / num;
-}
 function timing(row: NativeWindow, input: NativeCanvasInput, alignMediaEnd = false): string {
   const start = seconds(row.startFrame, input.frameRate), end = seconds(row.endFrame, input.frameRate);
   const duration = seconds(row.endFrame - row.startFrame, input.frameRate);
@@ -158,6 +157,8 @@ function validate(input: NativeCanvasInput): void {
       if (![pose.y, pose.scale, pose.opacity].every(Number.isFinite) || Math.abs(pose.y) > 1920
           || pose.scale < .1 || pose.scale > 2 || pose.opacity < 0 || pose.opacity > 1) throw new Error("Native pose exceeds finite bounds");
     }
+    if (motion.from.opacity === 0 && motion.startFrame > target.startFrame) throw new NativeCheckError("motion-cue-premature-reveal",
+      `Native motion ${motion.id} fades in from opacity 0 at frame ${motion.startFrame} but its clip is visible from frame ${target.startFrame}; start the cue on the clip's first frame`);
   }
 }
 
@@ -263,11 +264,9 @@ export function buildNativeCanvas(input: NativeCanvasInput): string {
   }).join("\n");
   const text = input.text.map((row) => `<div ${identity(row.id)} class="clip text ${row.role}" ${timing(row, input)} data-track-index="3" style="${geometry(row.box)}${typography(row.style)}">${escape(row.text)}</div>`).join("\n");
   const motion = input.motion.map((row) => `tl.fromTo("#${row.id}",${motionPose(row.from)},{...${motionPose(row.to)},duration:${seconds(row.durationFrames, input.frameRate)},ease:${JSON.stringify(row.ease)},immediateRender:false},${seconds(row.startFrame, input.frameRate)});`).join("\n");
-  const duration = seconds(input.totalFrames, input.frameRate);
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escape(input.title)}</title><script src="assets/gsap.min.js"></script>
-<style>@font-face{font-family:Inter;src:url('assets/Inter-Bold.ttf');font-weight:700;font-display:block}${regularFont}
-*{box-sizing:border-box}body{margin:0;background:${input.background}}#native-canvas{position:relative;width:1080px;height:1920px;overflow:hidden;background:${input.background};font-family:Inter}.crop{position:absolute;overflow:hidden}.shape,.text{position:absolute}.text{white-space:pre-line;overflow-wrap:normal}.caption{z-index:8}.hook{z-index:5}</style></head>
-<body><div ${identity("native-canvas")} data-composition-id="native-canvas" data-width="1080" data-height="1920" data-fps="${1 / seconds(1, input.frameRate)}" data-duration="${duration}">
-${footage(input)}${shapes}${text}${titleCard}${captions(input)}</div><script>const tl=gsap.timeline({paused:true});${motion}\n${captionHighlights(input)}\n${exits(input)}
-tl.to({}, {duration:${duration}}, 0);window.__timelines=window.__timelines||{};window.__timelines["native-canvas"]=tl;</script></body></html>\n`;
+  // The shared skeleton (native-root-document.ts) is also the reveal probe's root, so both load identical bytes.
+  return nativeRootDocument({ title: escape(input.title), background: input.background, fontFaces: regularFont, head: "",
+    frameRate: input.frameRate, totalFrames: input.totalFrames,
+    content: `${footage(input)}${shapes}${text}${titleCard}${captions(input)}`,
+    timeline: `${motion}\n${captionHighlights(input)}\n${exits(input)}` });
 }

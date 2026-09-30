@@ -1,8 +1,9 @@
 """One consolidated early defect report for a built native Short, before previews.
 
 Runs the static package preflight, prepares (or confirms) the sealed whole-program
-audio stage, checks font readiness and reports the route canary for the current
-engine/runtime/tool identity. Writes ONE ``early-check-report.json``. It never
+audio stage, checks font readiness, reports the route canary for the current
+engine/runtime/tool identity and seeks the catalog mounts once in the pinned runtime
+for premature reveals (report schema 2). Writes ONE ``early-check-report.json``. It never
 claims motion, layout, semantic or listening quality; those need rendered review.
 Exit status: 0 no early defects found, 1 defects found, 2 incomplete or invalid use.
 """
@@ -19,13 +20,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from audio.mastering_profile import MASTERING_PROFILE_IDENTITIES, NATIVE_SHORT_MASTERING_PROFILE
 from cut_preview_io import real_directory, write_new
+from studio.native_reveal_probe import RevealProbeOptions, reveal_check, reveal_defects
 from studio.native_stage_evidence import require
 
 CLAIMS = {'motionQualityProven': False, 'semanticQualityProven': False, 'layoutQualityProven': False,
           'listeningApproved': False, 'renderApproved': False}
-COMPONENT_SAMPLES = {'status': 'not-run', 'reason': 'Pre-capture component rendering samples are not implemented. '
-                     'Title/connector reverse seeks and phone-size text are diagnosed from captured references '
-                     '(--capture-from, and automatically after every export capture) and from declared CSS sizes.'}
 
 
 @dataclass(frozen=True)
@@ -141,6 +140,7 @@ def defects(checks: dict) -> list[dict]:
     rows.extend({'check': 'phoneText', 'severity': 'warning', 'code': 'text-declared-below-phone-floor', **row}
                 for row in checks['phoneText']['declarations'])
     rows.extend(capture_defects(checks['captureDiagnostics']))
+    rows.extend(reveal_defects(checks['revealProbe']))
     if checks['canary']['status'] in ('no-current-pass', 'failed'):
         rows.append({'check': 'canary', 'severity': 'error', 'code': 'canary-not-current',
                      'message': 'No verified route canary pass exists for the current engine/runtime/tools.'})
@@ -156,15 +156,17 @@ def early_report(options: EarlyCheckOptions) -> dict:
     options.output.mkdir(mode=0o700)
     started = time.monotonic()
     from studio.native_font_readiness import declared_text_sizes
-    checks = {'staticPreflight': static_check(options), 'audio': audio_check(options),
+    static = static_check(options)
+    hints = tuple(row for row in static['findings'] if row['severity'] == 'warning')  # lint points where; probe decides
+    checks = {'staticPreflight': static, 'audio': audio_check(options),
               'fonts': font_readiness(options.project), 'phoneText': declared_text_sizes(options.project),
               'captureDiagnostics': capture_check(options), 'canary': canary_check(options.canary_fixture),
-              'componentSamples': COMPONENT_SAMPLES}
+              'revealProbe': reveal_check(RevealProbeOptions(options.project, options.output / 'reveal', hints))}
     found = defects(checks)
     incomplete = checks['fonts']['status'] == 'incomplete' or checks['canary']['status'] == 'not-configured'
     status = 'defects-found' if any(row['severity'] == 'error' for row in found) else \
         'incomplete' if incomplete else 'no-early-defects-found'
-    report = {'schemaVersion': 1, 'scope': 'native-short-early-defect-report', 'status': status,
+    report = {'schemaVersion': 2, 'scope': 'native-short-early-defect-report', 'status': status,
               'project': str(options.project), 'elapsedSeconds': time.monotonic() - started,
               'defects': found, 'checks': checks, 'claims': CLAIMS}
     write_new(options.output / 'early-check-report.json', report)

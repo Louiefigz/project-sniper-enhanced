@@ -22,8 +22,11 @@ import { inspectExternalMediaOrigin } from "../../src/lib/server/external-media-
 import { assertNativeBuildAuthority, nativeDraftCheck } from "../../src/lib/server/native-short-draft";
 import { nativeShortLineage } from "../../src/lib/server/native-short-lineage";
 import { stampStudioHostIds } from "../../src/lib/server/native-studio-host-stamp";
+import { assertNativeRevealDeclarations } from "../../src/lib/server/native-reveal-declarations";
+import { nativeCatalogFiles } from "../../src/lib/server/native-catalog-files";
+import { writeNativeRevealProbeProject } from "../../src/lib/server/native-reveal-probe-project";
 
-const USAGE = "Usage: native-short.ts prepare <producer-directory> [--manifest <canonical asset_manifest.json>] | prepare-guided|prepare-longform <producer-directory> | prepare-related <producer-directory> <related-context.json> | prepare-related-group <group-draft.json> <new-group-directory> | check-longform <request-directory> | inspect-origin <external-media/ASSET.json> | prepare-media <plan.json> <new-media-directory> | build-guided <producer-dir> <visual-plan.json> | measure <plan.json> | build|build-draft <plan.json> <new-project> [--parent <project>] | check|check-export|check-draft <project> | check-long-review <review.json> <plan-hash> | check-long-section-review <review.json> <scope-hash> | origin|origin-web <input.json> <new-receipt.json> | studio-ids <authored.html> <new.html>";
+const USAGE = "Usage: native-short.ts prepare <producer-directory> [--manifest <canonical asset_manifest.json>] | prepare-guided|prepare-longform <producer-directory> | prepare-related <producer-directory> <related-context.json> | prepare-related-group <group-draft.json> <new-group-directory> | check-longform <request-directory> | inspect-origin <external-media/ASSET.json> | prepare-media <plan.json> <new-media-directory> | build-guided <producer-dir> <visual-plan.json> | measure <plan.json> | build|build-draft <plan.json> <new-project> [--parent <project>] | check|check-export|check-draft <project> | check-long-review <review.json> <plan-hash> | check-long-section-review <review.json> <scope-hash> | origin|origin-web <input.json> <new-receipt.json> | studio-ids <authored.html> <new.html> | reveal-probe-project <plan.json|project> <new-dir>";
 /** Fixed in-process test seam only; parsed input cannot replace a service. */
 export const nativeShortCommandServices = { buildGuided: buildGuidedNativeProject };
 
@@ -48,6 +51,7 @@ function executeOperation(operation: string, input: string, destination: string,
   if (operation === "prepare-longform") return prepareNativeLongformRequest(path.resolve(input), process.cwd());
   if (operation === "check-longform") return checkNativeLongformRequest(path.resolve(input));
   if (operation === "inspect-origin") return inspectExternalMediaOrigin(path.resolve(input));
+  if (operation === "reveal-probe-project") return writeNativeRevealProbeProject(path.resolve(input), path.resolve(destination));
   if (operation === "prepare" || operation === "prepare-related") {
     const producerDir = path.resolve(input);
     return prepareNativeShortRequest({ producerDir, intent: storedAutoEditIntent(producerDir), repo: process.cwd(),
@@ -62,7 +66,8 @@ function executeOperation(operation: string, input: string, destination: string,
     return { status: "observations-awaiting-editorial-pacing", ...nativePacingBindings(plan),
       prebuildPlanHash: nativeShortPrebuildPlanHash(plan), assetUseRevisionHash: nativeAssetUseRevisionHash(plan),
       storyRevisionHash: nativeStoryRevisionHash(plan), observations: measureNativeShortPacing(plan.canvas),
-      visualWindows: nativePacingVisualWindows(plan, buildNativeCanvas(plan.canvas) + (plan.extension?.markup ?? "")) };
+      visualWindows: nativePacingVisualWindows(plan, buildNativeCanvas(plan.canvas) + (plan.extension?.markup ?? "")),
+      revealDeclarations: assertNativeRevealDeclarations(plan, nativeCatalogFiles(plan.catalogFiles)) };
   } else if (operation === "origin" || operation === "origin-web") {
     const record = JSON.parse(readFileSync(path.resolve(input), "utf8"));
     return operation === "origin" ? writeNativeAssetOrigin(record, destination) : bindNativeWebOrigin(record, destination);
@@ -111,8 +116,8 @@ export async function executeNativeShortCommand(argv: string[]) {
   if ((operation === "build" || operation === "build-draft") && argv.length === 5 && argv[3] === "--parent") {
     return executeOperation(operation, input, destination, path.resolve(argv[4]));
   }
-  const withDestination = ["prepare-related", "prepare-related-group", "prepare-media", "build", "build-draft", "build-guided", "origin", "origin-web"].includes(operation);
-  if (!input || !["prepare", "prepare-related", "prepare-related-group", "prepare-guided", "prepare-longform", "check-longform", "inspect-origin", "prepare-media", "measure", "build", "build-draft", "build-guided", "check", "origin", "origin-web"].includes(operation)
+  const withDestination = ["prepare-related", "prepare-related-group", "prepare-media", "build", "build-draft", "build-guided", "origin", "origin-web", "reveal-probe-project"].includes(operation);
+  if (!input || !["prepare", "prepare-related", "prepare-related-group", "prepare-guided", "prepare-longform", "check-longform", "inspect-origin", "prepare-media", "measure", "build", "build-draft", "build-guided", "check", "origin", "origin-web", "reveal-probe-project"].includes(operation)
       || argv.length !== (withDestination ? 3 : 2)) throw new Error(USAGE);
   return executeOperation(operation, input, destination);
 }

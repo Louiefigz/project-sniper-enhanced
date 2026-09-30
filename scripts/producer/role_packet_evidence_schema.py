@@ -6,26 +6,47 @@ inside their source. The words themselves are the author's; nothing here derives
 judges them. Requirement revision `approved-content-production-2026-09-27`: given titles and
 scripts are NOT shared evidence; they live only in the batch authority. Every authored field here is
 a claim a critic may raise as material.
+
+Schema version 2 (P2-07) is what new drafts use. It adds speaker certainty and basis, face regions and
+protected caption phrases, validated by role_packet_evidence_speakers, plus the engine-observed coverage.
+Version 1 drafts and records keep exactly today's rules, so historical records stay readable (ST-2).
 """
 from __future__ import annotations
+
+from types import ModuleType
 
 from role_packet_files import ArtifactError
 
 TEXT_LIMIT = 2000
 LIST_LIMIT = 64
 INTERVAL_LIMIT = 1024
+SCHEMA_VERSION = 2
+SCHEMA_VERSIONS = (1, 2)
 AUTHORED = ("author", "sourceScan", "speakers", "reference", "decisions", "limits")
+V2_AUTHORED = ("captionPhrases",)
+V2_FIELDS = ("captionPhrases", "coverage")
 DRAFT_KEYS = {"schemaVersion", "kind", "version", "record", "manifest", "sources", "transcripts", "bound", "guide",
-              *AUTHORED}
+              *AUTHORED, *V2_FIELDS}
 CITE = 'a bound file {"file": key} or a timecoded source observation {"source": id, "atSeconds": t}'
 GUIDE = {
     "author": "Your session id and identity. Shared evidence is input for authors and critics, never a review.",
     "sourceScan": "How the whole recording was scanned (method; coverage such as range and sample spacing) and each "
                   f"fact it found as {{statement, evidence}}, where every evidence item is {CITE}. limits: what it "
                   "cannot show. These are claims a critic may check and dispute, never a reason to skip inspection.",
-    "speakers": "people: {id, description, visibility, evidence} with evidence as above. intervals (optional): source "
-                "seconds with speaker (a people id, or null when unresolved) and visible people ids. listening: true only "
+    "speakers": "people: {id, description, visibility, evidence} with evidence as above, plus an optional faceRegion "
+                "{source, xRange: [x0, x1]} in source pixels. intervals: source seconds with speaker (a people id, or "
+                "null), visible people ids, note, certainty (established|probable|unresolved; unresolved exactly when "
+                "speaker is null), basis (listening|operator-statement|visual-and-stereo|transcript-only) and evidence "
+                "(0-64 items as above). basis listening needs listening true; established needs basis listening, or "
+                "operator-statement citing a bound file; transcript-only is never established. listening: true only "
                 "if source audio was actually heard; stills and transcripts are not listening. limits are required.",
+    "captionPhrases": "Protected caption phrases, each {source, sourceWordIndexes: [first, last] naming 2-6 transcript "
+                      "words, display, decidedBy: operator|coordinator, files: 1+ bound keys recording the decision, "
+                      "note}; at most 64, never overlapping.",
+    "coverage": "Leave null: the engine observes it at seal from --batch B. It lists the batch's clips approved on "
+                "the source the bound speaker-observations measured (clips on other sources are outside this "
+                "record). The intervals must hold the midpoint of each listed clip's retained words exactly once, and "
+                "the observations must measure those scripts on their approved transcript.",
     "reference": "The selected reference/title family and why, citing at least one bound file; null when none was selected.",
     "decisions": "Items decided before production (topic, statement, bound files): spellings, audio treatment, layout. "
                  "They are authored inputs recorded once; a critic may raise any of them as material. Given titles "
@@ -39,11 +60,22 @@ class EvidenceError(ArtifactError):
 
 
 def draft_fields() -> dict:
-    """The structure-only template; every authored value starts empty."""
+    """The structure-only version 2 template; every authored value starts empty and coverage is the engine's."""
     return {"guide": dict(GUIDE), "author": {"sessionId": None, "identity": None},
             "sourceScan": {"method": None, "coverage": None, "facts": [], "limits": []},
             "speakers": {"method": None, "listening": None, "people": [], "intervals": [], "limits": []},
-            "reference": {"statement": None, "files": [], "limits": []}, "decisions": [], "limits": []}
+            "reference": {"statement": None, "files": [], "limits": []}, "decisions": [], "limits": [],
+            "captionPhrases": [], "coverage": None}
+
+
+def draft_keys(version: int) -> set[str]:
+    """The keys a draft of this schema version may carry; version 1 has no captionPhrases or coverage."""
+    return set(DRAFT_KEYS) if version == 2 else set(DRAFT_KEYS) - set(V2_FIELDS)
+
+
+def authored_keys(version: int) -> tuple[str, ...]:
+    """The authored fields a record of this schema version stores."""
+    return (*AUTHORED, *V2_AUTHORED) if version == 2 else AUTHORED
 
 
 def exact(value: object, keys: tuple[str, ...], label: str) -> dict:
@@ -171,18 +203,39 @@ def decisions(value: object, bound: set[str]) -> list[dict]:
              "files": cited(row["files"], f"decisions[{index}].files", bound, required=True)} for index, row in enumerate(rows)]
 
 
-def authored_fields(value: dict, current: dict) -> dict:
-    """Validate the authored claim fields (identical at seal and at bind) against fresh observations."""
+def field_context(current: dict) -> dict:
+    """What authored fields are checked against: the bound keys, each source's duration and the observations."""
     bound = {row["key"] for row in current["bound"]}
     durations = {row["id"]: row["duration"] if isinstance(row.get("duration"), (int, float)) else None
                  for row in current["sources"]}
-    context = {"bound": bound, "durations": durations}
+    return {"bound": bound, "durations": durations, "current": current}
+
+
+def version_two() -> ModuleType:
+    """P2-07's module (role_packet_evidence_speakers); imported on use because it imports this module."""
+    import role_packet_evidence_speakers
+    return role_packet_evidence_speakers
+
+
+def authored_fields(value: dict, current: dict) -> dict:
+    """Validate the authored claim fields (identical at seal and at bind) against fresh observations.
+
+    Dispatches by ``schemaVersion``: 2 validates speakers and captionPhrases with role_packet_evidence_speakers
+    (P2-07); any other version keeps today's version 1 rules, in today's order.
+    """
+    context = field_context(current)
+    bound = context["bound"]
+    two = version_two() if value.get("schemaVersion") == 2 else None
     author = exact(value.get("author"), ("sessionId", "identity"), "author")
     scan = exact(value.get("sourceScan"), ("method", "coverage", "facts", "limits"), "sourceScan")
-    return {"author": {"sessionId": text(author["sessionId"], "author.sessionId"),
-                       "identity": text(author["identity"], "author.identity")},
-            "sourceScan": {"method": text(scan["method"], "sourceScan.method"),
-                           "coverage": text(scan["coverage"], "sourceScan.coverage"),
-                           "facts": fact_rows(scan["facts"], context), "limits": texts(scan["limits"], "sourceScan.limits")},
-            "speakers": speakers(value.get("speakers"), context), "reference": reference(value.get("reference"), bound),
-            "decisions": decisions(value.get("decisions"), bound), "limits": texts(value.get("limits"), "limits")}
+    fields = {"author": {"sessionId": text(author["sessionId"], "author.sessionId"),
+                         "identity": text(author["identity"], "author.identity")},
+              "sourceScan": {"method": text(scan["method"], "sourceScan.method"),
+                             "coverage": text(scan["coverage"], "sourceScan.coverage"),
+                             "facts": fact_rows(scan["facts"], context), "limits": texts(scan["limits"], "sourceScan.limits")},
+              "speakers": (two.speakers_v2 if two else speakers)(value.get("speakers"), context),
+              "reference": reference(value.get("reference"), bound),
+              "decisions": decisions(value.get("decisions"), bound), "limits": texts(value.get("limits"), "limits")}
+    if two:
+        fields["captionPhrases"] = two.caption_phrases(value.get("captionPhrases"), context)
+    return fields

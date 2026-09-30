@@ -44,7 +44,7 @@ SUPERVISED_NEEDS = ('exactChildHandle', 'interruptWithTerminalConfirmation')
 UNATTENDED_NEEDS = (*SUPERVISED_NEEDS, 'launchIdempotencyCallerSessionId', 'eventReplayAfterDisconnect',
                     'toolCleanupAfterCooperativeInterrupt', 'toolCleanupAfterHostProcessKilled',
                     'nestedSubagentCleanup', 'coordinatorDeathDelayedRestart', 'absoluteAiExpiry', 'directorEnrollment')
-MODES = ('unattended', 'supervised', 'record-only')
+MODES = ('unattended', 'supervised', 'declared', 'record-only')
 # A host child starts from exactly these variables: an inherited provider key silently switches Claude
 # to API-key billing, and a host-session variable would bind the child to the operator's session.
 CHILD_ENVIRONMENT = ('HOME', 'USER', 'LOGNAME', 'SHELL', 'TMPDIR', 'LANG', 'PATH')
@@ -85,13 +85,16 @@ def _count(value: object) -> bool:
 
 
 def valid_handle(value: object) -> bool:
-    """A process handle {type, pid, pgid, started} or a host handle {type, host, thread, turn}."""
+    """A process handle {type, pid, pgid, started}, a host handle {type, host, thread, turn} or a declared handle."""
     if type(value) is not dict:
         return False
     if value.get('type') == 'process':
         return set(value) == {'type', 'pid', 'pgid', 'started'} and all(
             type(value[key]) is int and 0 < value[key] <= MAX_PID for key in ('pid', 'pgid')) \
             and _text(value['started'], 64)
+    if value.get('type') == 'declared':
+        from studio.production.declared_identity import valid_declared  # lazy: that module imports this one
+        return valid_declared(value)
     return value.get('type') == 'host' and set(value) == {'type', 'host', 'thread', 'turn'} \
         and value['host'] in HOSTS and _token(value['thread']) and (value['turn'] is None or _token(value['turn']))
 
@@ -104,7 +107,8 @@ def _token(value: object) -> bool:
 def require_handle(value: object) -> dict:
     """Return a copy of a valid handle or raise ValueError."""
     if not valid_handle(value):
-        raise ValueError('A handle is a process {pid, pgid, started} or a host {host, thread, turn}')
+        raise ValueError('A handle is a process {pid, pgid, started}, a host {host, thread, turn} or a declared '
+                         '{host, session, agent, launch, hostThread, slots, hostProcess}')
     return dict(value)
 
 

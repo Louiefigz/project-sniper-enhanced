@@ -67,7 +67,8 @@ function localBody(container: Container): void {
   });
 }
 
-function parseCss(text: string): Container {
+/** Parse one style body with the compiler's CSS parser (postcss); refuses what it cannot parse. */
+export function parseCss(text: string): Container {
   try {
     return postcss.parse(text);
   } catch {

@@ -6,6 +6,11 @@ edited, moved or copied away from its recorded path, superseded by a later versi
 that describes another source or manifest than the subject. `evidence_check` is the public re-check
 (context.py --evidence-check) the typed submission step calls before accepting a review that relied
 on the evidence. Given titles and scripts are not part of it (role_packet_given).
+
+Schema version 2 (P2-07) also stores the engine-observed `coverage` of the listed clips' approved scripts (the
+batch's clips on the observed source, X127). A changed approval makes the record stale, and binding re-observes
+the approvals and the speaker observations (role_packet_evidence_coverage). Version 1 records are checked exactly
+as before (ST-2).
 """
 from __future__ import annotations
 
@@ -14,7 +19,10 @@ import json
 import re
 from pathlib import Path
 
-from role_packet_evidence_schema import AUTHORED, EvidenceError, authored_fields
+from role_packet_evidence_coverage import (batch_approvals, coverage, listed_approvals, observations_binding,
+                                           sealed_approvals)
+from role_packet_evidence_schema import (AUTHORED, SCHEMA_VERSIONS, V2_FIELDS, EvidenceError, authored_fields,
+                                         authored_keys)
 from role_packet_files import artifact, canonical_file, read_json
 from role_packet_transcript import Transcript, observe_transcript
 
@@ -25,6 +33,8 @@ SOURCE_FIELDS = ("id", "path", "sourceSha256", "sourceSizeBytes", "duration", "f
 KEY = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 RECORD_KEYS = {"schemaVersion", "kind", "version", "recordPath", "sealedAt", "draft", "manifest", "sources",
                "transcripts", "bound", *AUTHORED, "engineLimits", "contentSha256"}
+V2_RECORD_KEYS = {*RECORD_KEYS, *V2_FIELDS}
+COVERAGE_KEYS = {"batch", "clips", "observations"}
 OWNER_MANIFESTS = ("source/asset_manifest.json", "asset_manifest.json", "producer/asset_manifest.json")
 ENGINE_LIMITS = (
     "Source identity and file hashes were observed by the engine; every other field was authored and is a claim a "
@@ -102,10 +112,55 @@ def source_transcript(current: dict, source_id: str) -> tuple[dict, Transcript]:
     return source, observe_transcript(path, source["duration"])
 
 
+def approval_transcripts(current: dict, approvals: list[dict]) -> dict:
+    """``{sourceSha256: (source id, observed Transcript)}`` for the admitted sources the approvals are on."""
+    ids = {row["sourceSha256"]: row["id"] for row in current["sources"]}
+    wanted = {row.get("source") for row in approvals} & set(ids)
+    return {sha: (ids[sha], source_transcript(current, ids[sha])[1]) for sha in sorted(wanted)}
+
+
+def covered(fields: dict, current: dict, batch: str, approvals: list[dict]) -> dict:
+    """``{batch, clips, observations}``: the intervals cover each listed clip's script (the batch's clips on the
+    observed source, X127), and the observations measured exactly those scripts."""
+    context = {"bound": {row["key"]: row for row in current["bound"]}, "sources": current["sources"],
+               "approvals": approvals, "people": fields["speakers"]["people"]}
+    listed = listed_approvals(context)
+    found = coverage(fields["speakers"]["intervals"], listed, approval_transcripts(current, listed))
+    return {"batch": batch, **found, "observations": observations_binding({**context, "approvals": listed}, found)}
+
+
+def sealed_coverage(fields: dict, current: dict, batch: str | None) -> dict | None:
+    """At seal (P2-07): None without --batch and intervals; else the coverage of batch B's current approvals."""
+    if batch is None and fields["speakers"]["intervals"]:
+        raise EvidenceError("a v2 draft with speaker intervals needs --batch B: its intervals must cover every "
+                            "approved script's retained words")
+    return None if batch is None else covered(fields, current, batch, batch_approvals(batch))
+
+
+def current_coverage(row: dict, record: dict, current: dict) -> None:
+    """At bind: a v2 record's coverage observed again. A changed approval is stale; the rest must recompute exactly."""
+    sealed = record["coverage"]
+    if sealed is None:
+        sealed_coverage(record, current, None)
+        return
+    clips = sealed.get("clips") if isinstance(sealed, dict) and set(sealed) == COVERAGE_KEYS else None
+    if not isinstance(clips, list) or not all(isinstance(item, dict) and isinstance(item.get("clipId"), str)
+                                              for item in clips):
+        raise EvidenceError(f"{row['path']}: coverage must be {sorted(COVERAGE_KEYS)} with clip rows")
+    approvals = sealed_approvals(sealed["batch"], [item["clipId"] for item in clips])
+    changed = [item["clipId"] for item, now in zip(clips, approvals) if now.get("script") != item.get("scriptIdentity")]
+    if changed:
+        raise EvidenceError(f"shared evidence is stale: clip {changed[0]}'s approved script changed since sealing; reseal")
+    if covered(record, current, sealed["batch"], approvals) != sealed:
+        raise EvidenceError(f"{row['path']}: coverage differs from what the approvals and speaker observations give now")
+
+
 def located(row: dict, record: dict) -> None:
     """The record sits at its recorded path under its version name, unedited and not superseded."""
     path = Path(row["path"])
-    if record.get("schemaVersion") != 1 or record.get("kind") != KIND or set(record) != RECORD_KEYS:
+    version = record.get("schemaVersion")
+    keys = V2_RECORD_KEYS if version == 2 else RECORD_KEYS
+    if type(version) is not int or version not in SCHEMA_VERSIONS or record.get("kind") != KIND or set(record) != keys:
         raise EvidenceError(f"{path} is not a sealed shared-evidence record")
     if record["recordPath"] != str(path) or path.name != f"{PREFIX}-v{record['version']}.json":
         raise EvidenceError(f"{path} is not at its recorded path {record['recordPath']}: a moved or copied record is refused")
@@ -126,8 +181,10 @@ def verified_record(record_file: str) -> tuple[dict, dict, dict]:
     changes = changed_inputs(record, current)
     if changes:
         raise EvidenceError(f"stale shared evidence {row['path']}: {changes[:8]} changed since sealing; seal a new version")
-    if authored_fields(record, current) != {key: record[key] for key in AUTHORED}:
+    if authored_fields(record, current) != {key: record[key] for key in authored_keys(record["schemaVersion"])}:
         raise EvidenceError(f"{row['path']}: authored fields differ from their validated form")
+    if record["schemaVersion"] == 2:
+        current_coverage(row, record, current)
     return row, record, current
 
 

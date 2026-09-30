@@ -240,7 +240,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--probe-tools", action="store_true", help="Run bounded local version probes; no installs")
     role_arguments(parser)
     args = parser.parse_args(argv)
-    if args.evidence_draft or args.evidence_seal or args.evidence_check:
+    if args.evidence_draft or args.evidence_seal or args.evidence_check or args.evidence_unresolved:
         from role_packet_evidence import evidence_main
         return evidence_main(args)
     if args.given_check or args.review_submitted:

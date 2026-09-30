@@ -1,10 +1,10 @@
 import { nativeCatalogFiles, type NativeCatalogFile } from "./native-catalog-files";
 import { assertNativeVisualSources, type VisualSourceReceipt } from "./visual-source-admission";
 /** Local native project assembly shared by CLI and stored-proposal adapters. */
-import { constants, copyFileSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { constants, copyFileSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "./auto-edit-hash";
-import { buildNativeCanvas, nativeExtensionMount, type NativeCanvasInput } from "./native-short-composition";
+import { buildNativeCanvas, type NativeCanvasInput } from "./native-short-composition";
 import { assertUserTitleCopy, fillLocalHookTemplate } from "./native-hook-template";
 import { catalogFromSources, loadDirectorCatalog, type DirectorCatalog } from "./native-director-library";
 import { assertNativeShortStrategy, type NativeAssetBinding, type NativeShortStrategy } from "./native-short-strategy";
@@ -26,6 +26,9 @@ import { assertCurrentNativeShortAuthority, assertNativeShortReadAuthority, nati
 import { deriveNativeReviewRegions, NATIVE_REVIEW_REGIONS_FILE, type NativeReviewRegionMap } from "./native-review-regions";
 import { assertNativeShortLineage, nativeShortLineage } from "./native-short-lineage";
 import { assertStudioHostIds } from "./native-studio-host-ids";
+import { assertNativeRevealDeclarations } from "./native-reveal-declarations";
+import { assertCatalogFilesMounted, assertNativeAssetRow, assertNativeSceneExtension, mountNativeSceneExtension,
+  nativeProjectIds } from "./native-short-build-rules";
 export { assertNativeShortIntent } from "./native-short-request-binding";
 export interface NativeSceneExtension { markup: string; css: string; motion: string }
 export interface NativeShortProjectInput {
@@ -57,21 +60,10 @@ export function assembleNativeShortHtml(input: NativeShortProjectInput): string 
   const [rateNum, rateDen] = input.canvas.frameRate.split("/").map(Number);
   assertNativeShortAudio(input.audioFinishing, input.canvas.totalFrames * rateDen / rateNum);
   const extension = input.extension ?? { markup: "", css: "", motion: "" };
-  if (Object.values(extension).some((value) => typeof value !== "string" || value.length > 128 * 1024)
-      || /<\/?(?:script|iframe|audio)\b/iu.test(extension.markup)
-      || /<\/?script\b/iu.test(extension.motion)) throw new Error("Native scene extension contains an unsupported script, audio or frame element");
-  let html = buildNativeCanvas(input.canvas);
-  // Never assume caption-0-0 exists: a suppressed opening has no first caption element.
-  const caption = nativeExtensionMount(input.canvas);
-  if (extension.markup && !html.includes(caption)) throw new Error("Native extension needs the shared caption mounting point");
-  html = html.replace("</head>", `${extension.css}</head>`)
-    .replace(caption, extension.markup + caption)
-    .replace("const tl=gsap.timeline({paused:true});", "const tl=gsap.timeline({paused:true});" + extension.motion);
-  const ids = [...html.matchAll(/\sid="([^"]+)"/gu)].map((match) => match[1]);
-  if (new Set(ids).size !== ids.length) throw new Error("Native extension duplicates a shared element identity");
-  if (/(?:src|href)=["'](?:https?:|\/\/|references\/)|url\(["']?(?:https?:|\/\/|references\/)/iu.test(html)) {
-    throw new Error("Native project must use staged local assets; reference pixels cannot become production footage");
-  }
+  // The build's structural rules live in native-short-build-rules.ts; the reveal probe applies the same ones.
+  assertNativeSceneExtension(extension);
+  const html = mountNativeSceneExtension(buildNativeCanvas(input.canvas), input.canvas, extension);
+  const ids = nativeProjectIds(html);
   if ((input.expectations?.length ?? 0) > 128 || input.expectations?.some((row) => !Number.isSafeInteger(row.frame)
       || row.frame < 0 || row.frame >= input.canvas.totalFrames || !ids.includes(row.id)
       || !["opacity", "clipPath", "textContent"].includes(row.property) || typeof row.equals !== "string")) {
@@ -83,9 +75,8 @@ export function assembleNativeShortHtml(input: NativeShortProjectInput): string 
   assertNativeShortStory(input, html);
   assertNativeVisualSources(input);
   const catalogFiles = nativeCatalogFiles(input.catalogFiles);
-  for (const file of Object.keys(catalogFiles)) {
-    if (!html.includes(`data-composition-src="${file}"`)) throw new Error("Catalog file must be mounted in the authored scene");
-  }
+  assertCatalogFilesMounted(html, catalogFiles);
+  assertNativeRevealDeclarations(input, catalogFiles);
   assertNativeVisualPlanApplication({ binding: input.visualPlan,
     application: input.strategy.visualPlanApplication, scenes: input.strategy.scenes,
     html, catalogFiles: input.catalogFiles, assets: input.assets,
@@ -100,11 +91,7 @@ function verifyAssets(input: NativeShortProjectInput): void {
         && !["assets/gsap.min.js", "assets/Inter-Bold.ttf"].includes(asset.file)) {
       throw new Error("Native runtime assets are limited to the shared script and font");
     }
-    if (!/^(assets|references)\/[a-zA-Z0-9][a-zA-Z0-9._-]{0,140}$/u.test(asset.file)
-        || !["source", "supporting-video", "image", "runtime", "reference"].includes(asset.role)
-        || !path.isAbsolute(asset.path) || realpathSync(asset.path) !== asset.path
-        || !lstatSync(asset.path).isFile() || !/^[a-f0-9]{64}$/u.test(asset.sha256)
-        || fileSha256(asset.path) !== asset.sha256) throw new Error(`Native asset is missing, changed or not canonical: ${asset.file}`);
+    assertNativeAssetRow(asset);
     assertNativeWebCapture(asset);
   }
   const source = input.assets.find((row) => row.file === input.canvas.sourceFile && row.role === "source");

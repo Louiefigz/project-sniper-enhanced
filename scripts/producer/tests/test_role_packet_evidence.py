@@ -30,8 +30,16 @@ TEXTS = {10: "TEST", 11: "given", 13: "words"}
 
 
 def authored(draft: dict) -> dict:
-    """Fill every authored field of a draft with TEST content that cites its provenance."""
+    """Fill every authored field of a draft with TEST content that cites its provenance, in the version 1 form.
+
+    New drafts are version 2 (P2-07). These fixtures, and the modules that import them, keep sealing version 1
+    records, so every flow they cover proves version 1 still seals, verifies and binds (ST-2). Version 2 is
+    tested in test_role_packet_evidence_v2.py and test_role_packet_evidence_coverage.py.
+    """
+    for field in ("captionPhrases", "coverage"):
+        draft.pop(field, None)
     draft.update({
+        "schemaVersion": 1,
         "author": {"sessionId": "TEST-coordinator", "identity": "TEST coordinator"},
         "sourceScan": {"method": "TEST sampled stills", "coverage": "TEST 0-60 s every 5 s",
                        "facts": [{"statement": "TEST one static two-shot", "evidence": [{"source": "raw-1", "atSeconds": 5}]}],

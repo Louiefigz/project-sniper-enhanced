@@ -145,6 +145,17 @@ class CreditReadTests(CreditCase):
         self.assertEqual(owner.abort_reason, 'Short A capacity credit went down from 30.0s to 20.0s; the authority '
                                              'was rolled back or edited')
 
+    def test_a_later_grants_at_grant_is_the_floor_over_an_older_read(self) -> None:
+        """30 read on one reference, a later grant bound at 35, the authority rolled back to 32: below that grant's
+        ``atGrant``, so a regression although above the last read (the floor is the larger of the two; pins X05)."""
+        self.put(self.credit_record(30.0))
+        self.assertEqual(self.delta(), 30.0)
+        later = self.bind(self.credit_record(35.0), 'A')
+        self.put(self.credit_record(32.0))
+        self.now = 1.0
+        with self.assertRaisesRegex(CapacityCreditRegressed, 'went down from 35.0s to 32.0s'):
+            queue_credit.settled_credit(later['capacityCredit'])
+
     def test_readings_are_per_clip(self) -> None:
         """A's credit of 30 is no baseline for B: B at 10 reads as 10, and B's own later drop is B's regression."""
         record = self.credit_record(30.0)

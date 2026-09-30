@@ -62,6 +62,12 @@ class NamedCreditError(BudgetAuthorityError):
         super().__init__(message)
         self.since = since
 
+    @property
+    def category(self) -> str:
+        """The named failure category, for the processes that publish ``getattr(error, 'category', …)``: the native
+        pipeline and the section supervisor, whose stage allocations carry the credit reference (X158 D2)."""
+        return credit_category(self)
+
 
 class CapacityCreditUnavailable(NamedCreditError):
     """The authority stayed unreadable past the read tolerance: the render stops by name (this can clear)."""

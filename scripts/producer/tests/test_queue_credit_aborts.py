@@ -18,16 +18,21 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
-from _queue_credit_fixture import TORN, CreditCase
+from _budget_fixture import task_spec
+from _queue_credit_fixture import BATCH, TORN, CreditCase
 from studio import native_budget_launch as launch
-from studio.native_budget_launch import LaunchRequest
+from studio.native_budget_clock import stage_allowance
+from studio.native_budget_launch import LaunchRequest, record_outcome
 from studio.native_run import NativeRun
 from studio.native_run_lifecycle import failure_category, monitor_limits, require_production_time
-from studio.production import process, process_group, process_watch, queue_credit
+from studio.production import process, process_group, process_settle, process_watch, queue_credit
 from studio.production.queue_credit import CapacityCreditRegressed, CapacityCreditUnavailable
+from studio.production.tasks import new_row
 
 GRACE = process.DEADLINE_GRACE_SECONDS
 TOLERANCE = queue_credit.CREDIT_READ_TOLERANCE_SECONDS
+REQUEST = LaunchRequest('A', 'draft', 'TEST-id', ('/TEST/project', '/TEST/output'), 60.0)
+EXPORTER = {'type': 'process', 'pid': 2 ** 22 + 1, 'pgid': 2 ** 22 + 1, 'started': 'Sun Sep 27 10:00:05 2026'}
 
 
 class WatchCase(CreditCase):
@@ -47,6 +52,26 @@ class WatchCase(CreditCase):
         """The watchdog's answer at monotonic time ``now``."""
         self.now = now
         return process_watch._reason(self.watch, self.stops)
+
+    def supervise(self, exits_at: float | None) -> tuple[list, object]:
+        """Run ``_supervised_end`` from monotonic 0 with one poll a second; every signalling call is mocked."""
+        calls: list[tuple[str, float]] = []
+
+        def poll(_timeout: float) -> None:
+            """One watchdog poll interval."""
+            self.now += 1.0
+
+        relay = SimpleNamespace(pump=poll, drain=lambda: None)
+        with mock.patch.object(process_watch, 'OutputRelay', return_value=relay), \
+                mock.patch.object(process_group, 'exited', side_effect=lambda _pid: exits_at is not None
+                                  and self.now >= exits_at), \
+                mock.patch.object(process_group, 'terminate', side_effect=lambda *_: calls.append(('terminate',
+                                                                                                    self.now))), \
+                mock.patch.object(process_group, 'end_group', side_effect=lambda *_: calls.append(('end_group',
+                                                                                                   self.now)) or []):
+            ending = process_watch._supervised_end(SimpleNamespace(pid=2 ** 22 + 1), self.watch, self.stops)
+        return calls, ending
+
 
 
 class WatchdogBackstopTests(WatchCase):
@@ -71,6 +96,13 @@ class WatchdogBackstopTests(WatchCase):
         category, detail = self.reason(1.5 + TOLERANCE + GRACE)
         self.assertEqual(category, 'capacity-credit-unavailable')
         self.assertIn('Short A capacity credit has been unreadable for', detail)
+
+    def test_the_watchdogs_interruption_is_honoured_inside_the_grace(self) -> None:
+        """The watchdog's own interruption outranks a credit grace (D-O10 relies on it; pins X01)."""
+        self.put(self.credit_record(20.0))
+        self.assertIsNone(self.reason(1.0))
+        self.stops.reason = 'received SIGTERM'
+        self.assertEqual(self.reason(2.0)[0], process_watch.INTERRUPTED)
 
     def test_a_good_read_restarts_the_watchdogs_grace(self) -> None:
         """A regression seen at 1, the record back at 30 by 5 (a good read), a new drop at 10: the watchdog names it
@@ -99,26 +131,6 @@ class WatchdogBackstopTests(WatchCase):
         calls, ending = self.supervise(exits_at=6.0)
         self.assertIsNone(ending.reason)
         self.assertEqual([name for name, _ in calls], ['end_group'])
-
-    def supervise(self, exits_at: float | None) -> tuple[list, object]:
-        """Run ``_supervised_end`` from monotonic 0 with one poll a second; every signalling call is mocked."""
-        calls: list[tuple[str, float]] = []
-
-        def poll(_timeout: float) -> None:
-            """One watchdog poll interval."""
-            self.now += 1.0
-
-        relay = SimpleNamespace(pump=poll, drain=lambda: None)
-        with mock.patch.object(process_watch, 'OutputRelay', return_value=relay), \
-                mock.patch.object(process_group, 'exited', side_effect=lambda _pid: exits_at is not None
-                                  and self.now >= exits_at), \
-                mock.patch.object(process_group, 'terminate', side_effect=lambda *_: calls.append(('terminate',
-                                                                                                    self.now))), \
-                mock.patch.object(process_group, 'end_group', side_effect=lambda *_: calls.append(('end_group',
-                                                                                                   self.now)) or []):
-            ending = process_watch._supervised_end(SimpleNamespace(pid=2 ** 22 + 1), self.watch, self.stops)
-        return calls, ending
-
 
 class NamedCategoryTests(CreditCase):
     """The owner's published category and the retry decision it leads to."""
@@ -181,9 +193,30 @@ class NamedCategoryTests(CreditCase):
                   'failureCategory': owner.result['failureCategory']}
         self.assertEqual(failure_category(result), 'capacity-credit-regressed')
 
+    def test_cleanup_unverified_outranks_a_credit_category(self) -> None:
+        """m1's early check stays below the cleanup check: unverified cleanup is still named first (pins X09)."""
+        for category in queue_credit.CREDIT_CATEGORIES:
+            result = {'status': 'failed', 'cleanup': {'verified': False}, 'abortReason': 'TEST',
+                      'failureCategory': category}
+            self.assertEqual(failure_category(result), 'cleanup-unverified')
+
+    def test_stage_allocation_checks_publish_the_named_category(self) -> None:
+        """X158 D2: a stage's request allocation carries the credit reference, so ``stage_allowance`` raises the named
+        errors in pipeline, section and worker processes, which publish ``getattr(error, 'category', …)``."""
+        request = {'productionBudget': {'allocation': self.grant}}
+        self.put(self.credit_record(30.0))
+        self.assertEqual(stage_allowance(request, 60), 60)
+        self.put(self.credit_record(20.0))
+        self.now = 1.0
+        with self.assertRaises(CapacityCreditRegressed) as caught:
+            stage_allowance(request, 60)
+        self.assertEqual(getattr(caught.exception, 'category', 'renderer-failure'), 'capacity-credit-regressed')
+        self.assertEqual(CapacityCreditUnavailable('TEST', 0.0).category, 'capacity-credit-unavailable')
+
     def test_a_published_unavailable_is_retried_once_and_a_regression_never(self) -> None:
-        """m5 (J1 + OQ-1 end to end): the category the owner publishes, and the one the watchdog closes a launch
-        with, decide the retry: unavailable is TRANSIENT (J1), regressed is an unchanged deterministic failure."""
+        """m5 (J1 + OQ-1): the category the owner publishes, and the one the watchdog names, fed to the retry rule:
+        unavailable is TRANSIENT (J1), regressed an unchanged deterministic failure. This checks the categories only;
+        ``WatchdogSettlementTests`` builds the launch row through the watchdog's settlement (X158 D1)."""
         for error, retried in ((CapacityCreditUnavailable, True), (CapacityCreditRegressed, False)):
             with self.subTest(error.__name__):
                 queue_credit._CREDIT.clear()
@@ -201,9 +234,58 @@ class NamedCategoryTests(CreditCase):
         clip = {'counters': {'transientRetry': 0},
                 'attempts': [{'id': 'a1', 'route': 'draft', 'status': 'failed', 'identity': 'TEST-id',
                               'failure': {'category': category, 'signature': 'TEST'}}]}
-        request = LaunchRequest('A', 'draft', 'TEST-id', ('/TEST/project', '/TEST/output'), 60.0)
-        decision = launch._retry_decision(clip, request)
+        decision = launch._retry_decision(clip, REQUEST)
         self.assertEqual(decision.allowed, retried, (category, decision.reason))
+
+
+
+class WatchdogSettlementTests(WatchCase):
+    """X158 D1: when the watchdog names the stop, its settlement decides the retry, not the exporter's ``cancelled``."""
+
+    def settled_clip(self, stop: tuple[str, str]) -> dict:
+        """A media launch the SIGTERMed exporter closed as ``cancelled`` (the pipeline's outcome for an interruption,
+        recorded through the real ``record_outcome``), then the watchdog's settlement; returns Short A's clip row."""
+        record = self.credit_record(30.0)
+        task = new_row(record, task_spec('media-a', 'media', run_id=BATCH), [], (0, 0.0))
+        task.update(state='running', attempt='a1', handle=dict(EXPORTER))
+        record['production']['tasks']['media-a'] = task
+        clip = record['clips']['A']
+        clip['attempts'].append({'id': 'a1', 'route': 'draft', 'status': 'running', 'identity': 'TEST-id',
+                                 'failure': None})
+        record_outcome(record, {'clipId': 'A', 'attemptId': 'a1'},
+                       {'status': 'failed', 'successStatuses': ('draft-verified',), 'failureCategory': 'cancelled',
+                        'failedPhase': 'render', 'errorType': 'KeyboardInterrupt', 'error': 'TEST interrupted'}, 40.0)
+        self.assertEqual(clip['attempts'][0]['failure']['category'], 'cancelled')
+        ending = process_settle.Ending(EXPORTER['pid'], stop, (), None)
+        self.assertEqual(process_settle._decide(record, task, ending, 41.0), 'task-failed')
+        self.assertEqual(task['failure']['category'], stop[0])
+        return clip
+
+    def test_a_regression_the_watchdog_names_is_settled_as_regressed_and_never_retried(self) -> None:
+        """The owner is stuck: the watchdog names the regression after its grace and stops the export gracefully; the
+        interrupted exporter's ``cancelled`` (transient, so retried) gives way to the regression, which never is."""
+        self.put(self.credit_record(20.0))
+        _calls, ending = self.supervise(exits_at=None)
+        self.assertEqual(ending.reason[0], 'capacity-credit-regressed')
+        clip = self.settled_clip(ending.reason)
+        self.assertEqual(clip['attempts'][0]['failure']['category'], 'capacity-credit-regressed')
+        decision = launch._retry_decision(clip, REQUEST)
+        self.assertFalse(decision.allowed)
+        self.assertIn('capacity-credit-regressed', decision.reason)
+
+    def test_an_unavailable_authority_the_watchdog_names_keeps_its_one_transient_retry(self) -> None:
+        """The same path for an unreadable authority: named ``capacity-credit-unavailable``, retried once (J1)."""
+        self.path.write_bytes(TORN)
+        _calls, ending = self.supervise(exits_at=None)
+        self.assertEqual(ending.reason[0], 'capacity-credit-unavailable')
+        clip = self.settled_clip(ending.reason)
+        self.assertEqual(clip['attempts'][0]['failure']['category'], 'capacity-credit-unavailable')
+        self.assertTrue(launch._retry_decision(clip, REQUEST).allowed)
+
+    def test_other_watchdog_stops_keep_the_exporters_outcome(self) -> None:
+        """Only a named credit stop renames: a deadline stop leaves the exporter's ``cancelled`` as it was."""
+        clip = self.settled_clip((process_watch.DEADLINE, 'the export ran past its launch grant'))
+        self.assertEqual(clip['attempts'][0]['failure']['category'], 'cancelled')
 
 
 if __name__ == '__main__':

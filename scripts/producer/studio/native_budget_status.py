@@ -30,7 +30,7 @@ from studio.native_budget_launch import reconcile_running
 from studio.native_budget_outputs import output_status
 from studio.native_budget_report import TrailViews, batch_status
 from studio.native_budget_run_status import run_status
-from studio.native_budget_store import EVENTS, MAX_EVENT_BYTES, BudgetAuthorityError, locked_batch
+from studio.native_budget_store import EVENTS, MAX_EVENT_BYTES, BudgetAuthorityError, TrailFull, locked_batch
 from studio.native_budget_usage import ai_usage
 from studio.production.approvals import append_pending_decisions, trail_events
 from studio.production.duplication_check import pending_report, recorded_checks
@@ -69,7 +69,7 @@ def status_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--full', action='store_true', help='print the whole production block, not the summary')
 
 
-def _trail(session: object) -> tuple[dict, list[dict]]:
+def _trail(session: object) -> tuple[tuple[dict, ...], list[dict]]:
     """Inside the caller's batch lock: the trail events status reads (``TRAIL_EVENTS``) and every committed event
     (``approvals.trail_events``: an event followed by its own failure is dropped), from one read."""
     from headless.durable_files import DurableFileError, read_private_file
@@ -82,14 +82,25 @@ def _trail(session: object) -> tuple[dict, list[dict]]:
     return tuple(row for row in rows if isinstance(row, dict) and row.get('event') in TRAIL_EVENTS), committed
 
 
+def commit_observation(session: object, record: dict, elapsed: float, abandoned: list[str]) -> None:
+    """Commit a read-only observation (status, wait, archive) with its ``observed`` line. At a full trail one that
+    marked nothing commits the record alone, as a heartbeat does (X189 F1): status and wait stay readable, and
+    ``observed`` never becomes a settling event, since nothing bounds how often it is read. One that marked dead
+    launches abandoned is a launch outcome, always written (``native_budget_store._terminal``, X190)."""
+    event = {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned}
+    try:
+        session.commit(record, event)
+    except TrailFull:   # only an empty observation reaches here: one with abandoned launches is terminal
+        session.commit(record, {**event, 'event': 'observed-record-only'})
+
+
 def _observe(root: Path, batch_id: str) -> tuple[dict, float, tuple[tuple[dict, ...], list[dict]]]:
     """Lock once: read, advance the clock, mark provably dead launches, commit, read the trail, and write any
     duplication-check decision line the trail still owes (X144); the lines written join the status events."""
     with locked_batch(root, batch_id) as session:
         record = session.read()
         elapsed = advance_clock(record)
-        abandoned = reconcile_running(record, elapsed)
-        session.commit(record, {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned})
+        commit_observation(session, record, elapsed, reconcile_running(record, elapsed))
         events, committed = _trail(session)
         written = append_pending_decisions(session, record, events, elapsed)['decisions']   # owed lines (X144)
         return record, elapsed, (events + tuple(written), committed)

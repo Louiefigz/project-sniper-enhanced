@@ -2,10 +2,11 @@
 
 ReenrollmentTests (MAJOR, m7): each enrollment starts over, so a second director that declares nothing earns its
 Shorts no credit, and ``enroll`` tells the director to declare; driven through the CLI and the locked API on the
-test's private authority root (``test_queue_clock_v2_c.AuditCase``). DeadReadyWorkTests (m6): a ready creative task
-whose claim is refused for good is not the Short's work. EvidenceGapTests (m8, n1, n5): which tasks, rows and evidence
-the credit rule reads, each pinning a behaviour a surviving mutant changed. The last two use the in-memory TEST
-records of ``test_queue_clock_v2_b.Run``; no child process is started.
+test's private authority root (``test_queue_clock_v2_c.AuditCase``). EnrollHintTests (X190 n5): the hint parses
+with the CLI's parser and matches the doc. DeadReadyWorkTests (m6): a ready creative task whose claim is refused for
+good is not the Short's work. EvidenceGapTests (m8, n1, n5): which tasks, rows and evidence the credit rule reads,
+each pinning a behaviour a surviving mutant changed. The last two use the in-memory TEST records of
+``test_queue_clock_v2_b.Run``; no child process is started.
 """
 from __future__ import annotations
 
@@ -13,11 +14,12 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 
 import json
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from _budget_fixture import FINGERPRINT
 from _production_task_flow_fixture import run_cli
-from studio.production import api, callbacks, queue_clock
+from studio.production import api, callbacks, cli, queue_clock
 from studio.production.claim_admission import authoring_closed, claim_refusal
 from studio.production.claims import ClaimRef
 from studio.production.director_activity import ENROLL_HINT, DirectorActivity, declare
@@ -53,6 +55,29 @@ class ReenrollmentTests(AuditCase):
         self.assertIs(self.clock_of()['directorWorking'], True)
         self.wait(60, POOL)
         self.assertEqual(self.clock_of()['excludedSeconds'], 60.0)
+
+
+class EnrollHintTests(unittest.TestCase):
+    """X190 n5: the hint's two declarations are commands the CLI parses, and the governing doc names them."""
+
+    def test_the_hint_parses_and_matches_the_doc(self) -> None:
+        """With its placeholders filled, each declaration parses with ``cli.parser``; the doc's enrollment paragraph
+        carries both."""
+        idle = ENROLL_HINT.split(': ', 1)[1].split(' for the Shorts')[0]
+        working = idle.split(' --all')[0] + ' ' + ENROLL_HINT.split(', and ', 1)[1].split(' before')[0]
+        parsed = []
+        for command in (idle, working):
+            for placeholder, value in (('SESSION', 'batch-x'), ('<this task>', 'director'), ('N', '1'), ('T', 'tok'),
+                                       ('ID', 'A')):
+                command = command.replace(placeholder, value)
+            parsed.append(cli.parser('TEST').parse_args(command.split()))
+        self.assertEqual([(args.command, args.all, args.clip, args.state) for args in parsed],
+                         [('director-activity', True, None, 'idle'), ('director-activity', False, ['A'], 'working')])
+        doc = (Path(__file__).parents[3] / 'docs/producer/NATIVE_SHORTS_DEADLINE_BATCH.md').read_text()
+        doc = ' '.join(doc.split())
+        for text in ('--all --state idle', '--state working --clip ID'):
+            self.assertIn(text, doc)
+            self.assertIn(text, ENROLL_HINT)
 
 
 class DeadReadyWorkTests(unittest.TestCase):

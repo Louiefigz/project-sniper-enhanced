@@ -47,9 +47,12 @@ from studio.production.settlement import settlement_reserve
 AUTHORITY, PENDING, EVENTS, LOCK = 'authority.json', 'authority.pending.json', 'events.jsonl', 'authority.lock'
 REGISTRY_LOCK = 'registry.lock'
 MAX_RECORD_BYTES = 4 * 1024 ** 2
-MAX_EVENT_BYTES = 16 * 1024 ** 2
-# New work stops this far below the bound, so settling events normally fit inside it.
-TERMINAL_RESERVE_BYTES = 1024 ** 2
+# New work stops TERMINAL_RESERVE_BYTES below the bound, so every settling line fits inside it. The worst case of each
+# settling class (checkpoints, stall decisions, abandoned launches, task settlements with their capacitySettled,
+# the close) sums to ~2.4 MiB (test_trail_reserve_budget, X192), so the reserve was raised from 1 to 4 MiB and the
+# bound from 16 to 19 MiB with it: new work keeps its 15 MiB.
+MAX_EVENT_BYTES = 19 * 1024 ** 2
+TERMINAL_RESERVE_BYTES = 4 * 1024 ** 2
 # Outcomes, closing, draining, hand-offs and task settlement are bounded by the record's own
 # row bounds (each task acknowledges, ends and settles a bounded number of times, and a new
 # claim is not a settling event), so they are always written: a full trail can refuse new
@@ -58,17 +61,24 @@ TERMINAL_EVENTS = frozenset({'batch-closed', 'batch-draining', 'launch-completed
                              'batch-archived', 'commit-failed', 'commit-unsynced', 'task-attached',
                              'task-released', 'task-completed', 'task-failed', 'task-cancel-requested',
                              'task-cancelled', 'task-abandoned', 'task-superseded', 'task-resource-settled',
+                             # A task's settling event (task-*, tasks-reconciled) carries capacitySettled (X189 F2):
+                             # one entry per Short whose owner rows it removed, <= MAX_WORKERS (64) 16-hex owner
+                             # digests (~1.3 KB); a task's owners serve its own Short and settle once, so <=
+                             # BOUNDS['tasks'] (256) entries per batch (queue_audit.settlement_entry).
                              'tasks-reconciled', 'capacity-settled',
                              # Bound (X183 m5): <= MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) events,
                              # each written only within queue_authority.CHECKPOINT_EVENT_BYTES (512 B) as canonical()
-                             # encodes it: 512 KiB, half of TERMINAL_RESERVE_BYTES (queue_authority._checkpoint_due).
+                             # encodes it: 512 KiB of TERMINAL_RESERVE_BYTES (queue_authority._checkpoint_due).
                              'capacity-checkpoint',
                              # X184 MAJOR: the operator's one stall decision, at most one per Short (decide refuses
                              # a second), so <= BOUNDS['clips'] rows; a close may need it (X19), so it always writes.
                              'capacity-stall-decided'})
+# Commits that write the record without a trail line: a same-state heartbeat, and an observation that marked nothing
+# at a full trail (X189 F1: native_budget_status.commit_observation).
+RECORD_ONLY = frozenset({'capacity-heartbeat', 'observed-record-only'})
 # Commits that the settlement room never refuses: settlements, and read-only observations (status and
 # wait advance the clock and mark provably dead launches abandoned, which the room already covers).
-ROOM_EXEMPT = TERMINAL_EVENTS | {'observed', 'capacity-observed', 'capacity-heartbeat'}
+ROOM_EXEMPT = TERMINAL_EVENTS | RECORD_ONLY | {'observed', 'capacity-observed'}
 BATCH_ID = re.compile(r'[a-z0-9][a-z0-9-]{2,63}')
 CLIP_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}')
 A5_SHAPE_REFUSAL = ('Schema 5 record written by an A5-forecast build (attempts carry a forecast field): this engine '
@@ -187,7 +197,7 @@ class BatchSession:
                                        'outcomes; no new work is admitted')
         # Same-state scheduler heartbeats update the bounded authority snapshot. State
         # transitions retain cumulative totals in the trail; polling itself is unbounded.
-        heartbeat = event.get('event') == 'capacity-heartbeat'
+        heartbeat = event.get('event') in RECORD_ONLY
         if not heartbeat:
             self.event(event)
         try:
@@ -216,9 +226,15 @@ class BatchSession:
         except (OSError, DurableFileError) as error:
             raise BudgetAuthorityError(f'Budget event trail for {self.batch_id} is unusable: {error}') from error
         try:
-            _append(fd, line, value.get('event') in TERMINAL_EVENTS)
+            _append(fd, line, _terminal(value))
         finally:
             os.close(fd)
+
+
+def _terminal(value: dict) -> bool:
+    """A settling line, always written: a ``TERMINAL_EVENTS`` member, or an observation that marked dead launches
+    abandoned (G9, X190 F1): a launch outcome, at most one per attempt (BOUNDS['attempts'] per Short)."""
+    return value.get('event') in TERMINAL_EVENTS or (value.get('event') == 'observed' and bool(value.get('abandoned')))
 
 
 def _append(fd: int, line: bytes, terminal: bool) -> None:

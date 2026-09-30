@@ -25,7 +25,7 @@ from studio.native_budget_policy import BatchSpec, new_batch_record
 from studio.native_budget_report import TrailViews, clip_status
 from studio.native_budget_schema import validate_record
 from studio.native_budget_schema_data import BOUNDS
-from studio.native_budget_store import TERMINAL_EVENTS, TERMINAL_RESERVE_BYTES, canonical, locked_batch, read_batch
+from studio.native_budget_store import TERMINAL_EVENTS, canonical, locked_batch, read_batch
 from studio.production import queue_authority, queue_clock
 from studio.production.queue_audit import _audit_clip, capacity_audit
 from studio.production.queue_authority import CHECKPOINT_EVENT_BYTES, PoolEvidence, record_observation
@@ -220,14 +220,15 @@ class CheckpointTests(unittest.TestCase):
 
     def test_the_worst_case_fits_its_share_of_the_terminal_reserve(self) -> None:
         """32 Shorts x 32 checkpoints of the largest event written (a 64-character clip id, the longest float
-        spellings, an owner path filling the rest of ``CHECKPOINT_EVENT_BYTES``) fill at most half of the 1 MiB
-        reserve; a path one byte longer, or shorter but escaped by JSON, is never written as a checkpoint."""
+        spellings, an owner path filling the rest of ``CHECKPOINT_EVENT_BYTES``) fill at most 512 KiB, their row in
+        ``test_trail_reserve_budget``; a path one byte longer, or shorter but escaped by JSON, is never written as a
+        checkpoint."""
         mark = {'event': 'capacity-checkpoint', 'clipId': 'C' * 64, 'worker': '', 'state': 'waiting',
                 'elapsed': sys.float_info.max, 'excludedSeconds': sys.float_info.max}
         room = CHECKPOINT_EVENT_BYTES - len(canonical(mark))
         widest = {**mark, 'worker': '/' + 'x' * (room - 1)}
         self.assertEqual(len(canonical(widest)), CHECKPOINT_EVENT_BYTES)
-        self.assertLessEqual(BOUNDS['clips'] * MAX_CHECKPOINTS * len(canonical(widest)), TERMINAL_RESERVE_BYTES // 2)
+        self.assertLessEqual(BOUNDS['clips'] * MAX_CHECKPOINTS * len(canonical(widest)), 512 * 1024)
         clip = {'capacityClock': new_clock()}
         self.assertTrue(queue_authority._checkpoint_due(clip, widest))
         for worker in ('/' + 'x' * room, '/' + '\x01' * (room // 6 + 1)):

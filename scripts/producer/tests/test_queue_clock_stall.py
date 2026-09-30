@@ -182,9 +182,9 @@ class DecisionTests(unittest.TestCase):
         clock.update(excludedSeconds=100.0, observedElapsed=5000.0)
         clock['stall'].update(state='capacity-stalled', sinceElapsed=4000.0, occupants=['a' * 32])
         self.assertEqual(close_refusal(record, 5000.0),
-                         'Short A is capacity-stalled with 4900s counted and its authorization intact while its owner '
-                         "waits: the operator's cancel closes around it (capacity-stall --clip A --decision cancel "
-                         '--reason …); otherwise keep the batch open (it resumes when capacity frees)')
+                         "Short A is capacity-stalled with 4900s counted and its authorization intact: the operator's "
+                         'cancel closes around it (capacity-stall --clip A --decision cancel --reason …); otherwise '
+                         "keep the batch open until its waits end (a dead owner's once recovered or settled)")
         clock['stall'].update(state=None, sinceElapsed=None, occupants=[])
         self.assertIsNone(close_refusal(record, 5000.0))
 

@@ -17,6 +17,7 @@ from studio.production import queue_stall
 from studio.production.task_schema import LIVE, holds_slot, is_ai
 
 MAX_GAP_SECONDS = 6.0
+SETTLED = 'capacitySettled'   # the key a settling event (or one of its changes) carries entries under (X189 F2)
 
 
 def excluded(clip: dict) -> float:
@@ -170,14 +171,16 @@ def task_deadline(record: dict, task: dict) -> float:
     """Translate task deadlines by earned idle capacity time; running AI earns none.
 
     A clip task gains its Short's credit since its origin. A run-scoped task gains the largest credit any
-    writable Short earned since its origin there (C6); the director keeps the run's delivery deadline.
+    writable Short earned since its origin there (C6), never past its root's deadline, the run's delivery deadline
+    (X190 m1: its parent, the director, holds that one); the director keeps the run's delivery deadline.
     """
+    from studio.production.formats import run_deadlines
     if task['kind'] == 'director':
-        from studio.production.formats import run_deadlines
         return run_deadlines(record)['deliverySeconds']
     if task['clipId'] is None:
         credits = [_credit_since(clip, task['id']) for clip in record['clips'].values() if writable(clip)]
-        return task['deadlineElapsed'] + max((credit for credit in credits if credit is not None), default=0.0)
+        return min(task['deadlineElapsed'] + max((credit for credit in credits if credit is not None), default=0.0),
+                   run_deadlines(record)['deliverySeconds'])
     clip = record['clips'].get(task['clipId'], {})
     if not enabled(clip):
         return task['deadlineElapsed']
@@ -185,11 +188,15 @@ def task_deadline(record: dict, task: dict) -> float:
 
 
 def status(clip: dict, elapsed: float) -> dict:
-    """Report wall, counted and uncertain time separately, and a v2 Short's stall state and bound (M-050)."""
+    """Report wall, counted and uncertain time separately, and a v2 Short's stall state and bound (M-050).
+
+    ``capacityState`` is what close and the actions act on (``queue_stall.shown_state``): a handed-off Short is not
+    stalled (X190 s1); its raw row stays under ``stall``.
+    """
     authorized = clip.get('output', {}).get('authorizedElapsed', 0.0)
     clock = clip.get('capacityClock', {})
     v2 = clock.get('policy') == POLICY
-    return {'capacityState': queue_stall.state(clip), 'stall': clock['stall'] if v2 else None,
+    return {'capacityState': queue_stall.shown_state(clip), 'stall': clock['stall'] if v2 else None,
             'stallBoundSeconds': queue_stall.stall_seconds() if v2 else None,
             'timingPolicy': clock.get('policy', 'elapsed-wall-v1'),
             'totalElapsedSeconds': max(0.0, elapsed - authorized),
@@ -221,21 +228,36 @@ def settle_task_workers(record: dict, task_id: str) -> list[str]:
     Callers must hold the authority lock and supply actual cleanup proof; ordinary
     completion callbacks and heartbeat expiry must never invoke this function. The clip's pending interval
     becomes uncertain only when no waiting owner remains in it: another task's waiting owner keeps the pending
-    interval it is accruing (P1 Step B5, P6). A v2 clock's stall is then re-tracked, so it clears with the waits it
-    named (X184 m2).
+    interval it is accruing (P1 Step B5, P6). A stalled v2 clock is then re-tracked, so its stall clears with the
+    waits it named (X184 m2); a settlement never names a stall (X190 n1: the next observation's window does, and
+    writes its event). Returns the removed owner keys; ``settle_task_capacity`` also returns what the settling
+    event carries for the audit.
     """
-    removed = []
-    for clip in record['clips'].values():
+    return [key for keys in _settle_rows(record, task_id).values() for key in keys]
+
+
+def settle_task_capacity(record: dict, task_id: str) -> dict:
+    """``settle_task_workers``, returning each v2 Short's settlement entry for its settling event (X189 F2): the
+    settled credit and the removed owners, which ``queue_audit`` reads to close the waiting window and anchor the
+    total. Only a Short whose rows were removed has one; the entry's size is bounded in ``native_budget_store``."""
+    from studio.production.queue_audit import settlement_entry
+    return {clip_id: settlement_entry(record['clips'][clip_id], keys)
+            for clip_id, keys in _settle_rows(record, task_id).items() if writable(record['clips'][clip_id])}
+
+
+def _settle_rows(record: dict, task_id: str) -> dict:
+    """Remove a task's owner rows from every clock; ``{clipId: removed keys}`` for each clip that had some."""
+    removed = {}
+    for clip_id, clip in record['clips'].items():
         clock = clip.get('capacityClock')
-        if clock is None:
-            continue
-        keys = [key for key, row in clock['workers'].items() if row['taskId'] == task_id]
+        keys = [key for key, row in (clock or {}).get('workers', {}).items() if row['taskId'] == task_id]
         for key in keys:
             del clock['workers'][key]
         if keys and not any(row['state'] == 'waiting' for row in clock['workers'].values()):
             clock['uncertainSeconds'] += clock['pendingSeconds']
             clock['pendingSeconds'] = 0.0
-        if keys and writable(clip):
-            queue_stall.track(clock, clock['observedElapsed'])   # a stall never outlives the waits it names (X184 m2)
-        removed.extend(keys)
+        if keys and writable(clip) and queue_stall.state(clip) == queue_stall.STALLED:
+            queue_stall.track(clock, clock['observedElapsed'])   # clears only: the waits it named are gone
+        if keys:
+            removed[clip_id] = keys
     return removed

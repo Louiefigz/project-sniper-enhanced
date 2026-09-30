@@ -1320,11 +1320,12 @@ docs belong to P3b.
 - **P1-RP3 fixes (X183).** `director_activity.enroll` (what `api.enroll_director` calls) resets every open v2 Short's
   `directorWorking`, so a newly enrolled director counts as working until it declares, and `enroll`'s output carries
   `declare` (`ENROLL_HINT`). `native_work_pool_credit.classify` names `LEGACY_HOLDER` as the occupant of a legacy
-  exclusive wait. `claim_admission.authoring_closed` (a creative task past its output's preparation deadline, which never
-  reopens) is read by the claim refusal and by `queue_clock._task_is_work`, judged at each interval's start.
+  exclusive wait. `claim_admission.authoring_closed` (a creative task past its output's preparation deadline, which
+  never reopens for one output; the run's latest can move forward, X190 n3) is read by the claim refusal and by
+  `queue_clock._task_is_work`, judged at each interval's start.
   `queue_audit._waiting_after` closes the audit window when no owner waits after the last event. A
   `capacity-checkpoint` carries only `event, clipId, worker, state, elapsed, excludedSeconds` and is written only
-  within `queue_authority.CHECKPOINT_EVENT_BYTES` (512 B; 32 x 32 = half the terminal reserve). The lift refuses a
+  within `queue_authority.CHECKPOINT_EVENT_BYTES` (512 B; 32 x 32 = 512 KiB of the terminal reserve). The lift refuses a
   5-7 record with an unresolved end outside `UNRESOLVABLE`; an archived record of another version that is malformed
   reads as `(unreadable)`. Owner recovery moved to `production/queue_recovery.py`. Tests: `test_queue_clock_v2_e.py`,
   `test_queue_clock_v2_c.CheckpointTests`, `test_budget_schema_lift`, `test_production_batch_succession`.
@@ -1355,3 +1356,16 @@ docs belong to P3b.
   `native_budget_report.TrailViews` (O-4: four parameters at most); `wallBudget` and `blockers` use the output's own
   deadlines (`formats.clip_deadlines`). Known limit (O-12): a U+3164 used in place of a space, and U+2800, stay distinct; the
   fold is not a homoglyph defence. Tests: `test_production_add_clip_clock.py`, `test_production_duplication_check.py`.
+- **P1 fix round (M-RPIF; X189 as X190 widens it, X190, X192).** A run-scoped task's deadline never passes the run's
+  delivery deadline (`queue_clock.task_deadline`, m1). `queue_audit` checks each capacity row against its predecessor
+  (`_chain_break`, m2) with `SETTLE_TOLERANCE` (`MAX_GAP_SECONDS`, n1), names a malformed row (`malformed-trail`, n2)
+  and a lost owner no row explains (`unexplained-removal`, X192). A watchdog or reconcile settlement
+  (`queue_clock.settle_task_capacity`) puts each Short's settled credit and removed owners (16-hex digests,
+  `queue_audit.settlement_entry`) on its own terminal event under `capacitySettled` (F2); every other removal already
+  writes a row (a `finished` observation, a recovery), and a hand-off removes none. Status, wait and archive commit
+  through `native_budget_status.commit_observation`: an empty observation at a full trail is record-only
+  (`observed-record-only`, `native_budget_store.RECORD_ONLY`), one that marked dead launches abandoned is always
+  written (`native_budget_store._terminal`, F1). The trail's reserve is 4 MiB and its bound 19 MiB, so every settling
+  class's worst case fits (`test_trail_reserve_budget`). A failed checkpoint is written once (`_FAILED_CHECKPOINTS`,
+  n6); status shows a handed-off Short as not stalled (`queue_stall.shown_state`, s1); a settlement re-track only
+  clears a stall. Tests: `test_queue_clock_v2_f.py`, `test_queue_clock_stall_c.py`, `test_trail_reserve_budget.py`.

@@ -51,11 +51,13 @@ def _ai_refusal(record: dict, task: dict, elapsed: float, proof_current: bool) -
 
 
 def authoring_closed(record: dict, task: dict, elapsed: float) -> bool:
-    """Whether a creative-kind task's claim is refused for good: its output's preparation deadline has passed.
+    """Whether a creative-kind task's claim is refused now: its output's preparation deadline has passed.
 
     The claim refusal above and ``queue_clock._task_is_work`` (such a ready task is not its Short's work, X183 m6)
-    read this one rule. It never reopens: a Short's preparation deadline moves only with its credit, which never
-    grows faster than time passes, and a Long's is fixed.
+    read this one rule, so they agree at every instant. For one output it never reopens: a Short's preparation
+    deadline moves only with its credit, which never grows faster than time passes, and a Long's is fixed. A
+    run-scoped task's deadline is the run's latest, which moves forward when an output is authorized later (a Long,
+    or an added Short on its own clock), so it can reopen (X190 n3).
     """
     clip = record['clips'][task['clipId']] if task['clipId'] else None
     return task['kind'] in CREATIVE_KINDS and elapsed >= clip_deadlines(record, clip)['preparationSeconds']

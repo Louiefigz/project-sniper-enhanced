@@ -264,7 +264,8 @@ def main(description: str, argv: list[str] | None = None) -> None:
         print(json.dumps({'status': 'refused', 'reason': str(error)}, indent=2, sort_keys=True), flush=True)
         raise SystemExit(REFUSED) from error
     except (BudgetAuthorityError, BudgetClockError, ValueError, KeyError, OSError, RuntimeError) as error:
-        print(json.dumps({'status': 'error', 'error': f'{type(error).__name__}: {error}'}, indent=2, sort_keys=True),
+        kind = BudgetAuthorityError.__name__ if isinstance(error, BudgetAuthorityError) else type(error).__name__
+        print(json.dumps({'status': 'error', 'error': f'{kind}: {error}'}, indent=2, sort_keys=True),   # X190 n6
               flush=True)
         raise SystemExit(INVALID) from error
     print(json.dumps(result, indent=2, sort_keys=True), flush=True)

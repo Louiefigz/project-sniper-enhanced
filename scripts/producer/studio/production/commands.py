@@ -126,8 +126,7 @@ def observed_record(batch_id: str) -> tuple[dict, float]:
     with locked_batch(store.default_root(), batch_id) as session:
         record = session.read()
         elapsed = advance_clock(record)
-        abandoned = reconcile_running(record, elapsed)
-        session.commit(record, {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned})
+        status.commit_observation(session, record, elapsed, reconcile_running(record, elapsed))   # X189 F1
     return record, elapsed
 
 

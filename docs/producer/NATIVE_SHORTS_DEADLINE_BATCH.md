@@ -71,11 +71,15 @@ holders change or the wait ends. The operator's one decision is
 `capacity-stall --batch SESSION --clip A --decision cancel --reason TEXT`: it
 freezes that Short's work, closes it out and ends its credit, and it is written
 even when the event trail is full. A stalled Short without that cancel keeps its
-batch open while its owner waits (`close` names it first), so a batch never
+batch open until its waits end (`close` names it first), so a batch never
 closes away a stalled Short's remaining authorization. A stall ends with the
-waits it names: an owner settled by its watchdog, or the Short's hand-off, ends
-it too. At a full trail a waiting owner's stall change is kept in the record
-and `status` only; the render keeps waiting. A render owner waiting for the pool extends its own wait only by that
+waits it names: an owner settled by its watchdog ends it, and a handed-off Short
+is shown and treated as not stalled. At a full trail a waiting owner's stall
+change is kept in the record and `status` only; the render keeps waiting, and
+`status` and `wait` still answer (an observation that marked nothing is kept in
+the record only; one that marked a dead launch abandoned is always written). A
+run-scoped task's deadline gains Short credit, but never past the run's delivery
+deadline. A render owner waiting for the pool extends its own wait only by that
 settled credit: a wait that earns none (other work of the Short runs, or the
 wait is not for occupied capacity) ends after the owner's capacity patience (at
 most 600 seconds) with `capacity-timeout`. Owners retain their independent active-work limits and cleanup reserve.
@@ -153,8 +157,15 @@ gets a `capacity-checkpoint` (only the Short, owner, state, time and credit, at
 most 512 bytes; an owner path too long for that writes none, which only loosens
 the check), and `status` checks each Short's credit against
 its trail (`capacityAudit`; per output `creditVerified`: false for a total the
-trail cannot account for). This detects a hand-edited record, not a writer who
-rewrites the record and its trail together. Deadline refusal is not a completed video. The default `status` reads each
+trail cannot account for). Each capacity line's total is checked against the
+line before it, so a hand-edited total stays visible after the Short's next
+event carries it; a watchdog or reconcile settlement writes the credit and the
+owners it removed on its own settling line; an owner the record lost with no
+line explaining it is `unexplained-removal`, and a malformed line is
+`malformed-trail`. This detects a hand-edited record, not a writer who
+rewrites the record and its trail together. Settling lines (outcomes,
+settlements, stall decisions, abandoned launches, the close) always fit the
+trail's 4 MiB reserve; new work stops 15 MiB in. Deadline refusal is not a completed video. The default `status` reads each
 visible hand-off from its recorded `clip-handed-off` trail event and needs no live page;
 `status --handoff FILE` re-verifies that file against the live review page and Studio, so it
 is valid only while both are open. `--full` prints every section; the default is compact.

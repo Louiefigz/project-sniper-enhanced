@@ -31,7 +31,7 @@ from studio.production.dependencies import refresh, supersede
 from studio.production.host_contract import clip_text
 from studio.production.reconcile import _exact_outcome
 from studio.production.session import transact
-from studio.production.queue_clock import settle_task_workers
+from studio.production.queue_clock import SETTLED, settle_task_capacity
 from studio.production.task_schema import LIVE, MAX_TASK_OWNERS, UNRESOLVABLE, finish
 
 STOP_REQUESTED, UNACKNOWLEDGED = 'stop-requested', 'launch-not-acknowledged'
@@ -157,9 +157,10 @@ def settle(task_claim: object, ending: Ending) -> dict:
         event = _decide(record, task, ending, elapsed)
         if event is None:
             return Outcome(False, {}, {'taskId': task_claim.task_id, 'settled': False})
-        if not ending.survivors:
-            settle_task_workers(record, task['id'])
+        # The owners' rows go with their credit and names, in this same terminal event (X189 F2).
+        settled = {} if ending.survivors else settle_task_capacity(record, task['id'])
         refresh(record, elapsed)
         detail = {'taskId': task['id'], 'state': task['state'], 'failure': task['failure'], 'owners': task['owners']}
-        return Outcome(True, {'event': event, 'epoch': task_claim.epoch, **detail}, {**detail, 'settled': True})
+        line = {'event': event, 'epoch': task_claim.epoch, **detail, **({SETTLED: settled} if settled else {})}
+        return Outcome(True, line, {**detail, 'settled': True})
     return transact(store.default_root(), task_claim.batch_id, operation)

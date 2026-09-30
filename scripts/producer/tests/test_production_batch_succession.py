@@ -163,9 +163,11 @@ class ClosedSuccessionTests(SuccessionCase):
         # X183 m4: another version's record, readable JSON but malformed where the check reads it, is named too.
         for raw in ({'schemaVersion': 7, 'batchId': BATCH, 'production': ['TEST']},
                     {'schemaVersion': 9, 'batchId': BATCH,
-                     'production': {'closure': {'unresolvedAtClose': [{'taskId': 'x', 'kind': 'TEST kind'}]}}}):
+                     'production': {'closure': {'unresolvedAtClose': [{'taskId': 'x', 'kind': 'TEST kind'}]}}},
+                    {'schemaVersion': 9, 'batchId': BATCH, 'production': {'closure': 0}},      # X190 n4: falsy
+                    {'schemaVersion': 9, 'batchId': BATCH, 'production': {'closure': {'unresolvedAtClose': 5}}}):
             authority.write_bytes(json.dumps(raw).encode())
-            with self.subTest(raw['schemaVersion']):
+            with self.subTest(raw=raw):
                 self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth (unreadable)'))
 
     def test_an_archived_closure_without_ai_work_lets_the_next_batch_start(self) -> None:

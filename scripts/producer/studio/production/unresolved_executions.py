@@ -264,6 +264,17 @@ def archived_ai_rows(root: Path) -> list[str]:
     return [row for name in names for row in _archived_rows(root, name)]
 
 
+def _closure_rows(raw: dict) -> list:
+    """An archived record's closure rows: none without a closure, else its list; a malformed production, closure or
+    row list raises TypeError, so a falsy malformed value (0, '', []) is never read as "no rows" (X190 n4)."""
+    production = raw.get('production', {})
+    closure = production.get('closure') if type(production) is dict else 0
+    rows = [] if closure is None else closure.get('unresolvedAtClose', []) if type(closure) is dict else None
+    if type(rows) is not list:
+        raise TypeError('malformed archived closure')
+    return rows
+
+
 def _archived_rows(root: Path, name: str) -> list[str]:
     """One archived record's closure AI rows, or its name marked unreadable."""
     try:
@@ -271,9 +282,7 @@ def _archived_rows(root: Path, name: str) -> list[str]:
             raw = json.loads(read_private_file(session.dir_fd, AUTHORITY, BATCH_RECORD_BYTES).decode('utf-8'))
         if type(raw) is not dict or raw.get('schemaVersion') == SCHEMA_VERSION:
             validate_record(raw)
-        closure = (raw.get('production') or {}).get('closure') or {}
-        return [f'{name}/{row["taskId"]}' for row in closure.get('unresolvedAtClose', [])
-                if TASK_KINDS[row['kind']] == 'ai']
+        return [f'{name}/{row["taskId"]}' for row in _closure_rows(raw) if TASK_KINDS[row['kind']] == 'ai']
     except (OSError, DurableFileError, UnicodeError, ValueError, BudgetAuthorityError, AttributeError, KeyError,
             TypeError):   # another version's malformed record is named too (X183 m4), never a traceback
         return [f'{name} (unreadable)']

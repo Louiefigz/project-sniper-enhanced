@@ -1,4 +1,4 @@
-"""M-050's named stall, continued (P1-RP3b fixes, X184, open this module: ``test_queue_clock_stall`` is at 299 lines).
+"""M-050's named stall, continued (P1-RP3b fixes, X184, open this module: ``test_queue_clock_stall`` is at 300 lines).
 
 FullTrailTests (MAJOR, heartbeat ruling (b)): at a full event trail the operator's cancel is still written and the
 batch then closes, and a waiting owner's heartbeat that names a stall commits record-only instead of failing its
@@ -115,10 +115,11 @@ class StaleStallTests(unittest.TestCase):
         return waiter
 
     def test_close_names_the_stall_before_the_deadline(self) -> None:
-        """m1: a credited stall never reaches its deadline, so the stall's text comes before the open-clips text."""
+        """m1: a credited stall never reaches its deadline, so the stall's text (with the cancel as the way to close
+        around it, X190 n4) comes before the open-clips text."""
         waiter = self.stalled()
         refusal = close_refusal(waiter.session.record, waiter.now[0])
-        self.assertRegex(refusal, r'^Short A is capacity-stalled .* while its owner waits.* cancel')
+        self.assertRegex(refusal, r"^Short A is capacity-stalled .*: the operator's cancel closes around it")
 
     def test_settling_the_waiters_task_clears_its_stall(self) -> None:
         """m2: the watchdog settles the waiting owner's task; the stall it named clears and no longer holds close."""

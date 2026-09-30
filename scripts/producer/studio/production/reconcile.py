@@ -38,7 +38,7 @@ from studio.production.host_contract import CATEGORY, HostEvent, clip_text
 from studio.production.task_end import ALIVE, LOST, TERMINATED, observed_state
 from studio.production.task_schema import LIVE, TERMINAL, UNRESOLVABLE, finish, is_ai
 from studio.production.tasks import TaskConflict, task_of, tasks_of
-from studio.production.queue_clock import settle_task_workers, task_deadline
+from studio.production.queue_clock import SETTLED, settle_task_capacity, task_deadline
 
 HOST_STATES = {'running': ALIVE, 'terminal': TERMINATED, 'unknown': LOST}
 
@@ -191,13 +191,22 @@ def _unresolved(record: dict, task: dict, observation: Observation, elapsed: flo
     if task['kind'] == 'media':
         if not _owners_ended(task, observation):
             return None
-        settle_task_workers(record, task['id'])
-        if task['cancelRequested'] or task['revoked']:
-            state = 'superseded' if task['revoked'] else 'cancelled'
-            return _media_terminal(task, state, elapsed, 'owned cleanup confirmed without publication')
-        if task['attempt'] is not None and (outcome := _exact_outcome(record, task, elapsed)):
-            return outcome
-        task['owners'] = []
+        settled = settle_task_capacity(record, task['id'])   # its credit and names ride on the change (X189 F2)
+        change = _media_resolved(record, task, elapsed)
+        return {**change, SETTLED: settled} if settled else change
+    task.update(unresolved=False, endConfirmed=True,
+                reason=clip_text(f'{task["reason"] or task["state"]}; termination confirmed'))
+    return _change(task, task['state'], 'termination confirmed')
+
+
+def _media_resolved(record: dict, task: dict, elapsed: float) -> dict:
+    """A media task whose owned cleanup is confirmed: its terminal outcome, or its termination confirmed."""
+    if task['cancelRequested'] or task['revoked']:
+        state = 'superseded' if task['revoked'] else 'cancelled'
+        return _media_terminal(task, state, elapsed, 'owned cleanup confirmed without publication')
+    if task['attempt'] is not None and (outcome := _exact_outcome(record, task, elapsed)):
+        return outcome
+    task['owners'] = []
     task.update(unresolved=False, endConfirmed=True,
                 reason=clip_text(f'{task["reason"] or task["state"]}; termination confirmed'))
     return _change(task, task['state'], 'termination confirmed')

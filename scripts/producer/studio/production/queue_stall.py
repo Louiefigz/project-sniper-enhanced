@@ -102,9 +102,18 @@ def stalled(clip: dict) -> bool:
     return state(clip) == STALLED and clip['state'] != 'handed-off'
 
 
+def shown_state(clip: dict) -> str | None:
+    """The state status reports: a handed-off Short's leftover ``capacity-stalled`` row is not a stall, as close and
+    the actions already treat it (X190 s1)."""
+    named = state(clip)
+    return None if named == STALLED and not stalled(clip) else named
+
+
 def cancelled_refusal(record: dict, clip: dict) -> str:
-    """``phase_refusal``'s text for a Short the operator cancelled, naming it (X184 n1); ``clip`` is the record's."""
-    names = [clip_id for clip_id, row in record['clips'].items() if row is clip]
+    """``phase_refusal``'s text for a Short the operator cancelled, naming it (X184 n1). The Short is the record's
+    own clip, or failing that the equal one, so a copied clip is named too (X190 n3)."""
+    names = [clip_id for clip_id, row in record['clips'].items() if row is clip] \
+        or [clip_id for clip_id, row in record['clips'].items() if row == clip]
     return (f"Short {', '.join(names)}'s stalled capacity wait was cancelled by the operator; no new work is "
             'admitted for it')
 
@@ -115,10 +124,10 @@ def close_refusal(record: dict, elapsed: float) -> str | None:
     for clip_id, clip in record['clips'].items():
         if stalled(clip):
             counted = status(clip, elapsed)['countedProductionSeconds']
-            return (f'Short {clip_id} is capacity-stalled with {counted:.0f}s counted and its authorization intact '
-                    'while its owner waits: the operator\'s cancel closes around it (capacity-stall --clip '
-                    f'{clip_id} --decision cancel --reason …); otherwise keep the batch open (it resumes when '
-                    'capacity frees)')
+            return (f'Short {clip_id} is capacity-stalled with {counted:.0f}s counted and its authorization intact: '
+                    f'the operator\'s cancel closes around it (capacity-stall --clip {clip_id} --decision cancel '
+                    '--reason …); otherwise keep the batch open until its waits end (a dead owner\'s once '
+                    'recovered or settled)')
     return None
 
 

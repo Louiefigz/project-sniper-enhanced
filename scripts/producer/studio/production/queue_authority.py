@@ -22,8 +22,10 @@ from studio.production.queue_recovery import (  # noqa: F401  Recovery is re-exp
 
 CHECKPOINT_SECONDS = 300.0
 # X183 m5: the largest checkpoint event written. MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) such events
-# fill at most 512 KiB, the checkpoints' half of native_budget_store.TERMINAL_RESERVE_BYTES (test_queue_clock_v2_c).
+# fill at most 512 KiB of native_budget_store.TERMINAL_RESERVE_BYTES (test_queue_clock_v2_c, test_trail_reserve_budget).
 CHECKPOINT_EVENT_BYTES = 512
+# (authority, batch, checkpoint count, clip) whose line was written but whose record was not (X190 n6).
+_FAILED_CHECKPOINTS: set = set()
 
 
 @dataclass(frozen=True)
@@ -153,7 +155,8 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     mark = {'event': 'capacity-checkpoint', 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
             'elapsed': elapsed, 'excludedSeconds': after}
     if event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
-        session.commit(record, mark)
+        count = clip['capacityClock']['checkpoint']['count']   # the checkpoint this heartbeat makes due
+        _commit_checkpoint(session, record, mark, (context.get('authority'), context.get('batchId'), count))
         return after
     from studio.native_budget_store import TrailFull
     try:
@@ -167,6 +170,22 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
         # record and status still name the state, and the waiting render does not fail (as at 2bda52b5).
         session.commit(record, {**mark, 'event': 'capacity-heartbeat'})
     return after
+
+
+def _commit_checkpoint(session: object, record: dict, mark: dict, key: tuple) -> None:
+    """Commit a checkpoint. One whose record replace failed is on the trail already (its line, then ``commit-failed``),
+    so this process never appends it again: a later heartbeat that makes the same checkpoint due commits the record
+    alone (X190 n6), and the 32-per-Short bound counts that line."""
+    from studio.native_budget_store import BudgetAuthorityError
+    key = (*key, mark['clipId'])
+    if key in _FAILED_CHECKPOINTS:
+        session.commit(record, {**mark, 'event': 'capacity-heartbeat'})
+        return
+    try:
+        session.commit(record, mark)
+    except BudgetAuthorityError:
+        _FAILED_CHECKPOINTS.add(key)
+        raise
 
 
 def _checkpoint_due(clip: dict, mark: dict) -> bool:

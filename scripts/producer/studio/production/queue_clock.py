@@ -35,15 +35,15 @@ def writable(clip: dict) -> bool:
     return enabled(clip) and clip['capacityClock']['policy'] == POLICY
 
 
-def productive(record: dict, clip_id: str, workers: dict) -> bool:
-    """Owners and tasks outside the proven waiting set count as useful work (P1 Step B2, C4).
+def productive(record: dict, clip_id: str, workers: dict, elapsed: float) -> bool:
+    """Owners and tasks outside the proven waiting set count as useful work at ``elapsed`` (P1 Step B2, C4).
 
     Useful work: an owner row that is not waiting; on a v2 clock, the enrolled director holding its slot while it
     has not declared itself idle for this Short (``director_activity``); a running attempt other than the waited
     one; and any task of this Short, or run-scoped, other than the director and the waited owners' tasks, that is
-    live, ready AI or check work, or ended unresolved but not ``completed``. A completed turn does no work; only
-    its slot evidence is missing (X99(2)). Any other unresolved end may still be running. Blocked tasks wait for
-    their prerequisites (often the render itself) and do not count.
+    live, ready AI or check work that can still be claimed, or ended unresolved but not ``completed``. A completed
+    turn does no work; only its slot evidence is missing (X99(2)). Any other unresolved end may still be running.
+    Blocked tasks wait for their prerequisites (often the render itself) and do not count.
     """
     if any(row['state'] != 'waiting' for row in workers.values()):
         return True
@@ -57,14 +57,22 @@ def productive(record: dict, clip_id: str, workers: dict) -> bool:
             and any(row['kind'] == 'director' and holds_slot(row) for row in rows):
         return True
     return any(row['clipId'] in (None, clip_id) and row['kind'] != 'director' and row['id'] not in tasks
-               and _task_is_work(row) for row in rows)
+               and _task_is_work(record, row, elapsed) for row in rows)
 
 
-def _task_is_work(row: dict) -> bool:
-    """Live work, ready AI or check work, or an unresolved end that is not a completion (X99(2))."""
+def _task_is_work(record: dict, row: dict, elapsed: float) -> bool:
+    """Live work, ready AI or check work, or an unresolved end that is not a completion (X99(2)).
+
+    A ready creative task whose claim is refused for good (its output's preparation deadline has passed:
+    ``claim_admission.authoring_closed``, the claim refusal's own rule) can never run, so it is not work (X183 m6);
+    the director should cancel it.
+    """
     if row['state'] in LIVE or (row.get('unresolved') and row['state'] != 'completed'):
         return True
-    return row['state'] == 'ready' and (is_ai(row) or row['kind'] == 'check')
+    if row['state'] != 'ready' or not (is_ai(row) or row['kind'] == 'check'):
+        return False
+    from studio.production.claim_admission import authoring_closed
+    return not authoring_closed(record, row, elapsed)
 
 
 def checkpoint(record: dict, elapsed: float) -> None:
@@ -83,7 +91,8 @@ def _checkpoint_clip(record: dict, clip_id: str, elapsed: float) -> None:
     workers = clock['workers']
     waiting = [row for row in workers.values() if row['state'] == 'waiting']
     hold_open = bool(record['holds']) and record['holds'][-1]['endElapsed'] is None
-    if not waiting or hold_open or productive(record, clip_id, workers):
+    # Work is judged at the interval's start: a task that stops being work mid-interval still counts for it.
+    if not waiting or hold_open or productive(record, clip_id, workers, elapsed - delta):
         return
     if any(elapsed - row['seenElapsed'] > MAX_GAP_SECONDS for row in waiting):
         clock['uncertainSeconds'] += clock['pendingSeconds'] + delta

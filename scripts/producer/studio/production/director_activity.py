@@ -4,7 +4,8 @@ An enrolled director that says nothing counts as working (``directorWorking`` is
 its Shorts earn no render-queue credit while it holds its slot: undeclared director work and subagents that are
 not claimed tasks are uncertain state, and uncertain state counts (G1). The director declares ``idle`` for Shorts
 it only coordinates, and ``working`` before it authors or reviews itself, or launches a subagent that is not a
-claimed task.
+claimed task. Each enrollment starts over: a newly enrolled director counts as working on every open Short until
+it declares (``enroll``), whatever an earlier director declared. ``ENROLL_HINT`` is what ``enroll`` tells it.
 
 A declaration is the director's own claim, never an observation: the event says ``declared: True``, and nothing
 here checks what the director actually does (G8). ``queue_clock.productive`` reads the flag on v2 clocks only.
@@ -15,10 +16,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from studio.production.claims import ClaimRef, Outcome, check_claim
+from studio.production.claims import ClaimRef, Enrollment, Outcome, check_claim, enroll_director
 from studio.production.queue_clock import writable
 from studio.production.task_schema import holds_slot
 from studio.production.tasks import TaskRefused, task_of
+
+ENROLL_HINT = ('declare your activity: director-activity --batch SESSION --task <this task> --epoch N --token T --all '
+               '--state idle for the Shorts you only coordinate, and --state working --clip ID before you author or '
+               'review one yourself; until then every Short counts you as working and earns no render-queue credit')
 
 
 @dataclass(frozen=True)
@@ -41,7 +46,16 @@ def _clips(record: dict, activity: DirectorActivity) -> tuple[str, ...]:
                               'Shorts on this policy')
         if clip['state'] == 'handed-off':
             raise TaskRefused(f'Clip {clip_id} was handed off')
-    return tuple(activity.clips)
+    return tuple(dict.fromkeys(activity.clips))   # a Short named twice is one Short (P1-RP3 n1)
+
+
+def enroll(record: dict, enrollment: Enrollment, elapsed: float) -> Outcome:
+    """Enroll the director (``claims.enroll_director``); a newly enrolled director has declared nothing, so every
+    open v2 Short counts it as working again: an earlier director's ``idle`` never carries over (X183 MAJOR)."""
+    outcome = enroll_director(record, enrollment, elapsed)
+    for clip_id in _clips(record, DirectorActivity(None, True)) if outcome.changed else ():
+        record['clips'][clip_id]['capacityClock']['directorWorking'] = True
+    return outcome
 
 
 def declare(record: dict, ref: ClaimRef, activity: DirectorActivity, elapsed: float) -> Outcome:

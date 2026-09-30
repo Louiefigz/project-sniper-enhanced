@@ -1286,7 +1286,8 @@ docs belong to P3b.
   the clip's observed time; `cmd_status` adds `capacityAudit` and `clip_status` its `creditVerified` (the audit is
   passed in through `native_budget_status.StatusInputs.audit`). Unkeyed: a writer who rewrites record and trail
   together is not detected. Tests: `test_queue_clock_v2_c.py`, `test_native_work_pool_credit.EvidenceTests`.
-- **Orphans and dead waiters (M-048; C7, P3, P6).** `queue_authority.recovery_evidence` returns `Recovery(ended,
+- **Orphans and dead waiters (M-048; C7, P3, P6).** `queue_authority.recovery_evidence` (in `queue_recovery.py` since
+  P1-RP3, re-exported) returns `Recovery(ended,
   orphaned)`: a working row of this boot whose recorded supervisor no longer runs (PID, start and group compared)
   is orphaned; `recover_workers` moves it to a v2 clock's `orphans` (`count`, the last 16 rows with
   `orphanedElapsed`; a v1 clock keeps it) and makes the pending interval uncertain, and the observation event lists
@@ -1316,3 +1317,14 @@ docs belong to P3b.
   (a v1 clock too), a run-scoped task's on every writable Short clock. `task_deadline` gives a run-scoped task the
   largest credit any writable Short earned since its origin there (never retroactive; a Long has no clock and adds
   nothing), so its children, bounded by `tasks._check_parent`, follow it. Tests: `test_queue_clock_v2_b.RunScopedTests`.
+- **P1-RP3 fixes (X183).** `director_activity.enroll` (what `api.enroll_director` calls) resets every open v2 Short's
+  `directorWorking`, so a newly enrolled director counts as working until it declares, and `enroll`'s output carries
+  `declare` (`ENROLL_HINT`). `native_work_pool_credit.classify` names `LEGACY_HOLDER` as the occupant of a legacy
+  exclusive wait. `claim_admission.authoring_closed` (a creative task past its output's preparation deadline, which never
+  reopens) is read by the claim refusal and by `queue_clock._task_is_work`, judged at each interval's start.
+  `queue_audit._waiting_after` closes the audit window when no owner waits after the last event. A
+  `capacity-checkpoint` carries only `event, clipId, worker, state, elapsed, excludedSeconds` and is written only
+  within `queue_authority.CHECKPOINT_EVENT_BYTES` (512 B; 32 x 32 = half the terminal reserve). The lift refuses a
+  5-7 record with an unresolved end outside `UNRESOLVABLE`; an archived record of another version that is malformed
+  reads as `(unreadable)`. Owner recovery moved to `production/queue_recovery.py`. Tests: `test_queue_clock_v2_e.py`,
+  `test_queue_clock_v2_c.CheckpointTests`, `test_budget_schema_lift`, `test_production_batch_succession`.

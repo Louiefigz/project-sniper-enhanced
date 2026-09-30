@@ -1,9 +1,10 @@
 """Short capacity clock v2, continued (M-048 opens this module: ``_c`` would pass 300 lines with these, MA3).
 
 OrphanTests (P1 Step B5; C7, P3, P6): a working owner whose supervisor is gone is orphaned, not left counting as
-work; a dead prelaunch waiter is recovered even while its process group lives on; settling one task keeps another
-owner's pending interval. Batches are ``test_queue_clock_v2_c.AuditCase`` (a private authority root, a fake clock,
-Short A, this process as the observing owner) with a TEST process table; no child process is started.
+work; a dead prelaunch waiter is recovered even while its process group lives on, and an owner whose supervisor runs
+is neither orphaned nor recovered (X183 m8: O3, O6); settling one task keeps another owner's pending interval.
+Batches are ``test_queue_clock_v2_c.AuditCase`` (a private authority root, a fake clock, Short A, this process as
+the observing owner) with a TEST process table; no child process is started.
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ from test_queue_clock_v2 import V1_CLOCK, short_record
 V1_KEYS = ('state', 'resource', 'evidence', 'seenElapsed', 'taskId', 'attemptId')
 
 DEAD = {'pid': 424242, 'pgid': 424242, 'started': 'Sun Sep 27 09:00:00 2026'}
+LIVE = {'pid': 525252, 'pgid': 525252, 'started': 'Sun Sep 27 09:30:00 2026'}   # a supervisor the TEST table runs
 ROW = {'state': 'working', 'resource': 'native-owner', 'evidence': 'preparation', 'seenElapsed': 0.0,
        'taskId': None, 'attemptId': None, 'ticket': None, 'occupants': [], 'waitClass': None}
 POOL_ROW = {'ticket': POOL.ticket, 'occupants': list(POOL.occupants), 'waitClass': POOL.wait_class}
@@ -118,6 +120,21 @@ class OrphanTests(AuditCase):
         self.assertEqual((clock['excludedSeconds'], clock['orphans']['count']), (62.0, 0))
         self.assertNotIn('/TEST/dead-00.json', clock['workers'])
 
+    def test_a_live_working_owner_is_not_orphaned(self) -> None:
+        """O6: a working owner whose supervisor still runs (planted under the dead-row name) stays the Short's work:
+        no orphan, and the wait beside it earns nothing."""
+        self.plant(supervisor=LIVE)
+        self.use_table(table(LIVE))
+        self.wait(62, POOL)
+        clock = self.clock_of()
+        self.assertEqual((clock['orphans']['count'], clock['excludedSeconds']), (0, 0.0))
+
+    def test_a_live_waiter_is_not_recovered(self) -> None:
+        """O3: another owner's waiting row whose supervisor still runs is kept by recovery."""
+        self.plant(supervisor=LIVE, state='waiting', resource='heavy-pool', evidence='{}', **POOL_ROW)
+        self.use_table(table(LIVE))
+        self.observe('working')
+        self.assertIn('/TEST/dead-00.json', self.clock_of()['workers'])
 
     def test_a_v1_clock_keeps_its_rows(self) -> None:
         """A v1 clock (the P0 engine's) has no orphan list and is never advanced: its dead working row stays."""
@@ -145,7 +162,6 @@ class PendingOwnershipTests(unittest.TestCase):
         self.assertEqual((clock['pendingSeconds'], clock['uncertainSeconds']), (10.0, 0.0))
         self.assertEqual(queue_clock.settle_task_workers(record, 'media-2'), ['/TEST/owner-2.json'])
         self.assertEqual((clock['pendingSeconds'], clock['uncertainSeconds']), (0.0, 10.0))
-
 
 
 if __name__ == '__main__':

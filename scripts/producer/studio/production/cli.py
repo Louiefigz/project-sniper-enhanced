@@ -34,6 +34,7 @@ from studio.native_budget_store import BudgetAuthorityError
 from studio.production import api, commands, dispatch, handover_commands, inputs, media, queue_commands
 from studio.production.callbacks import TaskFailure, TaskResult
 from studio.production.claims import ClaimRef, Enrollment
+from studio.production.director_activity import ENROLL_HINT
 from studio.production.process import ExportLaunch, TaskClaim
 from studio.production.task_schema import holds_slot, is_ai
 from studio.production.tasks import TaskRefused
@@ -51,7 +52,7 @@ def _ref(args: argparse.Namespace) -> ClaimRef:
 def cmd_enroll(args: argparse.Namespace) -> dict:
     """Record the running director with its exact host handle; it holds one AI slot and one reservation."""
     enrollment = Enrollment(args.task, inputs.handle(args.handle), args.version, args.fingerprint)
-    return api.enroll_director(store.default_root(), args.batch, enrollment)
+    return {**api.enroll_director(store.default_root(), args.batch, enrollment), 'declare': ENROLL_HINT}   # X183 m7
 
 
 def cmd_enqueue(args: argparse.Namespace) -> dict:

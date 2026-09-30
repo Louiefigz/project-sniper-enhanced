@@ -18,10 +18,11 @@ import native_work_pool as pool
 import native_work_pool_disk as disk
 import native_work_pool_mix as mix
 from native_render_resources import GIB
-from native_work_pool_credit import MAX_OCCUPANTS, ReasonGroups, classify
+from native_work_pool_credit import LEGACY_HOLDER, MAX_OCCUPANTS, ReasonGroups, classify
 from native_work_pool_state import NativeWorkQueued
 from studio.native_queue_accounting import pool_evidence
 from studio.production.queue_authority import NO_EVIDENCE, PoolEvidence
+from studio.production.queue_clock import verified_wait
 from _native_pool_fixture import hold_legacy_exclusive, isolate_pool, plan_project, qualify_fixture_host
 
 SLOTS = {'heavy': 3, 'audio': 1}
@@ -136,11 +137,16 @@ class CreditTests(PoolCase):
         self.assert_credit(error, True, 'capacity')
 
     def test_legacy_exclusive_work_is_credited(self) -> None:
-        """Old-code exclusive work holding heavy.lock is live work on the capacity: credited."""
+        """Old-code exclusive work holding heavy.lock is live work on the capacity: credited, and its evidence names
+        the legacy holder as the occupant, so the owner's row is a verified wait (X183 m1)."""
         hold_legacy_exclusive(self, self.root)
         error = self.refused(self.request())
         self.assertIn('legacy exclusive heavy work is running', str(error))
         self.assert_credit(error, True, 'capacity')
+        evidence = pool_evidence(error)
+        self.assertEqual(evidence.occupants, (LEGACY_HOLDER,))
+        self.assertTrue(verified_wait({'waitClass': evidence.wait_class, 'ticket': evidence.ticket,
+                                       'occupants': list(evidence.occupants)}))
 
     def test_a_qualification_session_wait_is_never_credited(self) -> None:
         """Beside full live slots the session reason still withholds credit: it is never credited (RC2)."""

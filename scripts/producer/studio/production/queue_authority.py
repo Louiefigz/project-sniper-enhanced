@@ -3,20 +3,27 @@
 Credit is bound to evidence (P1 Step B4, C11): only the registered supervisor commits its own row, a wait names
 its pool ticket and the live occupants it waits behind (``PoolEvidence``, from ``native_work_pool_credit``), and
 every ``CHECKPOINT_SECONDS`` of credit one heartbeat becomes a ``capacity-checkpoint`` trail event (at most
-``MAX_CHECKPOINTS`` per Short), so ``queue_audit`` can bound the recorded total by the trail. The threat model is
-the unkeyed one of ``approvals``: a writer who rewrites the record and the trail together is not detected.
+``MAX_CHECKPOINTS`` per Short, each only what the audit reads and at most ``CHECKPOINT_EVENT_BYTES``, X183 m5), so
+``queue_audit`` can bound the recorded total by the trail. The threat model is the unkeyed one of ``approvals``: a
+writer who rewrites the record and the trail together is not detected. Owner recovery before an observation lives in
+``queue_recovery`` (split out at P1-RP3; re-exported here).
 """
 from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from pathlib import Path
-import subprocess
 
 from studio.production import queue_clock, queue_stall
-from studio.production.queue_clock_schema import MAX_CHECKPOINTS, MAX_ORPHAN_ROWS, number
+from studio.production.queue_clock_schema import MAX_CHECKPOINTS, number
+from studio.production.queue_recovery import (  # noqa: F401  Recovery is re-exported
+    Recovery, recover_workers, recovery_evidence,
+)
 
 CHECKPOINT_SECONDS = 300.0
+# X183 m5: the largest checkpoint event written. MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) such events
+# fill at most 512 KiB, the checkpoints' half of native_budget_store.TERMINAL_RESERVE_BYTES (test_queue_clock_v2_c).
+CHECKPOINT_EVENT_BYTES = 512
 
 
 @dataclass(frozen=True)
@@ -142,23 +149,33 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     named = {'capacityState': queue_stall.state(clip)} if queue_stall.state(clip) != stall else {}   # M-050
     event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat and not named \
         else 'capacity-observed'
-    if event == 'capacity-heartbeat' and _checkpoint_due(clip, after, elapsed):
-        event = 'capacity-checkpoint'
-    session.commit(record, {'event': event, 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
-                            'elapsed': elapsed, 'excludedSeconds': after, 'creditedSeconds': after - before,
+    # A checkpoint carries only what queue_audit reads (X183 m5); every other event also carries its evidence.
+    mark = {'event': 'capacity-checkpoint', 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
+            'elapsed': elapsed, 'excludedSeconds': after}
+    if event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
+        session.commit(record, mark)
+        return after
+    session.commit(record, {**mark, 'event': event, 'creditedSeconds': after - before,
                             'resource': observation['resource'], 'evidence': observation['evidence'],
                             'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named})
     return after
 
 
-def _checkpoint_due(clip: dict, after: float, elapsed: float) -> bool:
-    """Whether this heartbeat is a trail checkpoint (v2 clocks only); if so, the checkpoint row is advanced."""
+def _checkpoint_due(clip: dict, mark: dict) -> bool:
+    """Whether this heartbeat is a trail checkpoint (v2 clocks only); if so, the checkpoint row is advanced.
+
+    A checkpoint is written only within ``CHECKPOINT_EVENT_BYTES`` as the store encodes it (X183 m5), so its bound
+    holds whatever the owner's path; a longer path leaves the heartbeat unwritten, which only widens
+    ``queue_audit``'s window (credit never grows faster than time passes).
+    """
+    from studio.native_budget_store import canonical
     if not queue_clock.writable(clip):
         return False
     row = clip['capacityClock']['checkpoint']
-    if after - row['excludedSeconds'] < CHECKPOINT_SECONDS or row['count'] >= MAX_CHECKPOINTS:
+    if mark['excludedSeconds'] - row['excludedSeconds'] < CHECKPOINT_SECONDS or row['count'] >= MAX_CHECKPOINTS \
+            or len(canonical(mark)) > CHECKPOINT_EVENT_BYTES:
         return False
-    row.update(excludedSeconds=after, elapsed=elapsed, count=row['count'] + 1)
+    row.update(excludedSeconds=mark['excludedSeconds'], elapsed=mark['elapsed'], count=row['count'] + 1)
     return True
 
 
@@ -183,107 +200,3 @@ def supporting_contexts(owner: object, primary: dict | None) -> list[dict]:
                          'workerId': str(owner.path), 'attemptId': None, 'taskId': None})
         seen.add(key)
     return contexts
-
-
-@dataclass(frozen=True)
-class Recovery:
-    """Other owners' rows seen before the lock: ``ended`` ones (proved gone) and ``orphaned`` ones (C7: a working
-    row of this boot whose own supervisor is gone, with no finished receipt; its children may still run)."""
-
-    ended: dict
-    orphaned: dict
-
-
-def recovery_evidence(record: dict, context: dict) -> Recovery:
-    """Observe possible departed workers before taking the authority lock (an unreadable table proves nothing)."""
-    from studio.native_budget_clock import boot_id
-    from studio.native_budget_launch import _process_table
-    from native_render_processes import ResourceMeasurementError
-    clip = record['clips'][context['clipId']]
-    candidates = {key: row for key, row in clip.get('capacityClock', {}).get('workers', {}).items()
-                  if key != context['workerId']}
-    if not candidates:
-        return Recovery({}, {})
-    try:
-        table = _process_table()
-    except (OSError, subprocess.SubprocessError, ResourceMeasurementError):
-        table = None
-    observed = boot_id(), table
-    ended = {key: row for key, row in candidates.items() if _recoverable((key, row), clip, observed)}
-    return Recovery(ended, {key: row for key, row in candidates.items()
-                            if key not in ended and _orphaned(row, observed)})
-
-
-def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
-    """A reboot, completed cleanup, or a dead prelaunch waiter proves an owner ended.
-
-    A waiting row is written only before pool admission (``native_run_admission.acquire_capacity``: ``join_queue``
-    precedes ``lease.mark_launching``), so its owner launched no child: once its supervisor is gone, a surviving
-    member of its process group cannot be its work (P3), and the group is not checked.
-    """
-    key, row = worker
-    boot, table = observed
-    if row.get('boot') and row['boot'] != boot:
-        return True
-    if _finished_receipt(key):
-        return True
-    if row['state'] != 'waiting' or table is None:
-        return False  # A dead working supervisor alone cannot prove detached-child cleanup (it is orphaned).
-    identity = row.get('supervisor')
-    if identity is None:
-        attempt = next((item for item in clip['attempts'] if item['id'] == row['attemptId']), None)
-        identity = attempt.get('supervisor') if attempt else None
-    if identity is None:
-        return False
-    from native_render_processes import ProcessIdentity, identity_matches
-    return not identity_matches(table, ProcessIdentity(**identity))
-
-
-def _orphaned(row: dict, observed: tuple) -> bool:
-    """A working row of this boot, the table readable, whose recorded supervisor no longer runs (PID, start and group
-    compared, so a recycled PID is not that supervisor). The caller has already ruled out an ended row."""
-    boot, table = observed
-    identity = row.get('supervisor')
-    if row['state'] != 'working' or table is None or identity is None or row.get('boot') != boot:
-        return False
-    from native_render_processes import ProcessIdentity, identity_matches
-    return not identity_matches(table, ProcessIdentity(**identity))
-
-
-def _finished_receipt(path: str) -> bool:
-    """Only the actual terminal owner receipt with proved cleanup retires a working row."""
-    from cut_preview_io import bound_json
-    try:
-        value = bound_json(Path(path), maximum=4 * 1024 ** 2)
-    except (OSError, ValueError, TypeError, RuntimeError):
-        return False
-    if type(value) is not dict or not value.get('completedAt') or type(value.get('cleanup')) is not dict:
-        return False
-    cleanup = value['cleanup']
-    return cleanup.get('verified') is True and (value.get('leaseCleanupVerified') is True
-                                               or cleanup.get('childNeverLaunched') is True)
-
-
-def recover_workers(record: dict, clip_id: str, evidence: Recovery, elapsed: float) -> tuple[list[str], list[str]]:
-    """Remove unchanged proved-ended rows; on a v2 clock move unchanged orphaned rows to ``orphans`` (C7).
-
-    Either way the pending interval becomes uncertain: every unconfirmed interval stays counted. An orphan no longer
-    counts as work or toward the owner cap, and its identity stays visible (``orphans.recent``, the last 16).
-    Returns the (removed, orphaned) owner keys.
-    """
-    clock = record['clips'][clip_id].get('capacityClock')
-    if clock is None:
-        return [], []
-    removed = [key for key, row in evidence.ended.items() if clock['workers'].get(key) == row]
-    orphaned = [key for key, row in evidence.orphaned.items()
-                if queue_clock.writable(record['clips'][clip_id]) and clock['workers'].get(key) == row]
-    if removed or orphaned:
-        clock['uncertainSeconds'] += clock['pendingSeconds']
-        clock['pendingSeconds'] = 0.0
-    rows = [{**clock['workers'][key], 'orphanedElapsed': elapsed} for key in orphaned]
-    for key in removed + orphaned:
-        del clock['workers'][key]
-    if orphaned:
-        orphans = clock['orphans']
-        orphans.update(count=orphans['count'] + len(orphaned), recent=(orphans['recent'] + rows)[-MAX_ORPHAN_ROWS:])
-    return removed, orphaned

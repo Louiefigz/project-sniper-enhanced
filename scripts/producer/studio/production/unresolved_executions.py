@@ -271,8 +271,9 @@ def _archived_rows(root: Path, name: str) -> list[str]:
             raw = json.loads(read_private_file(session.dir_fd, AUTHORITY, BATCH_RECORD_BYTES).decode('utf-8'))
         if type(raw) is not dict or raw.get('schemaVersion') == SCHEMA_VERSION:
             validate_record(raw)
-    except (OSError, DurableFileError, UnicodeError, ValueError, BudgetAuthorityError):
+        closure = (raw.get('production') or {}).get('closure') or {}
+        return [f'{name}/{row["taskId"]}' for row in closure.get('unresolvedAtClose', [])
+                if TASK_KINDS[row['kind']] == 'ai']
+    except (OSError, DurableFileError, UnicodeError, ValueError, BudgetAuthorityError, AttributeError, KeyError,
+            TypeError):   # another version's malformed record is named too (X183 m4), never a traceback
         return [f'{name} (unreadable)']
-    closure = (raw.get('production') or {}).get('closure') or {}
-    return [f'{name}/{row["taskId"]}' for row in closure.get('unresolvedAtClose', [])
-            if TASK_KINDS[row['kind']] == 'ai']

@@ -19,7 +19,8 @@ and a memory wait while live slots are free. A disk reason and the qualification
 are never credited, and neither is a terminal or unsupported refusal or any class but 'heavy'.
 
 Context keys: liveOccupied, liveFull, occupants (at most MAX_OCCUPANTS sorted nonces: the live
-members consuming the needed capacity plus the live mix blockers), occupantsTruncated, waitClass
+members consuming the needed capacity plus the live mix blockers, and LEGACY_HOLDER while old-code exclusive work
+runs), occupantsTruncated, waitClass
 ('capacity' when credited, 'other' for any other wait, None when nothing waits) and capacityOnly.
 """
 from __future__ import annotations
@@ -27,6 +28,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 MAX_OCCUPANTS = 8
+# The occupant named for live old-code exclusive work: it holds heavy.lock and may write no member record, so the
+# legacy wait names this holder, and C11's evidence binding (a credited wait names its occupants) holds (X183 m1).
+LEGACY_HOLDER = 'legacy-heavy.lock'
 
 
 @dataclass(frozen=True)
@@ -71,7 +75,7 @@ def classify(decision: object, rows: list[dict], groups: ReasonGroups) -> None:
     """
     live = [row['nonce'] for row in rows if not row['quarantined']]
     full = len(live) >= decision.context['capacity']
-    occupants = sorted({*live, *groups.blockers})
+    occupants = sorted({*live, *groups.blockers, *((LEGACY_HOLDER,) if groups.legacy else ())})
     credited = _credited(decision, full, groups)
     decision.context.update(liveOccupied=len(live), liveFull=full, occupants=occupants[:MAX_OCCUPANTS],
                             occupantsTruncated=len(occupants) > MAX_OCCUPANTS, capacityOnly=credited,

@@ -2,8 +2,9 @@
 
 ``native_budget_store.BatchSession.read`` asks, before any lift, whether a record that claims an older version
 carries content only schema 8 writes (``newer_content_problem``). A genuine 5-7 record never does: this engine
-writes version 8 and adds the optional production keys, the optional attempt and delivery keys and v2 capacity
-clocks only under it. So such a record is refused by name, never lifted, and a lift can never hand a record
+writes version 8 and adds the optional production keys, the optional attempt and delivery keys, v2 capacity
+clocks and tasks that ended holding an unresolved resource outside ``UNRESOLVABLE`` (G9; X183 m3) only under it.
+So such a record is refused by name, never lifted, and a lift can never hand a record
 schema-8 state (a writable clock, a closure) it was not written with (P1-RP1 m4). Then ``lift_additive_fields``
 supplies the older schemas' implicit fields, and nothing else, before closed validation. Both read raw JSON and
 leave every other shape problem to the validator.
@@ -14,6 +15,7 @@ from studio.native_budget_schema import LIFTED_VERSIONS, OPTIONAL_ROWS
 from studio.native_budget_schema_data import CLIP_ROWS
 from studio.production.production_optional import PRODUCTION_OPTIONAL
 from studio.production.queue_clock_schema import POLICY as CLOCK_V2
+from studio.production.task_schema import UNRESOLVABLE
 
 
 def _newer_rows(record: dict) -> list[str]:
@@ -35,6 +37,9 @@ def newer_content_problem(record: object) -> str | None:
         return None
     block = record.get('production') if type(record.get('production')) is dict else {}
     found = [f'production.{key}' for key in sorted(PRODUCTION_OPTIONAL & set(block))] + _newer_rows(record)
+    tasks = block.get('tasks') if type(block.get('tasks')) is dict else {}   # X183 m3: the ledger's fourth class
+    found += [f'production.tasks.{task_id} unresolved {row.get("state")}' for task_id, row in tasks.items()
+              if type(row) is dict and row.get('unresolved') is True and row.get('state') not in UNRESOLVABLE]
     clips = record.get('clips') if type(record.get('clips')) is dict else {}
     found += [f'{clip_id}.capacityClock v2' for clip_id, clip in clips.items()
               if type(clip) is dict and type(clip.get('capacityClock')) is dict

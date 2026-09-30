@@ -88,7 +88,14 @@ requirements already enforced by `production/host_contract.py` and enrollment.
 The coordinator enrolls its exact host handle with `native_batch.py enroll`,
 submits the dependency graph with `enqueue --tasks FILE`, claims AI/check work
 with `next`, and records real attached handles and artifacts through `attach` and
-`complete`. Every task uses immutable input identity, prerequisites and fenced
+`complete`. Right after enrolling, it declares `director-activity --batch SESSION
+--task DIRECTOR --epoch N --token T --all --state idle` for the Shorts it only
+coordinates, and `--state working --clip ID` before it authors or reviews one
+itself (`enroll`'s output says so under `declare`); until then every Short counts
+the director as working and earns no render-queue credit. A ready authoring,
+planning, plan review or repair task whose output's preparation deadline has
+passed can never be claimed, so it no longer withholds credit; cancel it. Every
+task uses immutable input identity, prerequisites and fenced
 claim epoch/token. `change-approval --approval FILE --reason TEXT` revokes stale
 work; a superseded callback cannot satisfy a current dependency.
 
@@ -118,15 +125,17 @@ settling the task.
 Use `status --batch SESSION` and `next --peek` for current work and refusal
 reasons. Per-clip status distinguishes wall elapsed, counted production,
 excluded render queue and uncertain intervals, with current forecasts and SLA
-misses. Excluded time is bound to evidence: only the owner process that
-registered a wait records it, and a wait earns credit only when it names its
+misses. Excluded time is bound to evidence: only the process named in the
+observation's context commits it, and a wait earns credit only when it names its
 pool ticket and the live members it waits behind; any other wait is counted as
 uncertain. An owner whose process is gone while it worked is moved to the
 clock's `orphans` (its children may still run, so its interval is counted as
 uncertain); it no longer counts as the Short's work or toward the owner limit.
 A waiting owner whose process is gone is simply removed: it launched nothing.
 Every 300 credited seconds (at most 32 times per Short) the trail
-gets a `capacity-checkpoint`, and `status` checks each Short's credit against
+gets a `capacity-checkpoint` (only the Short, owner, state, time and credit, at
+most 512 bytes; an owner path too long for that writes none, which only loosens
+the check), and `status` checks each Short's credit against
 its trail (`capacityAudit`; per output `creditVerified`: false for a total the
 trail cannot account for). This detects a hand-edited record, not a writer who
 rewrites the record and its trail together. Deadline refusal is not a completed video. The default `status` reads each

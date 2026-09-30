@@ -5,14 +5,15 @@ reservation and new tasks, by name. A closed batch whose closure lists unresolve
 name until termination evidence resolves that work (X114 M4): until M-100 counts the host record's open rows at
 admission, creation fails closed, archived or not, for a row of either host or a null-host row, and after the host
 record lost its rows (the live closures are appended first, X125). With the host record missing, an archived
-closure's AI rows, or an archived record that cannot be read, refuse by name too (P1-RP2 m1). Code work left at
-closure does not hold a new batch.
+closure's AI rows, or an archived record that cannot be read (another version's malformed one included, X183 m4),
+refuse by name too (P1-RP2 m1). Code work left at closure does not hold a new batch.
 Registry batches (``RegistryCase``) on private roots and fake clocks; no child process is started.
 """
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import json
 import unittest
 from unittest import mock
 
@@ -159,6 +160,13 @@ class ClosedSuccessionTests(SuccessionCase):
         authority.write_bytes(kept)
         self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth/critic'))
         self.assertFalse((self.root / RECORD).exists())
+        # X183 m4: another version's record, readable JSON but malformed where the check reads it, is named too.
+        for raw in ({'schemaVersion': 7, 'batchId': BATCH, 'production': ['TEST']},
+                    {'schemaVersion': 9, 'batchId': BATCH,
+                     'production': {'closure': {'unresolvedAtClose': [{'taskId': 'x', 'kind': 'TEST kind'}]}}}):
+            authority.write_bytes(json.dumps(raw).encode())
+            with self.subTest(raw['schemaVersion']):
+                self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth (unreadable)'))
 
     def test_an_archived_closure_without_ai_work_lets_the_next_batch_start(self) -> None:
         """m1's control: nothing was unresolved at closure, so no host record exists; the archived closure lists no

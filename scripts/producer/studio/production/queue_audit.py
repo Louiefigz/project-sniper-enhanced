@@ -2,8 +2,9 @@
 
 Every change of a v2 clock's credit reaches the trail as a capacity event (``capacity-observed``,
 ``capacity-checkpoint`` or ``capacity-settled``, each carrying the clip's ``excludedSeconds``) or through a
-heartbeat, which writes none. Credit can never grow faster than time passes, so the recorded total must lie
-between the last such event's total and that total plus the observed seconds since that event. A clip is:
+heartbeat of a waiting owner, which writes none. Credit can never grow faster than time passes, so the recorded
+total must lie between the last such event's total and that total plus the observed seconds since that event, and
+must equal it when the trail leaves no owner of the clip waiting (``_waiting_after``, X183 m2). A clip is:
 - ``consistent`` inside that bound (or with no credit and no event);
 - ``exceeds-trail`` above it (a hand-edited or forged total);
 - ``below-trail`` under the last event (an event the record never took, or a lowered total);
@@ -43,6 +44,17 @@ def _committed_trail(root: Path, batch_id: str) -> list[dict]:
         raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
 
 
+def _waiting_after(trail: list[dict]) -> bool:
+    """Whether the trail leaves an owner of the clip waiting (X183 m2): credit grows between events only through a
+    waiting row's heartbeats, and every transition into ``waiting`` writes an event. Recovered and orphaned owners
+    no longer wait."""
+    waiting: set = set()
+    for row in trail:
+        waiting -= {*row.get('recoveredWorkers', ()), *row.get('orphanedWorkers', ())}
+        (waiting.add if row.get('state') == 'waiting' else waiting.discard)(row.get('worker'))
+    return bool(waiting)
+
+
 def _audit_clip(clip: dict, events: list[dict]) -> dict:
     """One Short's verdict: its recorded credit against its last capacity event at or before its observed time."""
     clock = clip['capacityClock']
@@ -53,7 +65,8 @@ def _audit_clip(clip: dict, events: list[dict]) -> dict:
         status = 'consistent' if recorded == 0.0 else 'no-trail'
         return {'status': status, 'recordedSeconds': recorded, 'trailSeconds': None, 'trailElapsed': None}
     last = trail[-1]
-    ceiling = last['excludedSeconds'] + max(0.0, observed - last['elapsed']) + TOLERANCE
+    window = max(0.0, observed - last['elapsed']) if _waiting_after(trail) else 0.0
+    ceiling = last['excludedSeconds'] + window + TOLERANCE
     status = 'below-trail' if recorded < last['excludedSeconds'] else 'exceeds-trail' if recorded > ceiling \
         else 'consistent'
     return {'status': status, 'recordedSeconds': recorded, 'trailSeconds': last['excludedSeconds'],

@@ -59,8 +59,9 @@ TERMINAL_EVENTS = frozenset({'batch-closed', 'batch-draining', 'launch-completed
                              'task-released', 'task-completed', 'task-failed', 'task-cancel-requested',
                              'task-cancelled', 'task-abandoned', 'task-superseded', 'task-resource-settled',
                              'tasks-reconciled', 'capacity-settled',
-                             # Bound: <= MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) x ~420 B ~ 430 KB,
-                             # inside TERMINAL_RESERVE_BYTES (1 MiB) (P1 Step B4, queue_authority._checkpoint_due).
+                             # Bound (X183 m5): <= MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) events,
+                             # each written only within queue_authority.CHECKPOINT_EVENT_BYTES (512 B) as canonical()
+                             # encodes it: 512 KiB, half of TERMINAL_RESERVE_BYTES (queue_authority._checkpoint_due).
                              'capacity-checkpoint'})
 # Commits that the settlement room never refuses: settlements, and read-only observations (status and
 # wait advance the clock and mark provably dead launches abandoned, which the room already covers).

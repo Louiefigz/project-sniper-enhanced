@@ -1,7 +1,8 @@
 """Schema 8's version and lift guards (P1 review point 1, X180): what a read refuses before it lifts or validates.
 
 m1 the next version; m2 which row kinds take optional keys; m3 the A5 shape by key; m4 a 5-7 record carrying
-content only schema 8 writes (``native_budget_lift.newer_content_problem``); m5 an integer too large for a float.
+content only schema 8 writes (``native_budget_lift.newer_content_problem``), a task's unresolved end outside
+``UNRESOLVABLE`` included (X183 m3); m5 an integer too large for a float.
 Every root is private; records are this engine's TEST records, written raw.
 """
 from __future__ import annotations
@@ -15,8 +16,10 @@ import unittest
 
 from _budget_fixture import FakeClock, fake_clock, private_root
 from studio.native_budget_batches import create_batch
+from studio.native_budget_lift import newer_content_problem
 from studio.native_budget_schema import OPTIONAL_ROWS, SCHEMA_VERSION, a5_shape, validate_record
 from studio.native_budget_store import BudgetAuthorityError, read_batch
+from studio.production.task_schema import UNRESOLVABLE
 from test_budget_schema_shapes import A5_REFUSAL, STORAGE, d1_schema_five, delivered
 from test_queue_clock_v2 import BATCH, short_record, write_raw
 
@@ -93,6 +96,23 @@ class LiftGuardTests(unittest.TestCase):
             with self.subTest(name, version=version):
                 self.refused(record, f'claims schema {version} but carries content only schema 8 writes '
                                      f'\\({re.escape(name)}\\); it is refused, never lifted')
+
+    def test_an_unresolved_end_outside_unresolvable_is_refused(self) -> None:
+        """X183 m3: a task that ended completed or failed still holding its resource (G9) is written only under
+        schema 8, so a 5-7 record carrying one is refused by name; an end in ``UNRESOLVABLE`` is not schema-8
+        content."""
+        for state, version in itertools.product(('completed', 'failed'), (5, 6, 7)):
+            record = {**delivered(), 'schemaVersion': version}
+            record['production']['tasks']['author-1'].update(state=state, unresolved=True)
+            with self.subTest(state, version=version):
+                self.refused(record, f'claims schema {version} but carries content only schema 8 writes '
+                                     f'\\(production\\.tasks\\.author-1 unresolved {state}\\); '
+                                     'it is refused, never lifted')
+        for state in UNRESOLVABLE:
+            record = {**delivered(), 'schemaVersion': 7}
+            record['production']['tasks']['author-1'].update(state=state, unresolved=True)
+            with self.subTest(state):
+                self.assertIsNone(newer_content_problem(record))
 
     def test_a_huge_integer_is_an_unreadable_record(self) -> None:
         """m5: an integer too large for a float is refused as unreadable, never raised as an OverflowError."""

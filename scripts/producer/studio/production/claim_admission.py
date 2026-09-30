@@ -30,8 +30,8 @@ def _ai_refusal(record: dict, task: dict, elapsed: float, proof_current: bool) -
     if parent is None or parent['state'] not in LIVE_PARENT:
         state = f'{parent["id"]} is {parent["state"]}' if parent else 'none'
         return f'AI task {task["id"]} has no live parent ({state}); the authority admits no AI work outside the director\'s tree'
-    clip = record['clips'][task['clipId']] if task['clipId'] else None
-    if task['kind'] in CREATIVE_KINDS and elapsed >= clip_deadlines(record, clip)['preparationSeconds']:
+    if authoring_closed(record, task, elapsed):
+        clip = record['clips'][task['clipId']] if task['clipId'] else None
         return f'{preparation_passed(clip)}: no further authoring, planning, plan review or repair is admitted'
     ai = record['production']['ai']
     if active_ai(record) >= ai['slots']:
@@ -48,6 +48,17 @@ def _ai_refusal(record: dict, task: dict, elapsed: float, proof_current: bool) -
         decision = admit_dispatch(record, task['clipId'], task['kind'], elapsed)
         return None if decision.allowed else decision.reason
     return None
+
+
+def authoring_closed(record: dict, task: dict, elapsed: float) -> bool:
+    """Whether a creative-kind task's claim is refused for good: its output's preparation deadline has passed.
+
+    The claim refusal above and ``queue_clock._task_is_work`` (such a ready task is not its Short's work, X183 m6)
+    read this one rule. It never reopens: a Short's preparation deadline moves only with its credit, which never
+    grows faster than time passes, and a Long's is fixed.
+    """
+    clip = record['clips'][task['clipId']] if task['clipId'] else None
+    return task['kind'] in CREATIVE_KINDS and elapsed >= clip_deadlines(record, clip)['preparationSeconds']
 
 
 def _media_refusal(record: dict, task: dict) -> str | None:

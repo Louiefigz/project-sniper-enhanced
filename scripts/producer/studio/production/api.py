@@ -62,7 +62,7 @@ def authorize_output(root: Path, batch_id: str, request: outputs.OutputAuthoriza
 
 def enroll_director(root: Path, batch_id: str, enrollment: Enrollment) -> dict:
     """Record the already-running director with its exact handle; returns its claim."""
-    return transact(root, batch_id, lambda record, elapsed: claims.enroll_director(record, enrollment, elapsed))
+    return transact(root, batch_id, lambda record, elapsed: director_activity.enroll(record, enrollment, elapsed))
 
 
 def next_ready(root: Path, batch_id: str) -> list[dict]:

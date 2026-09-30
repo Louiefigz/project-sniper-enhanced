@@ -1,8 +1,10 @@
 """Short capacity clock v2, continued (M-047 opens this module: v2 is at 299 lines and v2_b near its bound, MA3).
 
 AuditTests (P1 Step B4, C11): credit bound to pool evidence and to the registered supervisor, trail checkpoints and
-the status audit. Batches live on the test's private authority root (``_live_state_isolation``) on a fake clock,
-with one Short, A, and no enrolled director, so a render wait is the only work; no child process is started.
+the status audit; P1-RP3 (X183): the audit's window closes when no owner waits (m2), and a checkpoint event carries
+only what the audit reads, within its share of the trail's terminal reserve (m5). Batches live on the test's private
+authority root (``_live_state_isolation``) on a fake clock, with one Short, A, and no enrolled director, so a render
+wait is the only work; no child process is started.
 """
 from __future__ import annotations
 
@@ -10,6 +12,7 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 
 import copy
 import os
+import sys
 import unittest
 from unittest import mock
 
@@ -21,10 +24,12 @@ from studio.native_budget_clock import ClockAnchor, start_anchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
 from studio.native_budget_report import clip_status
 from studio.native_budget_schema import validate_record
-from studio.native_budget_store import TERMINAL_EVENTS, locked_batch, read_batch
+from studio.native_budget_schema_data import BOUNDS
+from studio.native_budget_store import TERMINAL_EVENTS, TERMINAL_RESERVE_BYTES, canonical, locked_batch, read_batch
 from studio.production import queue_authority, queue_clock
-from studio.production.queue_audit import capacity_audit
-from studio.production.queue_authority import PoolEvidence, record_observation
+from studio.production.queue_audit import _audit_clip, capacity_audit
+from studio.production.queue_authority import CHECKPOINT_EVENT_BYTES, PoolEvidence, record_observation
+from studio.production.queue_clock_schema import MAX_CHECKPOINTS, new_clock
 
 BATCH = 'clock-audit'
 POOL = PoolEvidence(7, ('a' * 32,), 'capacity')   # a capacity-only refusal's ticket and live occupant
@@ -96,6 +101,20 @@ class AuditTests(AuditCase):
         self.assertEqual((code, status['capacityAudit']['A']['status'], status['clips']['A']['creditVerified']),
                          (0, 'exceeds-trail', False))
 
+    def test_a_hand_edit_after_a_productive_stretch_exceeds_the_trail(self) -> None:
+        """X183 m2: the owner works for 20 min after its last event and nothing waits, so no credit can have accrued
+        since that event: a total raised by 1100 s exceeds the trail although 1200 s have passed."""
+        self.observe('working')                        # a capacity-observed event at 0 s carrying 0
+        self.clock.advance(1200.0)
+        with locked_batch(self.root, BATCH) as session:
+            edited = session.read()
+            native_budget_binding.advance_clock(edited)
+            edited['clips']['A']['capacityClock']['excludedSeconds'] += 1100.0
+            session.commit(edited, {'event': 'TEST-hand-edit'})
+        audit = capacity_audit(self.root, BATCH, read_batch(self.root, BATCH))['A']
+        self.assertEqual((audit['status'], audit['recordedSeconds'], audit['trailSeconds']),
+                         ('exceeds-trail', 1100.0, 0.0))
+
     def test_an_event_after_the_record_was_read_is_no_mismatch(self) -> None:
         """Only events at or before the record's observed time count: credit committed after this record was read
         (a later wait's admission) leaves the earlier record consistent, and the fresh record too."""
@@ -139,14 +158,15 @@ class MemorySession:
 
 
 class CheckpointTests(unittest.TestCase):
-    """Trail checkpoints: one per 300 credited seconds, at most 32 per Short, never refused by a full trail."""
+    """Trail checkpoints: one per 300 credited seconds, at most 32 per Short, never refused by a full trail; each only
+    what the audit reads, within ``CHECKPOINT_EVENT_BYTES`` (X183 m5)."""
 
-    def test_checkpoint_every_300_credited_seconds_capped(self) -> None:
-        """40 windows of 300 s of credited waiting (a new occupant each window, observed every 5 s) write exactly
-        32 capacity-checkpoint events; the checkpoint row names the last one."""
+    def drive(self, windows: int, worker: str = '/TEST/owner-a.json') -> MemorySession:
+        """``windows`` windows of 300 s of credited waiting by ``worker`` (a new occupant each window, observed every
+        5 s) through the committing path; returns the in-memory session."""
         spec = BatchSpec(BATCH, ('A',), (), 1, approvals={'A': approval('A')})
         session = MemorySession(new_batch_record(spec, ClockAnchor('TEST-boot', 5000.0, 1_800_000_000.0, 0.0)))
-        context = {'clipId': 'A', 'workerId': '/TEST/owner-a.json', 'taskId': None, 'attemptId': None,
+        context = {'clipId': 'A', 'workerId': worker, 'taskId': None, 'attemptId': None,
                    'supervisor': {'pid': 7001, 'pgid': 7001, 'started': 'TEST start'}, 'boot': 'TEST-boot'}
         now = [0.0]
 
@@ -156,18 +176,58 @@ class CheckpointTests(unittest.TestCase):
             return now[0]
 
         self.enterContext(mock.patch.object(native_budget_binding, 'advance_clock', advance))
-        for window in range(40):
+        for window in range(windows):
             evidence = {'ticket': window, 'occupants': [f'{window:032x}'], 'waitClass': 'capacity'}
             for _ in range(60):
                 now[0] += 5.0
                 observation = {'state': 'waiting', 'resource': 'heavy-pool', 'evidence': '{}', **evidence}
                 queue_authority._observe_locked(session, context, observation, queue_authority.Recovery({}, {}))
+        return session
+
+    def test_checkpoint_every_300_credited_seconds_capped(self) -> None:
+        """40 windows write exactly 32 capacity-checkpoint events; the checkpoint row names the last one."""
+        session = self.drive(40)
         names = [event['event'] for event in session.trail]
         clock = session.record['clips']['A']['capacityClock']
         self.assertEqual((names.count('capacity-checkpoint'), clock['checkpoint']['count']), (32, 32))
         self.assertEqual(clock['checkpoint']['excludedSeconds'], 32 * 300.0)
         self.assertEqual(clock['excludedSeconds'], 40 * 300.0 - 5.0)   # the first observation starts the wait
         self.assertIn('capacity-checkpoint', TERMINAL_EVENTS)
+
+    def test_a_checkpoint_carries_only_what_the_audit_reads(self) -> None:
+        """m5: the checkpoint is the six fields ``queue_audit`` reads; the observation before it keeps its evidence."""
+        trail = self.drive(2).trail
+        self.assertEqual([event['event'] for event in trail], ['capacity-observed', 'capacity-checkpoint'])
+        self.assertEqual(set(trail[1]), {'event', 'clipId', 'worker', 'state', 'elapsed', 'excludedSeconds'})
+        self.assertEqual((trail[0]['resource'], trail[0]['evidence'], trail[1]['worker']),
+                         ('heavy-pool', '{}', '/TEST/owner-a.json'))
+
+    def test_the_worst_case_fits_its_share_of_the_terminal_reserve(self) -> None:
+        """32 Shorts x 32 checkpoints of the largest event written (a 64-character clip id, the longest float
+        spellings, an owner path filling the rest of ``CHECKPOINT_EVENT_BYTES``) fill at most half of the 1 MiB
+        reserve; a path one byte longer, or shorter but escaped by JSON, is never written as a checkpoint."""
+        mark = {'event': 'capacity-checkpoint', 'clipId': 'C' * 64, 'worker': '', 'state': 'waiting',
+                'elapsed': sys.float_info.max, 'excludedSeconds': sys.float_info.max}
+        room = CHECKPOINT_EVENT_BYTES - len(canonical(mark))
+        widest = {**mark, 'worker': '/' + 'x' * (room - 1)}
+        self.assertEqual(len(canonical(widest)), CHECKPOINT_EVENT_BYTES)
+        self.assertLessEqual(BOUNDS['clips'] * MAX_CHECKPOINTS * len(canonical(widest)), TERMINAL_RESERVE_BYTES // 2)
+        clip = {'capacityClock': new_clock()}
+        self.assertTrue(queue_authority._checkpoint_due(clip, widest))
+        for worker in ('/' + 'x' * room, '/' + '\x01' * (room // 6 + 1)):
+            clip = {'capacityClock': new_clock()}
+            with self.subTest(characters=len(worker)):
+                self.assertFalse(queue_authority._checkpoint_due(clip, {**mark, 'worker': worker}))
+                self.assertEqual(clip['capacityClock']['checkpoint']['count'], 0)
+
+    def test_an_owner_path_too_long_writes_no_checkpoint_and_the_audit_holds(self) -> None:
+        """m5: a 600-character owner path writes no checkpoint; its credit still accrues, and the audit's window
+        (the owner waits after its last event) still accounts for it."""
+        session = self.drive(2, '/TEST/' + 'p' * 600)
+        clip = session.record['clips']['A']
+        self.assertEqual([event['event'] for event in session.trail], ['capacity-observed'])
+        self.assertEqual(clip['capacityClock']['excludedSeconds'], 2 * 300.0 - 5.0)
+        self.assertEqual(_audit_clip(clip, session.trail)['status'], 'consistent')
 
 
 if __name__ == '__main__':

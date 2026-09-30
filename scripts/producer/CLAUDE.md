@@ -1222,3 +1222,17 @@ inserted dialogue node carries a `data-hf-id`. Tests: `test_native_handoff.py`,
 `review-submitted` events, read-only `check-final --as-submitted` and `studio/native_handoff_verify.py`
 are the unreviewed I-B123 round preserved on `p0/preserve-i-b123-wt`; review, acceptance and their
 docs belong to P3b.
+
+## Phase 1 correctness (P1; module map lines per step, completed at M-062)
+
+- **Schema 8 (M-044, X7), the release's one schema step.** `studio/native_budget_schema.py` holds
+  `SCHEMA_VERSION` 8, the readable versions 5, 6, 7 and 8, `OPTIONAL_ROWS` (optional attempt and delivery
+  keys), `a5_shape`, and the release field ledger in its docstring. Its policy literals live in the data
+  catalog `studio/native_budget_schema_data.py`, re-exported by name (checked with `--data-catalog`).
+  `native_budget_store.BatchSession.read` lifts 5-7 to 8 and refuses an A5-forecast schema-5 record by name.
+  `production/production_optional.py` validates the optional production keys through
+  `task_schema.production_problem` (`storage`; `closure` is refused until M-043 lands its validator).
+  `production/queue_clock_schema.py` holds the v1 and v2 `capacityClock` shapes and validators; new Shorts get
+  a v2 clock (`new_clock`, re-exported by `queue_clock.py`). `queue_clock.writable` is true for v2 only:
+  `checkpoint` and `observe_worker` never advance a v1 clock, which keeps the credit it earned (delivery and
+  task settlement still record on it). `queue_authority.bind_allocation` binds only writable clocks.

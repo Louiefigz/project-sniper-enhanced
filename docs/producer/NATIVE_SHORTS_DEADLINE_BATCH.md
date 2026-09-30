@@ -37,6 +37,17 @@ Retries and changed approval records preserve already spent time and counters.
 Long outputs and older saved Short authorizations retain their existing clock
 policy. A Long never borrows a Short's queue credit.
 
+Budget records are schema 8, this release's one schema step. New Shorts get the
+v2 `capacityClock` (`studio/production/queue_clock_schema.py`). A batch written
+by an earlier engine (schema 5, 6 or 7) is lifted to 8 on read; its v1 clocks
+earn no further credit and keep what they earned. The fields this release adds
+are listed, with their owning steps, in the release field ledger in
+`studio/native_budget_schema.py`'s docstring. Optional fields
+(`production.storage`, `production.closure`, an attempt's
+`admittedForecastSeconds` and `late`, a delivery's `late`) are absent until
+their writer lands and are never defaulted. A schema-5 record in the A5-forecast
+shape is refused by name. An older engine refuses a schema-8 record by version.
+
 ## Coordinator and media execution
 
 The buyer's active agent coordinates AI authoring and independent review. The

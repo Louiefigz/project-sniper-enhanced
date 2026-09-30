@@ -26,6 +26,23 @@
      "writers": ["studio/native_route_canary.py"],
      "literal": "reviewer",
      "required": ["inspection"],
-     "readers": ["studio/native_motion_review.py:require_typed_short_reviews"]}
+     "readers": ["studio/native_motion_review.py:require_typed_short_reviews"]},
+    {"name": "capacityClock v2 (M-044)",
+     "writers": ["studio/production/queue_clock_schema.py"],
+     "literal": "directorWorking",
+     "required": ["policy", "excludedSeconds", "pendingSeconds", "observedElapsed", "uncertainSeconds", "workers",
+                  "taskCredits", "deliveryCredits", "directorWorking", "occupancy", "stall", "orphans", "checkpoint",
+                  "handoff"],
+     "readers": ["studio/production/queue_clock_schema.py:problem"]},
+    {"name": "capacityClock v2 stall (M-044; written by M-050)",
+     "writers": ["studio/production/queue_clock_schema.py"],
+     "literal": "truncated",
+     "required": ["state", "sinceElapsed", "occupants", "truncated", "decisions"],
+     "readers": ["studio/production/queue_clock_schema.py:_stall_problem"]},
+    {"name": "capacityClock v2 worker row (M-044; pool evidence from M-047)",
+     "writers": ["studio/production/queue_clock.py"],
+     "literal": "waitClass",
+     "required": ["seenElapsed", "taskId", "attemptId", "ticket", "occupants", "waitClass"],
+     "readers": ["studio/production/queue_clock_schema.py:worker_problem"]}
   ]
 }

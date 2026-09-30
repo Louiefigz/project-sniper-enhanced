@@ -10,6 +10,7 @@ from studio.production.host_contract import (
     parse_capabilities, valid_failure, valid_handle, valid_receipts, valid_usage,
 )
 from studio.production.host_verdicts import HOST_RECORDS
+from studio.production.production_optional import PRODUCTION_OPTIONAL, optional_problem
 
 TASK_ID = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,63}')
 VERSION = re.compile(r'[A-Za-z0-9][A-Za-z0-9._:-]{0,127}')
@@ -245,10 +246,10 @@ def _drain_problem(record: dict) -> str | None:
 def production_problem(record: dict) -> str | None:
     """The first violation in the record's production block, or None."""
     block = record['production']
-    if type(block) is not dict or set(block) != PRODUCTION_KEYS:
+    if type(block) is not dict or set(block) - PRODUCTION_OPTIONAL != PRODUCTION_KEYS:
         return 'production block fields'
     problem = _ai_problem(block['ai']) or _drain_problem(record) or _governance_problem(block['governance']) \
-        or authorization_problem(record)
+        or authorization_problem(record) or optional_problem(record)
     if problem:
         return problem
     tasks = block['tasks']

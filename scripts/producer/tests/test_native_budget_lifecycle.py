@@ -160,8 +160,8 @@ class RoundThreeTests(RegistryCase):
                   3: '6550905eb8e0bf5685090b42150133d01223515f94cd86e894346ff56e572f65',
                   4: '3f94e36e174e2a2af8cc2e386fe60ddf00c67f99f70553e898600a57229eb171',
                   5: '0de2cc57a5bc0e0f5bbb65fa04e8a308825f4b29ca4f250e5a163da51ce8d140',
-                  # P0 adapt: schema 7 (native_budget_schema.py:9-10) changed the record shape, not the policy.
-                  7: '0de2cc57a5bc0e0f5bbb65fa04e8a308825f4b29ca4f250e5a163da51ce8d140'}
+                  # P0 adapt: schema 7 changed the record shape, not the policy; so does M-044's schema 8 (X7).
+                  **dict.fromkeys((7, 8), '0de2cc57a5bc0e0f5bbb65fa04e8a308825f4b29ca4f250e5a163da51ce8d140')}
         self.assertIn(schema.SCHEMA_VERSION, pinned, 'record the new version\'s policy digest here')
         self.assertEqual(schema.policy_digest(), pinned[schema.SCHEMA_VERSION],
                          'limits, deadlines or rates changed: bump SCHEMA_VERSION and pin its digest')

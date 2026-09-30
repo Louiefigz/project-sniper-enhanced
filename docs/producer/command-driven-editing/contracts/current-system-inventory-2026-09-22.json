@@ -2971,7 +2971,7 @@
       }
     },
     {
-      "artifactId": "native-production-budget-authority-v7",
+      "artifactId": "native-production-budget-authority-v8",
       "pathPattern": "<account>/.project-sniper/production-budgets/{registry.lock,batches/<batchId>/{authority.json,authority.pending.json,authority.lock,events.jsonl},batches/.creating-<batchId>-<nonce>/**,archive/**}",
       "owner": "scripts/producer/studio/native_budget_store.py",
       "authority": "canonical",
@@ -3058,7 +3058,7 @@
         "frozen logical family assignments, exact preview inventory, child scope/request identities and original attempt grant",
         "optional immutable reviewService envelope pin shared by exact-plan preview/final families; operational only, never a creative fingerprint"
       ],
-      "durability": "Closed schema 7 extends the same budget authority with bounded logical section families and actual child invocation outcomes. Closed schema 5/6 lifts preserve every original clock, counter and authorization. Logical waiting is not process liveness or a new allocation. Kernel locks, bounded fsynced records/events and reserved terminal room preserve spending and completed work. Unreadable authority refuses work; restart, repair and archive cannot renew limits. Tests use private temporary authorities; representative production qualification remains pending. The optional reviewService pin selects a derived file in the existing batch namespace. Its publication precedes separate authority commit, so failed admission may leave an unreferenced sidecar. Exact-plan preview/final inheritance preserves absence or the identical selected pin; original counters, clock and launch identity remain authoritative.",
+      "durability": "Closed schema 8 extends the same budget authority with bounded logical section families, actual child invocation outcomes and the M-044 release fields (capacityClock v2; the optional fields listed in native_budget_schema's release field ledger). Closed schema 5/6/7 lifts preserve every original clock, counter and authorization. Logical waiting is not process liveness or a new allocation. Kernel locks, bounded fsynced records/events and reserved terminal room preserve spending and completed work. Unreadable authority refuses work; restart, repair and archive cannot renew limits. Tests use private temporary authorities; representative production qualification remains pending. The optional reviewService pin selects a derived file in the existing batch namespace. Its publication precedes separate authority commit, so failed admission may leave an unreferenced sidecar. Exact-plan preview/final inheritance preserves absence or the identical selected pin; original counters, clock and launch identity remain authoritative.",
       "disposition": "extend",
       "parityFixture": "test_native_section_budget.py + test_native_section_budget_continuation.py + test_native_section_budget_settlement.py + test_native_review_budget_acceptance.py + test_native_section_publication.py; these structural/behavior tests do not establish production host or media qualification",
       "removalCondition": "Retain until every admitted author, reviewer and media owner preserves the same original authorization clock, cumulative limits, current result binding, terminal room and fail-closed restart semantics under a replacement authority.",

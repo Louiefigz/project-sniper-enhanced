@@ -5,12 +5,13 @@ from pathlib import Path
 import subprocess
 
 from studio.production import queue_clock
+from studio.production.queue_clock_schema import number
 
 
 def bind_allocation(grant: dict, record: dict, context: dict) -> dict:
-    """Attach a credit baseline to a Short grant; leave Long/old grants untouched."""
+    """Attach a credit baseline to a v2 Short grant; leave Long, v1-clock and old grants untouched."""
     clip = record['clips'][context['clipId']]
-    if not queue_clock.enabled(clip):
+    if not queue_clock.writable(clip):
         return grant
     return {**grant, 'capacityCredit': {**context, 'policy': queue_clock.POLICY,
                                       'atGrant': queue_clock.excluded(clip)}}
@@ -36,7 +37,7 @@ def validate_reference(ref: object) -> None:
     keys = {'authority', 'batchId', 'clipId', 'policy', 'atGrant'}
     if type(ref) is not dict or set(ref) != keys or ref['policy'] != queue_clock.POLICY \
             or type(ref['authority']) is not str or not Path(ref['authority']).is_absolute() \
-            or not queue_clock._number(ref['atGrant']):
+            or not number(ref['atGrant']):
         raise ValueError('Malformed capacity-credit allocation reference')
     require_batch_id(ref['batchId'])
     require_clip_id(ref['clipId'])
@@ -108,7 +109,7 @@ def supporting_contexts(owner: object, primary: dict | None) -> list[dict]:
             continue
         key = binding['batchId'], binding['clipId']
         record = read_batch(root, key[0])
-        if key in seen or not queue_clock.enabled(record['clips'][key[1]]):
+        if key in seen or not queue_clock.writable(record['clips'][key[1]]):
             continue
         identity = identity or owner_identity()
         contexts.append({'authority': str(root), 'batchId': key[0], 'clipId': key[1], **identity,

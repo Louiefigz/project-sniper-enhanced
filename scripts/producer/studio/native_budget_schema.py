@@ -6,6 +6,33 @@ record what governed each batch; changing those copies cannot raise its limits.
 ``SCHEMA_VERSION`` names shape and policy. Unknown versions refuse authority;
 closed records may be archived. Pre-release schema 4 is refused by name.
 
+Version 8 is the release's one schema step (X7, M-044). Reading 5, 6 or 7 lifts it to 8, adding nothing but the
+older schemas' implicit fields (``native_budget_store.lift_additive_fields``); a schema-5 record written by an
+A5-forecast build is refused by name first (``a5_shape``). Release field ledger: a step that lands a later row adds
+its validator under this version and ticks ``landed`` (``val``: validator here, writer at the later step). ``opt``
+rows may be absent and are never defaulted; every other row is required, once landed, on records this engine
+writes. ``lifted`` is how a lifted 5-7 record meets the row; M-171 checks each rule against a lifted 7 fixture and
+the ledger against the landed fields.
+
+    field                                                  validator / writer   landed opt  lifted 5-7 record
+    clip capacityClock v2 (production.queue_clock_schema)  M-044                yes         v1 clock, read-only
+    capacityClock.stall: None, capacity-stalled or         M-044 / M-050        val         v1 clocks have none
+      cancelled; <= 64 occupants (else truncated); <= 1 cancel row
+    task completed with an unresolved resource             M-042                no          holds no such row
+    production.closure {closedElapsed, unresolvedAtClose}  M-043                no     opt  absent
+    host unresolved-executions.jsonl (its own schema 1)    M-043                no          not a record field
+    task assignmentBinding (refused until validated)       M-080, M-082         no     opt  absent
+    declared handle types, hostProcess in DECLARED_KEYS    M-088 / M-099 (O3)   no          none are declared
+    declared director host, hostVersion (on its handle)    M-099                no          declared ones only
+    attempt admittedForecastSeconds (finite, >= 0)         M-044 / M-125        val    opt  absent
+    attempt late, delivery late (only True)                M-044 / M-144        val    opt  absent
+    Long output policy v2                                  M-122                no          M-122 states it
+    output revision                                        M-162                no          M-162 states it
+    production.storage {ceilingBytes, minimumFreeBytes,    M-044 / M-147        val    opt  absent
+      basis} (production.production_optional)
+    source-store extractionRaster, if held in the record   M-150                no          M-150 states it
+    launchError travels in events only and adds no record field (M-042).
+
 Version 7 adds bounded logical section families within existing counted attempts.
 Version 6 adds closed section-owner history; lifting schema 5/6 preserves clocks and counters.
 Version 5 adds the ``production`` block (task rows, run-scoped AI reservations, host
@@ -27,7 +54,7 @@ from studio.native_budget_schema_data import (  # re-exported by name: importers
     DISPATCH_KINDS, LIMITS, NESTED, PRE_RELEASE, PROVISIONAL_RATES, RECORD_KEYS, ROUTES,
 )
 
-SCHEMA_VERSION = 7
+SCHEMA_VERSION = 8
 SHA256 = re.compile(r'[0-9a-f]{64}')
 HEX32 = re.compile(r'[0-9a-f]{32}')
 Check = Callable[[object], bool]
@@ -118,12 +145,18 @@ ROWS: dict[str, dict[str, Check]] = {
                 'nested': lambda value: _counts_ok(value, NESTED, subset=True),
                 'transientRetryOf': _optional(_attempt_id)},
 }
+# Fields a row may omit (the ledger's opt rows; never defaulted). Present, each passes its check (P4-06).
+OPTIONAL_ROWS: dict[str, dict[str, Check]] = {
+    'attempt': {'admittedForecastSeconds': _nonnegative, 'late': lambda value: value is True},
+    'delivery': {'late': lambda value: value is True},
+}
 
 
 def _row_ok(kind: str, value: object) -> bool:
-    """A closed mapping whose every field passes its check."""
-    spec = ROWS[kind]
-    return type(value) is dict and set(value) == set(spec) and all(check(value[key]) for key, check in spec.items())
+    """A closed mapping whose every field passes its check; the kind's optional fields may be absent."""
+    spec = {**ROWS[kind], **OPTIONAL_ROWS.get(kind, {})}
+    return type(value) is dict and set(ROWS[kind]) <= set(value) <= set(spec) \
+        and all(check(value[key]) for key, check in spec.items() if key in value)
 
 
 def _rows_ok(kind: str, value: object, bound: int) -> bool:
@@ -155,7 +188,7 @@ def _record_problem(record: object) -> str | None:
     if version in PRE_RELEASE:
         return (f'pre-release schema {version} (a development build that was never released; this engine reads '
                 f'schema {SCHEMA_VERSION}); archive it once it is closed or its delivery deadline has passed')
-    if version not in (5, 6, SCHEMA_VERSION):
+    if version not in (5, 6, 7, SCHEMA_VERSION):
         return (f'written by another engine version (schemaVersion {version!r}, this engine '
                 f'{SCHEMA_VERSION}); finish it with that engine, or archive it once it is closed or '
                 'its delivery deadline has passed')
@@ -233,6 +266,17 @@ def approval_script(row: dict) -> dict:
     return {'sourceSha256': row['source'], 'transcriptSha256': row['transcript'],
             'transcriptWords': row['transcriptWords'], 'wordRanges': row['wordRanges'],
             'wordTexts': row['wordTexts'], 'ranges': row['ranges']}
+
+
+def a5_shape(record: dict) -> bool:
+    """True when any attempt row carries ``forecast``: a schema-5 record written by an A5-forecast build (P4-06).
+
+    The store asks before lifting a schema-5 record, so it reads raw JSON; any other shape is left to validation.
+    """
+    clips = record.get('clips')
+    rows = [row for clip in (clips.values() if type(clips) is dict else ()) if type(clip) is dict
+            for row in (clip.get('attempts') if type(clip.get('attempts')) is list else ())]
+    return any(type(row) is dict and 'forecast' in row for row in rows)
 
 def policy_digest() -> str:
     """Digest of the limits, deadlines, rates, AI policy and Long policy this schema version governs with."""

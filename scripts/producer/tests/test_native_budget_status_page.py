@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,6 +41,11 @@ def names_the_page(path: Path) -> bool:
     return 'native_budget_status_page' in text or MARKER.split()[1] in text
 
 
+def _blocked(_signum: int, _frame: object) -> None:
+    """SIGALRM handler: the write opened a FIFO and blocked."""
+    raise AssertionError('write_page blocked on a special file')
+
+
 def status() -> dict:
     """A fresh copy of the fixture status read."""
     return json.loads(FIXTURE.read_text())
@@ -70,8 +76,9 @@ class RenderTests(unittest.TestCase):
                      'owner declared:claude-code:s-00000000000000b2:agent-a41f · plan v2 frozen',
                      'queue waiting-for-ai-slot #2 · counted 14:05 used / 25:55 left',
                      'counted 14:05 of 40:00, 25:55 left', 'excluded render wait 3:10 (+0:12 uncertain)',
-                     'author 2, operator 1', '<td>412,300</td>', 'Identities are declared by the coordinator, not '
-                     'authenticated.', '<dt>Governance</dt><dd>declared: in-conversation subagents were not probed',
+                     'author 2, operator 1', '<td data-label="Input">412,300</td>',
+                     'Identities are declared by the coordinator, not authenticated.',
+                     '<dt>Governance</dt><dd>declared: in-conversation subagents were not probed',
                      'ended at 10:10 by takeover; host thread declared', 'open; host thread not declared',
                      'repair-q2-r1 (session s-00000000000000a1): its session was taken over',
                      'review-q2-r0 (session s-00000000000000a1): no listed end observation',
@@ -109,9 +116,11 @@ class RenderTests(unittest.TestCase):
         self.assertIn('queue unknown ·', page)
         self.assertIn('Ready: unknown</li><li>Shown: unknown</li>', page)
         self.assertIn('<strong>Next:</strong> unknown', page)
-        critic = '<tr><td>critic</td>' + '<td>unknown</td>' * 4 + '</tr>'
+        labels = ('Input', 'Cached', 'Output', 'Reasoning')
+        cells = ''.join(f'<td data-label="{label}">unknown</td>' for label in labels)
+        critic = f'<tr><td>critic</td>{cells}</tr>'
         self.assertIn(critic, page)
-        self.assertIn('<tr class="team"><td>team</td>' + '<td>unknown</td>' * 4, page)
+        self.assertIn(f'<tr class="team"><td>team</td>{cells}', page)
         self.assertIn('Unknown because: 1 host task(s) have no transcript record', page)
         self.assertIn('excluded render wait unknown (+unknown uncertain)', render_page(status(), stamp()))
 
@@ -193,6 +202,17 @@ class WriteTests(unittest.TestCase):
             with self.subTest(target=target), self.assertRaises(ValueError):
                 write_page(target, text)
         self.assertEqual(self.leftovers(), [])
+
+    def test_write_never_opens_a_special_file(self) -> None:
+        """A FIFO at the out path is refused without being opened (reading one would block)."""
+        fifo = self.directory / 'status.html'
+        os.mkfifo(fifo)
+        self.addCleanup(signal.signal, signal.SIGALRM, signal.signal(signal.SIGALRM, _blocked))
+        self.addCleanup(signal.alarm, 0)
+        signal.alarm(5)
+        with self.assertRaises(ValueError) as caught:
+            write_page(fifo, self.page)
+        self.assertEqual(str(caught.exception), FOREIGN_FILE)
 
     def test_write_replaces_an_existing_page(self) -> None:
         """An existing page is replaced whole, with no temporary file left."""

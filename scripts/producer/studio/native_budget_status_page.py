@@ -172,7 +172,8 @@ def _tokens(tokens: dict) -> str:
     rows = [(role, row['totals'], '') for role, row in tokens['roles'].items()]
     rows.append(('team', tokens['team']['totals'], ' class="team"'))
     body = ''.join(f'<tr{attrs}><td>{_text(role)}</td>'
-                   + ''.join(f'<td>{_count(totals[key])}</td>' for key, _label in TOKEN_COLUMNS) + '</tr>'
+                   + ''.join(f'<td data-label="{label}">{_count(totals[key])}</td>' for key, label in TOKEN_COLUMNS)
+                   + '</tr>'
                    for role, totals, attrs in rows)
     because = '; '.join(_text(reason) for reason in tokens['team']['unknownBecause'])
     return (f'<table><thead><tr><th>Role</th>{head}</tr></thead><tbody>{body}</tbody></table>'
@@ -221,7 +222,12 @@ def _inside(path: Path, root: Path) -> bool:
 
 
 def _is_page(path: Path) -> bool:
-    """Whether an existing ``path`` starts with ``MARKER`` (reads only those bytes; a directory is not a page)."""
+    """Whether an existing ``path`` is a regular file starting with ``MARKER`` (reads only those bytes).
+
+    A folder, FIFO, socket or device is never a page and is never opened (a FIFO would block the read).
+    """
+    if not path.is_file():
+        return False
     marker = MARKER.encode()
     try:
         with path.open('rb') as handle:

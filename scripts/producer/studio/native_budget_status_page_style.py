@@ -48,8 +48,18 @@ ul.chips li { background: var(--chip); border-radius: 12px; padding: 2px 10px; f
 table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .84rem;
   font-variant-numeric: tabular-nums; }
 th, td { text-align: right; padding: 3px 4px; border-bottom: 1px solid var(--line); }
-th:first-child, td:first-child { text-align: left; width: 28%; }
+th { font-size: .72rem; font-weight: 600; color: var(--muted); }
+th:first-child, td:first-child { text-align: left; width: 22%; }
 tr.team td { font-weight: 600; }
+@media (max-width: 480px) {
+  thead { display: none; }
+  table, tbody, td { display: block; }
+  tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; padding: 4px 0;
+    border-bottom: 1px solid var(--line); }
+  td, th:first-child, td:first-child { border: 0; padding: 1px 0; text-align: left; width: auto; }
+  td:first-child { grid-column: 1 / -1; font-weight: 600; }
+  td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); }
+}
 """
 
 STALE_SCRIPT = """

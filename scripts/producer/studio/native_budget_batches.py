@@ -18,7 +18,8 @@ by a new batch. Unsettled production tasks keep another engine version's batch u
 this engine's closed batch is archived only once its closure and the host record list them (X37).
 Until admission counts the host record (M-100), an open AI row in it, from any batch's closure and
 archived or not, refuses a new batch by name (X114: fail closed); the live closed batches' closure rows are
-appended to it first, as archive does (X125).
+appended to it first, as archive does (X125). While the host record is missing, the AI rows an archived closure
+lists refuse by name too (unresolved_executions.archived_ai_rows, P1-RP2 m1).
 """
 from __future__ import annotations
 
@@ -163,12 +164,17 @@ def _record_closures(root: Path, records: list[tuple[str, dict]]) -> None:
 
 def refuse_creation(root: Path, batch_id: str) -> None:
     """Raise unless a new batch with this id may be published now (call under the registry lock)."""
+    from studio.production.unresolved_executions import RECORD, archived_ai_rows
     records = live_records(root)
     current = [(name, record['status']) for name, record in records if record['status'] != 'closed']
     if current:
         name, status = current[0]
         raise PredecessorCurrent(f'Batch {name} is still {status}; close it before starting another (one production '
                                  'batch runs at a time, and a draining batch keeps its unresolved work until it settles)')
+    if not (root / RECORD).exists() and (listed := archived_ai_rows(root)):   # P1-RP2 m1: fail closed
+        raise PredecessorCurrent(f'unresolved-executions.jsonl is missing, yet archived closures list unresolved AI '
+                                 f'work ({", ".join(listed[:3])}); a new batch waits until that host record is '
+                                 'restored (fail closed until admission counts it, M-100)')
     _record_closures(root, records)
     if unresolved := _open_ai_rows(root):
         tasks = ', '.join(f'{row["batchId"]}/{row["taskId"]}' for row in unresolved[:3])

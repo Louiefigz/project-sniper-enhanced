@@ -4,8 +4,9 @@ A draining batch (an explicit drain, or a close while media is live) refuses a n
 reservation and new tasks, by name. A closed batch whose closure lists unresolved AI work refuses a new batch by
 name until termination evidence resolves that work (X114 M4): until M-100 counts the host record's open rows at
 admission, creation fails closed, archived or not, for a row of either host or a null-host row, and after the host
-record lost its rows (the live closures are appended first, X125). Code work left at closure does not hold a new
-batch.
+record lost its rows (the live closures are appended first, X125). With the host record missing, an archived
+closure's AI rows, or an archived record that cannot be read, refuse by name too (P1-RP2 m1). Code work left at
+closure does not hold a new batch.
 Registry batches (``RegistryCase``) on private roots and fake clocks; no child process is started.
 """
 from __future__ import annotations
@@ -31,6 +32,8 @@ CLAUDE_TURN = {'type': 'host', 'host': 'claude-code', 'thread': 'TEST-thread-cri
 AI_REFUSAL = ('Batch batch-auth closed with unresolved AI work (batch-auth/critic) still charged in '
               'unresolved-executions.jsonl; a new batch waits until termination evidence resolves it (fail closed '
               'until admission counts it, M-100)')
+LOST_REFUSAL = ('unresolved-executions.jsonl is missing, yet archived closures list unresolved AI work ({}); a new '
+                'batch waits until that host record is restored (fail closed until admission counts it, M-100)')
 
 
 class SuccessionCase(RegistryCase):
@@ -140,6 +143,31 @@ class ClosedSuccessionTests(SuccessionCase):
         (self.root / RECORD).unlink()
         self.assertEqual(self.refused(), AI_REFUSAL)
         self.assertEqual(recorded_task_ids(self.root, BATCH), {'critic'})
+
+    def test_a_lost_host_record_after_archive_refuses_by_name(self) -> None:
+        """P1-RP2 m1: archived, then the host record lost (a hand repair of a torn last line, say): the archived
+        closure's AI row refuses the next batch by name, and an archived record that cannot be read does too."""
+        self.held_critic()
+        self.close_batch()
+        self.archive()
+        (self.root / RECORD).unlink()
+        self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth/critic'))
+        authority = self.root / 'archive' / BATCH / 'authority.json'
+        kept = authority.read_bytes()
+        authority.write_bytes(b'{"TEST": "a torn archived record')
+        self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth (unreadable)'))
+        authority.write_bytes(kept)
+        self.assertEqual(self.refused(), LOST_REFUSAL.format('batch-auth/critic'))
+        self.assertFalse((self.root / RECORD).exists())
+
+    def test_an_archived_closure_without_ai_work_lets_the_next_batch_start(self) -> None:
+        """m1's control: nothing was unresolved at closure, so no host record exists; the archived closure lists no
+        AI row and the next batch starts."""
+        self.close_batch()
+        self.archive()
+        self.assertFalse((self.root / RECORD).exists())
+        self.start('batch-next', ('A',))
+        self.assertIn('batch-next', batches.list_batches(self.root))
 
     def test_code_work_left_at_closure_does_not_hold_a_new_batch(self) -> None:
         """A check still claimed by a live dispatcher is listed with a null host, yet it is not AI work (X114)."""

@@ -1,8 +1,8 @@
 """M-042's counted section reservations over the real chunk fixture (X125 N2, X168): what a row reserves.
 
 A started row whose early review can still run reserves one slot; a row that can never progress reserves
-nothing (X168 P2-M1): an early review frozen or cancelled before it ran, an author frozen before it ran, an
-author asked to stop or revoked. Only a current row's own early review may use a reserved slot (P2-m1); a
+nothing (X168 P2-M1): an early review frozen or cancelled before it ran (read with a chunk request, or from the
+family plan without one, P1-RP2 MA2), an author frozen before it ran, an author asked to stop or revoked. Only a current row's own early review may use a reserved slot (P2-m1); a
 row whose author has not started adds two slots once, not per row (P2-n2); a clip's family plan that cannot
 be read or verified refuses a run-scoped AI claim by name (P2-n3). The fixture is ``ChunkFixture`` (a private
 batch, TEST host handles, one free slot after setUp); claims run on its in-memory record, and no test starts
@@ -63,6 +63,16 @@ class ReservationCase(unittest.TestCase):
             return str(refusal)
         return 'claimed'
 
+    def run_scoped(self, task_id: str = 'TEST-run-scoped') -> dict:
+        """A ready run-scoped AI task (no clip, no section binding) and clip A's recorded family pin, so its claim
+        reads the family plan without a chunk request."""
+        work = copy.deepcopy(self.task)
+        work.pop('sectionBinding')
+        work.update(id=task_id, clipId=None)
+        self.tasks[task_id] = work
+        self.record['clips']['A']['sectionFamilies'] = [{'plan': dict(self.host.context['plan'])}]
+        return work
+
     def rows(self, *extra: dict) -> object:
         """Patch the rows a claim competes with to the fixture's current rows (plus ``extra``), read without a
         chunk request, as other Long work reads its clip's family plan."""
@@ -79,6 +89,23 @@ class DeadRowTests(ReservationCase):
         self.free(1)
         self.assertIn(NOT_READY, self.claimed(self.early))
         self.assertEqual(self.claimed(self.task), 'claimed')
+
+    def test_a_dead_early_review_reserves_nothing_on_the_family_path(self) -> None:
+        """P1-RP2 MA2, the twin above for a real run-scoped claim, which reads the family plan without a chunk
+        request: an early review cancelled before it ran, or failed unlaunched, reserves nothing; a ready one
+        still reserves the last slot."""
+        dead = {'cancelled before it ran': {},
+                'failed unlaunched': {'state': 'failed', 'endConfirmed': True, 'reason': 'TEST launch failed',
+                                      'failure': {'category': 'launch-failed', 'detail': 'TEST'}}}
+        for number, (name, change) in enumerate(dead.items()):
+            with self.subTest(name):
+                self.rewind(self.early, 'cancelled').update(change)
+                self.free(1)
+                self.assertEqual(self.claimed(self.run_scoped(f'TEST-run-scoped-{number}')), 'claimed')
+        self.rewind(self.early)
+        self.free(1)
+        self.assertRegex(self.claimed(self.run_scoped()), r'^AI task TEST-run-scoped must leave an AI slot .*'
+                                                          r'\(1 free, 1 reserved')
 
     def test_an_author_frozen_before_it_ran_is_not_a_section_to_author(self) -> None:
         """The row's author and early review were cancelled before they ran: the row is not dormant (no +2)."""
@@ -144,13 +171,9 @@ class FamilyPlanPinTests(ReservationCase):
     def test_a_run_scoped_claim_is_refused_by_name_for_a_missing_or_tampered_plan(self) -> None:
         """With a valid family pin a run-scoped AI claim is admitted; a missing plan file and changed plan bytes
         each refuse it by name (fail closed), and nothing is committed to the in-memory record."""
-        work = copy.deepcopy(self.task)
-        work.pop('sectionBinding')
-        work.update(id='TEST-run-scoped', clipId=None)
-        self.tasks[work['id']] = work
-        pin = dict(self.host.context['plan'])
-        family = {'plan': pin}
-        self.record['clips']['A']['sectionFamilies'] = [family]
+        work = self.run_scoped()
+        family = self.record['clips']['A']['sectionFamilies'][0]
+        pin = dict(family['plan'])
         self.free(1)
         missing = str(Path(pin['path']).with_name('TEST-missing-plan.json'))
         cases = (({'path': missing}, 'FileNotFoundError'), ({'sha256': 'f' * 64}, 'artifact bytes changed'))

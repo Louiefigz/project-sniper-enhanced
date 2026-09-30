@@ -251,11 +251,11 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(set(lifted['production']['tasks']), {'check-1', 'author-1'})
 
     def test_new_version_record_refused_by_version_in_old_reader(self) -> None:
-        """The P0 engine reads (5, 6, 7) only, so it refuses a new record by version, never as corrupt."""
+        """This engine is version 8, outside the P0 engine's (5, 6, 7); the next version (V+1) gets the named refusal."""
         self.assertEqual(SCHEMA_VERSION, 8)
         self.assertNotIn(SCHEMA_VERSION, (5, 6, 7))
-        self.assertEqual(_record_problem({'schemaVersion': 99}),
-                         'written by another engine version (schemaVersion 99, this engine 8); finish it with that '
+        self.assertEqual(_record_problem({'schemaVersion': SCHEMA_VERSION + 1}),
+                         'written by another engine version (schemaVersion 9, this engine 8); finish it with that '
                          'engine, or archive it once it is closed or its delivery deadline has passed')
         for version in (5, 6, 7, 8):
             with self.subTest(version=version):

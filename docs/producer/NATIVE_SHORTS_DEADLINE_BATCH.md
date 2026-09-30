@@ -76,7 +76,9 @@ once reconcile sees that exact process identity gone with an empty group. A
 claim whose launch call itself failed is released with the launch tool's own
 output, verbatim: `release --launch-error TEXT`, or `complete --failure
 launch-failed --detail TEXT --launch-error TEXT`; an AI release without it is
-refused. Cancellation wins: a result reported after a cancel request is kept as
+refused. An execution that attaches after its claim's deadline is refused, yet it
+exists: its handle is bound and the task ends through the same rule, its slot
+held. Cancellation wins: a result reported after a cancel request is kept as
 history and never publishes.
 
 Each media request names its exact batch, task, clip, project, fresh output
@@ -196,8 +198,10 @@ structures, never reviewer findings.
    `production.closure` and in the host record `unresolved-executions.jsonl`,
    where it stays charged until termination evidence resolves it. Until
    admission counts that record, a closed batch with unresolved AI work refuses a
-   new batch by name. `settle-resource --task ID --statement TEXT` records the
-   operator's words on such work and releases nothing.
+   new batch by name, and so does an archived one while that record is missing.
+   While the batch is active or draining, `settle-resource --task ID --statement
+   TEXT` records the operator's words on unresolved work, or on revoked work not
+   yet settled; it releases nothing and is refused once the batch is closed.
    State whether each is a checked MP4 (a technical pass, CHECKED FOR REVIEW) or a
    review draft, with its open findings.
 

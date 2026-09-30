@@ -1229,30 +1229,38 @@ docs belong to P3b.
   `SCHEMA_VERSION` 8, the readable versions 5, 6, 7 and 8, `OPTIONAL_ROWS` (optional attempt and delivery
   keys), `a5_shape`, and the release field ledger in its docstring. Its policy literals live in the data
   catalog `studio/native_budget_schema_data.py`, re-exported by name (checked with `--data-catalog`).
-  `native_budget_store.BatchSession.read` lifts 5-7 to 8 and refuses an A5-forecast schema-5 record by name.
+  `native_budget_store.BatchSession.read` lifts 5-7 to 8 (`studio/native_budget_lift.py`: the lift, and the refusal
+  by name of a 5-7 record carrying content only schema 8 writes) and refuses an A5-forecast schema-5 record by name;
+  the lifted versions are `native_budget_schema.LIFTED_VERSIONS`, the one place they are written.
   `production/production_optional.py` validates the optional production keys through
   `task_schema.production_problem` (`storage`; `closure` is refused until M-043 lands its validator).
   `production/queue_clock_schema.py` holds the v1 and v2 `capacityClock` shapes and validators; new Shorts get
   a v2 clock (`new_clock`, re-exported by `queue_clock.py`). `queue_clock.writable` is true for v2 only:
   `checkpoint` and `observe_worker` never advance a v1 clock, which keeps the credit it earned (delivery and
-  task settlement still record on it). `queue_authority.bind_allocation` binds only writable clocks.
+  task settlement still record on it, and `tasks.new_row` records a new task's credit origin in its `taskCredits`;
+  the credit since that origin stays 0). `queue_authority.bind_allocation` binds only writable clocks.
 - **One end rule (M-041, M-042; G9).** `production/task_end.py` decides every AI task end: `end_cause`,
   `end_proof` (`EndProof`: `slot_released` and `tool_cleanup` kept apart), `settle_end`, `late_cancel`, and the
   empty `HOST_END_EVIDENCE` catalog (filled at M-102). `callbacks.complete`/`fail`/`_terminated` and
   `reconcile._reconcile_one` settle through it; `task_schema.holds_slot` counts an ended task still `unresolved`.
   A launch-tool failure travels verbatim in events only (`release --launch-error`, `complete --failure
-  launch-failed --launch-error`); `claims.release` refuses an AI release without it. Section readers
-  (`section_results.current`, `sections.require_encoded_task`) keep a completed result that still holds its slot
-  current, and `section_chunk_liveness` reserves slots for early reviews whose authors cannot free theirs.
+  launch-failed --launch-error`); `claims.release` refuses an AI release without it. An AI execution attaching after
+  its claim's deadline is still refused, but `claims.attach` binds its handle and settles the end through the rule,
+  held (P1-RP2 MA1). Section readers (`section_results.current`, `sections.require_encoded_task`) keep a completed
+  result that still holds its slot current, and `section_chunk_liveness` reserves slots for early reviews whose
+  authors cannot free theirs; an early review that ended without running reserves nothing, read with a chunk request
+  or from the clip's family plan (`_early_task`, P1-RP2 MA2).
 - **Closure and the host record (M-043; X25, X29, X37).** `lifecycle.close_or_drain(record, elapsed, observation,
   root)` drains while media work is live; otherwise it ends the enrolled director's assignment (cause `closure`),
   revokes every other live AI task, writes `production.closure` (validated by
   `production_optional.closure_problem`) and appends its rows to `production/unresolved_executions.py`'s host
   record `unresolved-executions.jsonl` inside the closing transaction. Nothing is released. `archive_refusal`
   and `native_budget_batches._archivable` need every unsettled task in both; `native_budget_batches.refuse_creation`
-  refuses a new batch while the host record holds open AI rows (until M-100's admission counts them).
-  `settlement._lifecycle_room` reserves room for the widest closure. `production/queue_commands.py` registers
-  `settle-resource`, which records the operator's statement and releases nothing (`callbacks.settle_resource`).
+  refuses a new batch while the host record holds open AI rows (until M-100's admission counts them), and, while
+  that record is missing, while an archived closure lists AI rows (`unresolved_executions.archived_ai_rows`, P1-RP2
+  m1). `settlement._lifecycle_room` reserves room for the widest closure. `production/queue_commands.py` registers
+  `settle-resource`, which records the operator's statement and releases nothing (`callbacks.settle_resource`: an
+  active or draining batch's unresolved work, or revoked work not yet settled, P1-RP2 m2).
   `dependencies._dependency_outcome` reads a pre-P1 completed-after-cancel prerequisite as cancelled.
 - **Which work withholds queue credit (M-045; C4, X99(2)).** `queue_clock.productive` counts an owner that is
   not waiting, another running attempt, the enrolled director while it has not declared itself idle for the Short

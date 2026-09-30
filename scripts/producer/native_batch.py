@@ -24,7 +24,8 @@ Exit codes: 0 ok/admitted, 3 refused by the budget, 2 invalid or corrupt; run-me
   native_batch.py add-clip --batch ID --clip F --reason TEXT --approval FILE
   native_batch.py change-approval --batch ID --clip A --approval FILE --reason TEXT
   native_batch.py handoff --batch ID --clip A --confirmation VISIBLE-HANDOFF-CONFIRMATION.json
-  native_batch.py close --batch ID          (closes, or drains until owned work settles)
+  native_batch.py close --batch ID          (closes, listing unresolved work in its closure; drains instead while
+                                            media work is live: run close again once it ends. Nothing is released)
   native_batch.py archive --batch ID --reason TEXT
   native_batch.py staged-starts
   native_batch.py discard-start --name STAGING --reason TEXT
@@ -35,9 +36,15 @@ Production tasks (studio/production/cli.py):
   native_batch.py attach --batch ID --task ID --epoch N --token HEX --handle JSON
   native_batch.py complete --batch ID --task ID --epoch N --token HEX [--artifact FILE ...] [--usage JSON]
   native_batch.py complete --batch ID --task ID --epoch N --token HEX --failure CATEGORY --detail TEXT
-  native_batch.py release --batch ID --task ID --epoch N --token HEX
+                           [--launch-error TEXT]      (launch-failed: the launch tool's own error, verbatim)
+  native_batch.py release --batch ID --task ID --epoch N --token HEX [--launch-error TEXT]
+      (an AI task's release needs --launch-error: the launch tool's own error, verbatim, 1-512 bytes)
   native_batch.py cancel-request --batch ID --task ID --reason TEXT
   native_batch.py cancelled --batch ID --task ID --epoch N --token HEX [--usage JSON]
+  native_batch.py settle-resource --batch ID --task ID --statement TEXT
+      (records the operator's statement on unresolved or revoked work, never evidence; releases nothing)
+  native_batch.py director-activity --batch ID --task ID --epoch N --token HEX (--clip A ... | --all)
+                                    --state working|idle     (the enrolled director's own declaration)
   native_batch.py reconcile --batch ID [--host JSON]
   native_batch.py dispatch --batch ID       (starts the detached media dispatcher, or reports it)
   native_batch.py run-media --batch ID --task ID --epoch N --token HEX

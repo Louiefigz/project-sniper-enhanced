@@ -38,7 +38,10 @@ from headless.durable_files import (
     DurableFileError, locked_private_dir, open_private_dir, open_private_file,
     private_child_dir, read_private_file, write_all, write_pending_replace,
 )
-from studio.native_budget_schema import SCHEMA_VERSION, a5_shape, validate_record
+from studio.native_budget_lift import (  # noqa: F401  lift_additive_fields is re-exported for its readers
+    lift_additive_fields, newer_content_problem,
+)
+from studio.native_budget_schema import LIFTED_VERSIONS, SCHEMA_VERSION, a5_shape, validate_record
 from studio.production.settlement import settlement_reserve
 
 AUTHORITY, PENDING, EVENTS, LOCK = 'authority.json', 'authority.pending.json', 'events.jsonl', 'authority.lock'
@@ -141,9 +144,11 @@ class BatchSession:
             record = json.loads(raw.decode('utf-8'))
             if type(record) is dict and record.get('schemaVersion') == 5 and a5_shape(record):
                 raise BudgetAuthorityError(A5_SHAPE_REFUSAL)  # before any lift: the other schema-5 shape (P4-06)
+            if problem := newer_content_problem(record):   # before any lift: a 5-7 record with v8-only content
+                raise BudgetAuthorityError(f'Budget authority for {self.batch_id} {problem}')
             lift_additive_fields(record)
             validate_record(record)
-            if record['schemaVersion'] in (5, 6, 7):
+            if record['schemaVersion'] in LIFTED_VERSIONS:
                 record['schemaVersion'] = SCHEMA_VERSION  # Additive lift; retain clocks and counters.
         except (OSError, DurableFileError, UnicodeError, ValueError) as error:
             raise BudgetAuthorityError(f'Budget authority for {self.batch_id} is unreadable or corrupt: '
@@ -263,27 +268,3 @@ def read_any_batch(root: Path, batch_id: str) -> dict:
         directory = archived_directory(root, batch_id)
     with locked_batch(root, batch_id, directory=directory) as session:
         return session.read()
-
-
-def lift_additive_fields(record: object) -> None:
-    """Supply the old schema's implicit defaults before closed validation."""
-    if type(record) is not dict or record.get('schemaVersion') not in (5, 6, 7):
-        return
-    block = record.get('production')
-    if type(block) is not dict:
-        return
-    authorization = block.get('authorization')
-    if type(authorization) is dict and set(authorization) == {'identity', 'setup', 'setupElapsed'}:
-        authorization.update(prior=[], priorOmitted=0)
-    tasks = block.get('tasks')
-    if type(tasks) is dict:
-        _lift_tasks(tasks)
-
-
-def _lift_tasks(tasks: dict) -> None:
-    """Infer revocation only from the previously durable terminal/stale state."""
-    for row in tasks.values():
-        if type(row) is dict:
-            row.setdefault('owners', [])
-        if type(row) is dict and 'revoked' not in row:
-            row['revoked'] = row.get('state') == 'superseded' or (row.get('approvalStale') is True and row.get('state') != 'completed')

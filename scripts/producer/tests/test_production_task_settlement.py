@@ -2,7 +2,8 @@
 ``test_production_task_reconcile``, its closure room, validator and archive tests in
 ``test_production_closure_record``, and a batch's successor in ``test_production_batch_succession``.
 
-``settle-resource`` records the operator's statement and never releases. Closure ends only the director's batch
+``settle-resource`` records the operator's statement and never releases; it takes unsettled work of an active or
+draining batch only (P1-RP2 m2, S01, S02). Closure ends only the director's batch
 assignment, revokes live AI work, lists every task still holding a slot or an unresolved resource in
 ``production.closure``, and appends those rows to the host record inside the closing transaction; while media
 work is live or a media launch is running it drains instead. Batches are ``_production_task_flow_fixture.Batch``
@@ -22,7 +23,7 @@ from studio.native_budget_store import BudgetAuthorityError
 from studio.production import api
 from studio.production.callbacks import TaskFailure
 from studio.production.task_schema import holds_slot
-from studio.production.tasks import active_ai
+from studio.production.tasks import TaskRefused, active_ai
 from studio.production.unresolved_executions import RECORD, open_rows, recorded_task_ids
 
 STATEMENT = 'TEST operator: the turn ended on the host console'
@@ -56,6 +57,42 @@ class SettlementTests(unittest.TestCase):
                          [('critic', 'operator-statement', STATEMENT), ('writer', 'operator-statement', STATEMENT)])
         code, out = run_cli('settle-resource', '--batch', BATCH, '--statement', '  ', '--task', 'critic')
         self.assertEqual((code, out['error']), (2, "ValueError: Settling records the operator's statement"))
+
+    def test_revoked_work_takes_a_statement_only_while_unsettled(self) -> None:
+        """P1-RP2 m2 (S01): revoked live work (the shape M-104's takeover writes) takes a statement and keeps its
+        state and slot; a task superseded before it ran is settled, outside the settlement reserve, so it is
+        refused by name and the record is unchanged."""
+        batch = Batch(self)
+        batch.enqueue(('critic', 'specialist', ()), ('later', 'specialist', ('critic',)))
+        batch.claim('critic', host('critic'))
+        rewrite(batch, lambda record: record['production']['tasks']['critic'].update(revoked=True))
+        api.settle_resource(batch.root, BATCH, 'critic', STATEMENT)
+        critic = batch.row('critic')
+        self.assertEqual((critic['state'], critic['revoked'], critic['unresolved'], holds_slot(critic)),
+                         ('running', True, False, True))
+        self.assertIn(f'operator statement (not evidence): {STATEMENT}', critic['reason'])
+        api.supersede_task(batch.root, BATCH, 'later', 'TEST replaced before it ran')
+        later = batch.row('later')
+        self.assertEqual((later['state'], later['unresolved'], later['revoked']), ('superseded', False, True))
+        authority = batch.root / 'batches' / BATCH / 'authority.json'
+        before = authority.read_bytes()
+        with self.assertRaisesRegex(TaskRefused, '^Task later is superseded with no unresolved resource or '
+                                                 'unsettled revocation to settle$'):
+            api.settle_resource(batch.root, BATCH, 'later', STATEMENT)
+        self.assertEqual(authority.read_bytes(), before)
+
+    def test_a_closed_batch_takes_no_statement(self) -> None:
+        """S02: statements are recorded while the batch is active or draining; after its close, one is refused by
+        name and nothing is written."""
+        batch = held_batch(self)
+        close(batch)
+        authority = batch.root / 'batches' / BATCH / 'authority.json'
+        before = authority.read_bytes()
+        with self.assertRaisesRegex(TaskRefused, '^Batch batch-auth is closed: statements are recorded while it '
+                                                 'runs$'):
+            api.settle_resource(batch.root, BATCH, 'critic', STATEMENT)
+        self.assertEqual(authority.read_bytes(), before)
+        self.assertTrue(batch.row('critic')['unresolved'])
 
 
 class ClosureTests(unittest.TestCase):

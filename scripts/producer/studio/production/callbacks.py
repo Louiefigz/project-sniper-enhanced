@@ -21,7 +21,7 @@ from studio.production.claims import ClaimRef, Outcome, check_claim
 from studio.production.dependencies import approval_stale, refresh
 from studio.production.host_contract import clip_text, merge_usage, valid_failure, valid_receipts
 from studio.production.task_end import EndProof, end_cause, late_cancel, settle_end, settles_only
-from studio.production.task_schema import LIVE, TERMINAL, UNCLAIMED, UNRESOLVABLE, finish, holds_slot, is_ai
+from studio.production.task_schema import LIVE, TERMINAL, UNCLAIMED, UNRESOLVABLE, finish, holds_slot, is_ai, settled
 from studio.production.tasks import TaskConflict, TaskRefused, task_of
 from studio.production.queue_clock import task_deadline
 
@@ -280,8 +280,11 @@ def settle_resource(record: dict, task_id: str, statement: str, elapsed: float) 
         raise TaskRefused(f'Batch {record["batchId"]} is {record["status"]}: statements are recorded while it runs')
     if type(statement) is not str or not statement.strip():
         raise ValueError("Settling records the operator's statement")
-    if not (task['state'] in TERMINAL and task['unresolved'] or task['revoked']):
-        raise TaskRefused(f'Task {task_id} is {task["state"]} with no unresolved resource or revocation to settle')
+    # A settled task is outside the settlement reserve (``settlement.may_grow``), so a revoked one is refused too
+    # (P1-RP2 m2); the revoked branch serves live or unclaimed work (M-104's takeover of a live execution).
+    if not (task['state'] in TERMINAL and task['unresolved'] or task['revoked'] and not settled(task)):
+        raise TaskRefused(f'Task {task_id} is {task["state"]} with no unresolved resource or unsettled revocation '
+                          'to settle')
     task['reason'] = clip_text(f'{task["reason"] or task["state"]}; operator statement (not evidence): {statement}')
     return Outcome(True, {'event': 'task-resource-settled', 'taskId': task_id, 'basis': 'operator-statement',
                           'statement': clip_text(statement)},

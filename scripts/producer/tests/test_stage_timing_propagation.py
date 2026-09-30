@@ -153,6 +153,7 @@ class NativeLaunchLineageTests(unittest.TestCase):
             forwarded = launch_environment(dict(CLOSED))
             self.assertEqual(set(forwarded), (set(CLOSED) - LINEAGE_VARIABLES) | set(lineage_environment()))
         self.assertEqual(forwarded["PATH"], CLOSED["PATH"])
+        self.assertEqual(forwarded["PYTHONDONTWRITEBYTECODE"], "1")   # FOLLOWUP-C6 item 5 (X180 m8): no bytecode
         self.assertEqual(forwarded["SNIPER_TIMING_PARENT_SPAN_ID"], "outer-parent")
         self.assertNotIn("SNIPER_TIMING_TASK_ID", forwarded, "a rejected task id is not forwarded")
         for orphan in ("SNIPER_TIMING_CLAIM_EPOCH", "SNIPER_TIMING_HOST_TURN_ID"):

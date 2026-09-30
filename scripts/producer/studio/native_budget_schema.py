@@ -7,12 +7,12 @@ record what governed each batch; changing those copies cannot raise its limits.
 closed records may be archived. Pre-release schema 4 is refused by name.
 
 Version 8 is the release's one schema step (X7, M-044). Reading 5, 6 or 7 lifts it to 8, adding nothing but the
-older schemas' implicit fields (``native_budget_store.lift_additive_fields``); a schema-5 record written by an
-A5-forecast build is refused by name first (``a5_shape``). Release field ledger: a step that lands a later row adds
-its validator under this version and ticks ``landed`` (``val``: validator here, writer at the later step). ``opt``
-rows may be absent and are never defaulted; every other row is required, once landed, on records this engine
-writes. ``lifted`` is how a lifted 5-7 record meets the row; M-171 checks each rule against a lifted 7 fixture and
-the ledger against the landed fields.
+older schemas' implicit fields (``native_budget_lift``); a schema-5 record written by an A5-forecast build, or a 5-7
+record carrying content only version 8 writes, is refused by name first. Release field ledger: a step that lands a
+later row adds its validator under this version and ticks ``landed`` (``val``: validator here, writer at the later
+step). ``opt`` rows may be absent and are never defaulted; every other row is required, once landed, on records this
+engine writes. ``lifted`` is how a lifted 5-7 record meets the row; M-171 checks each rule against a lifted 7
+fixture and the ledger against the landed fields.
 
     field                                                  validator / writer   landed opt  lifted 5-7 record
     clip capacityClock v2 (production.queue_clock_schema)  M-044                yes         v1 clock, read-only
@@ -55,6 +55,7 @@ from studio.native_budget_schema_data import (  # re-exported by name: importers
 )
 
 SCHEMA_VERSION = 8
+LIFTED_VERSIONS = (5, 6, 7)   # the versions this engine lifts (X7: the one place that set is written)
 SHA256 = re.compile(r'[0-9a-f]{64}')
 HEX32 = re.compile(r'[0-9a-f]{32}')
 Check = Callable[[object], bool]
@@ -175,7 +176,7 @@ def validate_record(record: object) -> None:
     """Raise ValueError unless the record matches the closed schema and this engine's policy."""
     try:
         problem = _record_problem(record)
-    except (KeyError, TypeError, AttributeError) as error:
+    except (KeyError, TypeError, AttributeError, OverflowError) as error:   # OverflowError: a huge integer
         problem = f'unreadable structure ({type(error).__name__})'
     if problem:
         raise ValueError(f'budget record is invalid: {problem}')
@@ -188,7 +189,9 @@ def _record_problem(record: object) -> str | None:
     if version in PRE_RELEASE:
         return (f'pre-release schema {version} (a development build that was never released; this engine reads '
                 f'schema {SCHEMA_VERSION}); archive it once it is closed or its delivery deadline has passed')
-    if version not in (5, 6, 7, SCHEMA_VERSION):
+    # The readable set is formed at each call, never frozen at import: a test standing in for the next engine
+    # (``SCHEMA_VERSION`` patched to 9) must read this engine's 8 as foreign (test_production_room StagedStarts).
+    if version not in (*LIFTED_VERSIONS, SCHEMA_VERSION):
         return (f'written by another engine version (schemaVersion {version!r}, this engine '
                 f'{SCHEMA_VERSION}); finish it with that engine, or archive it once it is closed or '
                 'its delivery deadline has passed')

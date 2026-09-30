@@ -67,6 +67,13 @@ class MissingToolTests(unittest.TestCase):
         self.assertEqual(done.returncode, 1)
         self.assertTrue(any("run install/install.command" in str(e.get("error", "")) for e in events), done.stdout)
 
+    def test_the_clean_mac_child_is_armed_and_writes_no_bytecode(self) -> None:
+        """FOLLOWUP-C6 item 4 (X180 m8): PATH and HOME only, plus the tripwire, prefixes, reports, no bytecode."""
+        environ = clean_mac_environment(self.empty_bin, self.tmp)
+        self.assertEqual((environ["PATH"], environ["HOME"]), (str(self.empty_bin), str(self.tmp)))
+        self.assertEqual((environ["PYTHONPATH"], environ["PYTHONDONTWRITEBYTECODE"]), (children.CHILD_TRIPWIRE, "1"))
+        self.assertEqual(set(environ) - {children.CURRENT}, {"PATH", "HOME", "PYTHONPATH", *HARNESS})
+
     def test_reference_url_refuses_without_ytdlp(self) -> None:
         buffer = io.StringIO()
         with mock.patch.object(fetch_reference, "YTDLP_FALLBACKS", ()), redirect_stdout(buffer):

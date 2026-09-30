@@ -251,6 +251,10 @@ def attach(record: dict, ref: ClaimRef, handle: dict, elapsed: float) -> Outcome
             raise TaskConflict(f'Task {ref.task_id} was already acknowledged by another execution')
         return Outcome(False, {}, {**detail, 'state': state, 'proceed': state == 'running'})
     if state == 'claimed' and (expired := expired_claim(record, task, elapsed)):
+        if is_ai(task):   # the attaching execution exists: bind it and end through the rule, held (G9, P1-RP2 MA1)
+            task['handle'] = handle
+            proof = settle_end(task, end_cause(task, 'failed'))
+            expired.event.update(handle=handle, unresolved=task['unresolved'], **proof.event_fields())
         return expired
     if state == 'claimed':
         task['state'] = 'running'

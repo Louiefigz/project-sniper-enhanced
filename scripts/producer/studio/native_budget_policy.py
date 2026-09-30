@@ -183,8 +183,8 @@ def clip_record(record: dict, clip_id: str) -> dict:
 def phase_refusal(record: dict, clip: dict | None, elapsed: float) -> str | None:
     """Batch-level refusals shared by every kind of new work (clip None for run-scoped work)."""
     if record['status'] == 'draining':
-        return (f'Batch {record["batchId"]} is draining: no new work is admitted while its unresolved work '
-                'settles; it cannot be replaced by a new batch until it closes')
+        return (f'Batch {record["batchId"]} is draining: no new work is admitted while its media work ends; run '
+                'close again once it does (a new batch waits until it closes)')
     if record['status'] != 'active':
         return f'Batch {record["batchId"]} is closed; new work needs an explicit new user request'
     if record['production']['authorization']['setup'] != 'complete':

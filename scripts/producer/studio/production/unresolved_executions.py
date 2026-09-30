@@ -32,8 +32,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from headless.durable_files import DurableFileError, locked_private_dir, open_private_file, read_private_file, write_all
-from studio.native_budget_schema import BOUNDS
-from studio.native_budget_store import BudgetAuthorityError, canonical, ensure_root, require_batch_id
+from studio.native_budget_schema import BOUNDS, SCHEMA_VERSION, validate_record
+from studio.native_budget_store import AUTHORITY, BATCH_ID, BudgetAuthorityError, archived_directory, canonical, \
+    ensure_root, locked_batch, require_batch_id
+from studio.native_budget_store import MAX_RECORD_BYTES as BATCH_RECORD_BYTES
 from studio.production.host_contract import HOSTS, encoded_length, valid_handle
 from studio.production.task_schema import TASK_ID, TASK_KINDS, TASK_STATES
 
@@ -246,3 +248,31 @@ def recorded_task_ids(root: Path, batch_id: str) -> frozenset[str]:
     with _locked(root) as dir_fd:
         table = _executions(_read(dir_fd))
     return frozenset(task_id for batch, task_id in table if batch == batch_id)
+
+
+def archived_ai_rows(root: Path) -> list[str]:
+    """``<batch>/<task>`` for each AI row an archived closure of this engine lists (P1-RP2 m1).
+
+    The caller reads this only while this record is missing: the live closed batches' closures are appended back
+    (X125 N3), an archived one is not, so its rows would otherwise go uncharged. Every archived record is read.
+    Another engine version's record lists none (only schema 8 writes a closure); one that cannot be read or
+    validated is named as unreadable, so the caller fails closed.
+    """
+    archive = root / 'archive'
+    names = sorted(entry.name for entry in archive.iterdir() if BATCH_ID.fullmatch(entry.name)) \
+        if archive.is_dir() else []
+    return [row for name in names for row in _archived_rows(root, name)]
+
+
+def _archived_rows(root: Path, name: str) -> list[str]:
+    """One archived record's closure AI rows, or its name marked unreadable."""
+    try:
+        with locked_batch(root, name, create=True, directory=archived_directory(root, name)) as session:
+            raw = json.loads(read_private_file(session.dir_fd, AUTHORITY, BATCH_RECORD_BYTES).decode('utf-8'))
+        if type(raw) is not dict or raw.get('schemaVersion') == SCHEMA_VERSION:
+            validate_record(raw)
+    except (OSError, DurableFileError, UnicodeError, ValueError, BudgetAuthorityError):
+        return [f'{name} (unreadable)']
+    closure = (raw.get('production') or {}).get('closure') or {}
+    return [f'{name}/{row["taskId"]}' for row in closure.get('unresolvedAtClose', [])
+            if TASK_KINDS[row['kind']] == 'ai']

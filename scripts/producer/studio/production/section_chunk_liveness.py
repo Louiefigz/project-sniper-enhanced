@@ -43,7 +43,7 @@ from studio.production.section_chunk_plan import read_chunk_plan
 from studio.production.section_plan import read_plan
 from studio.production.section_results import rehash, require
 from studio.production.task_end import end_proof
-from studio.production.task_schema import LIVE, UNCLAIMED, holds_slot
+from studio.production.task_schema import LIVE, UNCLAIMED
 from studio.production.tasks import TaskRefused, active_ai
 
 
@@ -111,9 +111,10 @@ def _early_task(record: dict, row: dict, request: dict | None) -> dict | None:
     matches = [task for task in tasks.values() if task.get('sectionBinding', {}).get('role') == 'early-review'
                and task['sectionBinding'].get('authorTaskId') == row['authorTaskId']
                and all(task['sectionBinding'].get(key) == row[key]
-                       for key in ('sectionId', 'generation', 'inputIdentity', 'frameRange'))
-               and holds_slot(task)]
-    return next(iter(matches), None)
+                       for key in ('sectionId', 'generation', 'inputIdentity', 'frameRange'))]
+    # A runnable or live early review first; else an ended one, which reserves nothing (X168 P2-M1, P1-RP2 MA2):
+    # a review cancelled before it ran, failed unlaunched, or (from M-102) released is never "not enqueued yet".
+    return min(matches, key=lambda task: task['state'] not in (*UNCLAIMED, *LIVE), default=None)
 
 
 def _dormant(author: dict | None) -> bool:

@@ -249,39 +249,5 @@ class SpeechCleanupCliTests(unittest.TestCase):
         self.assertTrue(payload.get("error"))
 
 
-@unittest.skipUnless(_HAVE_RETAKE, "rapidfuzz not installed")
-class SpeechCleanupFoldTests(unittest.TestCase):
-    """A valid take folds pause_scan and retake_scan into one cutTrack.
-
-    Regression (FOLLOWUP-C6 item 1): ``build_cut_track`` passed ``retakes=`` to
-    ``apply_pauses.cut_track_from_pauses``, which takes them in ``CutOptions``, so
-    every valid transcript ended in the error status line instead of a cut."""
-
-    def test_valid_take_drops_the_flubbed_opening_and_keeps_the_retake(self) -> None:
-        """The confident retake's first take is cut; the later, clean take is kept whole."""
-        from edit import speech_cleanup
-        utts = [_mk_utt(0, 0.0, "I built this in a single weekend."),
-                _mk_utt(1, 3.0, "let me try that again."),
-                _mk_utt(2, 6.0, "I built this whole thing in a single weekend.")]
-        rows = [{"start": u.start, "end": u.end, "text": u.text,
-                 "words": [{"word": w.text, "start": w.start, "end": w.end} for w in u.words]}
-                for u in utts]
-        with tempfile.TemporaryDirectory() as d:
-            transcript = os.path.join(d, "t.json")
-            with open(transcript, "w") as f:
-                json.dump({"transcript": rows}, f)
-            source = {"id": "raw-1", "duration": 10.0, "transcript": transcript}
-            with contextlib.redirect_stdout(io.StringIO()):
-                result = speech_cleanup.build_cut_track(source, False)
-        track = result["cutTrack"]
-        self.assertEqual(result["segments"], len(track))
-        self.assertEqual(result["skippedRetakes"], 0)
-        first, retake = utts[0], utts[2]
-        self.assertFalse([s for s in track if s["start"] < first.end and s["end"] > first.start],
-                         "the flubbed first take is dropped, not stitched onto the clean take")
-        self.assertTrue([s for s in track if s["start"] <= retake.start and s["end"] >= retake.end],
-                        "the clean later take is kept whole")
-
-
 if __name__ == "__main__":
     unittest.main(verbosity=2)

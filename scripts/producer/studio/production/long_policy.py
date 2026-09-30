@@ -8,9 +8,11 @@ v1, or exactly v2 plus a valid late mode. Historical authorizations keep the pol
 it; only new authorizations get the current one. Nothing here is a runtime switch: changing a value is an engine
 change, which only new authorizations see.
 
-Every number names its evidence. ``LONG_DURATION_EVIDENCE`` states what was measured per output duration and
-``LONG_RISKS`` what the rates do not cover (graphics-dense pictures). This is a data catalog: it imports nothing from
-``production.formats``, which reads it (MASTER-PLAN M-122; P4-LONG P4-02).
+Version 2 is the P4-LONG section 4.0 calibration (M-123; P4-03): the largest real-footage rate per operation, no
+x1.21 Short pool factor on a Long (a Long is forecast exclusive), the safety factor unchanged, and each number's
+evidence in ``V2_RATE_SOURCE``. ``LONG_DURATION_EVIDENCE`` states what was measured per output-duration range
+(``duration_evidence``) and ``LONG_RISKS`` what the rates do not cover (graphics-dense pictures). This is a data
+catalog: it imports nothing from ``production.formats``, which reads it (MASTER-PLAN M-122, M-123; P4-02, P4-03).
 """
 from __future__ import annotations
 
@@ -54,9 +56,59 @@ LONG_POLICY_V1 = {
                    'verify': {'perOutputSecond': 2.9, 'fixedSeconds': 80.0}},  # a Long resume (forecast as verify)
     },
 }
-# Version 2 until M-123 gives it P4-03's calibrated value: version 1's numbers with its version, so this step changes
-# no number while the version logic is already in force (P4-02 "Behaviour").
-LONG_POLICY_V2 = {**LONG_POLICY_V1, 'version': 2}
+V2_RATE_SOURCE = (
+    'Long v2 rates (P4-LONG section 4.0, applied mechanically and never re-tuned): each Long operation\'s rate is the '
+    'largest recorded real-footage measurement of that operation on this host, per output second; where none exists '
+    'the recorded fixture measurement is kept and labelled as fixture evidence. The safety factor stays 1.25, '
+    'unmeasured terms stay ESTIMATES with their source, no rate changes after the qualification candidate is frozen, '
+    'and no rate was changed to make any output fit.\n\n'
+    'Picture (capture, encode and SDK assembly) 2.364 s per output second: the 4K-source Trevor Long, 145.933 s '
+    '(4,378 frames, 30 fps), streaming capture/encode 344.926 s (youtube-automation/docs/findings/'
+    'TREVOR_LONG_FORM_PRODUCTION_AUDIT_2026-09-16.md, lines 3 and 36-45), the largest per-second real-footage Long '
+    'rate. All three C0679 renders (24000/1001) are below it: B 657.365 s in 1,430.103 s (2.176), the B revision '
+    '(CRF 6) in 1,349.236 s (2.052) and A 683.766 s in 1,541.357 s (2.254) (docs/producer/'
+    'C0679_A_B_COMPARISON_2026-09-09.md lines 13-16; C0679_END_TO_END_OPTIMIZATION_AUDIT_2026-09-09.md lines 236 '
+    'and 1089).\n\n'
+    'Early gates (preflight, whole-program audio, seam samples) 0.18 s per output second: fixture evidence only, the '
+    '15-minute technical fixture\'s early gates, 162.231 s over 900 s (docs/producer/'
+    'NATIVE_LONG_RELIABILITY_2026-09-16.md, stress-v4); no real-footage measurement exists.\n\n'
+    'Assembly and delivery QC 0.273 s per output second: C0679 B corrected delivery 45.748 s and high delivery QC '
+    '133.523 s over 657.365 s (C0679_END_TO_END_OPTIMIZATION_AUDIT_2026-09-09.md lines 106 and 243).\n\n'
+    'Whole-program master preparation 0.0686 s per program second, charged per section or preview member because '
+    'each member prepares the whole-program master: C0679 B mastering guard 45.075 s over 657.365 s '
+    '(C0679_FRESH_B_PROGRESS_2026-09-09.md lines 44-45).\n\n'
+    'Fixed 63.8 s per launch: the Trevor supervised export, 408.707 s, less its capture/encode, 344.926 s (the same '
+    'audit).\n\n'
+    'Owner start 13.3 s per extra native owner (render window, preview window, review package): F1 phase 1, six '
+    'window owners of about 250 frames against the single-owner picture, (516.84 - 437.06) s / 6 windows, the '
+    'largest per-window difference observed (orchestration-impl/f1-segments-evidence/p1/phase1-summary.json; Short '
+    'windows on engine 8e98815; no Long window measurement exists).\n\n'
+    'x1.21 is a measured three-way Short pool slowdown and is not applied to a Long, which is forecast exclusive '
+    '(native_work_qualification.forecast_mode); a qualified Long profile supplies its own factor.'
+)
+# Version 2 (M-123; P4-LONG P4-03): the section 4.0 calibration. Each number's evidence is in V2_RATE_SOURCE.
+LONG_POLICY_V2 = {
+    'version': 2,
+    'deliverySeconds': 10800,
+    'maxOutputSeconds': 900,
+    'handoffReserve': {'playbackPerOutputSecond': 1.0, 'reviewNotesSeconds': 600, 'openConfirmSeconds': 300,
+                       'marginSeconds': 120},
+    'cleanupReserveSeconds': 45,
+    'routes': ['preview', 'final', 'resume'],
+    'limits': {'repairCycle': 2, 'author': 3, 'review': 8, 'planReview': 2, 'previewLaunch': 2, 'exportAttempt': 2,
+               'pictureGeneration': 2, 'aacCandidate': 6, 'aacPerAudio': 3, 'transientRetry': 1},
+    'motionReviewSeconds': 720,   # ESTIMATE, D3 5.4 step 8 high end; measured in P4-32, never tuned
+    'rates': {
+        'source': V2_RATE_SOURCE,
+        'safetyFactor': 1.25,
+        'routes': {'preview': {'perOutputSecond': 0.18, 'perWindowSecond': 2.364, 'fixedSeconds': 63.8,
+                               'perOwnerSeconds': 13.3},
+                   'final': {'perOutputSecond': 2.817, 'fixedSeconds': 63.8},
+                   'verify': {'perOutputSecond': 2.817, 'fixedSeconds': 63.8}},
+        'work': {'picturePerOutputSecond': 2.364, 'earlyGatesPerOutputSecond': 0.18, 'qcPerOutputSecond': 0.273,
+                 'masterPerProgramSecond': 0.0686, 'ownerStartSeconds': 13.3, 'launchFixedSeconds': 63.8},
+    },
+}
 # Operator decision pending (P4 section 9 D1; P4-24). The alternative is {'mode': 'labeled', 'graceSeconds': N}.
 LATE_LONG_DELIVERY = {'mode': 'refuse'}
 CURRENT_LONG_POLICY = {**LONG_POLICY_V2, 'lateDelivery': LATE_LONG_DELIVERY}
@@ -69,12 +121,24 @@ LONG_RISKS = {
                      'that rate a 27,000-frame (15-minute, 30 fps) Long picture takes about 100-109 minutes, not the '
                      'forecast 56; such a Long can miss its 180 minutes. Measure it; do not lower the forecast to fit.',
 }
-LONG_DURATION_EVIDENCE = {
-    600: 'no measurement: no 10-minute Long export has been recorded; its demand is derived from the Long rates',
-    900: 'technical fixture only (NATIVE_LONG_RELIABILITY_2026-09-16 stress-v4, 1920x1080 30 fps simple '
-         'solid-colour source: early gates 162.231 s, picture 1213.295 s, assembly 52.801 s, resume verification '
-         '136.013 s, all serial); no real-footage 15-minute export was measured',
-}
+# What was measured per output duration: (low seconds, high seconds, text), both ends included (P4-03).
+LONG_DURATION_EVIDENCE = (
+    (600, 700, 'C0679 real 4K H.264 footage, 1920x1080 at 24000/1001, single-owner native render on the September 9 '
+               'engine (SDK 0.8.31): B 657.365 s rendered in 1,430.103 s, B revision (CRF 6) in 1,349.236 s, A '
+               '683.766 s in 1,541.357 s (docs/producer/C0679_A_B_COMPARISON_2026-09-09.md, '
+               'C0679_END_TO_END_OPTIMIZATION_AUDIT_2026-09-09.md). Not the current section route; the current '
+               'engine is unmeasured at this duration'),
+    (880, 900, 'technical fixture only (NATIVE_LONG_RELIABILITY_2026-09-16 stress-v4, 1920x1080 30 fps simple '
+               'solid-colour source: early gates 162.231 s, picture 1213.295 s, assembly 52.801 s, resume verification '
+               '136.013 s, all serial); no real-footage 15-minute export was measured'),
+)
+NO_DURATION_EVIDENCE = 'no measurement at this duration'
+
+
+def duration_evidence(seconds: float) -> list[str]:
+    """Every recorded measurement whose duration range holds ``seconds``, or the one line saying there is none."""
+    texts = [text for low, high, text in LONG_DURATION_EVIDENCE if low <= seconds <= high]
+    return texts or [NO_DURATION_EVIDENCE]
 
 
 def valid_late_delivery(value: object) -> bool:

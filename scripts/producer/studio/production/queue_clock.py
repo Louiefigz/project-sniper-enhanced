@@ -13,6 +13,7 @@ from __future__ import annotations
 from studio.production.queue_clock_schema import (  # noqa: F401  new_clock and problem are re-exported
     MAX_WORKERS, POLICIES, POLICY, new_clock, problem,
 )
+from studio.production.task_schema import LIVE, holds_slot, is_ai
 
 MAX_GAP_SECONDS = 6.0
 
@@ -34,7 +35,15 @@ def writable(clip: dict) -> bool:
 
 
 def productive(record: dict, clip_id: str, workers: dict) -> bool:
-    """Owners and tasks outside the proven waiting set count as useful work."""
+    """Owners and tasks outside the proven waiting set count as useful work (P1 Step B2, C4).
+
+    Useful work: an owner row that is not waiting; on a v2 clock, the enrolled director holding its slot while it
+    has not declared itself idle for this Short (``director_activity``); a running attempt other than the waited
+    one; and any task of this Short, or run-scoped, other than the director and the waited owners' tasks, that is
+    live, ready AI or check work, or ended unresolved but not ``completed``. A completed turn does no work; only
+    its slot evidence is missing (X99(2)). Any other unresolved end may still be running. Blocked tasks wait for
+    their prerequisites (often the render itself) and do not count.
+    """
     if any(row['state'] != 'waiting' for row in workers.values()):
         return True
     tasks = {row['taskId'] for row in workers.values() if row['taskId']}
@@ -42,9 +51,19 @@ def productive(record: dict, clip_id: str, workers: dict) -> bool:
     clip = record['clips'][clip_id]
     if any(row['status'] == 'running' and row['id'] not in attempts for row in clip['attempts']):
         return True
-    return any(row['clipId'] in (None, clip_id) and row['kind'] != 'director'
-               and (row['state'] in ('claimed', 'running', 'cancel-requested') or row.get('unresolved'))
-               and row['id'] not in tasks for row in record['production']['tasks'].values())
+    rows = record['production']['tasks'].values()
+    if writable(clip) and clip['capacityClock']['directorWorking'] \
+            and any(row['kind'] == 'director' and holds_slot(row) for row in rows):
+        return True
+    return any(row['clipId'] in (None, clip_id) and row['kind'] != 'director' and row['id'] not in tasks
+               and _task_is_work(row) for row in rows)
+
+
+def _task_is_work(row: dict) -> bool:
+    """Live work, ready AI or check work, or an unresolved end that is not a completion (X99(2))."""
+    if row['state'] in LIVE or (row.get('unresolved') and row['state'] != 'completed'):
+        return True
+    return row['state'] == 'ready' and (is_ai(row) or row['kind'] == 'check')
 
 
 def checkpoint(record: dict, elapsed: float) -> None:

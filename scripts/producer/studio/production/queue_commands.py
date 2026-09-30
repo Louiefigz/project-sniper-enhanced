@@ -10,7 +10,9 @@ merges ``HANDLERS`` into its own table (MASTER-PLAN §5: an area adds commands o
   until termination evidence resolves them (G9, X25). The rule is ``callbacks.settle_resource``; an empty
   statement is refused there by name ("Settling records the operator's statement", exit 2).
 
-M-045 adds ``director-activity`` here.
+- ``director-activity --task <director> --epoch N --token T (--clip ID ... | --all) --state working|idle`` (M-045)
+  records the enrolled director's own declaration for its Shorts (``director_activity``). A Short earns no
+  render-queue credit while its director counts as working, which is the default until it declares ``idle``.
 """
 from __future__ import annotations
 
@@ -18,6 +20,8 @@ import argparse
 
 from studio import native_budget_store as store
 from studio.production import api
+from studio.production.claims import ClaimRef
+from studio.production.director_activity import DirectorActivity
 
 
 def cmd_settle_resource(args: argparse.Namespace) -> dict:
@@ -25,7 +29,14 @@ def cmd_settle_resource(args: argparse.Namespace) -> dict:
     return api.settle_resource(store.default_root(), args.batch, args.task, args.statement)
 
 
-HANDLERS = {'settle-resource': cmd_settle_resource}
+def cmd_director_activity(args: argparse.Namespace) -> dict:
+    """The enrolled director declares itself working or idle for the named Shorts, or for every open one."""
+    activity = DirectorActivity(None if args.all else tuple(args.clip), args.state == 'working')
+    return api.declare_director_activity(store.default_root(), args.batch,
+                                         ClaimRef(args.task, args.epoch, args.token), activity)
+
+
+HANDLERS = {'settle-resource': cmd_settle_resource, 'director-activity': cmd_director_activity}
 
 
 def register(sub: argparse._SubParsersAction) -> None:
@@ -35,3 +46,12 @@ def register(sub: argparse._SubParsersAction) -> None:
     settle.add_argument('--task', required=True)
     settle.add_argument('--statement', required=True,
                         help="The operator's own words, recorded verbatim; a statement is never evidence")
+    activity = sub.add_parser('director-activity', help="The enrolled director's own declaration: working (the "
+                                                        'default; its Shorts earn no queue credit) or idle')
+    activity.add_argument('--task', required=True, help="The enrolled director's task id")
+    activity.add_argument('--epoch', type=int, required=True)
+    activity.add_argument('--token', required=True)
+    clips = activity.add_mutually_exclusive_group(required=True)
+    clips.add_argument('--clip', action='append', help='A Short this declaration covers; repeat')
+    clips.add_argument('--all', action='store_true', help='Every Short on a v2 clock that is not handed off')
+    activity.add_argument('--state', choices=('working', 'idle'), required=True)

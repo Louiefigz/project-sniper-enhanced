@@ -15,7 +15,8 @@ from pathlib import Path
 
 from studio.native_budget_launch import reconcile_running
 from studio.native_budget_policy import close_refusal
-from studio.production import callbacks, claims, lifecycle, outputs
+from studio.production import callbacks, claims, director_activity, lifecycle, outputs
+from studio.production.director_activity import DirectorActivity
 from studio.native_budget_staging import staged_starts  # noqa: F401 - re-exported for the operator's listing
 from studio.production.approvals import (  # noqa: F401 - re-exported: the approval API callers import from here
     AddedClip, ApprovalChange, add_clip, approval_for_project, read_approval, record_script_change,
@@ -192,6 +193,11 @@ def settle_resource(root: Path, batch_id: str, task_id: str, statement: str) -> 
     """Record the operator's statement on unresolved or revoked work, active or draining; it releases nothing."""
     return transact(root, batch_id,
                     lambda record, elapsed: callbacks.settle_resource(record, task_id, statement, elapsed))
+
+
+def declare_director_activity(root: Path, batch_id: str, ref: ClaimRef, activity: DirectorActivity) -> dict:
+    """The enrolled director's own declaration (C4); the transaction checkpoints the clocks before it applies."""
+    return transact(root, batch_id, lambda record, elapsed: director_activity.declare(record, ref, activity, elapsed))
 
 
 def task_status(root: Path, batch_id: str) -> dict:

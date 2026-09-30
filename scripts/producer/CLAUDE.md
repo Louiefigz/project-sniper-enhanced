@@ -1254,3 +1254,9 @@ docs belong to P3b.
   `settlement._lifecycle_room` reserves room for the widest closure. `production/queue_commands.py` registers
   `settle-resource`, which records the operator's statement and releases nothing (`callbacks.settle_resource`).
   `dependencies._dependency_outcome` reads a pre-P1 completed-after-cancel prerequisite as cancelled.
+- **Which work withholds queue credit (M-045; C4, X99(2)).** `queue_clock.productive` counts an owner that is
+  not waiting, another running attempt, the enrolled director while it has not declared itself idle for the Short
+  (v2 clocks), and every task of the Short or run-scoped that is live, ready AI or check work, or ended unresolved
+  but not completed (a completed turn only lacks slot evidence). `production/director_activity.py` records the
+  director's own declaration (`director-activity --clip ID|--all --state working|idle`, in `queue_commands`;
+  `api.declare_director_activity`); it is declared, never observed. Tests: `test_queue_clock_v2_b.py`.

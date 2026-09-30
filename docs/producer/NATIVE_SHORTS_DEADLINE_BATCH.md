@@ -27,7 +27,13 @@ observed by the heavy-work scheduler as waiting solely for occupied render
 capacity can be excluded. Its durable `capacityClock` records settled credit,
 active owners and uncertain observation gaps. Preparation, hashing, rendering,
 encoding, review, revisions, human holds and handoff count. Other productive work
-for that Short overlapping a wait counts too. Unknown host pressure, disk
+for that Short overlapping a wait counts too: live or ready AI and check tasks of
+the Short or of the whole run, and ended work still holding its slot unless it
+completed. The enrolled director counts as working on every Short until it
+declares otherwise: `director-activity --batch SESSION --task DIRECTOR --epoch N
+--token T --all --state idle` (or `--clip ID`), and `--state working` before it
+authors or reviews itself. That declaration is the director's own claim, never an
+observation. Unknown host pressure, disk
 pressure, unsupported mixes, quarantined cleanup and missing heartbeats earn no
 credit. Forecast queue delays do not themselves earn credit.
 

@@ -31,11 +31,11 @@ Use it in whichever surface fits the job:
 
 ## Current state of `main` — read this first
 
-`main` is the **rc4 reconciled engine** (Phase 0 of the rc4 remediation, committed 2026-09-29).
-It is the most complete working state of the engine and passes its test suites apart from the
-known failures listed below. It is **not yet tagged final**: the last review fixes and the final
-full verification are still in progress, and the next phases are being built on separate
-`rc4/lanes/*` branches that are merged step by step. Branch `rc4/p0-reconciled-engine` tracks
+`main` is the **rc4 reconciled engine**: Phase 0 of the rc4 remediation, **complete and final**
+(commit `e31d819f`, 2026-09-30). It passed its final full verification on a quiet machine: the
+Python, TypeScript and Node suites pass apart from the known failures listed below. The next
+phases are being built on separate `rc4/lanes/*` branches and are merged into the engine step by
+step; `main` will be updated as each phase is finished. Branch `rc4/p0-reconciled-engine` tracks
 the same engine work.
 
 ### Developer quick start (macOS)
@@ -59,7 +59,7 @@ Full details: [Requirements](#requirements) and [Setup](#setup).
 ### Running the tests
 
 ```bash
-# Python suite (about an hour on one core; isolates itself from your real ~/.project-sniper state)
+# Python suite (about an hour one module at a time; isolates itself from your real ~/.project-sniper state)
 cd scripts/producer && ../../.venv/bin/python3 -B selftest.py
 
 # Node and TypeScript

@@ -100,7 +100,14 @@ settling the task.
 Use `status --batch SESSION` and `next --peek` for current work and refusal
 reasons. Per-clip status distinguishes wall elapsed, counted production,
 excluded render queue and uncertain intervals, with current forecasts and SLA
-misses. Deadline refusal is not a completed video. The default `status` reads each
+misses. Excluded time is bound to evidence: only the owner process that
+registered a wait records it, and a wait earns credit only when it names its
+pool ticket and the live members it waits behind; any other wait is counted as
+uncertain. Every 300 credited seconds (at most 32 times per Short) the trail
+gets a `capacity-checkpoint`, and `status` checks each Short's credit against
+its trail (`capacityAudit`; per output `creditVerified`: false for a total the
+trail cannot account for). This detects a hand-edited record, not a writer who
+rewrites the record and its trail together. Deadline refusal is not a completed video. The default `status` reads each
 visible hand-off from its recorded `clip-handed-off` trail event and needs no live page;
 `status --handoff FILE` re-verifies that file against the live review page and Studio, so it
 is valid only while both are open. `--full` prints every section; the default is compact.

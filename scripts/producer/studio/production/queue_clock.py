@@ -91,10 +91,19 @@ def _checkpoint_clip(record: dict, clip_id: str, elapsed: float) -> None:
     clock['pendingSeconds'] += delta
 
 
+def verified_wait(row: dict) -> bool:
+    """A waiting row whose pool evidence shows occupied capacity: the capacity class, a ticket and occupants (C11)."""
+    return row.get('waitClass') == 'capacity' and type(row.get('ticket')) is int and bool(row.get('occupants'))
+
+
 def observe_worker(record: dict, context: dict, observation: dict, elapsed: float) -> float:
     """Record one scheduler/owner state after checkpointing the preceding interval; return the settled credit.
 
-    A v1 clock is read-only: nothing is recorded and its earned credit is returned (0.0 for a clip without one).
+    The row keeps the observation's pool evidence (``ticket``, ``occupants``, ``waitClass``; an observation
+    without it, a working owner's, records none). A waiting row's pending interval becomes credit only when that
+    row was a verified wait (``verified_wait``) and the owner has not finished; otherwise it is counted, as
+    uncertain (P1 Step B4). A v1 clock is read-only: nothing is recorded and its earned credit is returned (0.0 for
+    a clip without one).
     """
     clip = record['clips'][context['clipId']]
     if not writable(clip):
@@ -104,8 +113,8 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
     clock, key = clip['capacityClock'], context['workerId']
     prior = clock['workers'].get(key)
     if prior and prior['state'] == 'waiting':
-        bucket = 'uncertainSeconds' if observation['state'] == 'finished' else 'excludedSeconds'
-        clock[bucket] += clock['pendingSeconds']
+        credited = observation['state'] != 'finished' and verified_wait(prior)
+        clock['excludedSeconds' if credited else 'uncertainSeconds'] += clock['pendingSeconds']
         clock['pendingSeconds'] = 0.0
     if observation['state'] == 'finished':
         clock['workers'].pop(key, None)
@@ -115,7 +124,8 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
     identity = {name: context[name] for name in ('supervisor', 'boot') if name in context}
     clock['workers'][key] = {**observation, **identity, 'seenElapsed': elapsed,
                              'taskId': context.get('taskId'), 'attemptId': context.get('attemptId'),
-                             'ticket': None, 'occupants': [], 'waitClass': None}  # no pool evidence (M-047 adds it)
+                             'ticket': observation.get('ticket'), 'occupants': list(observation.get('occupants', ())),
+                             'waitClass': observation.get('waitClass')}
     return clock['excludedSeconds']
 
 

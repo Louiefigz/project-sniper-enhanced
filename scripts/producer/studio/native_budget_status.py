@@ -46,6 +46,7 @@ class StatusInputs:
     events: tuple[dict, ...] = ()
     dispatcher: dict | None = None
     full: bool = False
+    audit: dict | None = None   # queue_audit.capacity_audit, which cmd_status reads (M-047); None: not audited
 
 
 CLOCK_KEYS = ('timingPolicy', 'totalElapsedSeconds', 'countedProductionSeconds', 'excludedRenderQueueSeconds',
@@ -117,7 +118,7 @@ def _transcripts(record: dict, files: tuple[Path, ...]) -> dict | None:
 
 def production_status(record: dict, elapsed: float, inputs: StatusInputs) -> dict:
     """``batch_status`` plus each output's status and milestones and the run's; compact unless ``full``."""
-    status = batch_status(record, elapsed)
+    status = batch_status(record, elapsed, inputs.audit)
     found = {'handoffs': handoff_verdicts(record, inputs.events, inputs.handoffs, elapsed),
              'finalReviews': final_review_verdicts(record, inputs.final_reviews, inputs.events)}
     timing, journal = _timing(record, inputs.timing)

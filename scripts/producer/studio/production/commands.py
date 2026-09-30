@@ -13,6 +13,7 @@ handler reads the authority root from ``native_budget_store.default_root`` at ca
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import hashlib
 import json
 import time
@@ -33,6 +34,7 @@ from studio.production import api, dispatch, handoff, inputs
 from studio.production.authorization import Setup, authorize, complete_setup
 from studio.production.handover_commands import NO_APPROVALS
 from studio.production.lifecycle import freeze
+from studio.production.queue_audit import capacity_audit
 from studio.production.tasks import TaskConflict
 
 REPO = Path(__file__).resolve().parents[4]
@@ -132,10 +134,14 @@ def observed_record(batch_id: str) -> tuple[dict, float]:
 
 def cmd_status(args: argparse.Namespace) -> dict:
     """Counters, forecasts and actions, each output's state and milestones, and the run's tasks, usage and
-    dispatcher (``native_budget_status``; the record and its trail are read under one batch lock)."""
+    dispatcher (``native_budget_status``; the record and its trail are read under one batch lock), plus
+    ``capacityAudit``: each v2 Short's settled credit checked against the trail (``queue_audit``, C11), which
+    ``creditVerified`` reports per output. ``wait`` reads no trail and carries neither."""
     record, elapsed, events = status.status_observation(store.default_root(), args.batch)
+    audit = capacity_audit(store.default_root(), args.batch, record)
     dispatcher = dispatch.status(store.default_root(), args.batch)
-    return status.production_status(record, elapsed, status.status_inputs(args, events, dispatcher))
+    evidence = dataclasses.replace(status.status_inputs(args, events, dispatcher), audit=audit)
+    return {**status.production_status(record, elapsed, evidence), 'capacityAudit': audit}
 
 
 def progress_key(record: dict, clip: str | None, until: str) -> str:

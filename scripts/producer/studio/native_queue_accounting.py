@@ -1,9 +1,11 @@
 """Bridge supervised owners to durable, evidence-backed Short queue accounting.
 
 A pool refusal explicitly classified as live heavy-slot contention is the only
-excluded wait. Memory pressure, disk pressure, inspection failures, cleanup and
-all running work count normally. Missing observation heartbeats never earn
-credit. Longs and historical batches keep their original wall-clock behavior.
+excluded wait, and it earns credit only with its pool evidence (``pool_evidence``:
+its ticket and live occupants, C11). Memory pressure, disk pressure, inspection
+failures, cleanup and all running work count normally. Missing observation
+heartbeats never earn credit. Longs and historical batches keep their original
+wall-clock behavior.
 """
 from __future__ import annotations
 
@@ -11,7 +13,10 @@ import json
 import time
 from typing import TYPE_CHECKING
 
-from studio.production.queue_authority import owner_context, record_observation, supporting_contexts
+from studio.production.queue_authority import (
+    NO_EVIDENCE, PoolEvidence, owner_context, record_observation, supporting_contexts,
+)
+from studio.production.queue_clock_schema import MAX_OCCUPANTS, WAIT_CLASSES
 
 if TYPE_CHECKING:
     from studio.native_run import NativeRun
@@ -30,8 +35,23 @@ def start_owner(owner: NativeRun) -> None:
     owner.capacity_wait_started = None
 
 
+def pool_evidence(error: Exception | None) -> PoolEvidence:
+    """The pool's evidence for this observation (C11): the refusal's ticket, live occupants and wait class
+    (``native_work_pool_credit``, carried as ``capacity_evidence``); none on admission, since a working row needs no
+    ticket. A value the clock's row cannot hold (``queue_clock_schema``) is dropped, so such a wait earns
+    nothing and the record stays valid."""
+    found = getattr(error, 'capacity_evidence', None) if error is not None else None
+    if type(found) is not dict:
+        return NO_EVIDENCE
+    ticket, occupants, wait_class = found.get('ticket'), found.get('occupants'), found.get('waitClass')
+    names = tuple(occupants) if type(occupants) is list and len(occupants) <= MAX_OCCUPANTS \
+        and all(type(name) is str and len(name) <= 64 for name in occupants) else ()
+    return PoolEvidence(ticket if type(ticket) is int and ticket >= 0 else None, names,
+                        wait_class if wait_class in WAIT_CLASSES else None)
+
+
 def pool_observation(owner: NativeRun, error: Exception | None) -> float:
-    """Settle a verified queue interval, then record admission or current contention."""
+    """Settle a verified queue interval, then record admission or current contention with its pool evidence."""
     contexts = [context for context in [owner.capacity_context, *getattr(owner, 'supporting_contexts', [])]
                 if context is not None]
     if not contexts:
@@ -39,12 +59,13 @@ def pool_observation(owner: NativeRun, error: Exception | None) -> float:
     waiting = bool(error and getattr(error, 'capacity_only', False))
     state = 'waiting' if waiting else 'working'
     evidence = json.dumps(getattr(error, 'capacity_evidence', {}), sort_keys=True) if error else 'admitted'
+    pool = pool_evidence(error)
     # Unknown/non-capacity refusals do not confirm the preceding pending interval.
     before = owner.capacity_credit
     for context in contexts:
         if error is not None and not waiting:
             record_observation(context, 'finished', ('heavy-pool', 'unverified wait ended'))
-        credit = record_observation(context, state, ('heavy-pool', evidence[:2048]))
+        credit = record_observation(context, state, ('heavy-pool', evidence[:2048]), pool)
         if context is owner.capacity_context:
             owner.capacity_credit = credit
     now = time.monotonic()

@@ -22,11 +22,11 @@ HANDOFF = ('open the delivered MP4 and its Studio project, then record the visib
            'handoff --confirmation <its visible-handoff confirmation record>')
 
 
-def batch_status(record: dict, elapsed: float) -> dict:
-    """Summarize the authoritative record at one observed elapsed time."""
+def batch_status(record: dict, elapsed: float, audit: dict | None = None) -> dict:
+    """Summarize the authoritative record at one observed elapsed time (``audit``: ``queue_audit.capacity_audit``)."""
     deadlines = clip_deadlines(record, None)  # a Shorts-only run: exactly its batch deadlines
     authorization = record['production']['authorization']
-    clips = {clip_id: clip_status(record, clip_id, elapsed) for clip_id in record['clips']}
+    clips = {clip_id: clip_status(record, clip_id, elapsed, audit) for clip_id in record['clips']}
     status = {'batchId': record['batchId'], 'status': record['status'],
               'elapsedSeconds': round(elapsed, 1), 'phase': phase(record, elapsed),
               'preparationRemainingSeconds': round(deadlines['preparationSeconds'] - elapsed, 1),
@@ -89,8 +89,12 @@ def _format_status(record: dict, clip: dict) -> dict:
     return status
 
 
-def clip_status(record: dict, clip_id: str, elapsed: float) -> dict:
-    """One output's counters, current launch, deliveries and next actions."""
+def clip_status(record: dict, clip_id: str, elapsed: float, audit: dict | None = None) -> dict:
+    """One output's counters, current launch, deliveries and next actions.
+
+    ``creditVerified`` says whether ``audit`` (``queue_audit.capacity_audit``, passed in: this never reads the
+    trail) found the Short's settled credit consistent with its trail; None when the clip was not audited.
+    """
     clip = record['clips'][clip_id]
     limits = clip_limits(record, clip)
     running = [row for row in clip['attempts'] if row['status'] == 'running']
@@ -106,8 +110,14 @@ def clip_status(record: dict, clip_id: str, elapsed: float) -> dict:
             'projects': [row['path'] for row in clip['projects']],
             'runningAttempt': running[-1] if running else None, 'runningRoutes': [row['route'] for row in running],
             'lastFailure': failures[-1] if failures else None, 'deliveries': clip['deliveries'],
-            'forecast': fits, 'slaMiss': miss,
+            'forecast': fits, 'slaMiss': miss, 'creditVerified': _credit_verified(audit, clip_id),
             'actions': actions(record, clip_id, fits, (elapsed, running))}
+
+
+def _credit_verified(audit: dict | None, clip_id: str) -> bool | None:
+    """True or False for an audited clip (only ``consistent`` is verified); None when it was not audited."""
+    row = (audit or {}).get(clip_id)
+    return None if row is None else row['status'] == 'consistent'
 
 
 def actions(record: dict, clip_id: str, fits: dict | None, context: tuple) -> list[str]:

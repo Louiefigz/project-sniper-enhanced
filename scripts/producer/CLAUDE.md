@@ -1276,3 +1276,13 @@ docs belong to P3b.
   are. Until M-049 the owner loop reads only `capacityOnly` (through `native_work_pool_fence.refusal`), so those
   uncredited waits no longer extend the deadline, and a full-slot memory wait beside an audio member now does.
   Tests: `test_native_work_pool_credit.py`.
+- **Credit bound to evidence (M-047; C11).** `queue_authority.record_observation(context, state, evidence, pool)`
+  refuses a context whose supervisor is not this process, and records the pool's `PoolEvidence` (ticket, live
+  occupants, wait class; `native_queue_accounting.pool_evidence` builds it from the refusal's `capacity_evidence`)
+  on the owner row (`queue_clock.observe_worker`). A waiting row's interval is credited only when that row was a
+  `verified_wait`; otherwise it is uncertain. A heartbeat that brings the credit `CHECKPOINT_SECONDS` (300) past the
+  last checkpoint is written as `capacity-checkpoint` (at most 32 per Short; a `TERMINAL_EVENTS` member).
+  `production/queue_audit.capacity_audit` checks each v2 Short's total against its last capacity event at or before
+  the clip's observed time; `cmd_status` adds `capacityAudit` and `clip_status` its `creditVerified` (the audit is
+  passed in through `native_budget_status.StatusInputs.audit`). Unkeyed: a writer who rewrites record and trail
+  together is not detected. Tests: `test_queue_clock_v2_c.py`, `test_native_work_pool_credit.EvidenceTests`.

@@ -25,7 +25,9 @@ from studio.production.tasks import StaleClaim, TaskRefused, enqueue
 DIRECTOR = {'type': 'host', 'host': 'codex', 'thread': 'TEST-thread-director', 'turn': 'TEST-turn-director'}
 OWNER = {'pid': 7101, 'pgid': 7101, 'started': 'Sun Sep 27 10:00:00 2026'}
 PROCESS = {'type': 'process', 'pid': 7201, 'pgid': 7201, 'started': 'Sun Sep 27 10:00:10 2026'}
-WAITING = {'state': 'waiting', 'resource': 'heavy-pool', 'evidence': '{}'}
+# A capacity-only wait with its pool evidence (ticket, live occupants: C11, M-047), as the owner loop reports it.
+WAITING = {'state': 'waiting', 'resource': 'heavy-pool', 'evidence': '{}', 'ticket': 7, 'occupants': ['a' * 32],
+           'waitClass': 'capacity'}
 
 
 def turn(name: str) -> dict:

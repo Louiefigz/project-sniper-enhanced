@@ -20,6 +20,8 @@ import native_work_pool_mix as mix
 from native_render_resources import GIB
 from native_work_pool_credit import MAX_OCCUPANTS, ReasonGroups, classify
 from native_work_pool_state import NativeWorkQueued
+from studio.native_queue_accounting import pool_evidence
+from studio.production.queue_authority import NO_EVIDENCE, PoolEvidence
 from _native_pool_fixture import hold_legacy_exclusive, isolate_pool, plan_project, qualify_fixture_host
 
 SLOTS = {'heavy': 3, 'audio': 1}
@@ -27,8 +29,8 @@ STAGES = {'heavy': 'pipeline', 'audio': 'audio-stage'}
 FREE_BYTES = 500 * GIB
 
 
-class CreditTests(unittest.TestCase):
-    """Real admission refusals and the capacity evidence they carry."""
+class PoolCase(unittest.TestCase):
+    """The private pool, its TEST record and project, and the admission helpers every real-refusal case uses."""
 
     def setUp(self) -> None:
         """Private namespace, TEST record, one TEST Short project on one TEST filesystem."""
@@ -67,6 +69,10 @@ class CreditTests(unittest.TestCase):
     def inflate(lease: object, reservation: int) -> None:
         """Raise one member's own memory reservation (its guard size) in its durable record."""
         lease._write(dict(lease.record, guardReservationBytes=reservation))
+
+
+class CreditTests(PoolCase):
+    """Real admission refusals and the capacity evidence they carry."""
 
     def test_all_live_slots_occupied_is_credited(self) -> None:
         """Three live members fill the three slots: the fourth request's wait is credited."""
@@ -159,6 +165,23 @@ class CreditTests(unittest.TestCase):
         error = self.refused(self.request('audio'))
         self.assertIn('all 1 audio slot(s) are occupied', str(error))
         self.assert_credit(error, False, 'other')
+
+
+class EvidenceTests(PoolCase):
+    """C11 (M-047): the owner loop carries a real refusal's ticket and live occupants into its observation."""
+
+    def test_capacity_evidence_names_ticket_and_occupants(self) -> None:
+        """Three live members fill the heavy slots: the fourth request's refusal becomes the pool evidence its
+        owner records (its ticket, the three sorted nonces, the capacity class); an admission carries none."""
+        holders = [self.admit() for _ in range(3)]
+        request = self.request()
+        error = self.refused(request)
+        self.assertIsInstance(request.sequence, int)
+        self.assertEqual(pool_evidence(error),
+                         PoolEvidence(request.sequence, tuple(sorted(lease.nonce for lease in holders)), 'capacity'))
+        self.assertEqual(pool_evidence(None), NO_EVIDENCE)
+        error.capacity_evidence = {**error.capacity_evidence, 'waitClass': 'TEST unknown', 'occupants': 'x'}
+        self.assertEqual(pool_evidence(error), PoolEvidence(request.sequence, (), None))   # dropped: earns nothing
 
 
 class ClassifyTests(unittest.TestCase):

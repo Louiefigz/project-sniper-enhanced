@@ -1,11 +1,35 @@
-"""Bind scheduler observations and live grants to the existing production authority."""
+"""Bind scheduler observations and live grants to the existing production authority.
+
+Credit is bound to evidence (P1 Step B4, C11): only the registered supervisor commits its own row, a wait names
+its pool ticket and the live occupants it waits behind (``PoolEvidence``, from ``native_work_pool_credit``), and
+every ``CHECKPOINT_SECONDS`` of credit one heartbeat becomes a ``capacity-checkpoint`` trail event (at most
+``MAX_CHECKPOINTS`` per Short), so ``queue_audit`` can bound the recorded total by the trail. The threat model is
+the unkeyed one of ``approvals``: a writer who rewrites the record and the trail together is not detected.
+"""
 from __future__ import annotations
 
+import os
+from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 
 from studio.production import queue_clock
-from studio.production.queue_clock_schema import number
+from studio.production.queue_clock_schema import MAX_CHECKPOINTS, number
+
+CHECKPOINT_SECONDS = 300.0
+
+
+@dataclass(frozen=True)
+class PoolEvidence:
+    """The pool's evidence for one observation: the request's ticket, the live occupants it waits behind (at most
+    ``native_work_pool_credit.MAX_OCCUPANTS`` nonces) and its wait class (``capacity``, ``other`` or None)."""
+
+    ticket: int | None
+    occupants: tuple[str, ...]
+    wait_class: str | None
+
+
+NO_EVIDENCE = PoolEvidence(None, (), None)   # an admission or a working owner: nothing to wait behind
 
 
 def bind_allocation(grant: dict, record: dict, context: dict) -> dict:
@@ -69,30 +93,70 @@ def owner_identity() -> dict:
     return {'supervisor': own_identity(), 'boot': boot_id()}
 
 
-def record_observation(context: dict | None, state: str, evidence: tuple[str, str]) -> float:
-    """Commit one observed transition under the batch lock; never reset an allowance."""
+def record_observation(context: dict | None, state: str, evidence: tuple[str, str],
+                       pool: PoolEvidence | None = None) -> float:
+    """Commit one observed transition under the batch lock; never reset an allowance.
+
+    Args:
+        context: The owner's accounting context (``owner_context``), or None for an unbound owner.
+        state: ``working``, ``waiting`` or ``finished``.
+        evidence: (resource, evidence text) of the observation.
+        pool: The pool's evidence for a wait; None records none, and such a wait earns nothing (C11).
+
+    Raises:
+        ValueError: The context names a supervisor other than this process: only the registered supervisor
+            commits its capacity observations.
+    """
     if context is None:
         return 0.0
-    from studio.native_budget_binding import advance_clock
+    if context.get('supervisor') and context['supervisor']['pid'] != os.getpid():
+        raise ValueError('Only the registered supervisor commits its capacity observations')
     from studio.native_budget_store import locked_batch, read_batch
     root, batch_id = Path(context['authority']), context['batchId']
-    snapshot = read_batch(root, batch_id)
-    recovered = recovery_evidence(snapshot, context)
+    recovered = recovery_evidence(read_batch(root, batch_id), context)
+    pool = pool or NO_EVIDENCE
+    observation = {'state': state, 'resource': evidence[0], 'evidence': evidence[1], 'ticket': pool.ticket,
+                   'occupants': list(pool.occupants), 'waitClass': pool.wait_class}
     with locked_batch(root, batch_id) as session:
-        record = session.read()
-        elapsed = advance_clock(record)
-        removed = recover_workers(record, context['clipId'], recovered)
-        observation = {'state': state, 'resource': evidence[0], 'evidence': evidence[1]}
-        prior = record['clips'][context['clipId']].get('capacityClock', {}).get('workers', {}).get(context['workerId'])
-        heartbeat = not removed and prior is not None and prior['state'] == state and prior['resource'] == evidence[0]
-        before = queue_clock.excluded(record['clips'][context['clipId']])
-        after = queue_clock.observe_worker(record, context, observation, elapsed)
-        event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat else 'capacity-observed'
-        session.commit(record, {'event': event, 'clipId': context['clipId'],
-                                'worker': context['workerId'], 'state': state, 'elapsed': elapsed,
-                                'excludedSeconds': after, 'creditedSeconds': after - before,
-                                'resource': evidence[0], 'evidence': evidence[1], 'recoveredWorkers': removed})
+        return _observe_locked(session, context, observation, recovered)
+
+
+def _observe_locked(session: object, context: dict, observation: dict, recovered: dict) -> float:
+    """Inside the batch lock: recover proved-ended owners, settle this observation, commit it and its trail event.
+
+    A same-state heartbeat writes no trail event, except the one that brings the Short's credit
+    ``CHECKPOINT_SECONDS`` past its last checkpoint (``capacity-checkpoint``, while fewer than ``MAX_CHECKPOINTS``).
+    """
+    from studio.native_budget_binding import advance_clock
+    record = session.read()
+    elapsed = advance_clock(record)
+    clip_id, state = context['clipId'], observation['state']
+    removed = recover_workers(record, clip_id, recovered)
+    clip = record['clips'][clip_id]
+    prior = clip.get('capacityClock', {}).get('workers', {}).get(context['workerId'])
+    heartbeat = not removed and prior is not None and prior['state'] == state \
+        and prior['resource'] == observation['resource']
+    before = queue_clock.excluded(clip)
+    after = queue_clock.observe_worker(record, context, observation, elapsed)
+    event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat else 'capacity-observed'
+    if event == 'capacity-heartbeat' and _checkpoint_due(clip, after, elapsed):
+        event = 'capacity-checkpoint'
+    session.commit(record, {'event': event, 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
+                            'elapsed': elapsed, 'excludedSeconds': after, 'creditedSeconds': after - before,
+                            'resource': observation['resource'], 'evidence': observation['evidence'],
+                            'recoveredWorkers': removed})
     return after
+
+
+def _checkpoint_due(clip: dict, after: float, elapsed: float) -> bool:
+    """Whether this heartbeat is a trail checkpoint (v2 clocks only); if so, the checkpoint row is advanced."""
+    if not queue_clock.writable(clip):
+        return False
+    row = clip['capacityClock']['checkpoint']
+    if after - row['excludedSeconds'] < CHECKPOINT_SECONDS or row['count'] >= MAX_CHECKPOINTS:
+        return False
+    row.update(excludedSeconds=after, elapsed=elapsed, count=row['count'] + 1)
+    return True
 
 
 def supporting_contexts(owner: object, primary: dict | None) -> list[dict]:

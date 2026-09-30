@@ -31,7 +31,7 @@ from studio.native_budget_binding import BudgetRefused
 from studio.native_budget_clock import BudgetClockError
 from studio.native_budget_status import status_arguments
 from studio.native_budget_store import BudgetAuthorityError
-from studio.production import api, commands, dispatch, handover_commands, inputs, media
+from studio.production import api, commands, dispatch, handover_commands, inputs, media, queue_commands
 from studio.production.callbacks import TaskFailure, TaskResult
 from studio.production.claims import ClaimRef, Enrollment
 from studio.production.process import ExportLaunch, TaskClaim
@@ -165,7 +165,7 @@ HANDLERS = {'start': commands.cmd_start, 'admit': commands.cmd_admit, 'status': 
             'next': cmd_next,
             'attach': cmd_attach, 'complete': cmd_complete, 'release': cmd_release,
             'cancel-request': cmd_cancel_request, 'cancelled': cmd_cancelled, 'reconcile': cmd_reconcile,
-            'dispatch': cmd_dispatch, 'run-media': cmd_run_media}
+            'dispatch': cmd_dispatch, 'run-media': cmd_run_media, **queue_commands.HANDLERS}
 
 
 def _batch_parsers(sub: argparse._SubParsersAction) -> None:
@@ -247,6 +247,7 @@ def parser(description: str) -> argparse.ArgumentParser:
     sub = main_parser.add_subparsers(dest='command', required=True)
     _batch_parsers(sub)
     _task_parsers(sub)
+    queue_commands.register(sub)
     for name, command in sub.choices.items():
         if name not in ROOT_COMMANDS:
             command.add_argument('--batch', required=True)

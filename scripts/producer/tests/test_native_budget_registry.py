@@ -109,6 +109,7 @@ class CorruptAuthorityTests(RegistryCase):
         self.close_batch()
         self.start('batch-next', ('A',))
         self.edit_file(lambda record: record.update(status='active', closedAtElapsed=None))
+        self.edit_file(lambda record: record['production'].pop('closure'))   # only a closed batch has one (M-043)
         with self.assertRaisesRegex(BudgetAuthorityError, 'only one may be'):
             registry.resolve_binding(self.root, self.project)
 
@@ -287,6 +288,7 @@ class DrainingRegistryTests(RegistryCase):
         path = self.root / 'batches/batch-auth/authority.json'
         record = json.loads(path.read_text())
         record.update(status='draining', closedAtElapsed=None)
+        record['production'].pop('closure', None)   # only a closed batch carries a closure (M-043)
         record['production']['drain'] = {'startedElapsed': 2400.0, 'reason': 'TEST'}
         path.write_text(json.dumps(record))
 

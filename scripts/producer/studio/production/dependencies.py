@@ -102,13 +102,19 @@ def _waiting_note(prerequisite: dict, stale: str | None) -> str | None:
 
 
 def _dependency_outcome(record: dict, task: dict, stale: dict) -> tuple[str, str, str | None]:
-    """(state, reason, failure category) implied by the prerequisites of an unclaimed task."""
+    """(state, reason, failure category) implied by the prerequisites of an unclaimed task.
+
+    A prerequisite counts as superseded when revoked, and as cancelled when it is the ``completed`` row with
+    ``cancelRequested`` that a pre-P1 engine wrote (P1 A4); this engine never writes that row.
+    """
     tasks = record['production']['tasks']
     ended = _parent_ended(tasks, task)
     if ended:
         return 'cancelled', ended, None
     for task_id in task['prerequisites']:
-        state = tasks[task_id]['state'] if not tasks[task_id]['revoked'] else 'superseded'
+        row = tasks[task_id]
+        state = 'superseded' if row['revoked'] else row['state']
+        state = 'cancelled' if state == 'completed' and row['cancelRequested'] else state
         if state in DEAD_PREREQUISITES:
             return 'failed', f'prerequisite {task_id} is {state}', f'prerequisite-{state}'
     waiting = [note for note in (_waiting_note(tasks[item], stale[item]) for item in task['prerequisites']) if note]

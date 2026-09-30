@@ -26,6 +26,7 @@ from studio import native_budget_owner as owner_budget
 from studio import native_budget_registry as registry
 from studio import native_budget_store as store
 from studio.native_budget_store import BudgetAuthorityError
+from studio.production.unresolved_executions import open_rows
 
 
 class StagingNameTests(RegistryCase):
@@ -207,7 +208,7 @@ class RoundThreeTests(RegistryCase):
 
 
 class DrainingTests(RegistryCase):
-    """Closing with unsettled work drains; a draining batch is neither archivable nor replaceable."""
+    """Closing drains only while media is live (M-043); draining refusals: test_production_batch_succession."""
 
     def setUp(self) -> None:
         super().setUp()
@@ -222,54 +223,50 @@ class DrainingTests(RegistryCase):
         production_api.complete_task(self.root, 'batch-auth', ClaimRef('director', 1, self.director['token']),
                                      TaskResult(()))
 
-    def test_a_running_critic_drains_the_batch_until_it_settles(self) -> None:
+    def test_a_running_critic_is_listed_at_closure_and_stays_charged(self) -> None:
+        """M-043 (X25, X37): a live AI task no longer keeps the batch draining. The close revokes it and lists it
+        in production.closure and the host record: charged after the archive, it still refuses a new batch (X114)."""
         claimed = production_api.claim_task(self.root, 'batch-auth', 'critic', host_turn('critic'))
         ref = ClaimRef('critic', claimed['epoch'], claimed['token'])
         production_api.attach_task(self.root, 'batch-auth', ref, host_turn('critic'))
         self.director_done()
         self.clock.advance(2400)
         closing = native_batch.cmd_close(ns(batch='batch-auth'))
-        self.assertEqual((closing['status'], closing['unsettledTasks']), ('draining', ['critic']))
-        with self.assertRaisesRegex(registry.BudgetRefused, 'still draining'):
-            self.start('batch-next', ('A',))
-        with self.assertRaisesRegex(registry.BudgetRefused, 'Only a closed batch'):
-            native_batch.cmd_archive(ns(batch='batch-auth', reason='operator released it'))
-        with self.assertRaisesRegex(registry.BudgetRefused, 'is draining'):
-            self.reserve(self.unrelated())
-        with self.assertRaisesRegex(registry.BudgetRefused, 'is draining'):
-            self.reserve(self.project)
-        with self.assertRaisesRegex(registry.BudgetRefused, 'draining'):
-            production_api.enqueue_tasks(self.root, 'batch-auth', (task_spec('late'),))
+        self.assertEqual((closing['status'], closing['unsettledTasks']), ('closed', ['critic']))
+        critic = self.record()['production']['tasks']['critic']
+        self.assertEqual((critic['state'], critic['revoked']), ('cancel-requested', True))
         production_api.confirm_cancelled(self.root, 'batch-auth', ref)       # Codex: tools may survive
-        self.assertEqual(native_batch.cmd_close(ns(batch='batch-auth'))['status'], 'draining')
-        production_api.settle_resource(self.root, 'batch-auth', 'critic', 'operator saw no tool process left')
-        self.assertEqual(native_batch.cmd_close(ns(batch='batch-auth'))['status'], 'closed')
+        self.assertTrue(self.record()['production']['tasks']['critic']['unresolved'])
         native_batch.cmd_archive(ns(batch='batch-auth', reason='operator released it'))
-        self.start('batch-next', ('A',))
+        self.assertEqual([row['taskId'] for row in open_rows(self.root, 'codex')], ['critic'])
+        with self.assertRaisesRegex(registry.BudgetRefused, 'closed with unresolved AI work'):
+            self.start('batch-next', ('A',))                                 # fail closed until M-100 (X114)
 
-    def test_an_unresolved_slot_is_settled_only_while_draining_and_with_evidence(self) -> None:
+    def test_an_operator_statement_on_an_unresolved_slot_releases_nothing(self) -> None:
+        """M-043 (X25, G9): settle-resource records the statement while active or draining and never releases;
+        the close lists the abandoned claim, with a null host for its process claimer (gate M3)."""
         from _budget_fixture import DISPATCHER, table
         from studio import native_budget_launch as launch
         production_api.claim_task(self.root, 'batch-auth', 'critic', DISPATCHER)
         with mock.patch.object(launch, '_process_table', return_value=table()):
             production_api.reconcile(self.root, 'batch-auth')              # dispatcher died: uncertain launch
-        with self.assertRaisesRegex(registry.BudgetRefused, 'only while the run drains'):
-            production_api.settle_resource(self.root, 'batch-auth', 'critic', 'checked the host')
+        production_api.settle_resource(self.root, 'batch-auth', 'critic', 'checked the host')
         self.director_done()
         self.clock.advance(2400)
-        self.assertEqual(native_batch.cmd_close(ns(batch='batch-auth'))['status'], 'draining')
-        production_api.settle_resource(self.root, 'batch-auth', 'critic', 'operator confirmed no host turn runs')
-        record = self.record()
-        self.assertEqual((record['production']['tasks']['critic']['state'], record['production']['ai']['charged']),
-                         ('abandoned', 2))                                    # still charged, never retried
         self.assertEqual(native_batch.cmd_close(ns(batch='batch-auth'))['status'], 'closed')
+        record = self.record()
+        critic = record['production']['tasks']['critic']
+        self.assertEqual((critic['state'], critic['unresolved'], record['production']['ai']['charged']),
+                         ('abandoned', True, 2))                              # still charged, never retried
+        rows = record['production']['closure']['unresolvedAtClose']
+        self.assertEqual([(row['taskId'], row['host']) for row in rows], [('critic', None)])
 
     def test_an_explicit_drain_waits_for_the_close_conditions_and_freezes_everything(self) -> None:
         with self.assertRaisesRegex(registry.BudgetRefused, 'not handed off'):
             production_api.drain(self.root, 'batch-auth', 'operator stopped the run')
         self.clock.advance(2400)
         drained = production_api.drain(self.root, 'batch-auth', 'operator stopped the run')
-        self.assertEqual((drained['status'], drained['frozen']), ('draining', ['critic', 'director']))
+        self.assertEqual((drained['status'], drained['frozen']), ('draining', ['critic']))   # M-043: not the director
         self.assertEqual(drained['unsettled'], ['director'])
         self.assertEqual(self.record()['production']['drain']['reason'], 'operator stopped the run')
 

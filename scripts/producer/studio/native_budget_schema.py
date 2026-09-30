@@ -19,8 +19,8 @@ the ledger against the landed fields.
     capacityClock.stall: None, capacity-stalled or         M-044 / M-050        val         v1 clocks have none
       cancelled; <= 64 occupants (else truncated); <= 1 cancel row
     task completed with an unresolved resource             M-042                yes         holds no such row
-    production.closure {closedElapsed, unresolvedAtClose}  M-043                no     opt  absent
-    host unresolved-executions.jsonl (its own schema 1)    M-043                no          not a record field
+    production.closure {closedElapsed, unresolvedAtClose}  M-043                yes    opt  absent
+    host unresolved-executions.jsonl (its own schema 1)    M-043                yes         not a record field
     task assignmentBinding (refused until validated)       M-080, M-082         no     opt  absent
     declared handle types, hostProcess in DECLARED_KEYS    M-088 / M-099 (O3)   no          none are declared
     declared director host, hostVersion (on its handle)    M-099                no          declared ones only

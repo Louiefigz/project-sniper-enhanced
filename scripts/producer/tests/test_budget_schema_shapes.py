@@ -215,11 +215,11 @@ class ProductionOptionalTests(unittest.TestCase):
             with self.subTest(name), self.assertRaisesRegex(ValueError, exact):
                 validate_record(record)
 
-    def test_closure_is_refused_until_its_validator_lands(self) -> None:
-        """``closure`` is a fixed key refused by name before M-043; any other extra key is not a production key."""
+    def test_closure_belongs_to_a_closed_batch(self) -> None:
+        """``closure`` is validated from M-043 (refused by name on an open batch); any other extra key is not one."""
         record = short_record()
         record['production']['closure'] = {'closedElapsed': 10.0, 'unresolvedAtClose': []}
-        refusal = 'budget record is invalid: production.closure is not accepted until its validator lands (M-043)'
+        refusal = 'budget record is invalid: production.closure belongs to a closed batch only'
         with self.assertRaisesRegex(ValueError, f'^{re.escape(refusal)}$'):
             validate_record(record)
         del record['production']['closure']

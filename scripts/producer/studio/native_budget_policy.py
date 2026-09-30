@@ -235,7 +235,7 @@ def admit_new_clip(record: dict, clip_id: str, elapsed: float) -> Decision:
 def close_refusal(record: dict, elapsed: float) -> str | None:
     """Closing never releases budgets early: every clip handed off, or the deadline passed.
 
-    A draining batch may be asked again: it closes once its owned work has settled
+    A draining batch may be asked again: it closes once no media work is live (M-043)
     (``production.lifecycle.close_or_drain``).
     """
     if record['status'] == 'closed':

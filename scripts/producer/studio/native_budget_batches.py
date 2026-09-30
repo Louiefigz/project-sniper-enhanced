@@ -14,8 +14,11 @@ so the batches an earlier engine left do not refuse every export after an upgrad
 their Shorts stay spent and their folders' supporting owners stay refused until
 the operator archives them. A draining batch
 (shutdown begun, owned work not yet settled) is neither archivable nor replaceable
-by a new batch; production tasks that have not ended, or that still hold an
-unresolved resource, keep any batch (of any engine version) from being released.
+by a new batch. Unsettled production tasks keep another engine version's batch unreleased;
+this engine's closed batch is archived only once its closure and the host record list them (X37).
+Until admission counts the host record (M-100), an open AI row in it, from any batch's closure and
+archived or not, refuses a new batch by name (X114: fail closed); the live closed batches' closure rows are
+appended to it first, as archive does (X125).
 """
 from __future__ import annotations
 
@@ -135,7 +138,27 @@ def current_batches(root: Path) -> list[tuple[str, dict]]:
 
 
 class PredecessorCurrent(BudgetRefused):
-    """Another batch is still active or draining; a new batch cannot be published yet."""
+    """Another batch is still active or draining, or closed with unresolved AI work; a new batch waits."""
+
+
+def _open_ai_rows(root: Path) -> list[dict]:
+    """The host record's open AI rows, every host's (X114: fail closed until M-100 counts them at admission)."""
+    from studio.production.host_contract import HOSTS
+    from studio.production.task_schema import TASK_KINDS
+    from studio.production.unresolved_executions import RECORD, open_rows
+    if not (root / RECORD).exists():
+        return []
+    rows = {(row['batchId'], row['taskId']): row for host in HOSTS for row in open_rows(root, host)}
+    return [row for row in rows.values() if TASK_KINDS[row['kind']] == 'ai']
+
+
+def _record_closures(root: Path, records: list[tuple[str, dict]]) -> None:
+    """Append the closure rows the host record lacks for every live closed batch of this engine, as archive does,
+    so the creation check below reads them even after the host record lost them (X125 N3; a no-op normally)."""
+    from studio.production.lifecycle import record_closure
+    for _name, record in records:
+        if record['status'] == 'closed' and record.get('schemaVersion') == SCHEMA_VERSION:
+            record_closure(record, root)
 
 
 def refuse_creation(root: Path, batch_id: str) -> None:
@@ -146,6 +169,12 @@ def refuse_creation(root: Path, batch_id: str) -> None:
         name, status = current[0]
         raise PredecessorCurrent(f'Batch {name} is still {status}; close it before starting another (one production '
                                  'batch runs at a time, and a draining batch keeps its unresolved work until it settles)')
+    _record_closures(root, records)
+    if unresolved := _open_ai_rows(root):
+        tasks = ', '.join(f'{row["batchId"]}/{row["taskId"]}' for row in unresolved[:3])
+        raise PredecessorCurrent(f'Batch {unresolved[0]["batchId"]} closed with unresolved AI work ({tasks}) still '
+                                 'charged in unresolved-executions.jsonl; a new batch waits until termination evidence '
+                                 'resolves it (fail closed until admission counts it, M-100)')
     if len(records) >= MAX_BATCHES:
         raise BudgetRefused(f'{len(records)} live batches exist; archive closed ones '
                             '(native_batch.py archive --batch ID) before starting another')
@@ -172,7 +201,7 @@ def archive_batch(root: Path, batch_id: str, reason: str) -> dict:
         raise ValueError("Archiving a batch needs the operator's reason")
     with registry_lock(root):
         with locked_batch(root, batch_id, create=True) as session:
-            record = _archivable(session)
+            record = _archivable(session, root)
             session.event({'event': 'batch-archived', 'batchId': batch_id, 'reason': reason[:512]})
         target = archived_directory(root, batch_id)
         if target.exists():
@@ -220,11 +249,16 @@ def foreign_released(raw: object) -> bool:
     return raw.get('status') == 'active' and time.time() >= deadline
 
 
-def _archivable(session: object) -> dict:
-    """The record, when it may leave resolution: closed, no running launch, no unsettled task."""
-    from studio.production.lifecycle import archive_refusal
+def _archivable(session: object, root: Path) -> dict:
+    """The record, when it may leave resolution: closed, no running launch, unsettled work recorded at closure.
+
+    This engine's closure rows the host record lacks are appended first, a no-op in normal operation (X37).
+    """
+    from studio.production.lifecycle import archive_refusal, record_closure
     record = _current_or_foreign_closed(session)
-    refusal = archive_refusal(record)
+    if record.get('schemaVersion') == SCHEMA_VERSION:
+        record_closure(record, root)
+    refusal = archive_refusal(record, root)
     if refusal:
         raise BudgetRefused(refusal)
     return record

@@ -16,10 +16,10 @@ handle. No evidence means no change.
   watchdog retained surviving owners, all exact identities and their process groups
   must be gone before the recorded launch outcome can settle the task. Unknown
   identities retain the slot. Revoked, cancelled and expired work cannot publish.
-- Otherwise a gone execution whose process group is empty (or whose host turn is
-  terminal) has terminated: ``cancel-requested`` becomes ``cancelled``, anything
-  else ``abandoned`` without a held slot. Survivors in its group, or a host that
-  no longer knows the turn, leave the slot unresolved.
+- Otherwise a gone execution whose process group is empty has terminated:
+  ``cancel-requested`` becomes ``cancelled``, anything else ``abandoned`` without a
+  held slot. Survivors in its group, a host turn seen terminal (no host end event is
+  evidence yet; ``task_end``) or a host that no longer knows the turn leave the slot unresolved.
 
 Host events arrive through ``apply_host_event`` and use the same fenced callbacks.
 """
@@ -35,11 +35,11 @@ from studio.production.callbacks import TaskFailure, TaskResult, complete, confi
 from studio.production.claims import ClaimRef, Outcome, attach, check_claim
 from studio.production.dependencies import refresh
 from studio.production.host_contract import CATEGORY, HostEvent, clip_text
-from studio.production.task_schema import LIVE, TERMINAL, UNRESOLVABLE, finish, handle_cleans_up, is_ai
+from studio.production.task_end import ALIVE, LOST, TERMINATED, observed_state
+from studio.production.task_schema import LIVE, TERMINAL, UNRESOLVABLE, finish, is_ai
 from studio.production.tasks import TaskConflict, task_of, tasks_of
 from studio.production.queue_clock import settle_task_workers, task_deadline
 
-ALIVE, TERMINATED, LOST = 'alive', 'terminated', 'lost'
 HOST_STATES = {'running': ALIVE, 'terminal': TERMINATED, 'unknown': LOST}
 
 
@@ -81,11 +81,8 @@ def execution_state(handle: dict, observation: Observation) -> str | None:
 
 
 def _evidence(record: dict, handle: dict, observation: Observation) -> str | None:
-    """The execution state; a host turn seen ended counts as lost unless its host ends tools on any end."""
-    status = execution_state(handle, observation)
-    if handle['type'] == 'host' and status == TERMINATED and not handle_cleans_up(handle, 'endCleansUp'):
-        return LOST
-    return status
+    """The execution state as the one end rule reads it (``task_end.observed_state``): an ended host turn is lost."""
+    return observed_state(handle, execution_state(handle, observation))
 
 
 def _change(task: dict, before: str, reason: str) -> dict:

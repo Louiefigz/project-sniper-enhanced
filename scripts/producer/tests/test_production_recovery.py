@@ -359,14 +359,14 @@ class FullTrailTests(RecoveryCase):
         with b3_stand_in():
             handed = native_batch.cmd_handoff(ns(batch=BATCH, clip='A', confirmation=confirmation))  # visible first
         self.assertEqual(handed['frozenTasks'], ['critic'])
-        self.clock.advance(2400)
-        self.assertEqual(native_batch.cmd_close(ns(batch=BATCH))['status'], 'draining')
         api.confirm_cancelled(self.root, BATCH, ref)                       # Codex: slot stays unresolved
         api.complete_task(self.root, BATCH, ClaimRef('director', 1, self.director['token']), TaskResult(()))
-        api.settle_resource(self.root, BATCH, 'critic', 'operator saw no tool process left')
-        self.assertEqual(native_batch.cmd_close(ns(batch=BATCH))['status'], 'closed')
-        self.assertEqual(self.events(5), ['batch-draining', 'task-cancelled', 'task-cancelled',   # D01: director
-                                          'task-resource-settled', 'batch-closed'])
+        api.settle_resource(self.root, BATCH, 'critic', 'operator saw no tool process left')   # M-043: while active
+        self.clock.advance(2400)
+        self.assertEqual(native_batch.cmd_close(ns(batch=BATCH))['status'], 'closed')   # M-043: lists, never drains
+        self.assertEqual(self.events(4), ['task-cancelled', 'task-completed', 'task-resource-settled', 'batch-closed'])
+        self.assertEqual([row['taskId'] for row in self.record()['production']['closure']['unresolvedAtClose']],
+                         ['critic'])
 
 
 if __name__ == '__main__':

@@ -183,8 +183,15 @@ structures, never reviewer findings.
    `native_handoff.py open ATTEMPT --owner OWNER --record NEW.json`, then confirm
    the actual browser views through its `confirm` command. Only that confirmation
    can satisfy `native_batch.py handoff --batch SESSION --clip A --confirmation
-   /absolute/confirmation.json`. Complete the director and close the batch after
-   owned tasks settle.
+   /absolute/confirmation.json`. Then close the batch. While media work is live,
+   `close` drains instead and is run again once that work ends. At closure the
+   enrolled director's assignment ends, every other live AI task is revoked, and
+   every task still holding a slot or an unresolved resource is listed in
+   `production.closure` and in the host record `unresolved-executions.jsonl`,
+   where it stays charged until termination evidence resolves it. Until
+   admission counts that record, a closed batch with unresolved AI work refuses a
+   new batch by name. `settle-resource --task ID --statement TEXT` records the
+   operator's words on such work and releases nothing.
    State whether each is a checked MP4 (a technical pass, CHECKED FOR REVIEW) or a
    review draft, with its open findings.
 

@@ -1244,3 +1244,13 @@ docs belong to P3b.
   launch-failed --launch-error`); `claims.release` refuses an AI release without it. Section readers
   (`section_results.current`, `sections.require_encoded_task`) keep a completed result that still holds its slot
   current, and `section_chunk_liveness` reserves slots for early reviews whose authors cannot free theirs.
+- **Closure and the host record (M-043; X25, X29, X37).** `lifecycle.close_or_drain(record, elapsed, observation,
+  root)` drains while media work is live; otherwise it ends the enrolled director's assignment (cause `closure`),
+  revokes every other live AI task, writes `production.closure` (validated by
+  `production_optional.closure_problem`) and appends its rows to `production/unresolved_executions.py`'s host
+  record `unresolved-executions.jsonl` inside the closing transaction. Nothing is released. `archive_refusal`
+  and `native_budget_batches._archivable` need every unsettled task in both; `native_budget_batches.refuse_creation`
+  refuses a new batch while the host record holds open AI rows (until M-100's admission counts them).
+  `settlement._lifecycle_room` reserves room for the widest closure. `production/queue_commands.py` registers
+  `settle-resource`, which records the operator's statement and releases nothing (`callbacks.settle_resource`).
+  `dependencies._dependency_outcome` reads a pre-P1 completed-after-cancel prerequisite as cancelled.

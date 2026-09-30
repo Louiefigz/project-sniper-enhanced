@@ -172,24 +172,26 @@ def drain(root: Path, batch_id: str, reason: str) -> dict:
 
 
 def close(root: Path, batch_id: str, host: dict | None = None) -> dict:
-    """Close when everything owned has settled, otherwise drain (the same path as ``native_batch.py close``)."""
+    """Close, listing unresolved work in the closure; drain instead while media is live (``native_batch.py close``)."""
     def operation(record: dict, elapsed: float) -> Outcome:
-        """Close, or drain until owned work settles (the process table is read under the lock)."""
+        """Close, or drain while media work is live (the process table is read under the lock)."""
         observation = current_observation(host)
         reconcile_running(record, elapsed)
         refusal = close_refusal(record, elapsed)
         if refusal:
             raise TaskRefused(refusal)
-        result = lifecycle.close_or_drain(record, elapsed, observation)
+        result = lifecycle.close_or_drain(record, elapsed, observation, root)
         event = 'batch-closed' if result['status'] == 'closed' else 'batch-draining'
         return Outcome(True, {'event': event, 'unsettled': result['unsettled'],
-                              'runningAttempts': result['runningAttempts']}, result)
+                              'runningAttempts': result['runningAttempts'], 'directorEnd': result['directorEnd'],
+                              'revoked': result['revoked']}, result)
     return transact(root, batch_id, operation)
 
 
-def settle_resource(root: Path, batch_id: str, task_id: str, reason: str) -> dict:
-    """While draining, record the operator's evidence that an unresolved slot has ended."""
-    return transact(root, batch_id, lambda record, elapsed: callbacks.settle_resource(record, task_id, reason, elapsed))
+def settle_resource(root: Path, batch_id: str, task_id: str, statement: str) -> dict:
+    """Record the operator's statement on unresolved or revoked work, active or draining; it releases nothing."""
+    return transact(root, batch_id,
+                    lambda record, elapsed: callbacks.settle_resource(record, task_id, statement, elapsed))
 
 
 def task_status(root: Path, batch_id: str) -> dict:

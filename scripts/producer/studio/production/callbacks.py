@@ -271,15 +271,18 @@ def record_usage(record: dict, ref: ClaimRef, usage: dict, elapsed: float) -> Ou
                    {'taskId': ref.task_id, 'usage': task['usage']})
 
 
-def settle_resource(record: dict, task_id: str, reason: str, elapsed: float) -> Outcome:
-    """While a run drains, the operator's recorded evidence settles an unresolved slot; the charge stays."""
+def settle_resource(record: dict, task_id: str, statement: str, elapsed: float) -> Outcome:
+    """Record the operator's statement on unresolved or revoked work, while active or draining (G9, X25).
+
+    It goes into the event (``basis: operator-statement``) and the reason; it never releases anything."""
     task = task_of(record, task_id)
-    if record['status'] != 'draining':
-        raise TaskRefused('Unresolved work is settled only while the run drains; before that it keeps its slot')
-    if type(reason) is not str or not reason.strip():
-        raise ValueError("Settling an unresolved resource records the operator's evidence")
-    if not (task['state'] in TERMINAL and task['unresolved']):
-        raise TaskRefused(f'Task {task_id} is {task["state"]} with no unresolved resource to settle')
-    task.update(unresolved=False, reason=clip_text(f'{task["reason"]}; settled by the operator: {reason}'))
-    return Outcome(True, {'event': 'task-resource-settled', 'taskId': task_id, 'reason': clip_text(reason)},
-                   {'taskId': task_id, 'state': task['state'], 'unresolved': False})
+    if record['status'] not in ('active', 'draining'):
+        raise TaskRefused(f'Batch {record["batchId"]} is {record["status"]}: statements are recorded while it runs')
+    if type(statement) is not str or not statement.strip():
+        raise ValueError("Settling records the operator's statement")
+    if not (task['state'] in TERMINAL and task['unresolved'] or task['revoked']):
+        raise TaskRefused(f'Task {task_id} is {task["state"]} with no unresolved resource or revocation to settle')
+    task['reason'] = clip_text(f'{task["reason"] or task["state"]}; operator statement (not evidence): {statement}')
+    return Outcome(True, {'event': 'task-resource-settled', 'taskId': task_id, 'basis': 'operator-statement',
+                          'statement': clip_text(statement)},
+                   {'taskId': task_id, 'state': task['state'], 'unresolved': task['unresolved']})

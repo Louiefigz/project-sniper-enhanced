@@ -10,7 +10,8 @@ reserve. The room covers, each measured on the canonical encoding (escapes count
   and texts in encoded bytes, and a delivered path longer than ``DELIVERY_PATH_BYTES`` is refused,
   never cut;
 - every running technical section owner recording its bounded terminal failure;
-- the batch's own close, drain, hand-offs and clock observations.
+- the batch's own close, drain, hand-offs and clock observations, and its ``production.closure`` (M-043):
+  a widest row for every task the close could list, so a close always fits.
 
 So filling the record with other work (approvals, clips, bindings, launches) can never block a
 task outcome, a launch outcome, a supersession or the close. Known limit: an ``abandoned`` launch
@@ -24,7 +25,7 @@ import json
 from studio.native_budget_schema import AI_POLICY, BOUNDS, ROUTES
 from studio.production.formats import output_format
 from studio.production.host_contract import HOSTS, MAX_COUNT, MAX_PID, clip_text, encoded_length
-from studio.production.task_schema import MAX_TASK_OWNERS, TASK_KINDS, TASK_STATES, settled
+from studio.production.task_schema import MAX_TASK_OWNERS, TASK_KINDS, TASK_STATES, UNCLAIMED, settled
 
 WIDE_FLOAT = 1.2345678901234567e-300      # a valid seconds value with the longest float encoding (23 bytes)
 NEGATIVE_WIDE = -WIDE_FLOAT               # the longest encoding of any finite float (24 bytes)
@@ -161,15 +162,41 @@ def _family_room(family: dict) -> int:
     return children + max(0, len('awaiting-sections') - len(family['state']))
 
 
+def widest_closure_row() -> dict:
+    """One ``production.closure.unresolvedAtClose`` row with every field at its bound (M-043)."""
+    return {'taskId': 'T' * 64, 'kind': max(TASK_KINDS, key=len), 'state': max(TASK_STATES, key=len),
+            'host': max(HOSTS, key=len), 'hostProcess': {'pid': MAX_PID, 'pgid': MAX_PID, 'started': 's' * 64},
+            'reason': 'r' * 512}
+
+
+# The closure's fixed part (its quoted key and separating comma, closedElapsed, the empty list) and one row
+# with its separating comma, at their widest.
+CLOSURE_BASE_BYTES = encoded({'closedElapsed': WIDE_FLOAT, 'unresolvedAtClose': []}) + encoded('closure') + 2
+CLOSURE_ROW_BYTES = encoded(widest_closure_row()) + 1
+
+
+def _closure_room(record: dict) -> int:
+    """The widest ``production.closure`` this record can still write.
+
+    The close lists only tasks that are claimed and unsettled (live, or ended holding their slot): its freeze
+    cancels every unclaimed task, and a settled task never becomes unsettled again. A task becomes listable only
+    through its claim, which is room-checked, so its row is reserved before that claim commits.
+    """
+    listable = sum(1 for task in record['production']['tasks'].values()
+                   if task['state'] not in UNCLAIMED and not settled(task))
+    return CLOSURE_BASE_BYTES + listable * CLOSURE_ROW_BYTES
+
+
 def _lifecycle_room(record: dict) -> int:
-    """The batch's close, drain, clip hand-offs and clock observations at their widest."""
+    """The batch's close (with its closure), drain, clip hand-offs and clock observations at their widest."""
     if record['status'] == 'closed':
         return 0
     clock = {'boot': 'b' * 64, 'continuous': NEGATIVE_WIDE, 'epoch': NEGATIVE_WIDE, 'elapsed': WIDE_FLOAT}
     drain = {'startedElapsed': WIDE_FLOAT, 'reason': 'r' * 512}
     handoffs = sum(len('handed-off') - len(clip['state']) for clip in record['clips'].values())
     return max(0, encoded(clock) - encoded(record['clock'])) + max(0, encoded(drain) - encoded(
-        record['production']['drain'])) + encoded(WIDE_FLOAT) + len('draining') + max(0, handoffs)
+        record['production']['drain'])) + encoded(WIDE_FLOAT) + len('draining') + max(0, handoffs) \
+        + _closure_room(record)
 
 
 def settlement_reserve(record: dict) -> int:

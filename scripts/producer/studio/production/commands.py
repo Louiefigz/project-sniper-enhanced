@@ -236,9 +236,10 @@ def _handoff_delivery(record: dict, clip: dict, evidence: dict) -> dict:
 
 
 def cmd_close(args: argparse.Namespace) -> dict:
-    """Close when every clip is handed off or the deadline passed and all owned work settled; else drain.
+    """Close when every clip is handed off or the deadline passed, listing unresolved work in the closure; while
+    media work is live or a media launch runs, drain instead and run close again once it ends.
 
-    Nothing is released: a draining batch keeps its reservations; run close again once it settles.
+    Nothing is released: the closure and the host record keep the unresolved work's reservations (X25, X37).
     """
     result = api.close(store.default_root(), args.batch)
     record = read_batch(store.default_root(), args.batch)

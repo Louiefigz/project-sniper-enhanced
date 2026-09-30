@@ -165,6 +165,10 @@ class FieldRules(unittest.TestCase):
         self.refused(with_rows('audio', [event]), 'a1 asset must be a plan input')
         validate_plan_record({**with_rows('audio', [event]), 'inputs': [asset]})
 
+    def test_a_story_needs_a_beat(self) -> None:
+        """An empty story is refused by name."""
+        self.refused(with_rows('story', []), 'story: needs at least one beat')
+
     def test_catalog_overrides(self) -> None:
         """X9: planning is the only coordination cap here; the reserves and packet roles are §4.0.1/§4.0.8's."""
         self.assertEqual(COORDINATION_LIMITS, {'planning': 3})

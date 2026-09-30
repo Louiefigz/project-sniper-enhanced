@@ -66,7 +66,7 @@ ROWS = (
      planned(lambda plan: plan['canvas']['occurrences'][0].__setitem__(5, 'TEST!')), 'global', ALL),
     ('story', 'strategy.pacing.beats (native-short-pacing.ts:11)',
      planned(lambda plan: plan['strategy']['pacing']['beats'][1].update(reason='TEST other')), 'global', ALL),
-    ('holds', 'strategy.scenes[].holdFrames (native-short-strategy.ts:38-41)',
+    ('holds', 'strategy.scenes[].holdFrames (native-short-strategy.ts:40-43)',
      planned(lambda plan: plan['strategy']['scenes'][1].update(holdFrames=6)), 'local', SCENE),
     ('framing', 'canvas.pictureViews (native-short-composition.ts:44)',
      planned(lambda plan: plan['canvas']['pictureViews'][1].update(crop=[800, 0, 720, 1080])), 'local',
@@ -92,7 +92,7 @@ ROWS = (
      'local', GRAPHICS),
     ('graphics', 'visualSources.decisions (native-short-project.ts:35)',
      planned(lambda plan: plan['visualSources']['decisions'][0].update(item='TEST other')), 'local', GRAPHICS),
-    ('transitions', 'strategy.scenes boundary (native-short-strategy.ts:38-41)',
+    ('transitions', 'strategy.scenes boundary (native-short-strategy.ts:40-43)',
      planned(lambda plan: plan['strategy']['scenes'][0].update(exitReason='TEST other')), 'local', SCENE),
     ('audio', 'audioFinishing (native-short-project.ts:50; F-2)',
      planned(lambda plan: plan['audioFinishing']['audioEnhance'].update(preset='voice-rnn')), 'local',
@@ -159,6 +159,12 @@ class DerivationRows(PlanFixture):
         evidence = self.sealed_v2(lambda value: value['speakers']['intervals'][1].update(note='TEST heard again'))
         after = self.short_record(self.project(copy.deepcopy(self.plan), name='resealed', evidence=evidence))
         self.assertEqual(classify(self.record, after), 'local')
+        self.assertEqual(moved(self.record, after), frozenset({'source-speaker-fidelity'}))
+
+    def test_resealed_people_move_source_speaker_fidelity(self) -> None:
+        """A changed description of S2, the speaker of interval 1, moves source-speaker-fidelity only."""
+        evidence = self.sealed_v2(lambda value: value['speakers']['people'][1].update(description='TEST person S2 again'))
+        after = self.short_record(self.project(copy.deepcopy(self.plan), name='people', evidence=evidence))
         self.assertEqual(moved(self.record, after), frozenset({'source-speaker-fidelity'}))
 
     def test_without_regions_a_composition_change_is_global(self) -> None:

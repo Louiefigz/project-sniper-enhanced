@@ -60,6 +60,15 @@ class Slices(PlanFixture):
         self.assertEqual(moved(self.record, after, narrow), set())
         self.assertEqual(moved(self.record, after, {**narrow, 'entryIds': ['view-1']}), {'source-speaker-fidelity'})
 
+    def test_an_unresolved_row_belongs_to_its_responsibility(self) -> None:
+        """A new evidence gap moves only the slice of the responsibility it names."""
+        gap = {'id': 'u1', 'responsibility': 'audio-dialogue', 'range': [0, 10], 'statement': 'TEST gap', 'blocks': 'none',
+               'decisionId': 'd1'}
+        after = {**self.record, 'unresolved': [gap]}
+        self.assertEqual(moved(self.record, after), {'audio-dialogue'})
+        self.assertEqual(changed_entries(self.record, after),
+                         [{'section': 'unresolved', 'id': 'u1', 'responsibility': 'audio-dialogue', 'range': [0, 10]}])
+
     def test_global_entry_changes_every_slice(self) -> None:
         """A global graphics entry (an unlisted canvas key) moves every responsibility's slice."""
         plan = copy.deepcopy(self.plan)

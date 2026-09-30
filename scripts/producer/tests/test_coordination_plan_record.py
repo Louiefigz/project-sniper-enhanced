@@ -279,6 +279,15 @@ class Homes(Case):
         Path(self.homes['nativePlan']['path']).write_text('{}')
         self.assertIn('Coordination plan: homes', homes_problem(self.record))
 
+    def test_derivation_refuses_an_unpinned_regions_file(self) -> None:
+        """``short_sections`` itself refuses homes that leave an existing REVIEW-REGIONS.json unpinned."""
+        with self.assertRaisesRegex(ValueError, 'Coordination plan: derived: regions must be pinned exactly'):
+            short_sections({**self.homes, 'regions': None})
+
+    def test_a_short_has_no_sections(self) -> None:
+        """Long sections on a Short record are refused."""
+        self.refused({**self.record, 'sections': [{'id': 'A', 'range': [0, 60]}]}, 'a Short has no sections')
+
     def test_home_shape_is_checked(self) -> None:
         """The native plan must be <project>/SHORT-PROJECT.json and a Short pins no Long chunks."""
         other = {**self.homes, 'nativePlan': {**self.homes['nativePlan'], 'path': self.homes['project'] + '/OTHER.json'}}

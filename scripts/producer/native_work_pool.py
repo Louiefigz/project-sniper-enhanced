@@ -12,7 +12,8 @@ waiting can help (NativeWorkQueued, message contains 'already active') or not
 covers the mix). Nothing here sleeps except acquire_until, which is bounded by the
 caller's monotonic deadline. Budget derivation: native_work_pool_policy.py.
 Disk is charged per shared space, an APFS container or one filesystem (native_work_pool_disk.py);
-a running member grows its reservation with native_work_pool_expand.expand_disk.
+a running member grows its reservation with native_work_pool_expand.expand_disk. Whether a wait
+earns Short credit is native_work_pool_credit.py: it only annotates the decision's context.
 """
 from __future__ import annotations
 
@@ -21,6 +22,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import native_work_lease as lease_module
+import native_work_pool_credit as credit
 import native_work_pool_disk as disk
 import native_work_pool_fence as fence
 import native_work_pool_mix as mix
@@ -102,6 +104,7 @@ class Decision:
     unsupported: list = field(default_factory=list)
     fence: list = field(default_factory=list)
     context: dict = field(default_factory=dict)
+    lane: str = ''  # the request's class; native_work_pool_credit credits only 'heavy'
 
 
 def _member_charges(view: state.PoolView, physical: int) -> list[dict]:
@@ -162,9 +165,34 @@ def _slot_reasons(decision: Decision, rows: list[dict], lane: str) -> None:
         decision.reasons.append(f'all {capacity} {lane} slot(s) are occupied')
 
 
+def _reason_groups(view: state.PoolView, request: PoolRequest, decision: Decision, context: tuple) -> dict:
+    """Append the session, legacy, slot, memory and disk reasons in that order; return them by source.
+
+    `context` is (the valid qualification session or None, the charged member rows, physical RAM).
+    Disk and session reasons are never credited, so they share the 'other' group
+    (native_work_pool_credit.ReasonGroups). Others' disk bytes in the same space are spent.
+    """
+    session, rows, physical = context
+    groups = {'other': ['a pool qualification session is running its declared jobs']
+              if session and decision.mode.name != 'qualification-session' else [],
+              'legacy': ['legacy exclusive heavy work is running'] if view.legacy_active else []}
+    decision.reasons += groups['other'] + groups['legacy']
+    steps = (('slot', lambda: _slot_reasons(decision, rows, request.lane)),
+             ('memory', lambda: _memory_reasons(decision, rows, physical)),
+             ('other', lambda: disk.admission(decision, rows, request.root or request.project)))
+    for name, step in steps:
+        prior = len(decision.reasons)
+        step()
+        groups[name] = [*groups.get(name, []), *decision.reasons[prior:]]
+    return {name: tuple(reasons) for name, reasons in groups.items()}
+
+
 def decide(view: state.PoolView, request: PoolRequest, host: dict,
            committed: qualification.Committed) -> Decision:
-    """Apply profile, queue order, slots, aggregate memory and shared disk to one request."""
+    """Apply profile, queue order, slots, aggregate memory and shared disk to one request.
+
+    native_work_pool_credit.classify then records whether the wait is credited; it changes no reason.
+    """
     physical = host['memsizeBytes']
     session = mix.session_of(view, host)
     rows = _member_charges(view, physical)
@@ -173,23 +201,10 @@ def decide(view: state.PoolView, request: PoolRequest, host: dict,
     mode, outside = mix.request_mode(session, committed, row, mix.members(readable))
     decision = Decision(mode, policy.reservation_bytes(mode, request.lane, physical, request.fixed_owned_gib),
                         request.disk_bytes if request.disk_bytes is not None
-                        else DISK_RESERVATION_BYTES[request.lane], 0)
-    capacity_reasons = []
-    if session and mode.name != 'qualification-session':
-        decision.reasons.append('a pool qualification session is running its declared jobs')
-    if view.legacy_active:
-        decision.reasons.append('legacy exclusive heavy work is running')
-        capacity_reasons.append(decision.reasons[-1])
+                        else DISK_RESERVATION_BYTES[request.lane], 0, lane=request.lane)
     decision.unsupported, terminal = mix.problems(mode, readable, outside, request.ticket)
     decision.terminal += terminal
-    prior = len(decision.reasons)
-    _slot_reasons(decision, rows, request.lane)
-    capacity_reasons.extend(decision.reasons[prior:])
-    prior = len(decision.reasons)
-    _memory_reasons(decision, rows, physical)
-    if rows and all(row['class'] == 'heavy' and not row['quarantined'] for row in rows):
-        capacity_reasons.extend(decision.reasons[prior:])
-    disk.admission(decision, rows, request.root or request.project)  # others' bytes in the same space are spent
+    groups = _reason_groups(view, request, decision, (session, rows, physical))
     requested = (*request.fence_reasons, *disk.fence_reasons(decision.space))
     decision.fence = fence.reasons_for(mode, requested) if committed.legacy_qualified else []
     # Older clients read reservationBytes: an exclusive or fenced member fills their budget, so none
@@ -199,11 +214,8 @@ def decide(view: state.PoolView, request: PoolRequest, host: dict,
     fenced = bool(decision.fence or request.fence_tickets)
     fifo = mix.fifo_reasons(view, request, mode, (session, committed, fenced))
     decision.reasons += fifo
-    capacity_reasons += fifo
-    decision.context['capacityOnly'] = (request.lane == 'heavy' and bool(capacity_reasons)
-                                       and decision.context['occupied'] > 0
-                                       and decision.reasons == capacity_reasons
-                                       and not decision.terminal and not decision.unsupported)
+    credit.classify(decision, _occupancy(rows, mode, request.lane), credit.ReasonGroups(fifo=tuple(fifo), **groups))
+    decision.context['ticket'] = request.sequence
     return decision
 
 

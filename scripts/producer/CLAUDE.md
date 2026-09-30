@@ -1268,3 +1268,11 @@ docs belong to P3b.
   but not completed (a completed turn only lacks slot evidence). `production/director_activity.py` records the
   director's own declaration (`director-activity --clip ID|--all --state working|idle`, in `queue_commands`;
   `api.declare_director_activity`); it is declared, never observed. Tests: `test_queue_clock_v2_b.py`.
+- **Which pool waits are capacity waits (M-046; C5).** `native_work_pool.decide` groups its waitable reasons by
+  source (`_reason_groups`, the order unchanged) and calls `native_work_pool_credit.classify`, which only annotates
+  `decision.context` (`liveOccupied`, `liveFull`, `occupants`, `waitClass`, `capacityOnly`); no reason, refusal or
+  admission changes. A heavy wait is credited only while live occupancy fills its slots, or beside a mix or legacy
+  exclusive member; FIFO-only, quarantine-only and free-slot memory waits, disk and the qualification session never
+  are. Until M-049 the owner loop reads only `capacityOnly` (through `native_work_pool_fence.refusal`), so those
+  uncredited waits no longer extend the deadline, and a full-slot memory wait beside an audio member now does.
+  Tests: `test_native_work_pool_credit.py`.

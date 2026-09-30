@@ -35,7 +35,13 @@ declares otherwise: `director-activity --batch SESSION --task DIRECTOR --epoch N
 authors or reviews itself. That declaration is the director's own claim, never an
 observation. Unknown host pressure, disk
 pressure, unsupported mixes, quarantined cleanup and missing heartbeats earn no
-credit. Forecast queue delays do not themselves earn credit.
+credit. Forecast queue delays do not themselves earn credit. The pool marks
+which of its waits are for occupied capacity (`native_work_pool_credit.py`): a
+heavy render's wait counts only while every live heavy slot is occupied, or
+while a live exclusive, out-of-profile or older-engine exclusive member holds
+the pool. Queue order or memory while a live slot is free, slots quarantined
+for unverified cleanup, disk headroom, a qualification session and audio-class
+work earn nothing.
 
 The clock, launch allocations, task deadlines and status use the same settled
 credit. Owners retain their independent active-work limits and cleanup reserve.

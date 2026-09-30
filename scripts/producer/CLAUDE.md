@@ -1293,3 +1293,8 @@ docs belong to P3b.
   `orphanedWorkers`. A dead waiting row is ended even while its old process group lives (it launched nothing).
   `queue_clock.settle_task_workers` makes pending uncertain only when no waiting owner remains in the clip. Tests:
   `test_queue_clock_v2_d.py`.
+- **The owner's wait extends only by settled credit (M-049; C3).** `native_run_admission.attempt_pool_admission`
+  adds only `pool_observation`'s settled-credit delta to `until`; the former +4 s extension for a capacity-only
+  refusal (`native_queue_accounting.waiting_for_capacity`) is gone. An uncredited wait (other work of the Short, or
+  a wait that is not capacity) ends after `capacity_wait_seconds` (at most 600 s) as `capacity-timeout`. This ends
+  M-046's interim reading of `capacityOnly` in the owner loop. Tests: `test_native_queue_accounting_waits.py`.

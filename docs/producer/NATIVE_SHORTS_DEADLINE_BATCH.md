@@ -44,7 +44,10 @@ for unverified cleanup, disk headroom, a qualification session and audio-class
 work earn nothing.
 
 The clock, launch allocations, task deadlines and status use the same settled
-credit. Owners retain their independent active-work limits and cleanup reserve.
+credit. A render owner waiting for the pool extends its own wait only by that
+settled credit: a wait that earns none (other work of the Short runs, or the
+wait is not for occupied capacity) ends after the owner's capacity patience (at
+most 600 seconds) with `capacity-timeout`. Owners retain their independent active-work limits and cleanup reserve.
 Retries and changed approval records preserve already spent time and counters.
 Long outputs and older saved Short authorizations retain their existing clock
 policy. A Long never borrows a Short's queue credit.

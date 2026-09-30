@@ -84,8 +84,3 @@ def finish_owner(owner: NativeRun) -> None:
     """Remove the owner; termination alone cannot certify its last queue interval."""
     for context in [owner.capacity_context, *getattr(owner, 'supporting_contexts', [])]:
         record_observation(context, 'finished', ('native-owner', 'owner finished'))
-
-
-def waiting_for_capacity(owner: NativeRun, error: Exception) -> bool:
-    """Only a bound Short waiting solely on occupied heavy slots may extend its wait."""
-    return owner.capacity_context is not None and getattr(error, 'capacity_only', False) is True

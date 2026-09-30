@@ -143,16 +143,20 @@ def join_queue(owner: NativeRun, until: float) -> None:
 
 
 def attempt_pool_admission(owner: NativeRun, request: PoolRequest, until: float) -> float:
-    """Temporary occupancy waits; uncertain cleanup and unsupported work fail closed."""
-    from studio.native_queue_accounting import pool_observation, waiting_for_capacity
+    """Temporary occupancy waits; uncertain cleanup and unsupported work fail closed.
+
+    The wait is extended only by the Short's settled credit (``pool_observation``, C3): ``until`` is the owner's
+    ``capacity_wait_seconds`` patience plus the credit its batch settled while it waited. A wait that earns no
+    credit (other work of the Short ran, or the pool evidence was not capacity) ends after that patience as
+    "Admission refused" (``capacity-timeout``).
+    """
+    from studio.native_queue_accounting import pool_observation
     try:
         owner.lease = _acquire(owner, request, until)
         until += pool_observation(owner, None)
         require_production_time(owner)
     except NativeWorkBusy as error:
         until += pool_observation(owner, error)
-        if waiting_for_capacity(owner, error):
-            until = max(until, time.monotonic() + 4.0)
         request.until = until
         if 'already active' not in str(error):
             record_pool_refusal(owner, error)

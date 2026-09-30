@@ -20,17 +20,12 @@ import _contract_records as records
 # Frozen base-engine copies run with their own directory first on sys.path (tests/fixtures/base_pool_driver.py),
 # so the tree-wide index would resolve their imports to the live modules; they are not audited.
 FROZEN = ('tests/fixtures/base_pool_4a15560/', 'tests/fixtures/base_pool_driver.py')
-C6 = 'follow-up after Phase 0 (C-6)'
+# The two C-6 rows (test_transitions_ban.py:70 and speech_cleanup.py:84) were fixed at M-040 (FOLLOWUP-C6).
 KNOWN_ATTRIBUTES = {
-    'tests/test_transitions_ban.py:70 motion.transitions_xfade is not defined':
-        (C6, 'the test asserts the xfade module stays deleted (pre-existing at add8f82c)'),
     'tests/test_native_short_regions.py:117 studio.native_preview_sections.planned_preview_workload is not defined':
         ('P4', "pending('P4') workload hook with no production caller (NOT-PORTED; M-121a)"),
 }
-KNOWN_CALLS = {
-    "edit/speech_cleanup.py:84 edit.apply_pauses.cut_track_from_pauses: unknown keyword ['retakes']":
-        (C6, 'pre-existing at add8f82c; owner named in the master plan'),
-}
+KNOWN_CALLS: dict[str, tuple[str, str]] = {}
 
 
 def write(root: Path, name: str, text: str) -> None:

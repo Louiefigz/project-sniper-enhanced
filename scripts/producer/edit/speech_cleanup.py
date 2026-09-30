@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 
 import retake_scan
 from edit import pause_scan
-from edit.apply_pauses import cut_track_from_pauses, removed_seconds
+from edit.apply_pauses import CutOptions, cut_track_from_pauses, removed_seconds
 
 
 def emit(event: str, **fields) -> None:
@@ -82,7 +82,7 @@ def build_cut_track(src: dict, all_retakes: bool) -> dict:
          skippedNeedsOperator=len(retakes) - len(applied))
     window = (0.0, src["duration"])
     track = cut_track_from_pauses(pauses, src["id"], window,
-                                  retakes=applied)
+                                  CutOptions(retakes=applied))
     return {"cutTrack": track, "segments": len(track),
             "removedS": removed_seconds(track, window),
             "skippedRetakes": len(retakes) - len(applied)}

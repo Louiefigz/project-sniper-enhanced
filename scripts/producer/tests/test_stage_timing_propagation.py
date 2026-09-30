@@ -77,7 +77,9 @@ LAUNCH_LINEAGE = {
     "SNIPER_TIMING_TASK_ID": "task-clip-3", "SNIPER_TIMING_CLAIM_EPOCH": "7",
     "SNIPER_TIMING_HOST_TURN_ID": "turn-TEST-1",
 }
-CLOSED = {"PATH": "/usr/bin:/bin", "LC_ALL": "C", "TMPDIR": "/private/tmp",
+# PYTHONDONTWRITEBYTECODE keeps the owner's Python child in this TEST closed environment from writing bytecode
+# into the checkout (FOLLOWUP-C6 item 5; X154). It is an ordinary closed-environment entry, forwarded as-is.
+CLOSED = {"PATH": "/usr/bin:/bin", "LC_ALL": "C", "TMPDIR": "/private/tmp", "PYTHONDONTWRITEBYTECODE": "1",
           "SNIPER_TIMING_PARENT_SPAN_ID": "stale-config-parent", "SNIPER_TIMING_TASK_ID": "stale-task"}
 
 

@@ -7,6 +7,7 @@ MODULE_STUDY §2, EDITCRAFT_LESSONS §2.7). These tests pin the ban: any
 ``xfade:*`` kind is a hard ERROR
 in EVERY mode at the lint gate and a loud ValueError at the primitive.
 """
+import importlib.util
 import unittest
 
 from _common import *  # noqa: F401,F403
@@ -66,8 +67,9 @@ class XfadeBanPrimitiveTests(unittest.TestCase):
                 tr.parse_events([{"outTime": 2.0, "kind": kind}], 10.0)
 
     def test_xfade_module_is_deleted(self) -> None:
-        with self.assertRaises(ImportError):
-            import motion.transitions_xfade  # noqa: F401
+        # A spec lookup, not an import statement: the static attribute audit reads an import of a
+        # module that must not exist as a missing attribute (FOLLOWUP-C6 item 2).
+        self.assertIsNone(importlib.util.find_spec("motion.transitions_xfade"))
 
 
 if __name__ == "__main__":

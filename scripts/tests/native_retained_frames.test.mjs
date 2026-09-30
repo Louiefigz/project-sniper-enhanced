@@ -67,8 +67,8 @@ test('destination link cannot be overwritten or become a retained result',t=>{
 test('FIFO replacement refuses without blocking before the regular-file check',{skip:process.platform==='win32'},t=>{
   const f=fixture(t);fs.unlinkSync(f.row.path);
   const made=spawnSync('mkfifo',[f.row.path],{timeout:1000});assert.equal(made.status,0);
-  const module=new URL('../producer/studio/native_retained_frames.mjs',import.meta.url).href;
-  const script=`import assert from 'node:assert/strict';import {retainedFrameHash} from ${JSON.stringify(module)};
+  const moduleUrl=new URL('../producer/studio/native_retained_frames.mjs',import.meta.url).href;
+  const script=`import assert from 'node:assert/strict';import {retainedFrameHash} from ${JSON.stringify(moduleUrl)};
     assert.throws(()=>retainedFrameHash(process.argv[1],4096),/file contract/);`;
   const child=spawnSync(process.execPath,['--input-type=module','-e',script,f.row.path],{timeout:2000});
   assert.equal(child.error,undefined);assert.equal(child.status,0,child.stderr.toString());

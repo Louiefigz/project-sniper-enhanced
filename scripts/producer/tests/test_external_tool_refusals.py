@@ -17,7 +17,22 @@ from unittest import mock
 PRODUCER = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PRODUCER))
 
+import _live_state_isolation  # noqa: F401,E402  arms this process's Python children (T0 child tripwire)
+import _live_state_children as children  # noqa: E402
 from study import fetch_reference, study_deep  # noqa: E402
+
+# Test-harness variables only (no product code reads them): the child tripwire's refused prefixes and reports
+# folder, and no bytecode written into the checkout (FOLLOWUP-C6 item 4; X154).
+HARNESS = ("PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX", children.CONFIG, children.REPORTS)
+
+
+def clean_mac_environment(path: Path, home: Path) -> dict[str, str]:
+    """PATH and HOME only, as on a clean Mac, plus the harness arming (the tripwire first on PYTHONPATH)."""
+    environ = {"PATH": str(path), "HOME": str(home), "PYTHONPATH": children.CHILD_TRIPWIRE}
+    environ.update({key: os.environ[key] for key in HARNESS})  # a KeyError means this process is not armed
+    if children.CURRENT in os.environ:  # names the running test in a refused child's report
+        environ[children.CURRENT] = os.environ[children.CURRENT]
+    return environ
 
 
 class MissingToolTests(unittest.TestCase):
@@ -47,7 +62,7 @@ class MissingToolTests(unittest.TestCase):
         video.write_bytes(b"not decoded: the refusal comes first")
         done = subprocess.run([sys.executable, str(PRODUCER / "study/study_deep.py"), str(video),
                                str(self.tmp / "out")], capture_output=True, text=True, timeout=120,
-                              env={"PATH": str(self.empty_bin), "HOME": str(self.tmp)}, check=False)
+                              env=clean_mac_environment(self.empty_bin, self.tmp), check=False)
         events = [json.loads(line) for line in done.stdout.splitlines() if line.startswith("{")]
         self.assertEqual(done.returncode, 1)
         self.assertTrue(any("run install/install.command" in str(e.get("error", "")) for e in events), done.stdout)

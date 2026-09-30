@@ -23,10 +23,12 @@ what passed; it approves nothing and is not a review.
 from __future__ import annotations
 
 import hashlib
+import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from cut_preview_io import read_bytes
 from role_packet_catalog import REPAIR_START_MARGIN_SECONDS, RECEIPT_CHECKS, REVIEW_BUDGETS
 from role_packet_files import ArtifactError, artifact, canonical_directory, canonical_file, read_json
 from role_packet_native import plan_hash
@@ -34,7 +36,7 @@ from studio.production.formats import clip_deadlines
 
 EARLY_SCOPE, EARLY_PASS, EARLY_SCHEMA = "native-short-early-defect-report", "no-early-defects-found", 2
 BUILD_SCOPE, BUILD_PASS = "native-short-review-project", "passed"
-PLAN_FILE, MANIFEST = "SHORT-PROJECT.json", "PROJECT-MANIFEST.json"
+PLAN_FILE, MANIFEST, MAX_PLAN_BYTES = "SHORT-PROJECT.json", "PROJECT-MANIFEST.json", 16 * 1024 * 1024
 RECEIPT_WHY = {"early-report": "Passing early report (static preflight, reveal probe) of the built project.",
                "build": "Built project's manifest: the build's structural checks passed for this plan hash."}
 
@@ -69,7 +71,8 @@ def budget_terms(repair: bool) -> dict:
     """The budget terms a plan-critic packet carries; its deadlines are recorded at its resolution (batch only)."""
     kind = "plan-critic-repair" if repair else "plan-critic"
     return {"kind": kind, **REVIEW_BUDGETS[kind], "repairStartMarginSeconds": REPAIR_START_MARGIN_SECONDS,
-            "deadlines": "recorded on the packet-resolved event (context.py --role batchClock.budget; --given-check budget)"}
+            "deadlines": "recorded on the packet-resolved event (context.py --role: batchClock.budget; "
+                         "--given-check: budget)"}
 
 
 def resolution_budget(clip: str, terms: dict) -> Callable[[dict, float], dict]:
@@ -83,10 +86,10 @@ def project_plan_hash(project: Path) -> str:
     manifest = read_json(project / MANIFEST)
     rows = [row.get("sha256") for row in manifest.get("files") or []
             if isinstance(row, dict) and row.get("file") == PLAN_FILE]
-    raw = (project / PLAN_FILE).read_bytes()
+    raw = read_bytes(project / PLAN_FILE, MAX_PLAN_BYTES)   # one no-follow read: the hashed bytes are the parsed ones
     if manifest.get("scope") != BUILD_SCOPE or rows != [hashlib.sha256(raw).hexdigest()]:
         raise ArtifactError(f"{project} is not a built native Short project whose manifest binds its {PLAN_FILE}")
-    return plan_hash(read_json(project / PLAN_FILE))
+    return plan_hash(json.loads(raw))
 
 
 def receipt_row(path: str, wanted: str) -> dict:

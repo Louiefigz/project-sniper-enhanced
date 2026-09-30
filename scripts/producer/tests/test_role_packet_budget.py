@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import contextlib
+import io
 import json
 import unittest
 from pathlib import Path
@@ -59,6 +61,9 @@ class BudgetTests(unittest.TestCase):
         """Outside a batch there is no clock and no deadline; an unbudgeted role is refused by name."""
         self.assertEqual(plan_budget(None), {'kind': 'plan-critic', 'status': 'unbatched', 'resolvedElapsed': None,
                                             'earlyBy': None, 'hardBy': None})
+        for clip, resolved in ((None, 100.0), ('A', None)):   # no clip or no resolution: no batch clock to budget on
+            self.assertEqual(review_budget(BudgetRequest('plan-critic', record(), clip, resolved, False))['status'],
+                             'unbatched')
         with self.assertRaisesRegex(ArtifactError, 'no review budget is defined for motion-critic'):
             review_budget(BudgetRequest('motion-critic', None, None, None, False))
 
@@ -173,6 +178,20 @@ class PacketReceiptTests(ReceiptFixture):
         with self.assertRaisesRegex(ArtifactError, '--receipt binds a plan'):
             resolve_role_packet(RoleRequest(role='clip-owner', project=str(self.root / 'clip'),
                                             receipts=(str(report), str(manifest))), REPO)
+        with self.assertRaisesRegex(ArtifactError, '--receipt binds a plan'):   # a final critic's parts carry a plan
+            budget.review_inputs('final-critic', (str(report), str(manifest)), None, json.loads(self.planned.read_text()))
+
+    def test_context_role_takes_repeated_receipts(self) -> None:
+        """`context.py --role plan-critic --receipt A --receipt B` binds both; one receipt exits 2 with the reason."""
+        manifest, report = self.built()
+        output, errors = io.StringIO(), io.StringIO()
+        argv = ['--role', 'plan-critic', '--plan', str(self.planned), '--format', 'json', '--receipt', str(report)]
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(entry.main([*argv, '--receipt', str(manifest)]), 0)
+        self.assertEqual(len(json.loads(output.getvalue())['packet']['mechanicalReceipts']), 2)
+        with contextlib.redirect_stderr(errors):
+            self.assertEqual(entry.main(argv), 2)
+        self.assertIn('exactly one early report and one build receipt', json.loads(errors.getvalue())['error'])
 
 
 if __name__ == '__main__':

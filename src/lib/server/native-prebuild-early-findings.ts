@@ -40,11 +40,17 @@ export interface EarlyEvent { index: number; issuesSha256: string; issues: numbe
 /** Whether a final plan record came after its packet's budget, and on what basis. */
 export interface ReviewLateness { late: boolean; lateBasis: "budget" | "clock-unknown"; hardBy: number | null }
 
+/** The context.py arguments that record one early record on its packet's batch clock. */
+export function earlyFindingsArguments(packetPath: string, issuesSha256: string, counts: { issues: number; index: number },
+  elapsed: number): string[] {
+  return ["--review-early-findings", packetPath, "--issues-sha256", issuesSha256, "--issues", String(counts.issues),
+    "--early-index", String(counts.index), "--submitted-elapsed", String(elapsed)];
+}
+
 /** The engine command that records an early record on the batch trail; tests replace it with a TEST double. */
 export const earlyFindingsCheck = {
   record: (packetPath: string, issuesSha256: string, counts: { issues: number; index: number }, elapsed: number): JsonRecord =>
-    givenCheckReport(pythonInterpreter(), ["-B", CONTEXT, "--review-early-findings", packetPath, "--issues-sha256",
-      issuesSha256, "--issues", String(counts.issues), "--early-index", String(counts.index), "--submitted-elapsed", String(elapsed)]),
+    givenCheckReport(pythonInterpreter(), ["-B", CONTEXT, ...earlyFindingsArguments(packetPath, issuesSha256, counts, elapsed)]),
 };
 
 /** The packet's own JSON (budget, submission paths), read again and bound to the bytes the packet was verified as. */

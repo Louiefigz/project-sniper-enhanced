@@ -155,10 +155,10 @@
                 "reasoningTokens": null
               },
               "knownPartial": {
-                "inputTokens": 0,
-                "cachedInputTokens": 0,
-                "outputTokens": 0,
-                "reasoningTokens": 0
+                "inputTokens": 412300,
+                "cachedInputTokens": 350120,
+                "outputTokens": 9870,
+                "reasoningTokens": 2400
               },
               "unknownBecause": [
                 "1 host task(s) have no transcript record"

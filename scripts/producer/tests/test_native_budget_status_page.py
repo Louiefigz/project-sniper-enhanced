@@ -28,11 +28,11 @@ EPOCH = 1_800_001_265.4
 HOSTILE = '<script>alert(1)</script> & "q" \'s\''
 ESCAPED = '&lt;script&gt;alert(1)&lt;/script&gt; &amp; &quot;q&quot; &#x27;s&#x27;'
 CODE = {'.py', '.mjs', '.cjs', '.js', '.ts', '.tsx', '.sh'}
-SKIPPED = {'node_modules', '.git', '__pycache__'}
-# The only code that names the page module or its marker. M-111 stage B adds studio/production/coordination_cli.py
-# (it registers status-page and writes pages; it never reads one).
+SKIPPED = {'node_modules', '.git', '__pycache__', 'tests', '__tests__'}   # tests are not engine code (review n5)
+# The only engine code that names the page module or its marker: the renderer and the writer. M-111 stage B adds
+# studio/production/coordination_cli.py (it registers status-page and writes pages; it never reads one).
 PAGE_CODE = {'scripts/producer/studio/native_budget_status_page.py',
-             'scripts/producer/tests/test_native_budget_status_page.py'}
+             'scripts/producer/studio/native_budget_status_page_write.py'}
 
 
 def names_the_page(path: Path) -> bool:
@@ -101,7 +101,9 @@ class RenderTests(unittest.TestCase):
         page = render_page(read, stamp(banner=HOSTILE, batch=HOSTILE))
         self.assertEqual(page.count('<script>'), 1)   # the STALE script only
         self.assertNotIn('alert(1)</script>', page)
-        self.assertEqual(page.count(ESCAPED), 16)   # every injected field, each escaped
+        self.assertEqual(page.count(ESCAPED), 15)   # every injected field that prints, each escaped
+        note = 'Identities are declared by the coordinator, not authenticated.'
+        self.assertEqual(page.count(note), 2)   # the constant on both cards, not the status's identityNote
 
     def test_unknown_renders_unknown(self) -> None:
         """None prints "unknown" in the clock, the chips, the compact line and the token table."""
@@ -111,7 +113,7 @@ class RenderTests(unittest.TestCase):
         block['compact']['queue'] = block['nextAction'] = None
         block['review']['ready'] = block['review']['shown'] = None
         page = render_page(read, stamp())
-        self.assertIn('counted unknown of unknown, 25:55 left</div><div class="bar counted" title="unknown">', page)
+        self.assertIn('counted unknown of unknown, 25:55 left</div><div class="small">excluded', page)   # no bar drawn
         self.assertIn('(+unknown uncertain)', page)
         self.assertIn('queue unknown ·', page)
         self.assertIn('Ready: unknown</li><li>Shown: unknown</li>', page)
@@ -228,7 +230,8 @@ class WriteTests(unittest.TestCase):
         write_page(target, self.page)
         newer = render_page(status(), stamp(watch=True))
         for name in ('replace', 'fsync'):
-            failing = mock.patch(f'studio.native_budget_status_page.os.{name}', side_effect=OSError(28, 'disk full'))
+            failing = mock.patch(f'studio.native_budget_status_page_write.os.{name}',
+                                 side_effect=OSError(28, 'disk full'))
             with self.subTest(failing=name), failing, self.assertRaises(OSError):
                 write_page(target, newer)
             self.assertEqual((target.read_text(), self.leftovers()), (self.page, []))
@@ -238,7 +241,7 @@ class NoReaderTests(unittest.TestCase):
     """The page is never a second source of truth: no code but the writer names its module or its marker."""
 
     def test_no_engine_code_reads_status_pages(self) -> None:
-        """Only the writer and this test name the page module or its marker."""
+        """Only the renderer and the writer name the page module or its marker; tests are not engine code."""
         code = [path for top in ('scripts', 'src') for path in (REPOSITORY / top).rglob('*')
                 if path.suffix in CODE and not SKIPPED.intersection(path.parts) and path.is_file()]
         found = {path.relative_to(REPOSITORY).as_posix() for path in code if names_the_page(path)}

@@ -90,6 +90,8 @@ BANNERS = {
     'error': 'The budget authority could not be read at {utc}: {error}. Below is the last good snapshot, from {last}.',
 }
 
+DECLARED_NOTE = 'Identities are declared by the coordinator, not authenticated.'   # P3a roster.DECLARED (P3b-13)
+THREAD_KNOWN = {True: 'declared', False: 'not declared', None: 'unknown'}
 PLAYED_BASIS = {'player-observed-playing': 'player observed playing (not proof a person watched)',
                 'declared-by-reviewer': 'declared by the reviewer, not authenticated', 'none': 'none'}
 VERDICTS = {'approved': 'approved', 'not-approved': 'not approved',

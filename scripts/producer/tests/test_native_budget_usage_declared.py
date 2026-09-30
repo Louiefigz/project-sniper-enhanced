@@ -13,8 +13,8 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import agent_usage
 from _budget_fixture import FINGERPRINT
 from _status_fixture import batch_record, record_usage, run_task, temporary_directory, usage
-from studio.native_budget_identity_links import (NO_HOST_THREAD, NO_ROLLOUT, SUBAGENT_RULES, link_key,
-                                                 unlinked_reason, unlinked_reasons)
+from studio.native_budget_identity_links import (NO_HOST_THREAD, NO_ROLLOUT, SUBAGENT_RULES, link_key, link_reasons,
+                                                 unlinked_reason)
 from studio.native_budget_schema import validate_record
 from studio.native_budget_usage import ai_usage, authority_usage, transcript_usage
 from studio.production import claims, host_contract
@@ -207,7 +207,8 @@ class CodexLinkTests(DeclaredCase):
         self.assertEqual(found['threads'], {
             'TEST-sub-1': {'parent': DIRECTOR_THREAD, 'agentPath': '/root/a'},
             'TEST-root': {'parent': None, 'agentPath': None},
-            'TEST-sub-2': {'parent': None, 'agentPath': None}})   # its two files disagree: it names neither
+            'TEST-sub-2': {'parent': None, 'agentPath': None,   # its two files disagree: it names neither
+                           'disagree': [[DIRECTOR_THREAD, '/root/b'], [DIRECTOR_THREAD, '/root/c']]}})
 
     def directors(self) -> list[dict]:
         """This batch's one declared director row."""
@@ -253,14 +254,14 @@ class LinkRuleTests(unittest.TestCase):
         agent = subagent_handle(self.DIRECTOR, '/root/author_a', LAUNCHES[0])
         threads = {'TEST-sub-1': {'parent': DIRECTOR_THREAD, 'agentPath': '/root/author_a'}}
         row = {'id': 'director', 'handle': self.DIRECTOR}
-        other = {'id': 'director-2', 'handle': director_handle('codex', 's-00000000000000b2', DIRECTOR_THREAD, 3)}
+        other = {'id': 'director-2', 'handle': director_handle('codex', 's-00000000000000b2', 'TEST-other-thread', 3)}
         self.assertEqual(link_key(agent, [other, row], threads), ('codex', 'TEST-sub-1', '*'))
         self.assertEqual(unlinked_reason(agent, [other], threads), f'0 declared director rows name session {SESSION}')
         self.assertEqual(unlinked_reason(agent, [row, dict(row)], threads),
                          f'2 declared director rows name session {SESSION}')
         tasks = [{'id': 't1', 'handle': agent}, {'id': 't2', 'handle': {**agent, 'launch': LAUNCHES[1]}},
                  {'id': 't3', 'handle': None}]
-        self.assertEqual(unlinked_reasons(tasks, [], threads), [f'0 declared director rows name session {SESSION}'])
+        self.assertEqual(link_reasons(tasks, [], threads), [f'0 declared director rows name session {SESSION}'])
 
     def test_every_host_has_a_subagent_rule(self) -> None:
         """Every host the contract knows has exactly one subagent link rule."""

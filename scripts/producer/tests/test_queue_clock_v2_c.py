@@ -161,7 +161,7 @@ class CheckpointTests(unittest.TestCase):
             for _ in range(60):
                 now[0] += 5.0
                 observation = {'state': 'waiting', 'resource': 'heavy-pool', 'evidence': '{}', **evidence}
-                queue_authority._observe_locked(session, context, observation, {})
+                queue_authority._observe_locked(session, context, observation, queue_authority.Recovery({}, {}))
         names = [event['event'] for event in session.trail]
         clock = session.record['clips']['A']['capacityClock']
         self.assertEqual((names.count('capacity-checkpoint'), clock['checkpoint']['count']), (32, 32))

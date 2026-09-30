@@ -103,7 +103,11 @@ excluded render queue and uncertain intervals, with current forecasts and SLA
 misses. Excluded time is bound to evidence: only the owner process that
 registered a wait records it, and a wait earns credit only when it names its
 pool ticket and the live members it waits behind; any other wait is counted as
-uncertain. Every 300 credited seconds (at most 32 times per Short) the trail
+uncertain. An owner whose process is gone while it worked is moved to the
+clock's `orphans` (its children may still run, so its interval is counted as
+uncertain); it no longer counts as the Short's work or toward the owner limit.
+A waiting owner whose process is gone is simply removed: it launched nothing.
+Every 300 credited seconds (at most 32 times per Short) the trail
 gets a `capacity-checkpoint`, and `status` checks each Short's credit against
 its trail (`capacityAudit`; per output `creditVerified`: false for a total the
 trail cannot account for). This detects a hand-edited record, not a writer who

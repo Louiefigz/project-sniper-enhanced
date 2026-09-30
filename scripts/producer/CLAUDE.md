@@ -1286,3 +1286,10 @@ docs belong to P3b.
   the clip's observed time; `cmd_status` adds `capacityAudit` and `clip_status` its `creditVerified` (the audit is
   passed in through `native_budget_status.StatusInputs.audit`). Unkeyed: a writer who rewrites record and trail
   together is not detected. Tests: `test_queue_clock_v2_c.py`, `test_native_work_pool_credit.EvidenceTests`.
+- **Orphans and dead waiters (M-048; C7, P3, P6).** `queue_authority.recovery_evidence` returns `Recovery(ended,
+  orphaned)`: a working row of this boot whose recorded supervisor no longer runs (PID, start and group compared)
+  is orphaned; `recover_workers` moves it to a v2 clock's `orphans` (`count`, the last 16 rows with
+  `orphanedElapsed`; a v1 clock keeps it) and makes the pending interval uncertain, and the observation event lists
+  `orphanedWorkers`. A dead waiting row is ended even while its old process group lives (it launched nothing).
+  `queue_clock.settle_task_workers` makes pending uncertain only when no waiting owner remains in the clip. Tests:
+  `test_queue_clock_v2_d.py`.

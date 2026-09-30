@@ -14,7 +14,7 @@ from pathlib import Path
 import subprocess
 
 from studio.production import queue_clock
-from studio.production.queue_clock_schema import MAX_CHECKPOINTS, number
+from studio.production.queue_clock_schema import MAX_CHECKPOINTS, MAX_ORPHAN_ROWS, number
 
 CHECKPOINT_SECONDS = 300.0
 
@@ -121,8 +121,8 @@ def record_observation(context: dict | None, state: str, evidence: tuple[str, st
         return _observe_locked(session, context, observation, recovered)
 
 
-def _observe_locked(session: object, context: dict, observation: dict, recovered: dict) -> float:
-    """Inside the batch lock: recover proved-ended owners, settle this observation, commit it and its trail event.
+def _observe_locked(session: object, context: dict, observation: dict, recovered: Recovery) -> float:
+    """Inside the batch lock: recover ended and orphaned owners, settle this observation, commit it and its event.
 
     A same-state heartbeat writes no trail event, except the one that brings the Short's credit
     ``CHECKPOINT_SECONDS`` past its last checkpoint (``capacity-checkpoint``, while fewer than ``MAX_CHECKPOINTS``).
@@ -131,10 +131,10 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     record = session.read()
     elapsed = advance_clock(record)
     clip_id, state = context['clipId'], observation['state']
-    removed = recover_workers(record, clip_id, recovered)
+    removed, orphaned = recover_workers(record, clip_id, recovered, elapsed)
     clip = record['clips'][clip_id]
     prior = clip.get('capacityClock', {}).get('workers', {}).get(context['workerId'])
-    heartbeat = not removed and prior is not None and prior['state'] == state \
+    heartbeat = not (removed or orphaned) and prior is not None and prior['state'] == state \
         and prior['resource'] == observation['resource']
     before = queue_clock.excluded(clip)
     after = queue_clock.observe_worker(record, context, observation, elapsed)
@@ -144,7 +144,7 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     session.commit(record, {'event': event, 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
                             'elapsed': elapsed, 'excludedSeconds': after, 'creditedSeconds': after - before,
                             'resource': observation['resource'], 'evidence': observation['evidence'],
-                            'recoveredWorkers': removed})
+                            'recoveredWorkers': removed, 'orphanedWorkers': orphaned})
     return after
 
 
@@ -182,8 +182,17 @@ def supporting_contexts(owner: object, primary: dict | None) -> list[dict]:
     return contexts
 
 
-def recovery_evidence(record: dict, context: dict) -> dict:
-    """Observe possible departed workers before taking the authority lock."""
+@dataclass(frozen=True)
+class Recovery:
+    """Other owners' rows seen before the lock: ``ended`` ones (proved gone) and ``orphaned`` ones (C7: a working
+    row of this boot whose own supervisor is gone, with no finished receipt; its children may still run)."""
+
+    ended: dict
+    orphaned: dict
+
+
+def recovery_evidence(record: dict, context: dict) -> Recovery:
+    """Observe possible departed workers before taking the authority lock (an unreadable table proves nothing)."""
     from studio.native_budget_clock import boot_id
     from studio.native_budget_launch import _process_table
     from native_render_processes import ResourceMeasurementError
@@ -191,17 +200,24 @@ def recovery_evidence(record: dict, context: dict) -> dict:
     candidates = {key: row for key, row in clip.get('capacityClock', {}).get('workers', {}).items()
                   if key != context['workerId']}
     if not candidates:
-        return {}
+        return Recovery({}, {})
     try:
         table = _process_table()
     except (OSError, subprocess.SubprocessError, ResourceMeasurementError):
         table = None
-    boot = boot_id()
-    return {key: row for key, row in candidates.items() if _recoverable((key, row), clip, (boot, table))}
+    observed = boot_id(), table
+    ended = {key: row for key, row in candidates.items() if _recoverable((key, row), clip, observed)}
+    return Recovery(ended, {key: row for key, row in candidates.items()
+                            if key not in ended and _orphaned(row, observed)})
 
 
 def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
-    """A reboot, completed cleanup, or a dead prelaunch waiter proves an owner ended."""
+    """A reboot, completed cleanup, or a dead prelaunch waiter proves an owner ended.
+
+    A waiting row is written only before pool admission (``native_run_admission.acquire_capacity``: ``join_queue``
+    precedes ``lease.mark_launching``), so its owner launched no child: once its supervisor is gone, a surviving
+    member of its process group cannot be its work (P3), and the group is not checked.
+    """
     key, row = worker
     boot, table = observed
     if row.get('boot') and row['boot'] != boot:
@@ -209,7 +225,7 @@ def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
     if _finished_receipt(key):
         return True
     if row['state'] != 'waiting' or table is None:
-        return False  # A dead working supervisor alone cannot prove detached-child cleanup.
+        return False  # A dead working supervisor alone cannot prove detached-child cleanup (it is orphaned).
     identity = row.get('supervisor')
     if identity is None:
         attempt = next((item for item in clip['attempts'] if item['id'] == row['attemptId']), None)
@@ -217,8 +233,18 @@ def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
     if identity is None:
         return False
     from native_render_processes import ProcessIdentity, identity_matches
-    return not identity_matches(table, ProcessIdentity(**identity)) \
-        and not any(item[1] == identity['pgid'] for item in table.values())
+    return not identity_matches(table, ProcessIdentity(**identity))
+
+
+def _orphaned(row: dict, observed: tuple) -> bool:
+    """A working row of this boot, the table readable, whose recorded supervisor no longer runs (PID, start and group
+    compared, so a recycled PID is not that supervisor). The caller has already ruled out an ended row."""
+    boot, table = observed
+    identity = row.get('supervisor')
+    if row['state'] != 'working' or table is None or identity is None or row.get('boot') != boot:
+        return False
+    from native_render_processes import ProcessIdentity, identity_matches
+    return not identity_matches(table, ProcessIdentity(**identity))
 
 
 def _finished_receipt(path: str) -> bool:
@@ -235,15 +261,26 @@ def _finished_receipt(path: str) -> bool:
                                                or cleanup.get('childNeverLaunched') is True)
 
 
-def recover_workers(record: dict, clip_id: str, evidence: dict) -> list[str]:
-    """Remove only unchanged proved-ended rows, retaining every unconfirmed interval as counted."""
+def recover_workers(record: dict, clip_id: str, evidence: Recovery, elapsed: float) -> tuple[list[str], list[str]]:
+    """Remove unchanged proved-ended rows; on a v2 clock move unchanged orphaned rows to ``orphans`` (C7).
+
+    Either way the pending interval becomes uncertain: every unconfirmed interval stays counted. An orphan no longer
+    counts as work or toward the owner cap, and its identity stays visible (``orphans.recent``, the last 16).
+    Returns the (removed, orphaned) owner keys.
+    """
     clock = record['clips'][clip_id].get('capacityClock')
     if clock is None:
-        return []
-    removed = [key for key, row in evidence.items() if clock['workers'].get(key) == row]
-    if removed:
+        return [], []
+    removed = [key for key, row in evidence.ended.items() if clock['workers'].get(key) == row]
+    orphaned = [key for key, row in evidence.orphaned.items()
+                if queue_clock.writable(record['clips'][clip_id]) and clock['workers'].get(key) == row]
+    if removed or orphaned:
         clock['uncertainSeconds'] += clock['pendingSeconds']
         clock['pendingSeconds'] = 0.0
-    for key in removed:
+    rows = [{**clock['workers'][key], 'orphanedElapsed': elapsed} for key in orphaned]
+    for key in removed + orphaned:
         del clock['workers'][key]
-    return removed
+    if orphaned:
+        orphans = clock['orphans']
+        orphans.update(count=orphans['count'] + len(orphaned), recent=(orphans['recent'] + rows)[-MAX_ORPHAN_ROWS:])
+    return removed, orphaned

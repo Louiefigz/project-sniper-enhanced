@@ -175,7 +175,9 @@ def settle_task_workers(record: dict, task_id: str) -> list[str]:
     """Retire a task's owners only after its watchdog proves all owned sessions ended.
 
     Callers must hold the authority lock and supply actual cleanup proof; ordinary
-    completion callbacks and heartbeat expiry must never invoke this function.
+    completion callbacks and heartbeat expiry must never invoke this function. The clip's pending interval
+    becomes uncertain only when no waiting owner remains in it: another task's waiting owner keeps the pending
+    interval it is accruing (P1 Step B5, P6).
     """
     removed = []
     for clip in record['clips'].values():
@@ -183,10 +185,10 @@ def settle_task_workers(record: dict, task_id: str) -> list[str]:
         if clock is None:
             continue
         keys = [key for key, row in clock['workers'].items() if row['taskId'] == task_id]
-        if keys:
-            clock['uncertainSeconds'] += clock['pendingSeconds']
-            clock['pendingSeconds'] = 0.0
         for key in keys:
             del clock['workers'][key]
+        if keys and not any(row['state'] == 'waiting' for row in clock['workers'].values()):
+            clock['uncertainSeconds'] += clock['pendingSeconds']
+            clock['pendingSeconds'] = 0.0
         removed.extend(keys)
     return removed

@@ -1311,3 +1311,8 @@ docs belong to P3b.
   `clip_status`'s first action names the holders and their watchdog. The stall validator (X180 m7) requires
   `cancelled` iff one cancel row, a time iff a state, and sorted, distinct occupants. Tests:
   `test_queue_clock_stall.py`.
+- **Run-scoped tasks follow the Shorts' credit (M-051; C6).** `tasks.new_row` calls
+  `queue_clock.record_task_origin` for every task but the director: a clip task's origin goes on its clip's clock
+  (a v1 clock too), a run-scoped task's on every writable Short clock. `task_deadline` gives a run-scoped task the
+  largest credit any writable Short earned since its origin there (never retroactive; a Long has no clock and adds
+  nothing), so its children, bounded by `tasks._check_parent`, follow it. Tests: `test_queue_clock_v2_b.RunScopedTests`.

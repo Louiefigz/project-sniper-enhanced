@@ -3,7 +3,8 @@
 ProductiveTests (P1 Step B2, C4; X99(2), X176): which work withholds render-queue credit, and the enrolled
 director's declared activity. In-memory TEST records only (no authority root is written): Shorts A and B, a
 Codex-hosted enrolled director, and a media task per Short whose owner waits 60 s for render capacity, reporting a
-capacity-only refusal every 2 s after a checkpoint, as the owner loop does.
+capacity-only refusal every 2 s after a checkpoint, as the owner loop does. RunScopedTests (M-051, C6): a
+run-scoped task's deadline follows the largest credit any Short earned after its enqueue.
 """
 from __future__ import annotations
 
@@ -18,7 +19,9 @@ from studio.native_budget_clock import ClockAnchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
 from studio.production import api, callbacks, claims, queue_clock
 from studio.production.claims import ClaimRef, Enrollment
+from studio.production.dependencies import refresh
 from studio.production.director_activity import DirectorActivity, declare
+from studio.production.outputs import OutputAuthorization, _new_output
 from studio.production.reconcile import Observation, reconcile_tasks
 from studio.production.tasks import StaleClaim, TaskRefused, enqueue
 
@@ -214,6 +217,76 @@ class DirectorActivityTests(unittest.TestCase):
         again = api.declare_director_activity(batch.root, BATCH, batch.director, DirectorActivity(('A',), False))
         self.assertFalse(again['committed'])
         self.assertEqual(copy.deepcopy(batch.events()[-1]), event)
+
+
+class RunScopedTests(unittest.TestCase):
+    """C6 (M-051, P1 Step B8; p8): a run-scoped task gains the largest credit any Short earned after its enqueue.
+
+    The shared task waits for A's render (a prerequisite), so it is not concurrent work while A's owner waits.
+    """
+
+    def run_with_shared(self, deadline: float = 2300.0) -> Run:
+        """Shorts A and B, the director declared idle, run-scoped ``shared`` blocked on A's render."""
+        run = Run()
+        run.declare(False)
+        enqueue(run.record, (task_spec('shared', 'review', prerequisites=('media-a',), parent='director',
+                                       deadline_elapsed=deadline),), run.elapsed)
+        return run
+
+    def deadline(self, run: Run, task_id: str = 'shared') -> float:
+        """The task's credited deadline."""
+        return queue_clock.task_deadline(run.record, run.record['production']['tasks'][task_id])
+
+    def test_shared_task_gains_the_largest_short_credit(self) -> None:
+        """A earns 1000 s, B nothing: the shared deadline moves 2300 -> 3300 and a completion at 2350 counts."""
+        run = self.run_with_shared()
+        self.assertEqual((run.wait('A', 1000.0), run.wait('B', 0.0)), (1000.0, 0.0))
+        self.assertEqual(self.deadline(run), 3300.0)
+        run.record['production']['tasks']['media-a'].update(state='completed', terminalElapsed=run.elapsed)
+        refresh(run.record, run.elapsed)                  # TEST: A's render delivered; the shared review is ready
+        run.elapsed = 2000.0
+        ref = run.claim('shared', turn('shared'))
+        callbacks.complete(run.record, ref, callbacks.TaskResult((receipt('shared'),)), 2350.0)
+        row = run.record['production']['tasks']['shared']
+        self.assertEqual((row['state'], row['failure']), ('completed', None))
+
+    def test_no_retroactive_credit(self) -> None:
+        """Credit A earned before the shared task was enqueued never moves its deadline; later credit does."""
+        run = Run()
+        run.declare(False)
+        run.wait('A', 1000.0)
+        enqueue(run.record, (task_spec('shared', 'review', prerequisites=('media-a',), parent='director',
+                                       deadline_elapsed=2300.0),), run.elapsed)
+        self.assertEqual(self.deadline(run), 2300.0)
+        run.wait('A', 50.0)
+        self.assertEqual(self.deadline(run), 2350.0)
+
+    def test_long_in_run_adds_nothing(self) -> None:
+        """A Long has no capacity clock: no origin is recorded on it, and its later deadline never applies. A v1
+        Short (read-only here) takes no run-scoped origin either."""
+        run = self.run_with_shared()
+        run.record['clips']['L'] = _new_output(run.record, OutputAuthorization('L', 'long', 'TEST', 'TEST',
+                                                                               output_seconds=600.0), 0.0)
+        run.record['clips']['B']['capacityClock']['policy'] = 'short-render-capacity-v1'
+        enqueue(run.record, (task_spec('shared-2', 'review', prerequisites=('media-a',), parent='director',
+                                       deadline_elapsed=2300.0),), run.elapsed)
+        self.assertNotIn('capacityClock', run.record['clips']['L'])
+        self.assertNotIn('shared-2', run.record['clips']['B']['capacityClock']['taskCredits'])
+        self.assertEqual((self.deadline(run, 'shared-2'), self.deadline(run)), (2300.0, 2300.0))
+        run.wait('A', 30.0)
+        self.assertEqual(self.deadline(run, 'shared-2'), 2330.0)
+
+    def test_child_of_run_scoped_parent_is_bounded_by_its_credited_deadline(self) -> None:
+        """A earns 30 s: the shared parent's deadline is 2330, so a child due at 2320 is admitted and one due at
+        2340 is refused by name."""
+        run = self.run_with_shared()
+        run.wait('A', 30.0)
+        admitted = task_spec('child-1', 'review', parent='shared', deadline_elapsed=2320.0)
+        enqueue(run.record, (admitted,), run.elapsed)
+        self.assertIn('child-1', run.record['production']['tasks'])
+        late = task_spec('child-2', 'review', parent='shared', deadline_elapsed=2340.0)
+        with self.assertRaisesRegex(TaskRefused, "Task child-2 deadline is later than its parent shared's"):
+            enqueue(run.record, (late,), run.elapsed)
 
 
 if __name__ == '__main__':

@@ -138,18 +138,41 @@ def _record_row(clock: dict, context: dict, observation: dict, elapsed: float) -
                              'waitClass': observation.get('waitClass')}
 
 
+def record_task_origin(record: dict, task_id: str, clip_id: str | None) -> None:
+    """Record where a new task's credit starts: its Short's settled credit now (C6, P1 Step B8).
+
+    A clip-scoped task records on its clip's clock (a v1 clock too; its credit since then stays 0). A run-scoped
+    task (the caller passes no director) records on every writable Short clock, so it later gains the largest
+    credit any Short earned after it was enqueued, never retroactive credit; a Long has no clock and adds nothing.
+    """
+    clips = [record['clips'][clip_id]] if clip_id else [clip for clip in record['clips'].values() if writable(clip)]
+    for clip in clips:
+        if 'capacityClock' in clip:
+            clip['capacityClock']['taskCredits'].setdefault(task_id, excluded(clip))
+
+
+def _credit_since(clip: dict, task_id: str) -> float | None:
+    """The clip's settled credit since the task's recorded origin; None when it recorded none."""
+    origin = clip['capacityClock'].get('taskCredits', {}).get(task_id)
+    return max(0.0, excluded(clip) - origin) if origin is not None else None
+
+
 def task_deadline(record: dict, task: dict) -> float:
-    """Translate clip task deadlines by earned idle capacity time; running AI earns none."""
+    """Translate task deadlines by earned idle capacity time; running AI earns none.
+
+    A clip task gains its Short's credit since its origin. A run-scoped task gains the largest credit any
+    writable Short earned since its origin there (C6); the director keeps the run's delivery deadline.
+    """
     if task['kind'] == 'director':
         from studio.production.formats import run_deadlines
         return run_deadlines(record)['deliverySeconds']
+    if task['clipId'] is None:
+        credits = [_credit_since(clip, task['id']) for clip in record['clips'].values() if writable(clip)]
+        return task['deadlineElapsed'] + max((credit for credit in credits if credit is not None), default=0.0)
     clip = record['clips'].get(task['clipId'], {})
     if not enabled(clip):
         return task['deadlineElapsed']
-    clock = clip['capacityClock']
-    origin = clock.get('taskCredits', {}).get(task['id'])
-    credit = max(0.0, excluded(clip) - origin) if origin is not None else 0.0
-    return task['deadlineElapsed'] + credit
+    return task['deadlineElapsed'] + (_credit_since(clip, task['id']) or 0.0)
 
 
 def status(clip: dict, elapsed: float) -> dict:

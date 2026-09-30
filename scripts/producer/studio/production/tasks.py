@@ -234,10 +234,9 @@ def new_row(record: dict, spec: TaskSpec, prerequisites: list[str], context: tup
             'enqueuedElapsed': elapsed, 'epochs': 0, 'claim': None, 'handle': None, 'attempt': None, 'owners': [],
             'receipts': [], 'failure': None, 'unresolved': False, 'charged': False, 'cancelRequested': False,
             'endConfirmed': False, 'usage': None, 'terminalElapsed': None, 'approvalStale': False, 'revoked': False}
-    if spec.clip_id and 'capacityClock' in record['clips'][spec.clip_id]:
-        from studio.production.queue_clock import excluded
-        clock = record['clips'][spec.clip_id]['capacityClock']
-        clock['taskCredits'].setdefault(spec.task_id, excluded(record['clips'][spec.clip_id]))
+    if spec.kind != 'director':   # C6: where its credit starts (the director keeps the run's deadline)
+        from studio.production.queue_clock import record_task_origin
+        record_task_origin(record, spec.task_id, spec.clip_id)
     if spec.section_binding is not None:
         row['sectionBinding'] = deepcopy(spec.section_binding)
     return row

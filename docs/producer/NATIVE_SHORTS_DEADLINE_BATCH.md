@@ -44,7 +44,9 @@ for unverified cleanup, disk headroom, a qualification session and audio-class
 work earn nothing.
 
 The clock, launch allocations, task deadlines and status use the same settled
-credit. A verified capacity wait keeps earning credit for as long as it stays verified;
+credit. A run-scoped task (shared review, check or planning work) gains the
+largest credit any Short earned after it was enqueued, never earlier credit and
+never a Long's later deadline. A verified capacity wait keeps earning credit for as long as it stays verified;
 time passing never stops it. When the live members a Short waits behind have
 not changed for the longest admissible render plus cleanup (derived from policy,
 `queue_stall.stall_seconds`; `status` shows it as `stallBoundSeconds`), the Short is named

@@ -144,6 +144,8 @@ class SettlementRoom(TaskCase):
         """Grow the record with approval changes and added clips until new work is refused."""
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)
+        # M-052 (C8): an added Short now passes the forecast by name; this fill measures the record's size only.
+        self.enterContext(mock.patch('studio.production.outputs.admission_refusal', return_value=None))
         words = [{'word': f'{index:04d}' + 'W' * 60, 'start': float(index), 'end': index + 0.9}
                  for index in range(2000)]
         path = Path(temp.name) / 'long.json'

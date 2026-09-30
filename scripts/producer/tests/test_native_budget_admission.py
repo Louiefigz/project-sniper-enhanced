@@ -93,10 +93,10 @@ class AdmissionTests(unittest.TestCase):
         self.assertRegex(phase_refusal(record, record['clips']['A'], 2400), '^The 40-minute delivery deadline')
         self.assertRegex(admit_dispatch(record, 'A', 'author', 1500).reason, '^Minute 25 has passed')
 
-    def test_new_clips_are_refused_after_minute_25(self) -> None:
-        self.assertTrue(admit_new_clip(batch(), 'F', 100).allowed)
-        self.assertFalse(admit_new_clip(batch(), 'F', 1500).allowed)
-        self.assertFalse(admit_new_clip(batch(), 'A', 100).allowed)
+    def test_new_clips_have_no_minute_25_wall(self) -> None:
+        """M-052 (C8): an added clip starts its own clock at any minute; the forecast decides, never minute 25."""
+        self.assertEqual([admit_new_clip(batch(), clip, at).allowed for clip, at in (('F', 100), ('F', 1500), ('A', 100))],
+                         [True, True, False])
 
     def test_close_needs_every_clip_handed_off_or_the_deadline(self) -> None:
         record = batch()

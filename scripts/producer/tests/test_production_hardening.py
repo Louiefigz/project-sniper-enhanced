@@ -154,11 +154,11 @@ class HeadroomTests(TaskCase):
         self.assertGreater(settlement.MAX_TASK_ENTRY_BYTES, 12 * 1024)
 
     def test_filling_the_record_with_approvals_never_blocks_a_task_outcome(self) -> None:
-        temp = tempfile.TemporaryDirectory()
-        self.addCleanup(temp.cleanup)
+        temp = self.enterContext(tempfile.TemporaryDirectory())   # M-052: added Shorts pass the forecast; not this fill
+        self.enterContext(mock.patch('studio.production.outputs.admission_refusal', return_value=None))
         words = [{'word': f'{index:04d}' + 'W' * 60, 'start': index * 0.5, 'end': index * 0.5 + 0.4}
                  for index in range(2000)]
-        path = Path(temp.name) / 'long.json'
+        path = Path(temp) / 'long.json'
         sha = write_transcript(path, words)
         self.enqueue(task_spec('critic', 'review', clip_id='A', parent='director'))
         ref = self.start_task('critic', host_turn('critic'))

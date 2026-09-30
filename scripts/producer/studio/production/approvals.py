@@ -19,21 +19,24 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from headless.durable_files import DurableFileError, read_private_file
-from studio.native_budget_policy import Approval, admit_new_clip, approval_row, change_approval, clip_record, new_clip
+from studio.native_budget_binding import advance_clock
+from studio.native_budget_policy import Approval, admit_new_clip, change_approval, clip_record
 from studio.native_budget_registry import owner_binding
 from studio.native_budget_selection import CANONICAL_FORM
 from studio.native_budget_store import (
-    EVENTS, MAX_EVENT_BYTES, BudgetAuthorityError, archived_directory, batch_directory, locked_batch,
+    EVENTS, MAX_EVENT_BYTES, BatchSession, BudgetAuthorityError, TrailFull, archived_directory, batch_directory,
+    locked_batch,
 )
 from studio.production.claims import Outcome
 from studio.production.dependencies import refresh
+from studio.production.duplication_check import ADDING_EVENTS, pending_decisions, pending_report, recorded_checks
 from studio.production.host_contract import clip_text, encoded_length
-from studio.production.outputs import admit_joining_short
+from studio.production.outputs import OutputAuthorization, authorize_output
 from studio.production.session import transact
 from studio.production.tasks import TaskRefused
 
 REASON_BYTES = 512
-ADDING_EVENTS = ('clip-added', 'output-authorized')   # the events that bind a later clip's first approval
+ADDED_REASON = 'approved title and script bound when the clip was added; its own clock starts here'
 
 
 @dataclass(frozen=True)
@@ -45,19 +48,87 @@ class AddedClip:
 
 
 def add_clip(root: Path, batch_id: str, clip_id: str, added: AddedClip) -> dict:
-    """Add a clip under the running clock (before minute 25), binding its approved title and script."""
+    """Add a Short with its approved title and script bound; its own 40 counted minutes start now (C8).
+
+    The clip is authorized as its own output (``outputs.authorize_output``): the forecast admits or refuses it by
+    name at any minute, the same job is refused by name, and an identical retry is a replay that commits nothing.
+    The answer's ``duplicationCheck`` is always the recorded one (``recorded_duplication``, X144).
+    """
     def operation(record: dict, elapsed: float) -> Outcome:
-        """Admit the clip and bind its approval in one commit."""
-        decision = admit_new_clip(record, clip_id, elapsed)
-        if not decision.allowed or type(added.reason) is not str or not added.reason.strip():
-            raise TaskRefused(decision.reason if not decision.allowed else 'Adding a clip records its reason')
-        row = approval_row(added.approval, elapsed, record['clock']['epoch'],
-                           'approved title and script bound when the clip was added; the batch clock is unchanged')
-        record['clips'][clip_id] = new_clip(clip_text(added.reason), True, [row])
-        admit_joining_short(record, clip_id, elapsed)
-        return Outcome(True, {'event': 'clip-added', 'clipId': clip_id, 'reason': clip_text(added.reason),
-                              'approval': row['identity']}, {'clipId': clip_id, 'approval': row})
-    return transact(root, batch_id, operation)
+        """Authorize the clip on its own clock and bind its approval in one commit."""
+        refusal = _add_refusal(record, clip_id, added, elapsed)
+        if refusal:
+            raise TaskRefused(refusal)
+        request = OutputAuthorization(clip_id, 'short', clip_text(added.reason), added.approval.recorded_by,
+                                      approval=added.approval)
+        result = authorize_output(record, request, elapsed)
+        row = record['clips'][clip_id]['approvals'][0]
+        if result['replayed']:                          # nothing is written; the recorded check is read back below
+            return Outcome(False, {}, {**result, 'approval': row})
+        row['reason'] = ADDED_REASON
+        event = {'event': 'clip-added', 'clipId': clip_id, 'reason': clip_text(added.reason),
+                 'approval': row['identity'], 'authorizedElapsed': result['output']['authorizedElapsed'],
+                 'duplicationCheck': result.pop('duplicationCheck')}
+        return Outcome(True, event, {**result, 'approval': row})
+    done = transact(root, batch_id, operation)
+    return {**done, **recorded_duplication(root, batch_id, clip_id)}
+
+
+def _add_refusal(record: dict, clip_id: str, added: AddedClip, elapsed: float) -> str | None:
+    """A new clip id passes ``admit_new_clip`` (an existing one is ``authorize_output``'s replay or conflict), and
+    the addition records its reason."""
+    decision = admit_new_clip(record, clip_id, elapsed) if clip_id not in record['clips'] else None
+    if decision is not None and not decision.allowed:
+        return decision.reason
+    if type(added.reason) is not str or not added.reason.strip():
+        return 'Adding a clip records its reason'
+    return None
+
+
+def recorded_duplication(root: Path, batch_id: str, clip_id: str) -> dict:
+    """After an add or authorization (a replay too): the clip's recorded check, and the owed decision lines written.
+
+    ``duplicationCheck`` is the value on the clip's committed adding event (absent when that event has none).
+    Every decision line the trail owes (``pending_decisions``) is appended once (``append_decisions``), so a line
+    missed by a crash or a refused append is written by the next add, replay or status. ``pendingDecisions`` is
+    every line still owed afterwards, as ``status`` shows it (``append_pending_decisions``, X167).
+    """
+    with locked_batch(root, batch_id) as session:
+        record = session.read()
+        events = committed_trail(session, batch_id)
+        checks = recorded_checks(events)
+        written = append_pending_decisions(session, record, events, advance_clock(record))
+    return {**({'duplicationCheck': checks[clip_id]} if clip_id in checks else {}), **written}
+
+
+def append_decisions(session: BatchSession, lines: list[dict]) -> dict:
+    """Append decision lines under the caller's lock; a refused line never undoes the committed add (X144).
+
+    Returns ``decisions`` (the lines written now) and ``refusals``: each refused line's ``decisionId`` and the
+    trail's refusal text (for example once it reached its reserve); a later add, replay or status retries them.
+    """
+    written, refusals = [], {}
+    for line in lines:
+        try:
+            session.event(line)
+            written.append(line)
+        except TrailFull as error:   # only the trail's own refusal; unwritable authority still fails closed
+            refusals[line['decisionId']] = str(error)
+    return {'decisions': written, 'refusals': refusals}
+
+
+def append_pending_decisions(session: BatchSession, record: dict, events: list | tuple, elapsed: float) -> dict:
+    """Write the decision lines the locked trail read ``events`` shows are owed; a closed batch takes none.
+
+    Returns ``decisions`` (the lines written now) and ``pendingDecisions``: every line still owed afterwards in
+    ``status``'s shape (``pending_report``: ``decisionId`` and ``outputId``), plus ``refusal`` where this call's own
+    append was refused (X167). ``recorded_duplication`` and ``status`` (``native_budget_status.status_observation``)
+    call it.
+    """
+    owed = pending_decisions(record, events, elapsed) if record['status'] != 'closed' else []
+    appended = append_decisions(session, owed)
+    report = pending_report(record, [*events, *appended['decisions']], appended['refusals'])
+    return {'decisions': appended['decisions'], 'pendingDecisions': report}
 
 
 def change_reason(reason: object) -> str:
@@ -98,6 +169,15 @@ def record_script_change(root: Path, batch_id: str, clip_id: str, change: Approv
         return Outcome(True, event, {'clipId': clip_id, 'approval': result['row'], 'changed': result['changed'],
                                      'material': result['material'], 'reason': reason})
     return transact(root, batch_id, operation)
+
+
+def committed_trail(session: BatchSession, batch_id: str) -> list[dict]:
+    """The committed events of the locked batch's trail (``trail_events``)."""
+    try:
+        raw = read_private_file(session.dir_fd, EVENTS, 2 * MAX_EVENT_BYTES)
+    except (OSError, DurableFileError) as error:
+        raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
+    return trail_events(raw)
 
 
 def trail_events(raw: bytes) -> list[dict]:
@@ -153,7 +233,7 @@ def chain_problem(record: dict, clip_id: str, events: list[dict]) -> str | None:
 
 def _added_problem(ours: list[tuple], first: str) -> str | None:
     """An added clip: its last adding event (earlier ones were killed before their record) names the first
-    approval, and no change of the clip precedes it. ``clip-added`` adds a Short under the running clock;
+    approval, and no change of the clip precedes it. ``clip-added`` adds a Short on its own clock (C8);
     ``output-authorized`` authorizes an own-clock or derived output (unit D1), with the same
     ``clipId`` and ``approval`` fields."""
     added = [(index, row) for index, row in ours if row.get('event') in ADDING_EVENTS]
@@ -174,12 +254,9 @@ def read_approval(root: Path, batch_id: str, clip_id: str) -> dict:
     directory = directory if directory.is_dir() else archived_directory(root, batch_id)
     with locked_batch(root, batch_id, directory=directory) as session:
         record = session.read()
-        try:
-            raw = read_private_file(session.dir_fd, EVENTS, 2 * MAX_EVENT_BYTES)
-        except (OSError, DurableFileError) as error:
-            raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
+        events = committed_trail(session, batch_id)
     approvals = clip_record(record, clip_id)['approvals']
-    problem = chain_problem(record, clip_id, trail_events(raw))
+    problem = chain_problem(record, clip_id, events)
     if problem:
         raise BudgetAuthorityError(f'Approvals of clip {clip_id} in batch {batch_id} are corrupt authority: {problem}')
     return {'batchId': batch_id, 'clipId': clip_id, 'status': record['status'],

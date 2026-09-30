@@ -175,12 +175,10 @@ class VersionTests(FormatCase):
 
 
 class ClockTests(FormatCase):
-    """Each output keeps its own immutable deadline; the add-clip rule stays for Shorts."""
+    """Each output keeps its own immutable deadline; an added Short has its own clock too (M-052, C8)."""
 
     def test_a_long_joins_after_minute_25_on_its_own_clock(self) -> None:
-        self.clock.advance(1800)
-        with self.assertRaisesRegex(registry.BudgetRefused, 'Minute 25'):
-            api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip('late Short', approval('C')))
+        self.clock.advance(1800)                                  # M-052: add-clip has no minute 25 either
         row = self.authorize('L')['output']
         self.assertEqual((row['authorizedElapsed'], row['preparationElapsed'], row['deadlineElapsed']),
                          (1800.0, 8705.0, 12600.0))
@@ -277,10 +275,8 @@ class ClockTests(FormatCase):
         with self.assertRaisesRegex(BudgetAuthorityError, 'output deadlines do not match'):
             self.record()
 
-    def test_own_clock_shorts_join_only_a_run_that_holds_a_long(self) -> None:
-        with self.assertRaisesRegex(registry.BudgetRefused, 'Shorts-only run with add-clip'):
-            self.authorize('N', 'short')
-        self.authorize('L')
+    def test_own_clock_shorts_join_any_active_run(self) -> None:
+        """M-052 (C8, X2): a Shorts-only run takes an own-clock Short; P4's open-Long rule is for derived Shorts."""
         self.clock.advance(1800)
         row = self.authorize('N', 'short')['output']
         self.assertEqual((row['authorizedElapsed'], row['preparationElapsed'], row['deadlineElapsed']),
@@ -299,8 +295,9 @@ class ClockTests(FormatCase):
                 'nested': {}, 'transientRetryOf': None})
         self.mutate('batch-auth', long_final)
         self.clock.advance(600)
-        # A and B (ahead by least slack) already miss behind the Long's non-preemptible final; C would miss too.
-        with self.assertRaisesRegex(registry.BudgetRefused, r'C \(short\) would finish at 3650s, after its latest 2280s, '
+        # A and B (ahead by least slack) already miss behind the Long's non-preemptible final; C would miss too, even on
+        # its own clock (M-052: added at 600 s, its latest finish is 2880 s, not the batch clock's 2280 s).
+        with self.assertRaisesRegex(registry.BudgetRefused, r'C \(short\) would finish at 3650s, after its latest 2880s, '
                                                             r'behind A, B\. Heavy slots: L long final owner bbbbbbbb'):  # P0 adapt: owner
             api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip('fourth Short', approval('C')))
         self.assertNotIn('C', self.record()['clips'])

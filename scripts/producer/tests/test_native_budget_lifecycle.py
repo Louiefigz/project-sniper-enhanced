@@ -93,7 +93,7 @@ class SelectionTests(RegistryCase):
 
 
 class AddedClipTests(RegistryCase):
-    """In-process probe: an added clip binds its approval before minute 25, and none is added after it."""
+    """In-process probe: an added clip binds its approval on its own clock at any minute (M-052); none without one."""
 
     def test_add_clip_at_the_minute_25_boundary(self) -> None:
         self.clock.advance(1499)
@@ -101,10 +101,10 @@ class AddedClipTests(RegistryCase):
                                              approval=added_approval(self.work, 'E')))
         self.assertEqual((added['status'], added['approval']['title']), ('clip-added', 'TEST title E'))
         self.clock.advance(1)
-        for file in (added_approval(self.work, 'F'), None):
-            with self.subTest(approval=file is not None), self.assertRaises(registry.BudgetRefused):
-                native_batch.cmd_add_clip(ns(batch='batch-auth', clip='F', reason='probe', approval=file))
-        self.assertNotIn('F', self.record()['clips'])
+        with self.assertRaises(registry.BudgetRefused):
+            native_batch.cmd_add_clip(ns(batch='batch-auth', clip='F', reason='probe', approval=None))
+        self.assertEqual(native_batch.cmd_add_clip(ns(batch='batch-auth', clip='F', reason='probe',
+                                                      approval=added_approval(self.work, 'F')))['status'], 'clip-added')
 
 
 class HandoffBundleTests(RegistryCase):

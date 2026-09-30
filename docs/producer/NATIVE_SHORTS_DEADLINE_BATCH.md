@@ -22,6 +22,18 @@ staged authorization; `staged-starts` reports it and `discard-start --name NAME
 --reason TEXT` records an explicit disposition. Earlier missed authorizations
 remain visible. Do not create a fresh batch to erase elapsed production time.
 
+A Short added later (`add-clip --batch SESSION --clip ID --reason TEXT
+--approval FILE`) gets its own clock from its authorization, at any minute of
+the run; the forecast admits it or names the conflict. The same job is refused
+by name: the same title (compared after folding case, width, spacing and
+invisible characters), source and ordered kept words as another clip, or a
+revision in that clip's `change-approval` lineage. Rename a clip with
+`change-approval`, which keeps its clock, never by adding it again. A distinct
+job whose source seconds overlap another clip's is admitted; the overlap is
+recorded as `duplicationCheck` on its adding event, shown per output by
+`status`, and noted once as a coordinator decision. A decision line the trail
+could not take stays listed under `status`'s `pendingDecisions`.
+
 Each newly authorized Short has 2,400 counted production seconds. Only intervals
 observed by the heavy-work scheduler as waiting solely for occupied render
 capacity can be excluded. Its durable `capacityClock` records settled credit,

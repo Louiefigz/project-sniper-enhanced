@@ -1337,3 +1337,21 @@ docs belong to P3b.
   clock's observed time, and a cancel dated before its stall. `status` audits the credit from the trail it read under
   its observation lock (`native_budget_status.audited_observation`, `queue_audit.audit_record`; X183 n3). Tests:
   `test_queue_clock_stall_b.py`, `test_queue_clock_v2_c.AuditTests.test_status_reads_the_trail_once`.
+- **An added Short has its own clock; one same-job function (M-052; C8, C-2 as X144, X159 and X167 make it
+  exact).** `native_budget_policy.admit_new_clip` has no minute-25 refusal: a clip added at any minute gets its own
+  clock from its authorization and is admitted by the mixed forecast (`outputs.authorize_output`;
+  `admit_joining_short` is gone). `production/duplication_check.py` holds the job identity: the folded title
+  (`fold_title`: NFKC, casefold, drop category Cf and `DEFAULT_IGNORABLE`, then trim and collapse whitespace; the
+  constant is data, 17 ranges of Unicode 16.0.0, re-read from the interpreter's Unicode version on any upgrade,
+  D-P-24), the source and the ordered kept words (`kept_words`: transcript index and text). `outputs.same_job`
+  refuses only an effective duplicate (the same identity, or one in the other clip's revision lineage); a rename
+  goes through `change-approval`. Overlapping source seconds record `duplicationCheck` on the `clip-added` or
+  `output-authorized` event (null, or one row per overlapping clip), and each non-null check owes one
+  `coordination-decision` line (`coordinator-note`, `decisionId` = `duplication-check.` + 32 hex of the approval
+  identity) that `add-clip`, `authorize_output` and `status` write once (`approvals.append_pending_decisions`),
+  never on a closed batch. The trail cap has no exception: a line refused at a full trail, or owed when the batch
+  closed, stays in `status.pendingDecisions` for good (O-11). `status` shows each added clip's recorded
+  `duplicationCheck` (no key for a legacy adding event), passed with the capacity audit as one
+  `native_budget_report.TrailViews` (O-4: four parameters at most); `wallBudget` and `blockers` use the output's own
+  deadlines (`formats.clip_deadlines`). Known limit (O-12): a U+3164 used in place of a space, and U+2800, stay distinct; the
+  fold is not a homoglyph defence. Tests: `test_production_add_clip_clock.py`, `test_production_duplication_check.py`.

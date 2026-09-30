@@ -7,17 +7,21 @@ title and script (bound as it is authorized) and the Long it was derived from, i
 only if the mixed forecast still fits every committed output (``production.mixed_forecast``); a refusal
 names the conflict and commits nothing.
 
-- A Long may join at any time while the run is active, after the Shorts' minute 25 included: that is
-  this policy, not a bypass of ``add-clip``, which keeps its rule for Shorts (batch clock, before minute
-  25; in a run holding a Long it also passes the mixed forecast, ``admit_joining_short``).
-- A Short joins on its own 40-minute clock only a run that holds a Long, optionally as that Long's
-  derivation (its approved script must cut one of the Long's bound recordings). A Shorts-only run keeps
-  today's rules.
+- A Long may join at any time while the run is active, after the Shorts' minute 25 included.
+- A genuinely new approved Short joins any active run on its own 40 counted minutes from its own
+  authorization (C8): through ``add-clip`` (``approvals.add_clip``, which authorizes it here) or as a Long's
+  derivation (its approved script must cut one of the Long's bound recordings). No minute 25 of the batch
+  clock applies; the forecast admits or refuses it by name.
+- The same job never gets a new clock (C-2, X144, X159): ``same_job`` refuses a Short that is the same job as another
+  clip's current approval or one in its recorded revision lineage: the same folded title, source and ordered kept
+  words (``duplication_check.one_job``; range grouping, derived seconds and transcript bytes are not the job).
+  Overlapping source seconds alone never refuse; ``duplication_check`` records them on the adding event. A rename
+  goes through ``change-approval``, which keeps the lineage and the clock.
 
 Binding checks the format (a Short project for a Short output, a Long project for a Long output), binds a
 Long's lineage once from its first project, and keeps a derived Short on its Long's recordings.
-``freeze_expired`` stops a Short's work once its own deadline passes while a Long keeps the run open, so a
-Long never keeps Short AI work alive; it never stops a Long.
+``freeze_expired`` stops a Short's work once its own deadline passes in every active run, so neither a Long nor
+a later Short keeps an expired Short's AI work alive; it never stops a Long.
 """
 from __future__ import annotations
 
@@ -29,8 +33,9 @@ from studio.native_budget_policy import Approval, approval_row, clip_record, new
 from studio.native_budget_registry import BudgetRefused, owner_binding
 from studio.native_budget_schema import BOUNDS, valid_title
 from studio.native_budget_store import read_any_batch, require_clip_id
+from studio.production.duplication_check import duplication_check, one_job
 from studio.production.formats import (
-    FORMATS, LONG_POLICY, clip_deadlines, expected_deadlines, is_mixed, output_format, output_identity,
+    FORMATS, LONG_POLICY, clip_deadlines, expected_deadlines, output_format, output_identity,
 )
 from studio.production.lifecycle import freeze
 from studio.production.lineage import same_long
@@ -82,10 +87,7 @@ def _shape_refusal(request: OutputAuthorization) -> str | None:
 
 
 def _short_refusal(record: dict, request: OutputAuthorization) -> str | None:
-    """A Short on its own clock: a run a Long keeps open, and a verifiable derivation."""
-    if not is_mixed(record):
-        return ('A Short joins a Shorts-only run with add-clip, on the batch clock before minute 25; a Short on its '
-                'own clock joins only a run that holds a Long')
+    """A Short on its own clock joins any active run (C8); a derived one names a Long it verifiably cuts."""
     source = request.derived_from
     if source is None:
         return None
@@ -123,7 +125,10 @@ def _new_output(record: dict, request: OutputAuthorization, elapsed: float) -> d
 def authorize_output(record: dict, request: OutputAuthorization, elapsed: float) -> dict:
     """Add one output with its own clock to the caller's locked record; raises on any refusal.
 
-    An identical repeated authorization (a lost acknowledgement) returns ``replayed`` and changes nothing.
+    An identical repeated authorization (a lost acknowledgement) returns ``replayed`` and changes nothing; it
+    carries no ``duplicationCheck`` (the caller reads the recorded one from the adding event, X144). A new Short that
+    is the same job as another clip is refused by name (``same_job``) before the forecast runs; a distinct one carries
+    its ``duplicationCheck`` (None when nothing overlaps) for the caller's event.
     """
     clip_id = require_clip_id(request.clip_id)
     if request.format not in FORMATS:
@@ -140,31 +145,44 @@ def authorize_output(record: dict, request: OutputAuthorization, elapsed: float)
     if refusal:
         raise TaskRefused(refusal)
     candidate = _new_output(record, request, elapsed)
+    refusal = same_job(record, clip_id, candidate)
+    if refusal:
+        raise TaskRefused(refusal)
+    check = duplication_check(record, clip_id, candidate)
     record['clips'][clip_id] = candidate
     refusal = admission_refusal(record, clip_id, elapsed)
     if refusal:
         del record['clips'][clip_id]
         raise TaskRefused(refusal)
-    return {'clipId': clip_id, 'output': candidate['output'], 'replayed': False}
+    return {'clipId': clip_id, 'output': candidate['output'], 'replayed': False, 'duplicationCheck': check}
 
 
-def admit_joining_short(record: dict, clip_id: str, elapsed: float) -> None:
-    """A Short added with add-clip to a run that holds a Long must fit the mixed forecast (raises otherwise)."""
-    if not is_mixed(record):
-        return
-    refusal = admission_refusal(record, clip_id, elapsed)
-    if refusal:
-        raise TaskRefused(refusal)
+def same_job(record: dict, clip_id: str, candidate: dict) -> str | None:
+    """The refusal of an effective duplicate of another clip of the run, or None (C-2; P4-10 reuses it).
+
+    ``candidate`` is the clip being authorized; its first approval is what it binds. It is the same job as another
+    clip when that approval is ``one_job`` with the other clip's current approval or one of its earlier approvals,
+    its recorded revision lineage (``change-approval``): the same folded title, source and ordered kept words,
+    however its ranges and seconds are cut (X144, X159). A retry, re-add or rename of the same job never gets a new
+    clock. Overlapping source seconds alone never refuse: ``duplication_check`` records them.
+    """
+    first = candidate['approvals'][0] if candidate['approvals'] else None
+    others = [other for other, clip in sorted(record['clips'].items())
+              if first is not None and other != clip_id and any(one_job(first, row) for row in clip['approvals'])]
+    if not others:
+        return None
+    return (f'Clip {others[0]} already carries this approved script: a retry, re-add or rename of the same job never '
+            f'gets a new clock; change it with change-approval --clip {others[0]}')
 
 
 def freeze_expired(record: dict, elapsed: float) -> list[str]:
-    """While a Long keeps the run open, stop a Short's work once its own deadline passes.
+    """In every active run, stop a Short's work once its own deadline passes (C8).
 
-    Unlaunched tasks are cancelled and live ones asked to stop (slots stay held until confirmed), as
-    ``close`` does at minute 40 of a Shorts-only run. A Long is never stopped by this: its live work
-    settles at close, like every output's in a Shorts-only run.
+    Each Short keeps its own deadline (``clip_deadlines``), so a later Short or a Long keeps the run open while
+    an expired Short's unlaunched tasks are cancelled and its live ones asked to stop (slots stay held until
+    confirmed), as ``close`` does at minute 40. A Long is never stopped by this: its live work settles at close.
     """
-    if record['status'] != 'active' or not is_mixed(record):
+    if record['status'] != 'active':
         return []
     frozen = []
     for clip_id, clip in record['clips'].items():

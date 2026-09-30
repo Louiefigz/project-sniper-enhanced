@@ -21,6 +21,7 @@ from studio.production.queue_stall import StallDecision
 from studio.native_budget_staging import staged_starts  # noqa: F401 - re-exported for the operator's listing
 from studio.production.approvals import (  # noqa: F401 - re-exported: the approval API callers import from here
     AddedClip, ApprovalChange, add_clip, approval_for_project, read_approval, record_script_change,
+    recorded_duplication,
 )
 from studio.production.authorization import discard_staged  # noqa: F401 - re-exported: the operator's discard
 from studio.production.outputs import output_for_project, read_output  # noqa: F401 - re-exported (D2/D3 readers)
@@ -43,21 +44,27 @@ def enqueue_tasks(root: Path, batch_id: str, specs: tuple[TaskSpec, ...]) -> dic
 
 
 def authorize_output(root: Path, batch_id: str, request: outputs.OutputAuthorization) -> dict:
-    """Authorize a Long (any time the run is active) or a Short on its own clock (a run holding a Long).
+    """Authorize a Long or a Short on its own clock, any time the run is active (C8).
 
     The output's clock starts now under the run anchor and is never reset; the mixed forecast must fit
-    every committed output, else the refusal names the conflict and nothing is recorded.
+    every committed output, else the refusal names the conflict and nothing is recorded. The same job is
+    refused by name (``outputs.same_job``); a Short's duplication check travels on the event and, when not
+    None, is recorded as one decision. The answer's check is the recorded one (``approvals.recorded_duplication``).
     """
     def operation(record: dict, elapsed: float) -> Outcome:
         """Record the authorization event, or recognise an identical repeat."""
         result = outputs.authorize_output(record, request, elapsed)
+        if result['replayed']:                          # nothing is written; the recorded check is read back below
+            return Outcome(False, {}, result)
         row, approvals = result['output'], record['clips'][result['clipId']]['approvals']
         event = {'event': 'output-authorized', 'clipId': result['clipId'], 'format': row['format'],
                  'identity': row['identity'], 'authorizedElapsed': row['authorizedElapsed'],
                  'deadlineElapsed': row['deadlineElapsed'], 'derivedFrom': row['derivedFrom'],
-                 'approval': approvals[0]['identity'] if approvals else None}  # read_approval checks the chain
-        return Outcome(not result['replayed'], event, result)
-    return transact(root, batch_id, operation)
+                 'approval': approvals[0]['identity'] if approvals else None,  # read_approval checks the chain
+                 'duplicationCheck': result.pop('duplicationCheck')}
+        return Outcome(True, event, result)
+    done = transact(root, batch_id, operation)
+    return {**done, **recorded_duplication(root, batch_id, done['clipId'])}
 
 
 def enroll_director(root: Path, batch_id: str, enrollment: Enrollment) -> dict:

@@ -104,7 +104,8 @@ class AuditSelfTests(unittest.TestCase):
         """(M3) The pre-M3 authorize_output event, without its approval, fails the output-authorized contract."""
         row = next(row for row in records.load_contracts() if row.get('event') == 'output-authorized')
         text = (audit.PRODUCER / 'studio/production/api.py').read_text()
-        before = text.replace(",\n                 'approval': approvals[0]['identity'] if approvals else None}", '}')
+        before = text.replace("\n                 'approval': approvals[0]['identity'] if approvals else None,"
+                              '  # read_approval checks the chain', '')   # M-052 moved the line (duplicationCheck)
         self.assertNotEqual(before, text, 'the M3 approval line moved: update this self-test')
         write(self.root, 'studio/production/api.py', before)
         self.assertIn("['approval']", records.contract_problems([row], self.root)[0])

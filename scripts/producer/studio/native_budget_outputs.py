@@ -11,6 +11,7 @@ from __future__ import annotations
 from studio.native_budget_breakdown import breakdown
 from studio.native_budget_milestones import milestones
 from studio.native_budget_usage import ai_usage
+from studio.production.formats import clip_deadlines
 from studio.production.task_schema import LIVE, is_ai
 from studio.production.tasks import tasks_of
 
@@ -69,8 +70,12 @@ def versions(clip: dict, tasks: list[dict]) -> dict:
 
 
 def wall_budget(record: dict, clip: dict, elapsed: float) -> dict:
-    """Elapsed and remaining wall time against the output's deadlines (holds never subtract)."""
-    deadlines = record['deadlines']
+    """Elapsed and remaining wall time against the output's own deadlines (holds never subtract).
+
+    An added or own-clock Short counts from its own authorization and a Long by its own policy (``clip_deadlines``),
+    never by the batch's minute 25 and 40 (M-052, X144).
+    """
+    deadlines = clip_deadlines(record, clip)
     return {'elapsedSeconds': round(elapsed, 1), 'addedAfterStart': clip['addedAfterStart'],
             'preparationRemainingSeconds': round(deadlines['preparationSeconds'] - elapsed, 1),
             'launchCutoffRemainingSeconds': round(deadlines['deliverySeconds'] - deadlines['handoffReserveSeconds']
@@ -112,7 +117,7 @@ def blockers(record: dict, clip: dict, tasks: list[dict], elapsed: float) -> lis
         failure = last['failure'] or {}
         rows.append(f'the last {last["route"]} launch {last["status"]}: {failure.get("category")} '
                     f'({failure.get("signature")})')
-    if clip['outputSeconds'] is None and elapsed >= record['deadlines']['draftDecisionSeconds']:
+    if clip['outputSeconds'] is None and elapsed >= clip_deadlines(record, clip)['draftDecisionSeconds']:
         rows.append('no launch has recorded this output\'s duration, so no render can be forecast')
     return rows[:MAX_BLOCKERS]
 

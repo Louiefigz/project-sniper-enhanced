@@ -11,6 +11,8 @@ output beside it. ``wait`` and ``close`` keep this authority-only ``batch_status
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from studio.native_budget_forecast import launch_fits
 from studio.production import queue_stall
 from studio.production.formats import (
@@ -23,11 +25,24 @@ HANDOFF = ('open the delivered MP4 and its Studio project, then record the visib
            'handoff --confirmation <its visible-handoff confirmation record>')
 
 
-def batch_status(record: dict, elapsed: float, audit: dict | None = None) -> dict:
-    """Summarize the authoritative record at one observed elapsed time (``audit``: ``queue_audit.capacity_audit``)."""
+@dataclass(frozen=True)
+class TrailViews:
+    """What ``status`` read from the trail for each output; this module never reads the trail itself, so ``wait`` and
+    ``close`` show neither. ``audit``: ``queue_audit.audit_record`` (None: not audited); ``checks``: the added clips'
+    recorded duplication checks (``duplication_check.recorded_checks``, M-052; None: not read)."""
+
+    audit: dict | None = None
+    checks: dict | None = None
+
+
+NO_VIEWS = TrailViews()
+
+
+def batch_status(record: dict, elapsed: float, views: TrailViews = NO_VIEWS) -> dict:
+    """Summarize the authoritative record at one observed elapsed time (``views``: what ``status`` read)."""
     deadlines = clip_deadlines(record, None)  # a Shorts-only run: exactly its batch deadlines
     authorization = record['production']['authorization']
-    clips = {clip_id: clip_status(record, clip_id, elapsed, audit) for clip_id in record['clips']}
+    clips = {clip_id: clip_status(record, clip_id, elapsed, views) for clip_id in record['clips']}
     status = {'batchId': record['batchId'], 'status': record['status'],
               'elapsedSeconds': round(elapsed, 1), 'phase': phase(record, elapsed),
               'preparationRemainingSeconds': round(deadlines['preparationSeconds'] - elapsed, 1),
@@ -90,11 +105,13 @@ def _format_status(record: dict, clip: dict) -> dict:
     return status
 
 
-def clip_status(record: dict, clip_id: str, elapsed: float, audit: dict | None = None) -> dict:
+def clip_status(record: dict, clip_id: str, elapsed: float, views: TrailViews = NO_VIEWS) -> dict:
     """One output's counters, current launch, deliveries and next actions.
 
-    ``creditVerified`` says whether ``audit`` (``queue_audit.capacity_audit``, passed in: this never reads the
-    trail) found the Short's settled credit consistent with its trail; None when the clip was not audited.
+    ``creditVerified`` says whether ``views.audit`` (passed in: this never reads the trail) found the Short's settled
+    credit consistent with its trail; None when the clip was not audited. With ``views.checks`` (status only),
+    ``duplicationCheck`` is the value its adding event recorded (X121; None: no clip overlapped). A clip whose adding
+    event recorded none (declared at start, or added before M-052) shows no key (X50, X144).
     """
     clip = record['clips'][clip_id]
     limits = clip_limits(record, clip)
@@ -105,15 +122,19 @@ def clip_status(record: dict, clip_id: str, elapsed: float, audit: dict | None =
         or long_final_missed(record, clip_id, elapsed)
     from studio.production.queue_clock import status as clock_status
     stall = queue_stall.action(clip_id, clip)   # a capacity-stalled Short's first action, even while it renders
-    return {**clock_status(clip, elapsed), 'state': clip['state'], 'addedAfterStart': clip['addedAfterStart'],
-            'outputSeconds': clip['outputSeconds'], **_format_status(record, clip), 'phase': phase(record, elapsed, clip),
-            'counters': {key: f'{value}/{limits[key]}' if key in limits else value
-                         for key, value in clip['counters'].items()},
-            'projects': [row['path'] for row in clip['projects']],
-            'runningAttempt': running[-1] if running else None, 'runningRoutes': [row['route'] for row in running],
-            'lastFailure': failures[-1] if failures else None, 'deliveries': clip['deliveries'],
-            'forecast': fits, 'slaMiss': miss, 'creditVerified': _credit_verified(audit, clip_id),
-            'actions': [*([stall] if stall else []), *actions(record, clip_id, fits, (elapsed, running))]}
+    status = {**clock_status(clip, elapsed), 'state': clip['state'], 'addedAfterStart': clip['addedAfterStart'],
+              'outputSeconds': clip['outputSeconds'], **_format_status(record, clip),
+              'phase': phase(record, elapsed, clip),
+              'counters': {key: f'{value}/{limits[key]}' if key in limits else value
+                           for key, value in clip['counters'].items()},
+              'projects': [row['path'] for row in clip['projects']],
+              'runningAttempt': running[-1] if running else None, 'runningRoutes': [row['route'] for row in running],
+              'lastFailure': failures[-1] if failures else None, 'deliveries': clip['deliveries'],
+              'forecast': fits, 'slaMiss': miss, 'creditVerified': _credit_verified(views.audit, clip_id),
+              'actions': [*([stall] if stall else []), *actions(record, clip_id, fits, (elapsed, running))]}
+    if views.checks is not None and clip_id in views.checks:
+        status['duplicationCheck'] = views.checks[clip_id]
+    return status
 
 
 def _credit_verified(audit: dict | None, clip_id: str) -> bool | None:

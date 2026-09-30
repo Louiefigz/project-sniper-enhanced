@@ -41,6 +41,7 @@ class AuthorityCase(unittest.TestCase):
         patch = mock.patch.object(binding, 'engine_identity', return_value=dict(ENGINE))
         patch.start()
         self.addCleanup(patch.stop)
+        self.enterContext(mock.patch('studio.native_budget_forecast.heavy_lane_capacity', return_value=1))  # X144
         self.clock = FakeClock()
         context = fake_clock(self.clock)
         context.__enter__()
@@ -341,9 +342,9 @@ class ApprovalAuthorityTests(AuthorityCase):
             api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip('fourth Short', bad))
         added = api.add_clip(self.root, 'batch-auth', 'C', api.AddedClip('fourth Short', approval('C')))
         self.assertEqual(added['approval']['elapsed'], 600.0)
-        self.clock.advance(900)
-        with self.assertRaisesRegex(registry.BudgetRefused, 'Minute 25'):
-            api.add_clip(self.root, 'batch-auth', 'D', api.AddedClip('too late', approval('D')))
+        self.clock.advance(900)                                   # M-052 (C8): no minute 25; D starts its own clock
+        later = api.add_clip(self.root, 'batch-auth', 'D', api.AddedClip('after minute 25', approval('D')))
+        self.assertEqual((later['output']['authorizedElapsed'], later['output']['deadlineElapsed']), (1500.0, 3900.0))
 
     def test_clip_work_needs_an_approval_bound_at_start(self) -> None:
         from _budget_fixture import DIRECTOR, FINGERPRINT, task_spec

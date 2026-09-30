@@ -28,12 +28,16 @@ from studio.native_budget_evidence import final_review_verdicts
 from studio.native_budget_handoffs import handoff_verdicts
 from studio.native_budget_launch import reconcile_running
 from studio.native_budget_outputs import output_status
-from studio.native_budget_report import batch_status
+from studio.native_budget_report import TrailViews, batch_status
 from studio.native_budget_run_status import run_status
 from studio.native_budget_store import EVENTS, MAX_EVENT_BYTES, BudgetAuthorityError, locked_batch
 from studio.native_budget_usage import ai_usage
+from studio.production.approvals import append_pending_decisions, trail_events
+from studio.production.duplication_check import pending_report, recorded_checks
 
-TRAIL_EVENTS = ('clip-handed-off', 'task-claimed', 'task-released', 'packet-resolved', 'review-submitted')
+TRAIL_EVENTS = ('clip-handed-off', 'task-claimed', 'task-released', 'packet-resolved', 'review-submitted',
+                'clip-added', 'output-authorized',   # the adding events carry each added clip's duplicationCheck
+                'coordination-decision')             # which decision lines they already have (X144)
 SECTIONS = ('preparation', 'encoding', 'visibleMp4', 'matchingStudio', 'editorialApproval', 'cleanup', 'slaMiss')
 
 
@@ -69,7 +73,6 @@ def _trail(session: object) -> tuple[dict, list[dict]]:
     """Inside the caller's batch lock: the trail events status reads (``TRAIL_EVENTS``) and every committed event
     (``approvals.trail_events``: an event followed by its own failure is dropped), from one read."""
     from headless.durable_files import DurableFileError, read_private_file
-    from studio.production.approvals import trail_events
     try:
         data = read_private_file(session.dir_fd, EVENTS, MAX_EVENT_BYTES)
         rows = [json.loads(line) for line in data.decode('utf-8').splitlines() if line.strip()]
@@ -80,13 +83,16 @@ def _trail(session: object) -> tuple[dict, list[dict]]:
 
 
 def _observe(root: Path, batch_id: str) -> tuple[dict, float, tuple[tuple[dict, ...], list[dict]]]:
-    """Lock once: read, advance the clock, mark provably dead launches, commit, read the trail."""
+    """Lock once: read, advance the clock, mark provably dead launches, commit, read the trail, and write any
+    duplication-check decision line the trail still owes (X144); the lines written join the status events."""
     with locked_batch(root, batch_id) as session:
         record = session.read()
         elapsed = advance_clock(record)
         abandoned = reconcile_running(record, elapsed)
         session.commit(record, {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned})
-        return record, elapsed, _trail(session)
+        events, committed = _trail(session)
+        written = append_pending_decisions(session, record, events, elapsed)['decisions']   # owed lines (X144)
+        return record, elapsed, (events + tuple(written), committed)
 
 
 def status_observation(root: Path, batch_id: str) -> tuple[dict, float, tuple[dict, ...]]:
@@ -136,7 +142,8 @@ def _transcripts(record: dict, files: tuple[Path, ...]) -> dict | None:
 
 def production_status(record: dict, elapsed: float, inputs: StatusInputs) -> dict:
     """``batch_status`` plus each output's status and milestones and the run's; compact unless ``full``."""
-    status = batch_status(record, elapsed, inputs.audit)
+    status = batch_status(record, elapsed, TrailViews(inputs.audit, recorded_checks(inputs.events)))
+    status['pendingDecisions'] = pending_report(record, inputs.events)   # X159: a check with no decision line yet
     found = {'handoffs': handoff_verdicts(record, inputs.events, inputs.handoffs, elapsed),
              'finalReviews': final_review_verdicts(record, inputs.final_reviews, inputs.events)}
     timing, journal = _timing(record, inputs.timing)

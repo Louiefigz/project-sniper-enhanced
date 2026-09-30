@@ -7,6 +7,7 @@ The derived case uses the real output authorization and bound recording lineage.
 from __future__ import annotations
 
 import copy
+import dataclasses
 import json
 from types import SimpleNamespace
 import unittest
@@ -94,8 +95,9 @@ class ShortChunkIsolationTests(unittest.TestCase):
             return record
         authorize_output(record, OutputAuthorization('L', 'long', 'TEST', 'TEST', output_seconds=60), 0)
         record['clips']['L']['output']['lineage'] = {'request': 'b' * 64, 'sources': [approval.source_sha256]}
+        derived_job = dataclasses.replace(approval, title='TEST derived Short')   # another job than S (C-2, M-052)
         authorize_output(record, OutputAuthorization('D', 'short', 'TEST', 'TEST',
-                                                      approval=approval, derived_from='L'), 0)
+                                                      approval=derived_job, derived_from='L'), 0)
         self.assertEqual(record['clips']['D']['output']['derivedFrom'], 'L')
         return record
 

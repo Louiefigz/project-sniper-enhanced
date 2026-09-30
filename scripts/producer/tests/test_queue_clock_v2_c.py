@@ -22,7 +22,7 @@ from studio import native_budget_binding, native_budget_store
 from studio.native_budget_batches import create_batch
 from studio.native_budget_clock import ClockAnchor, start_anchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
-from studio.native_budget_report import clip_status
+from studio.native_budget_report import TrailViews, clip_status
 from studio.native_budget_schema import validate_record
 from studio.native_budget_schema_data import BOUNDS
 from studio.native_budget_store import TERMINAL_EVENTS, TERMINAL_RESERVE_BYTES, canonical, locked_batch, read_batch
@@ -95,7 +95,7 @@ class AuditTests(AuditCase):
         audit = capacity_audit(self.root, BATCH, record)
         self.assertEqual(audit['A'], {'status': 'exceeds-trail', 'recordedSeconds': 660.0, 'trailSeconds': 60.0,
                                       'trailElapsed': 800.0})
-        self.assertIs(clip_status(record, 'A', 800.0, audit)['creditVerified'], False)
+        self.assertIs(clip_status(record, 'A', 800.0, TrailViews(audit))['creditVerified'], False)
         self.assertIsNone(clip_status(record, 'A', 800.0)['creditVerified'])
         code, status = run_cli('status', '--batch', BATCH)
         self.assertEqual((code, status['capacityAudit']['A']['status'], status['clips']['A']['creditVerified']),

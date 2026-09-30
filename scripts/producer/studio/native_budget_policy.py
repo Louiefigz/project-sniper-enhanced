@@ -222,14 +222,13 @@ def admit_dispatch(record: dict, clip_id: str, kind: str, elapsed: float) -> Dec
 
 
 def admit_new_clip(record: dict, clip_id: str, elapsed: float) -> Decision:
-    """A clip added after start is explicit, visible work; never after minute 25."""
+    """A clip added after start is explicit, visible work on its own clock at any minute (C8): no minute 25 applies,
+    the forecast admits it by name (``production.outputs.authorize_output``); ``elapsed`` decides nothing here."""
     require_clip_id(clip_id)
     if record['status'] != 'active':
         return Decision(False, f'The batch is {record["status"]}')
     if clip_id in record['clips']:
         return Decision(False, f'Clip {clip_id} already exists')
-    if elapsed >= record['deadlines']['preparationSeconds']:
-        return Decision(False, 'Minute 25 has passed: new clips cannot be added to this batch')
     if len(record['clips']) >= BOUNDS['clips']:
         return Decision(False, 'The batch already has the maximum number of clips')
     return Decision(True, 'admitted')

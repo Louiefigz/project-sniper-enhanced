@@ -87,6 +87,20 @@ test("records early material issues without a verdict", async t => {
     (JSON.parse(readFileSync(s.early(2), "utf8")) as JsonRecord).issuesSha256]]);
 });
 
+test("a crash between the event and the file: the same issues publish it; other issues wait for it", t => {
+  const s = setup(t);
+  s.submitEarly(1);
+  const recorded = JSON.parse(readFileSync(s.early(1), "utf8")) as JsonRecord;
+  renameSync(s.early(1), `${s.early(1)}.lost`);   // the event exists; the file was never published
+  assert.throws(() => s.submitEarly(1, [issue("TEST_OTHER")]), /recorded but never published; resubmit exactly its issues/);
+  assert.throws(() => s.submitEarly(2), /The next early findings record of this packet is .*EARLY-1\.json/);
+  const again = s.submitEarly(1);
+  assert.deepEqual([again.index, EARLY.get(s.packet)!.length], [1, 1]);
+  const published = JSON.parse(readFileSync(s.early(1), "utf8")) as JsonRecord;
+  assert.deepEqual(published.timing, recorded.timing);   // the recorded time, not a new one
+  assert.equal(s.submitEarly(2).index, 2);
+});
+
 test("refuses a stale plan", t => {
   const s = setup(t), run = givenCheck.run;
   t.after(() => { givenCheck.run = run; });

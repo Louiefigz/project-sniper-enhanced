@@ -2,16 +2,19 @@
  * A plan critic submits each material issue as soon as it has it (`native-review.ts submit-prebuild-early`), at most
  * three early records per role packet, so the coordinator can route a repair while one can still help. An early record
  * binds the current packet and plan digest, an independent reviewer and 1–16 execution-scoped material issues in the
- * shared issue shape; it is published beside the packet's final record as `<record>-EARLY-<k>.json` (exclusive create)
- * and then recorded on the batch trail (`review-early-findings`: packet, issues SHA-256, count, index). It never
- * carries a verdict and never admits anything. It is batch-bound only: outside a batch there is no budget to route
- * against, so the critic submits the final record. An early record the authority refused stays on disk unrecorded and
- * binds nothing. The final `submit-prebuild` of the same packet must keep every recorded early code as a material
- * issue or withdraw it in `withdrawnEarlyIssues` with a reason; a deleted or edited early record fails it closed.
+ * shared issue shape. It is recorded on the batch trail first (`review-early-findings`: packet, issues SHA-256, count,
+ * index), then published beside the packet's final record as `<record>-EARLY-<k>.json` (exclusive create), the order
+ * the final submission uses. A crash between the two leaves an event without a file: resubmitting the same issues
+ * publishes that record at its recorded time (no second event); other issues are refused until it is published, and
+ * then take the next index. It never carries a verdict and never admits anything. It is batch-bound only: outside a
+ * batch there is no budget to route against, so the critic submits the final record. The final `submit-prebuild` of
+ * the same packet must keep every recorded early code as a material issue or withdraw it in `withdrawnEarlyIssues`
+ * with a reason; a deleted or edited early record fails it closed.
  * Lateness: the final record is late when it is submitted after the `hardBy` the batch authority recorded at the
  * packet's resolution (reported by the engine's given check as `budget`); a packet without a recorded budget or a
  * batch clock is late with `lateBasis: "clock-unknown"` (never on time). The authority records the same rule on its
  * `review-submitted` event (`studio/production/packets.py`). */
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { validateProducerReview, type ProducerMaterialIssue } from "@/app/api/producer/auto-edit/review-contract";
@@ -141,15 +144,37 @@ function readEarlyObservations(file: string, packet: RolePacket, clock: FrameClo
     issues: earlyIssues(value.materialIssues, clock) };
 }
 
-/** The next early record of a batch-bound packet: its index and exact path, refused past the third. */
-function nextRecord(packet: RolePacket, output: string): number {
-  const index = recordedReview(packet).early.length + 1;
+/** The next early record of a batch-bound packet: a recorded one whose file a crash never published (resubmitted with
+ * the same issues), else the next index; refused past the third. The output must be that record's exact path. */
+function nextRecord(packet: RolePacket, output: string): { index: number; recorded: EarlyEvent | null } {
+  const early = recordedReview(packet).early, last = early.at(-1);
+  const pending = last && !existsSync(earlyRecordPath(packet, last.index)) ? last : null;
+  const index = pending ? pending.index : early.length + 1;
   if (index > MAX_EARLY_RECORDS) {
     throw new Error(`A plan critic records at most ${MAX_EARLY_RECORDS} early findings per role packet; put later issues in the final record`);
   }
   const expected = earlyRecordPath(packet, index);
   if (output !== expected) throw new Error(`The next early findings record of this packet is ${expected}`);
-  return index;
+  return { index, recorded: pending };
+}
+
+/** Record the event (a fresh record) or confirm the recorded one (a crash recovery); returns its batch-clock time. */
+function recordEvent(packet: RolePacket, next: { index: number; recorded: EarlyEvent | null },
+  issues: { sha256: string; count: number }, now: number): number {
+  if (next.recorded) {
+    if (next.recorded.issuesSha256 !== issues.sha256 || next.recorded.issues !== issues.count) {
+      throw new Error(`Early findings record ${next.index} was recorded but never published; resubmit exactly its issues to `
+        + "publish it, then submit new issues as the next record");
+    }
+    return next.recorded.elapsed;
+  }
+  const report = earlyFindingsCheck.record(packet.path, issues.sha256, { issues: issues.count, index: next.index }, now);
+  const event = objectValue(report.event, "recorded early findings event");
+  if (report.status !== "early-findings-recorded" || event.index !== next.index || event.issuesSha256 !== issues.sha256
+      || typeof event.elapsed !== "number") {
+    throw new Error("The batch authority did not record this early findings record; nothing was published");
+  }
+  return event.elapsed;
 }
 
 /** Record early material issues of a batch-bound plan-critic packet; never a verdict and never an admission. */
@@ -161,22 +186,20 @@ export function submitNativePrebuildEarlyFindings(paths: ReviewSubmissionPaths) 
   if (canonicalJson(current.given) !== canonicalJson(packet.given)) {
     throw new Error("The batch authority's approval no longer yields this packet's given block; re-resolve the role packet");
   }
-  const output = canonicalOutput(paths.output, "Early findings record", packet.subject), index = nextRecord(packet, output);
+  const output = canonicalOutput(paths.output, "Early findings record", packet.subject), next = nextRecord(packet, output);
   const observations = readEarlyObservations(paths.observations, packet, plan.clock);
   const issuesSha256 = canonicalJsonSha256(observations.issues), clock = current.batchClock;
-  const record = { schemaVersion: 1, scope: EARLY_SCOPE, index, planHash: plan.planHash,
+  const submittedElapsed = recordEvent(packet, next, { sha256: issuesSha256, count: observations.issues.length },
+    clock.nowElapsed);
+  const record = { schemaVersion: 1, scope: EARLY_SCOPE, index: next.index, planHash: plan.planHash,
     rolePacket: { path: packet.path, sha256: packet.sha256 }, observations: observations.file, reviewer: observations.reviewer,
     materialIssues: observations.issues, issuesSha256, timing: { basis: "batch-authority", batchId: clock.batchId,
-      clipId: clock.clipId, resolvedElapsed: clock.resolvedElapsed, submittedElapsed: clock.nowElapsed } };
+      clipId: clock.clipId, resolvedElapsed: clock.resolvedElapsed, submittedElapsed } };
   const published = publishValidatedJson(output, record, candidate => {
     if (canonicalJson(readCutPreviewObject(candidate).value) !== canonicalJson(record)) throw new Error("Early record re-read differs");
   });
-  const report = earlyFindingsCheck.record(packet.path, issuesSha256, { issues: observations.issues.length, index }, clock.nowElapsed);
-  const event = objectValue(report.event, "recorded early findings event");
-  if (report.status !== "early-findings-recorded" || event.index !== index || event.issuesSha256 !== issuesSha256) {
-    throw new Error(`Early record ${published.path} was published but the batch authority did not record it; it binds nothing`);
-  }
-  return { status: "early-findings-recorded" as const, record: published.path, issues: observations.issues.length, index };
+  return { status: "early-findings-recorded" as const, record: published.path, issues: observations.issues.length,
+    index: next.index };
 }
 
 /** The recorded early codes of this packet, each read from its own record (bytes and issues hash re-checked). */
@@ -185,7 +208,8 @@ function earlyCodes(packet: RolePacket, recorded: EarlyEvent[]): string[] {
     const file = earlyRecordPath(packet, event.index);
     let value: JsonRecord;
     try { value = objectValue(readCutPreviewObject(file).value, "early findings record"); } catch {
-      throw new Error(`Early findings record ${event.index} of this packet is missing or unreadable (${file}); it was recorded on the batch trail`);
+      throw new Error(`Early findings record ${event.index} of this packet is missing or unreadable (${file}); it was recorded `
+        + "on the batch trail: resubmit the same early findings to publish it");
     }
     const bound = objectValue(value.rolePacket, "early record packet");
     if (bound.sha256 !== packet.sha256 || value.issuesSha256 !== event.issuesSha256

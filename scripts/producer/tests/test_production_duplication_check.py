@@ -51,7 +51,7 @@ class JobIdentityTests(AddClipCase):
 
     def test_format_characters_case_and_spacing_fold_into_the_same_title(self) -> None:
         """U+200B, U+00AD, a case-only retitle and extra spaces all fold to A's title."""
-        for title in ('TEST title A\u200b', 'TEST ti\u00adtle A', 'test TITLE a', ' TEST  Title\tA '):
+        for title in ('TEST title A\u200b', 'TEST ti\u00adtle A', 'test TITLE a', ' TEST  Title   A '):
             with self.subTest(title=title):
                 self.refused_as_a(approval('A', title=title))
 

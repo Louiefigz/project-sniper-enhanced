@@ -155,9 +155,17 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     if event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
         session.commit(record, mark)
         return after
-    session.commit(record, {**mark, 'event': event, 'creditedSeconds': after - before,
-                            'resource': observation['resource'], 'evidence': observation['evidence'],
-                            'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named})
+    from studio.native_budget_store import TrailFull
+    try:
+        session.commit(record, {**mark, 'event': event, 'creditedSeconds': after - before,
+                                'resource': observation['resource'], 'evidence': observation['evidence'],
+                                'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named})
+    except TrailFull:
+        if not (heartbeat and named):
+            raise
+        # X184 (ruling b): at a full trail a stall change is committed record-only, as the heartbeat it was: the
+        # record and status still name the state, and the waiting render does not fail (as at 2bda52b5).
+        session.commit(record, {**mark, 'event': 'capacity-heartbeat'})
     return after
 
 

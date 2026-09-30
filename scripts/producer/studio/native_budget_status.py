@@ -3,7 +3,9 @@
 ``status_observation`` reads the record, advances the clock, marks provably dead launches and reads
 the authority trail's hand-off, claim, release, packet-resolved and review-submitted events in the
 same batch-lock session, so a delivery or hand-off landing between two reads cannot produce a false
-miss, and a review's timing is cross-checked against the trail observed with the record. ``production_status``
+miss, and a review's timing is cross-checked against the trail observed with the record.
+``audited_observation`` adds the capacity audit (``queue_audit.audit_record``) from that same read, so a status
+reads the trail once (X183 n3). ``production_status``
 adds to ``native_budget_report.batch_status`` each output's state, next actions, blockers,
 milestones and forecast path, and the run's AI, usage, media and cleanup
 (``native_budget_outputs``, ``_milestones``, ``_handoffs``, ``_evidence``, ``_usage``,
@@ -46,7 +48,7 @@ class StatusInputs:
     events: tuple[dict, ...] = ()
     dispatcher: dict | None = None
     full: bool = False
-    audit: dict | None = None   # queue_audit.capacity_audit, which cmd_status reads (M-047); None: not audited
+    audit: dict | None = None   # queue_audit.audit_record, from cmd_status's one trail read; None: not audited
 
 
 CLOCK_KEYS = ('timingPolicy', 'totalElapsedSeconds', 'countedProductionSeconds', 'excludedRenderQueueSeconds',
@@ -63,18 +65,21 @@ def status_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--full', action='store_true', help='print the whole production block, not the summary')
 
 
-def _trail(session: object) -> tuple[dict, ...]:
-    """The trail events status reads (``TRAIL_EVENTS``), inside the caller's batch lock."""
+def _trail(session: object) -> tuple[dict, list[dict]]:
+    """Inside the caller's batch lock: the trail events status reads (``TRAIL_EVENTS``) and every committed event
+    (``approvals.trail_events``: an event followed by its own failure is dropped), from one read."""
     from headless.durable_files import DurableFileError, read_private_file
+    from studio.production.approvals import trail_events
     try:
         data = read_private_file(session.dir_fd, EVENTS, MAX_EVENT_BYTES)
         rows = [json.loads(line) for line in data.decode('utf-8').splitlines() if line.strip()]
+        committed = trail_events(data)
     except (OSError, DurableFileError, UnicodeError, ValueError) as error:
         raise BudgetAuthorityError(f'Budget event trail for {session.batch_id} is unreadable: {error}') from error
-    return tuple(row for row in rows if isinstance(row, dict) and row.get('event') in TRAIL_EVENTS)
+    return tuple(row for row in rows if isinstance(row, dict) and row.get('event') in TRAIL_EVENTS), committed
 
 
-def status_observation(root: Path, batch_id: str) -> tuple[dict, float, tuple[dict, ...]]:
+def _observe(root: Path, batch_id: str) -> tuple[dict, float, tuple[tuple[dict, ...], list[dict]]]:
     """Lock once: read, advance the clock, mark provably dead launches, commit, read the trail."""
     with locked_batch(root, batch_id) as session:
         record = session.read()
@@ -82,6 +87,19 @@ def status_observation(root: Path, batch_id: str) -> tuple[dict, float, tuple[di
         abandoned = reconcile_running(record, elapsed)
         session.commit(record, {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned})
         return record, elapsed, _trail(session)
+
+
+def status_observation(root: Path, batch_id: str) -> tuple[dict, float, tuple[dict, ...]]:
+    """One locked observation: the record, its elapsed time and the trail events status reads."""
+    record, elapsed, (events, _committed) = _observe(root, batch_id)
+    return record, elapsed, events
+
+
+def audited_observation(root: Path, batch_id: str) -> tuple[dict, float, tuple[dict, ...], dict]:
+    """``status_observation`` plus each v2 Short's capacity audit, from the same trail read (X183 n3)."""
+    from studio.production.queue_audit import audit_record
+    record, elapsed, (events, committed) = _observe(root, batch_id)
+    return record, elapsed, events, audit_record(record, committed)
 
 
 def status_inputs(args: argparse.Namespace, events: tuple[dict, ...], dispatcher: dict | None) -> StatusInputs:

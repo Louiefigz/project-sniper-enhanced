@@ -62,7 +62,10 @@ TERMINAL_EVENTS = frozenset({'batch-closed', 'batch-draining', 'launch-completed
                              # Bound (X183 m5): <= MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) events,
                              # each written only within queue_authority.CHECKPOINT_EVENT_BYTES (512 B) as canonical()
                              # encodes it: 512 KiB, half of TERMINAL_RESERVE_BYTES (queue_authority._checkpoint_due).
-                             'capacity-checkpoint'})
+                             'capacity-checkpoint',
+                             # X184 MAJOR: the operator's one stall decision, at most one per Short (decide refuses
+                             # a second), so <= BOUNDS['clips'] rows; a close may need it (X19), so it always writes.
+                             'capacity-stall-decided'})
 # Commits that the settlement room never refuses: settlements, and read-only observations (status and
 # wait advance the clock and mark provably dead launches abandoned, which the room already covers).
 ROOM_EXEMPT = TERMINAL_EVENTS | {'observed', 'capacity-observed', 'capacity-heartbeat'}
@@ -75,6 +78,10 @@ A5_SHAPE_REFUSAL = ('Schema 5 record written by an A5-forecast build (attempts c
 
 class BudgetAuthorityError(RuntimeError):
     """Budget authority is missing, unreadable, corrupt or unwritable: refuse new work."""
+
+
+class TrailFull(BudgetAuthorityError):
+    """The event trail refused a line that is not a settling event: it is within its terminal reserve."""
 
 
 def canonical(value: dict) -> bytes:
@@ -218,7 +225,7 @@ def _append(fd: int, line: bytes, terminal: bool) -> None:
     """Write one line (new work stops at the reserve; settling events always write) and flush it."""
     try:
         if not terminal and os.fstat(fd).st_size + len(line) > MAX_EVENT_BYTES - TERMINAL_RESERVE_BYTES:
-            raise BudgetAuthorityError('Budget event trail is full: no new work is admitted; close the batch')
+            raise TrailFull('Budget event trail is full: no new work is admitted; close the batch')
         write_all(fd, line)
         os.fsync(fd)
     except (OSError, DurableFileError) as error:

@@ -221,7 +221,8 @@ def settle_task_workers(record: dict, task_id: str) -> list[str]:
     Callers must hold the authority lock and supply actual cleanup proof; ordinary
     completion callbacks and heartbeat expiry must never invoke this function. The clip's pending interval
     becomes uncertain only when no waiting owner remains in it: another task's waiting owner keeps the pending
-    interval it is accruing (P1 Step B5, P6).
+    interval it is accruing (P1 Step B5, P6). A v2 clock's stall is then re-tracked, so it clears with the waits it
+    named (X184 m2).
     """
     removed = []
     for clip in record['clips'].values():
@@ -234,5 +235,7 @@ def settle_task_workers(record: dict, task_id: str) -> list[str]:
         if keys and not any(row['state'] == 'waiting' for row in clock['workers'].values()):
             clock['uncertainSeconds'] += clock['pendingSeconds']
             clock['pendingSeconds'] = 0.0
+        if keys and writable(clip):
+            queue_stall.track(clock, clock['observedElapsed'])   # a stall never outlives the waits it names (X184 m2)
         removed.extend(keys)
     return removed

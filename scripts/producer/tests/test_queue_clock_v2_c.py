@@ -2,9 +2,9 @@
 
 AuditTests (P1 Step B4, C11): credit bound to pool evidence and to the registered supervisor, trail checkpoints and
 the status audit; P1-RP3 (X183): the audit's window closes when no owner waits (m2), and a checkpoint event carries
-only what the audit reads, within its share of the trail's terminal reserve (m5). Batches live on the test's private
-authority root (``_live_state_isolation``) on a fake clock, with one Short, A, and no enrolled director, so a render
-wait is the only work; no child process is started.
+only what the audit reads, within its share of the trail's terminal reserve (m5); status audits from its one trail
+read (n3). Batches live on the test's private authority root (``_live_state_isolation``) on a fake clock, with one
+Short, A, and no enrolled director, so a render wait is the only work; no child process is started.
 """
 from __future__ import annotations
 
@@ -114,6 +114,22 @@ class AuditTests(AuditCase):
         audit = capacity_audit(self.root, BATCH, read_batch(self.root, BATCH))['A']
         self.assertEqual((audit['status'], audit['recordedSeconds'], audit['trailSeconds']),
                          ('exceeds-trail', 1100.0, 0.0))
+
+    def test_status_reads_the_trail_once(self) -> None:
+        """X183 n3: status audits the credit from the trail it read under its observation lock, not a second read."""
+        from headless import durable_files
+        self.wait(60, POOL)
+        reads, original = [], durable_files.read_private_file
+
+        def counted(dir_fd: int, name: str, limit: int) -> bytes:
+            """The real read, counting the trail's."""
+            reads.append(name)
+            return original(dir_fd, name, limit)
+
+        with mock.patch.object(durable_files, 'read_private_file', counted):
+            code, status = run_cli('status', '--batch', BATCH)
+        self.assertEqual((code, status['capacityAudit']['A']['status'], reads.count(native_budget_store.EVENTS)),
+                         (0, 'consistent', 1))
 
     def test_an_event_after_the_record_was_read_is_no_mismatch(self) -> None:
         """Only events at or before the record's observed time count: credit committed after this record was read

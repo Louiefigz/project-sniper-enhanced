@@ -182,9 +182,9 @@ class DecisionTests(unittest.TestCase):
         clock.update(excludedSeconds=100.0, observedElapsed=5000.0)
         clock['stall'].update(state='capacity-stalled', sinceElapsed=4000.0, occupants=['a' * 32])
         self.assertEqual(close_refusal(record, 5000.0),
-                         'Short A is capacity-stalled with 4900s counted and its authorization intact: cancel it with '
-                         'capacity-stall --clip A --decision cancel --reason …, or keep the batch open (it resumes '
-                         'when capacity frees)')
+                         'Short A is capacity-stalled with 4900s counted and its authorization intact while its owner '
+                         "waits: the operator's cancel closes around it (capacity-stall --clip A --decision cancel "
+                         '--reason …); otherwise keep the batch open (it resumes when capacity frees)')
         clock['stall'].update(state=None, sinceElapsed=None, occupants=[])
         self.assertIsNone(close_refusal(record, 5000.0))
 
@@ -206,7 +206,7 @@ class DecisionTests(unittest.TestCase):
         self.assertEqual((code, out['reason']), (3, 'Short A is not capacity-stalled'))
         with locked_batch(root, 'batch-auth') as session:
             record = session.read()
-            record['clips']['A']['capacityClock']['stall'].update(state='capacity-stalled', sinceElapsed=1.0,
+            record['clips']['A']['capacityClock']['stall'].update(state='capacity-stalled', sinceElapsed=0.0,
                                                                   occupants=['a' * 32])
             session.commit(record, {'event': 'TEST-stalled'})
         self.assertEqual(run_cli(*cancel)[0], 0)
@@ -221,9 +221,10 @@ class DecisionTests(unittest.TestCase):
 
     def test_contradictory_stall_rows_are_refused(self) -> None:
         """X180 m7: cancelled iff one cancel row; a time iff a state; no occupants without a state; occupants sorted
-        and distinct. 64 distinct names are accepted, truncated or not (the cases moved from test_queue_clock_v2)."""
+        and distinct. 64 distinct names are accepted, truncated or not, stalled or cancelled (the cases moved from
+        test_queue_clock_v2 with their cancelled form, X184 m4)."""
         cancel = {'kind': 'cancel', 'reason': 'TEST', 'elapsed': 1.0}
-        named = {'state': 'capacity-stalled', 'sinceElapsed': 1.0, 'occupants': ['a'], 'truncated': False,
+        named = {'state': 'capacity-stalled', 'sinceElapsed': 0.0, 'occupants': ['a'], 'truncated': False,
                  'decisions': []}
         cases = (('cancelled without its cancel', {**named, 'state': 'cancelled'}),
                  ('a cancel row on a live stall', {**named, 'decisions': [cancel]}),
@@ -239,16 +240,16 @@ class DecisionTests(unittest.TestCase):
             with self.subTest(name):
                 clock = {**copy.deepcopy(clip['capacityClock']), 'stall': stall}
                 self.assertEqual(schema.problem({**clip, 'capacityClock': clock}), INCONSISTENT)
-        for truncated in (False, True):
-            clock = {**copy.deepcopy(clip['capacityClock']), 'stall': {**named, 'occupants': NAMES,
-                                                                       'truncated': truncated}}
+        for extra in ({'truncated': False}, {'truncated': True}, {'state': 'cancelled', 'decisions': [cancel]},
+                      {'state': 'cancelled', 'decisions': [cancel], 'truncated': True}):
+            clock = {**copy.deepcopy(clip['capacityClock']), 'stall': {**named, 'occupants': NAMES, **extra}}
             self.assertIsNone(schema.problem({**clip, 'capacityClock': clock}))
 
 
 class StuckHolderTests(unittest.TestCase):
     """G1: recovery targets the cause; the waiter's earned credit is kept whatever happens to the holders."""
 
-    def test_stuck_holder_is_stopped_by_the_watchdog_and_waiter_credit_is_kept(self) -> None:
+    def test_a_stopped_holder_clears_the_stall_and_waiter_credit_is_kept(self) -> None:
         """A real refusal behind three live holders stalls A. One holder stopped with unverified cleanup keeps its
         slot quarantined: the wait is no longer verified, the stall clears and nothing earned is lost. Another
         stopped with verified cleanup frees its slot, and A's render is admitted. (The watchdog's two outcomes are

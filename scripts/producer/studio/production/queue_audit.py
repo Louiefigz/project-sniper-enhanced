@@ -27,8 +27,13 @@ TOLERANCE = 1e-6
 
 
 def capacity_audit(root: Path, batch_id: str, record: dict) -> dict:
-    """``{clipId: {status, recordedSeconds, trailSeconds, trailElapsed}}`` for each v2 Short of ``record``."""
-    events = _committed_trail(root, batch_id)
+    """``audit_record`` over the batch's committed trail, read under its lock."""
+    return audit_record(record, _committed_trail(root, batch_id))
+
+
+def audit_record(record: dict, events: list[dict]) -> dict:
+    """``{clipId: {status, recordedSeconds, trailSeconds, trailElapsed}}`` for each v2 Short of ``record``, from
+    its committed trail events (``status`` passes those it already read, X183 n3)."""
     return {clip_id: _audit_clip(clip, [row for row in events if row.get('clipId') == clip_id])
             for clip_id, clip in record['clips'].items() if writable(clip)}
 

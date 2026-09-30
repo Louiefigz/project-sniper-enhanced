@@ -137,7 +137,7 @@ def _v2_problem(clock: dict) -> str | None:
             or not (occupancy['fingerprint'] is None or _digest(occupancy['fingerprint'])) \
             or not number(occupancy['sinceElapsed']):
         return 'Short capacity clock occupancy'
-    return _stall_problem(clock['stall']) or _orphans_problem(clock['orphans']) \
+    return _stall_problem(clock['stall'], clock['observedElapsed']) or _orphans_problem(clock['orphans']) \
         or _checkpoint_problem(clock['checkpoint']) or _handoff_problem(clock['handoff'])
 
 
@@ -146,7 +146,7 @@ def _digest(value: object) -> bool:
     return type(value) is str and SHA256.fullmatch(value) is not None
 
 
-def _stall_problem(stall: object) -> str | None:
+def _stall_problem(stall: object, observed: float) -> str | None:
     """The named stall state, the occupants it stalled behind (cut at 64, and then marked truncated), and at
     most one recorded cancellation."""
     if type(stall) is not dict or set(stall) != {'state', 'sinceElapsed', 'occupants', 'truncated', 'decisions'} \
@@ -158,17 +158,21 @@ def _stall_problem(stall: object) -> str | None:
     decisions = stall['decisions']
     if type(decisions) is not list or len(decisions) > 1 or not all(map(_decision_ok, decisions)):
         return 'Short capacity clock stall decisions: at most one, the operator\'s recorded cancel'
-    return None if _stall_consistent(stall) else 'Short capacity clock stall: its state, time, occupants and ' \
-        'decision disagree'
+    return None if _stall_consistent(stall, observed) else 'Short capacity clock stall: its state, time, ' \
+        'occupants and decision disagree'
 
 
-def _stall_consistent(stall: dict) -> bool:
+def _stall_consistent(stall: dict, observed: float) -> bool:
     """X180 m7: ``cancelled`` iff one cancel row; a time iff a state; no state keeps no occupants or truncation
-    (cleared together, X102); occupants sorted and distinct (the union ``queue_stall.track`` writes)."""
-    state, occupants = stall['state'], stall['occupants']
-    if (state == 'cancelled') != (len(stall['decisions']) == 1) or (state is None) != (stall['sinceElapsed'] is None):
+    (cleared together, X102); occupants sorted and distinct (the union ``queue_stall.track`` writes). X184 n3: a state
+    names its occupants, its time is not after the clock's observed time, and its cancel is not dated before it."""
+    state, occupants, since = stall['state'], stall['occupants'], stall['sinceElapsed']
+    if (state == 'cancelled') != (len(stall['decisions']) == 1) or (state is None) != (since is None):
         return False
     if state is None and (occupants or stall['truncated']):
+        return False
+    if state is not None and (not occupants or since > observed
+                              or state == 'cancelled' and stall['decisions'][0]['elapsed'] < since):
         return False
     return occupants == sorted(set(occupants))
 

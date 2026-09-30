@@ -57,9 +57,13 @@ otherwise the slot is quarantined (recover it with
 `native_work_recovery.py <nonce>`). The state clears by itself when the
 holders change or the wait ends. The operator's one decision is
 `capacity-stall --batch SESSION --clip A --decision cancel --reason TEXT`: it
-freezes that Short's work and closes it out. A stalled Short without that
-cancel keeps its batch open (`close` refuses by name), so a batch never closes
-away a stalled Short's remaining authorization. A render owner waiting for the pool extends its own wait only by that
+freezes that Short's work, closes it out and ends its credit, and it is written
+even when the event trail is full. A stalled Short without that cancel keeps its
+batch open while its owner waits (`close` names it first), so a batch never
+closes away a stalled Short's remaining authorization. A stall ends with the
+waits it names: an owner settled by its watchdog, or the Short's hand-off, ends
+it too. At a full trail a waiting owner's stall change is kept in the record
+and `status` only; the render keeps waiting. A render owner waiting for the pool extends its own wait only by that
 settled credit: a wait that earns none (other work of the Short runs, or the
 wait is not for occupied capacity) ends after the owner's capacity patience (at
 most 600 seconds) with `capacity-timeout`. Owners retain their independent active-work limits and cleanup reserve.

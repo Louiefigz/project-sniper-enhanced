@@ -1328,3 +1328,12 @@ docs belong to P3b.
   5-7 record with an unresolved end outside `UNRESOLVABLE`; an archived record of another version that is malformed
   reads as `(unreadable)`. Owner recovery moved to `production/queue_recovery.py`. Tests: `test_queue_clock_v2_e.py`,
   `test_queue_clock_v2_c.CheckpointTests`, `test_budget_schema_lift`, `test_production_batch_succession`.
+- **P1-RP3b fixes (X184).** `capacity-stall-decided` is a `TERMINAL_EVENTS` member (at most one per Short), so the
+  cancel, and then `close`, work at a full trail. A full trail raises `native_budget_store.TrailFull`;
+  `queue_authority._observe_locked` then commits a heartbeat's stall change record-only, so the waiting render never
+  fails. `close_refusal` names a stalled Short before its open-clips text. `settle_task_workers` re-tracks writable
+  clocks; `queue_stall.stalled` excludes handed-off Shorts; `suppressed` ends a cancelled Short's credit;
+  `cancelled_refusal` names the Short. The stall validator also refuses a stall with no occupants, one dated after the
+  clock's observed time, and a cancel dated before its stall. `status` audits the credit from the trail it read under
+  its observation lock (`native_budget_status.audited_observation`, `queue_audit.audit_record`; X183 n3). Tests:
+  `test_queue_clock_stall_b.py`, `test_queue_clock_v2_c.AuditTests.test_status_reads_the_trail_once`.

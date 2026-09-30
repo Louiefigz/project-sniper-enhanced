@@ -16,8 +16,9 @@ fixture and the ledger against the landed fields.
 
     field                                                  validator / writer   landed opt  lifted 5-7 record
     clip capacityClock v2 (production.queue_clock_schema)  M-044                yes         v1 clock, read-only
-    capacityClock.stall: None, capacity-stalled or         M-044 / M-050        val         v1 clocks have none
-      cancelled; <= 64 occupants (else truncated); <= 1 cancel row
+    capacityClock.stall: None, capacity-stalled or         M-044 / M-050        yes         v1 clocks have none
+      cancelled; <= 64 occupants (else truncated); <= 1 cancel row; occupants sorted and distinct; cancelled iff one
+      cancel row; a state names its occupants, not after the clock's observed time, its cancel not before it
     task completed with an unresolved resource             M-042                yes         holds no such row
     production.closure {closedElapsed, unresolvedAtClose}  M-043                yes    opt  absent
     host unresolved-executions.jsonl (its own schema 1)    M-043                yes         not a record field

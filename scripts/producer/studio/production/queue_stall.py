@@ -6,14 +6,16 @@ admissible render plus cleanup, derived from policy), the Short is named ``capac
 the capacity longer than any legitimate render, so it is past its grant or not progressing. Status names the
 holders and points to their watchdog, which stops a stuck render and releases its resources only on verified
 cleanup, else quarantines them (G9). The state clears by itself when the occupants change or the verified wait
-ends. The operator's one decision is ``cancel`` (``capacity-stall --clip ID --decision cancel --reason TEXT``):
-it freezes the Short's work and closes it out for good. While a Short is stalled and not cancelled, the batch
-cannot close (``close_refusal``), so a stalled Short never loses its authorization to a closing batch.
+ends, a watchdog's settlement of the waiting owner included; a handed-off Short is not stalled (X184 m2). The
+operator's one decision is ``cancel`` (``capacity-stall --clip ID --decision cancel --reason TEXT``): it freezes the
+Short's work and closes it out for good. While a Short is stalled and not cancelled, the batch cannot close
+(``close_refusal``), so a stalled Short never loses its authorization to a closing batch.
 
 The stall's ``occupants`` are the sorted union of every verified waiting row's occupants, cut at
 ``MAX_STALL_OCCUPANTS`` with ``truncated`` true (X95, X98); the fingerprint hashes the full union, so a changed
 set is still seen. A truncated stall is never credited (``suppressed``): its interval counts on the clock (fail
-closed). ``occupants`` and ``truncated`` are cleared together on resume (X102). v1 clocks never stall.
+closed); nor is a cancelled Short, truncated or not (X184 m3). ``occupants`` and ``truncated`` are cleared
+together on resume (X102). v1 clocks never stall.
 """
 from __future__ import annotations
 
@@ -77,9 +79,10 @@ def track(clock: dict, elapsed: float) -> str | None:
 
 
 def suppressed(clock: dict) -> bool:
-    """A stall whose occupant list was cut earns no credit: its interval stays counted (X98 M1, fail closed)."""
+    """No credit while a stall's occupant list is cut (X98 M1, fail closed), nor ever after the operator's cancel,
+    truncated or not (X184 m3): the Short was given up. The interval stays counted."""
     stall = clock.get('stall') or {}
-    return stall.get('state') == STALLED and stall.get('truncated') is True
+    return stall.get('state') == CANCELLED or (stall.get('state') == STALLED and stall.get('truncated') is True)
 
 
 def state(clip: dict) -> str | None:
@@ -94,8 +97,16 @@ def closed_out(clip: dict) -> bool:
 
 
 def stalled(clip: dict) -> bool:
-    """A v2 Short named ``capacity-stalled`` and not cancelled."""
-    return state(clip) == STALLED
+    """A v2 Short named ``capacity-stalled``, not cancelled and not handed off (then nothing is left to protect,
+    X184 m2)."""
+    return state(clip) == STALLED and clip['state'] != 'handed-off'
+
+
+def cancelled_refusal(record: dict, clip: dict) -> str:
+    """``phase_refusal``'s text for a Short the operator cancelled, naming it (X184 n1); ``clip`` is the record's."""
+    names = [clip_id for clip_id, row in record['clips'].items() if row is clip]
+    return (f"Short {', '.join(names)}'s stalled capacity wait was cancelled by the operator; no new work is "
+            'admitted for it')
 
 
 def close_refusal(record: dict, elapsed: float) -> str | None:
@@ -104,9 +115,10 @@ def close_refusal(record: dict, elapsed: float) -> str | None:
     for clip_id, clip in record['clips'].items():
         if stalled(clip):
             counted = status(clip, elapsed)['countedProductionSeconds']
-            return (f'Short {clip_id} is capacity-stalled with {counted:.0f}s counted and its authorization intact: '
-                    f'cancel it with capacity-stall --clip {clip_id} --decision cancel --reason …, or keep the batch '
-                    'open (it resumes when capacity frees)')
+            return (f'Short {clip_id} is capacity-stalled with {counted:.0f}s counted and its authorization intact '
+                    'while its owner waits: the operator\'s cancel closes around it (capacity-stall --clip '
+                    f'{clip_id} --decision cancel --reason …); otherwise keep the batch open (it resumes when '
+                    'capacity frees)')
     return None
 
 

@@ -8,11 +8,15 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import copy
 import json
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from _coordination_fixture import OUTPUT, TASK, PlanFixture, canonical_size, padded_long, pin_of, write_plan
 from cross_runtime_canonical_json import canonical_compact_json
-from studio.production.plan_record import approved_content_problem, read_plan_record, validate_plan_record
-from studio.production.plan_short_projection import derived_problem, short_sections, unlisted_keys
+from studio.production.plan_record import (
+    approved_content_problem, homes_problem, read_plan_record, validate_plan_record,
+)
+from studio.production.plan_short_projection import _output_spans, derived_problem, short_sections, unlisted_keys
 
 LIMIT = 1_048_576
 
@@ -124,6 +128,14 @@ class Derived(Case):
         self.assertNotIn('region-0', {row['id'] for row in graphics})
 
 
+    def test_a_group_naming_a_missing_word_is_refused_by_name(self) -> None:
+        """A caption group that names no kept word is refused with the word ids."""
+        plan = copy.deepcopy(self.plan)
+        plan['canvas']['captionGroups'] = [[0, 1], [7]]
+        with self.assertRaisesRegex(ValueError, r'Coordination plan: derived: occurrences \[7\] are not in the plan'):
+            short_sections(self.project(plan, name='missing'))
+
+
 class ShortApprovedContent(Case):
     """Freeze reopens no approved word or title (A5), through ``role_packet_given.bound_facts``."""
 
@@ -224,3 +236,52 @@ class SourceFacts(Case):
         """A named unresolved speaker, and an unknown vocabulary value, are refused."""
         self.refused(self.fact(certainty='unresolved'), 'speaker is null exactly when certainty is unresolved')
         self.refused(self.fact(certainty='none'), 'must be P2-07 values')
+
+    def test_intervals_on_another_source_are_not_facts(self) -> None:
+        """A plan whose source recording the sealed record does not describe derives no facts."""
+        plan = copy.deepcopy(self.plan)
+        plan['assets'][0]['sha256'] = 'f' * 64
+        self.assertEqual(short_sections(self.project(plan, name='other', evidence=self.evidence))['sourceFacts'], [])
+
+    def test_output_frames_round_outward(self) -> None:
+        """Source seconds map through the cut's speed onto frames, rounded outward (P2-08's rule inverted)."""
+        canvas = {'frameRate': '30/1', 'cuts': [{'start': 10.0, 'end': 12.0, 'speed': 2}],
+                  'segments': [{'startFrame': 5, 'endFrameExclusive': 35}]}
+        self.assertEqual(_output_spans({'startSeconds': 10.1, 'endSeconds': 11.01}, canvas), [(0, 6, 21)])
+        self.assertEqual(_output_spans({'startSeconds': 12.0, 'endSeconds': 13.0}, canvas), [])
+
+    def test_a_fact_without_a_basis_is_refused(self) -> None:
+        """A version 1 interval read without a basis (nobody listened) cannot become a fact (X53, D-Q-7)."""
+        from role_packet_evidence_speakers import mapped_intervals
+        def unheard(version: int, speakers: dict) -> list[dict]:
+            """The version 1 reading of an unheard interval."""
+            return [{**row, 'basis': None} for row in mapped_intervals(version, speakers)]
+        with mock.patch('role_packet_evidence_speakers.mapped_intervals', unheard), \
+                self.assertRaisesRegex(ValueError, 'interval 0 of a version 1 record has no basis'):
+            short_sections(self.homes)
+
+
+class Homes(Case):
+    """Freeze-time checks of the executable homes."""
+
+    def test_current_homes_pass(self) -> None:
+        """The record's homes rehash and match the native plan."""
+        self.assertIsNone(homes_problem(self.record))
+
+    def test_each_home_mismatch_is_named(self) -> None:
+        """A wrong plan hash, changed plan bytes, an unpinned regions file and another evidence record are refused."""
+        cases = {'planHash is not the native plan hash': {**self.homes, 'planHash': 'f' * 64},
+                 'regions are pinned exactly when the project has REVIEW-REGIONS.json': {**self.homes, 'regions': None},
+                 'sharedEvidence must pin the sealed record the native plan binds': {**self.homes, 'sharedEvidence': None}}
+        for words, homes in cases.items():
+            with self.subTest(words=words):
+                self.assertIn(words, homes_problem({**self.record, 'homes': homes}))
+        Path(self.homes['nativePlan']['path']).write_text('{}')
+        self.assertIn('Coordination plan: homes', homes_problem(self.record))
+
+    def test_home_shape_is_checked(self) -> None:
+        """The native plan must be <project>/SHORT-PROJECT.json and a Short pins no Long chunks."""
+        other = {**self.homes, 'nativePlan': {**self.homes['nativePlan'], 'path': self.homes['project'] + '/OTHER.json'}}
+        self.refused({**self.record, 'homes': other}, 'nativePlan must be <project>/SHORT-PROJECT.json')
+        self.refused({**self.record, 'homes': {**self.homes, 'longChunks': self.homes['nativePlan']}},
+                     'a Short pins no Long chunks')

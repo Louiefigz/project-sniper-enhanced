@@ -172,3 +172,4 @@ class LongGraphics(unittest.TestCase):
         for change in ({'blocks': 'none'}, {'responsibility': 'audio-dialogue'}, {'range': [20, 100]}):
             with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'g1 is unverified'):
                 validate_plan_record({**record, 'unresolved': [{**gap, **change}]})
+

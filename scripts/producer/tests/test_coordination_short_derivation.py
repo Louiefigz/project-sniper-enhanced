@@ -161,6 +161,15 @@ class DerivationRows(PlanFixture):
         self.assertEqual(classify(self.record, after), 'local')
         self.assertEqual(moved(self.record, after), frozenset({'source-speaker-fidelity'}))
 
+    def test_without_regions_a_composition_change_is_global(self) -> None:
+        """With no REVIEW-REGIONS.json, a change to any composition moves every slice (the project unit)."""
+        before = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-before'))
+        homes = bare(self, copy.deepcopy(self.plan), 'bare-after')
+        (Path(homes['project']) / 'compositions' / 'extra.html').write_text('<div>TEST changed</div>')
+        after = self.short_record(homes)
+        self.assertEqual(classify(before, after), 'global')
+        self.assertEqual(moved(before, after), ALL)
+
 
 class NoSilentChange(PlanFixture):
     """The X201 attack: a change to any native-plan leaf moves a slice or refuses the derivation."""

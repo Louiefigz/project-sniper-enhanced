@@ -191,19 +191,22 @@ def status(clip: dict, elapsed: float) -> dict:
     """Report wall, counted and uncertain time separately, and a v2 Short's stall state and bound (M-050).
 
     ``capacityState`` is what close and the actions act on (``queue_stall.shown_state``): a handed-off Short is not
-    stalled (X190 s1); its raw row stays under ``stall``.
+    stalled (X190 s1); its raw row stays under ``stall``. A v2 Short's times stop at its deliveries and its visible
+    hand-off (M-054, C12: ``queue_handoff.frozen_times``).
     """
+    from studio.production.queue_handoff import frozen_times
     authorized = clip.get('output', {}).get('authorizedElapsed', 0.0)
     clock = clip.get('capacityClock', {})
     v2 = clock.get('policy') == POLICY
+    running = (max(0.0, elapsed - authorized), max(0.0, elapsed - authorized - excluded(clip)))
     return {'capacityState': queue_stall.shown_state(clip), 'stall': clock['stall'] if v2 else None,
             'stallBoundSeconds': queue_stall.stall_seconds() if v2 else None,
             'timingPolicy': clock.get('policy', 'elapsed-wall-v1'),
-            'totalElapsedSeconds': max(0.0, elapsed - authorized),
-            'countedProductionSeconds': max(0.0, elapsed - authorized - excluded(clip)),
+            'totalElapsedSeconds': running[0], 'countedProductionSeconds': running[1],
             'excludedRenderQueueSeconds': excluded(clip),
             'uncertainQueueSeconds': clock.get('uncertainSeconds', 0.0),
-            'capacityWaits': list(clock.get('workers', {}).values())}
+            'capacityWaits': list(clock.get('workers', {}).values()),
+            **(frozen_times(clip, authorized, running) if v2 else {})}
 
 
 def record_delivery(clip: dict, attempt_id: str) -> None:

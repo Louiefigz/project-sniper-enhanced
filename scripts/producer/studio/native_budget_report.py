@@ -118,8 +118,7 @@ def clip_status(record: dict, clip_id: str, elapsed: float, views: TrailViews = 
     running = [row for row in clip['attempts'] if row['status'] == 'running']
     failures = [row for row in clip['attempts'] if row['status'] in ('failed', 'abandoned')]
     fits = forecasts(record, clip_id, elapsed)
-    miss = elapsed >= clip_deadlines(record, clip)['deliverySeconds'] and not on_time(record, clip) \
-        or long_final_missed(record, clip_id, elapsed)
+    miss = sla_miss(record, clip_id, elapsed)
     from studio.production.queue_clock import status as clock_status
     stall = queue_stall.action(clip_id, clip)   # a capacity-stalled Short's first action, even while it renders
     status = {**clock_status(clip, elapsed), 'state': clip['state'], 'addedAfterStart': clip['addedAfterStart'],
@@ -135,6 +134,17 @@ def clip_status(record: dict, clip_id: str, elapsed: float, views: TrailViews = 
     if views.checks is not None and clip_id in views.checks:
         status['duplicationCheck'] = views.checks[clip_id]
     return status
+
+
+def sla_miss(record: dict, clip_id: str, elapsed: float) -> bool:
+    """A v2 Short's recorded visible hand-off decides its SLA (M-054, C12: minute 40 is the visible hand-off; the
+    export time is still reported in ``deliveries``); otherwise no delivery by the deadline, or a Long's final."""
+    clip = record['clips'][clip_id]
+    handoff = clip.get('capacityClock', {}).get('handoff')
+    if handoff:
+        return not handoff['onTime']
+    return elapsed >= clip_deadlines(record, clip)['deliverySeconds'] and not on_time(record, clip) \
+        or long_final_missed(record, clip_id, elapsed)
 
 
 def _credit_verified(audit: dict | None, clip_id: str) -> bool | None:

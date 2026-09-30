@@ -34,6 +34,7 @@ from studio.production import api, dispatch, handoff, inputs
 from studio.production.authorization import Setup, authorize, complete_setup
 from studio.production.handover_commands import NO_APPROVALS
 from studio.production.lifecycle import freeze
+from studio.production.queue_handoff import record_handoff
 from studio.production.tasks import TaskConflict
 
 REPO = Path(__file__).resolve().parents[4]
@@ -214,14 +215,15 @@ def cmd_handoff(args: argparse.Namespace) -> dict:
         elapsed = advance_clock(record)
         clip = clip_record(record, require_clip_id(args.clip))
         delivery = _handoff_delivery(record, clip, evidence)
+        clock = record_handoff(record, clip, elapsed)   # M-054 (C12): the hand-off timed against the Short's clock
         clip['state'] = 'handed-off'
         frozen = freeze(record, args.clip, 'clip handed off', elapsed)
         summary = {key: evidence[key] for key in ('record', 'confirmation', 'mp4', 'viewsVerifiedAt',
                                                   'visibleHandoffAt')}
         session.commit(record, {'event': 'clip-handed-off', 'clipId': args.clip, 'elapsed': elapsed,
-                                'delivery': delivery, 'frozenTasks': frozen, 'handoff': summary})
+                                'delivery': delivery, 'frozenTasks': frozen, 'handoff': summary, 'clock': clock})
     return {'status': 'handed-off', 'clipId': args.clip, 'elapsed': round(elapsed, 1), 'delivery': delivery,
-            'frozenTasks': frozen, 'handoff': summary}
+            'frozenTasks': frozen, 'handoff': summary, 'clock': clock}
 
 
 def _handoff_delivery(record: dict, clip: dict, evidence: dict) -> dict:

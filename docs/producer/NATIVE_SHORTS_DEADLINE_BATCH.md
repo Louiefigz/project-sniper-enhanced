@@ -168,7 +168,13 @@ line explaining it is `unexplained-removal`, and a malformed line is
 `malformed-trail`. This detects a hand-edited record, not a writer who
 rewrites the record and its trail together. Settling lines (outcomes,
 settlements, stall decisions, abandoned launches, the close) always fit the
-trail's 4 MiB reserve; new work stops 15 MiB in. Deadline refusal is not a completed video. The default `status` reads each
+trail's 4 MiB reserve; new work stops 15 MiB in. A delivered Short's counted time
+stops at its first delivery (`countedAtDeliverySeconds`, from the credit frozen
+there). `handoff` records on the Short's clock its counted and total time and
+whether the visible hand-off met the Short's deadline with the credit it held
+then (`handoffOnTime`): minute 40 is the visible hand-off, not the export, so a
+late hand-off is an SLA miss even after an on-time export. After the hand-off
+nothing grows. A v1 clock and a Long keep their rules. Deadline refusal is not a completed video. The default `status` reads each
 visible hand-off from its recorded `clip-handed-off` trail event and needs no live page;
 `status --handoff FILE` re-verifies that file against the live review page and Studio, so it
 is valid only while both are open. `--full` prints every section; the default is compact.

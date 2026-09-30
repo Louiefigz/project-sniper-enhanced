@@ -1386,3 +1386,14 @@ docs belong to P3b.
   pause at most 15 s during a credit grace (D-O10); the task row's own tolerance can end one poll before the credit
   error, which loses the name but not the retry (D3). `process_watch.py` is 299/300: its next editor splits it.
   Tests: `test_queue_credit_snapshot.py`, `test_queue_credit_aborts.py`, `test_queue_clock_v2_f.GrantDeltaTests`.
+- **Counted time stops at delivery; the hand-off is timed (M-054; C12).** `queue_clock.status` (v2 clocks,
+  `queue_handoff.frozen_times`) freezes `countedProductionSeconds` at the first delivery (`countedAtDeliverySeconds`,
+  `totalAtDeliverySeconds`, from `deliveryCredits`); `countedToHandoffSeconds` runs until the visible hand-off.
+  `commands.cmd_handoff` calls `queue_handoff.record_handoff` inside its lock, at the command's batch-clock `elapsed`
+  (B11; the confirmation's `visibleHandoffAt` stays its own field), before the state change: the clock's `handoff`
+  row (`elapsed`, `countedSeconds`, `totalSeconds`, `deadlineElapsed` with the credit held then, `onTime`) goes on
+  the clip, the `clip-handed-off` event and the answer (`clock`; None for a v1 clock or a Long). After it nothing
+  grows (`totalAtHandoffSeconds`, `handoffOnTime`), and `native_budget_report.sla_miss` lets the recorded hand-off
+  decide `slaMiss` (minute 40 is the visible hand-off; the export time stays in `deliveries`). The hand-off timing
+  lives in `production/queue_handoff.py` (split from `queue_clock` for its line budget). Tests:
+  `test_production_handoff_clock.py`.

@@ -1,10 +1,12 @@
 """C-2's job identity and its recorded duplication check: overlap is recorded, never refused on its own.
 
-**One job (C-2, X144).** Two approvals are the same job when they have the same title, source, transcript, word
-ranges and word texts (``one_job``). The derived second ranges are not part of it: they are a cut choice inside the
-word gaps, not the job. Titles compare after NFC normalisation with surrounding whitespace trimmed and internal runs
-collapsed (``native_budget_selection.compare_titles``: a normalization-only difference is the same title).
-``outputs.same_job`` refuses a new Short that is the same job as another clip's current or earlier approval.
+**One job (C-2, X144, X159).** Two approvals are the same job when they have the same folded title, the same source
+and the same ordered kept words: every kept word's transcript index and text, in order (``kept_words``, from
+``native_budget_selection.expand_words``). How the words are grouped into ranges, the derived second ranges and the
+transcript file's bytes are cut or storage choices, not the job; a reordered script is a different edit. The title
+fold (``fold_title``) is NFC, casefold, Unicode format characters (category Cf, such as U+200B and U+00AD) dropped,
+and whitespace trimmed and collapsed. ``outputs.same_job`` refuses a new Short that is the same job as another clip's
+current or earlier approval.
 
 **The check (X121).** When a new Short is authorized (``add-clip`` or ``authorize_output``), every other clip whose
 current approved seconds are the same Short under ``native_budget_selection.same_short`` is compared with it, and the
@@ -15,42 +17,55 @@ result is one value, ``duplicationCheck``:
   ``{"clip", "overlapSeconds" (the seconds both cut, millisecond precision),
   "identity": {"script": "same"|"different", "title": "same"|"different", "lineage": bool}}``.
 
-``script`` compares the words (source, transcript, word ranges and texts), ``title`` the folded title, both with that
-clip's current approval; ``lineage`` says whether the candidate is the same job as one of its earlier approvals. An
+``script`` compares the source and the ordered kept words, ``title`` the folded title, both with that clip's current
+approval; ``lineage`` says whether the candidate is the same job as one of its earlier approvals. An
 effective duplicate never reaches the check (``same_job`` refuses it first and nothing is written), so a recorded row
 always has ``lineage`` false and differs in its title or its words.
 
 The value travels on the clip's adding event only, with no record key. ``recorded_checks`` reads it back for status
 and replays: a clip whose adding event carries no ``duplicationCheck`` (declared at start, or written before M-052)
 has no entry, never ``None`` (X50: absent is not "no overlap"). Each non-null check is also one ``coordinator-note``
-decision on the batch trail in P3a's ``coordination-decision`` line shape (``duplication_decision``);
-``pending_decisions`` names the ones the trail does not hold yet, so any later add, replay or status writes them.
+decision on the batch trail in P3a's ``coordination-decision`` line shape (``duplication_decision``). A check on a
+committed adding event with no decision line yet is a **pending decision** (X159): ``pending_decisions`` builds the
+owed lines, so any later add, replay or status writes them (the trail cap has no exception, so a full trail keeps
+them pending), and ``pending_report`` is what ``status`` shows under ``pendingDecisions`` until a line exists.
 """
 from __future__ import annotations
 
+import unicodedata
 from datetime import datetime, timezone
 
-from studio.native_budget_selection import _shared_seconds, compare_titles, merged, same_short
+from studio.native_budget_selection import _shared_seconds, expand_words, merged, same_short
 from studio.production.host_contract import clip_text
 
 ADDING_EVENTS = ('clip-added', 'output-authorized')   # the events that bind a later clip's first approval
 DECISION_EVENT = 'coordination-decision'   # P3a section 4.0.5; M-085's decision_log reads these lines
 DECISION_PREFIX = 'duplication-check.'     # + the first 32 hex of the adding event's approval identity
-WORDS = ('source', 'transcript', 'wordRanges', 'wordTexts')   # the script half of the job identity (no seconds)
+
+
+def kept_words(row: dict) -> list[tuple[int, str]]:
+    """An approval's kept words in script order: each word's transcript index and its text."""
+    return list(zip(expand_words(row['wordRanges']), row['wordTexts']))
 
 
 def same_words(first: dict, second: dict) -> bool:
-    """Two approval rows keep the same words of the same transcript of the same source."""
-    return all(first[key] == second[key] for key in WORDS)
+    """Two approval rows keep the same words of the same source, in the same order (however the ranges group them)."""
+    return first['source'] == second['source'] and kept_words(first) == kept_words(second)
+
+
+def fold_title(title: str) -> str:
+    """A title as the job identity compares it: NFC, casefold, no format characters (Cf), whitespace collapsed."""
+    folded = unicodedata.normalize('NFC', title).casefold()
+    return ' '.join(''.join(char for char in folded if unicodedata.category(char) != 'Cf').split())
 
 
 def same_title(first: dict, second: dict) -> bool:
-    """Two approval rows carry the same title once NFC and whitespace are folded."""
-    return compare_titles(first['title'], second['title']) != 'different'
+    """Two approval rows carry the same title once folded (``fold_title``)."""
+    return fold_title(first['title']) == fold_title(second['title'])
 
 
 def one_job(first: dict, second: dict) -> bool:
-    """C-2's job identity: the same title and the same words (the derived seconds are not compared)."""
+    """C-2's job identity: the same folded title and the same ordered kept words of the same source."""
     return same_title(first, second) and same_words(first, second)
 
 
@@ -91,12 +106,26 @@ def recorded_checks(events: list[dict] | tuple[dict, ...]) -> dict:
     return {clip: row['duplicationCheck'] for clip, row in last_adding(events).items() if 'duplicationCheck' in row}
 
 
-def pending_decisions(record: dict, events: list[dict] | tuple[dict, ...], elapsed: float) -> list[dict]:
-    """The decision lines owed by recorded non-null checks of the record's clips and not yet on ``events``."""
+def decision_id(added: dict) -> str:
+    """The decision id an adding event's check is recorded under (from its approval identity)."""
+    return DECISION_PREFIX + added['approval'][:32]
+
+
+def owed_adding_events(record: dict, events: list[dict] | tuple[dict, ...]) -> list[dict]:
+    """The record's clips' committed adding events whose non-null check has no decision line on ``events`` yet."""
     written = {row.get('decisionId') for row in events if row.get('event') == DECISION_EVENT}
-    lines = [duplication_decision(record, row, elapsed) for clip, row in sorted(last_adding(events).items())
-             if clip in record['clips'] and row.get('duplicationCheck')]
-    return [line for line in lines if line['decisionId'] not in written]
+    return [row for clip, row in sorted(last_adding(events).items())
+            if clip in record['clips'] and row.get('duplicationCheck') and decision_id(row) not in written]
+
+
+def pending_decisions(record: dict, events: list[dict] | tuple[dict, ...], elapsed: float) -> list[dict]:
+    """The decision lines owed by recorded non-null checks and not yet on ``events``."""
+    return [duplication_decision(record, row, elapsed) for row in owed_adding_events(record, events)]
+
+
+def pending_report(record: dict, events: list[dict] | tuple[dict, ...]) -> list[dict]:
+    """``status``'s ``pendingDecisions``: every owed line by id and output, until the trail holds it (X159)."""
+    return [{'decisionId': decision_id(row), 'outputId': row['clipId']} for row in owed_adding_events(record, events)]
 
 
 def duplication_decision(record: dict, added: dict, elapsed: float) -> dict:
@@ -112,7 +141,7 @@ def duplication_decision(record: dict, added: dict, elapsed: float) -> dict:
               'carries its approved title and script or has it in its lineage, and overlap alone never refuses')
     author = {'role': 'operator', 'taskId': None, 'epoch': None, 'handle': None,
               'recordedBy': record['clips'][clip_id]['output']['recordedBy']}
-    return {'event': DECISION_EVENT, 'decisionId': DECISION_PREFIX + added['approval'][:32], 'outputId': clip_id,
+    return {'event': DECISION_EVENT, 'decisionId': decision_id(added), 'outputId': clip_id,
             'kind': 'coordinator-note', 'decision': clip_text(decision), 'reason': clip_text(reason),
             'author': author, 'planVersion': None, 'refs': [], 'supersedes': None, 'elapsed': round(elapsed, 3),
             'recordedAt': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}

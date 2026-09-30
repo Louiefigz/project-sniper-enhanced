@@ -93,13 +93,21 @@ class OwnClockTests(AddClipCase):
         self.assertEqual((status['A']['deadlineElapsed'], status['C']['deadlineElapsed']), (2400, 3600.0))
 
     def test_status_full_wall_budget_counts_from_the_added_shorts_own_clock(self) -> None:
-        """X144 minor 4: at 2500 s (past the batch's minute 40), C added at 1200 s still has 1100 s to deliver."""
+        """X144 minor 4: at 2500 s (past the batch's minute 40), C added at 1200 s still has 1100 s to deliver, and a
+        Long authorized then has its own 180 minutes; at 1300 s C's missing duration is no blocker (its minute 20)."""
         self.clock.advance(1200)
         self.add('C', approval('C'))
-        self.clock.advance(1300)
-        budget = native_batch.cmd_status(ns(batch='batch-auth', full=True))['clips']['C']['production']['wallBudget']
+        api.authorize_output(self.root, 'batch-auth', OutputAuthorization('L', 'long', 'TEST Long', 'TEST operator',
+                                                                          output_seconds=600.0))
+        self.clock.advance(100)
+        self.assertEqual(native_batch.cmd_status(ns(batch='batch-auth', full=True))['clips']['C']['production']
+                         ['blockers'], [])
+        self.clock.advance(1200)
+        clips = native_batch.cmd_status(ns(batch='batch-auth', full=True))['clips']
+        budget = clips['C']['production']['wallBudget']
         self.assertEqual((budget['preparationRemainingSeconds'], budget['launchCutoffRemainingSeconds'],
                           budget['deliveryRemainingSeconds']), (200.0, 980.0, 1100.0))
+        self.assertEqual(clips['L']['production']['wallBudget']['deliveryRemainingSeconds'], 9500.0)
 
     def test_add_after_minute_25_is_admitted_by_name(self) -> None:
         """No batch-wall minute 25: an add at 1600 s is admitted; a Short that cannot fit is refused by name."""

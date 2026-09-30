@@ -113,6 +113,7 @@ class DurationEvidenceTests(unittest.TestCase):
                 self.assertEqual(duration_evidence(seconds), NONE_TEXT)
         self.assertEqual(formats.long_demand(657.365)['evidence'], duration_evidence(657.365))
         self.assertEqual(formats.long_demand(834.3)['evidence'], NONE_TEXT)
+        self.assertEqual(formats.long_demand(700.5)['evidence'], NONE_TEXT)   # the duration itself, never truncated
 
     def test_the_false_ten_minute_text_is_gone(self) -> None:
         """The pre-P4 claim that no 10-minute Long export was recorded appears in neither module."""
@@ -133,6 +134,16 @@ class C0679TableTests(unittest.TestCase):
         for got, want in zip((reserve, final, preparation), expected):
             self.assertAlmostEqual(got, want, delta=0.1)
         self.assertEqual(delivery, 10800.0)
+
+    def test_preparation_deadlines_are_exact(self) -> None:
+        """The preparation deadline a row records (rounded to the millisecond) for a Long authorized at 0."""
+        expected = {(660.0, 'v1'): 6627.5, (660.0, 'v2'): 6716.225, (834.3, 'v1'): 5821.363,
+                    (834.3, 'v2'): 5928.171, (900.0, 'v1'): 5517.5, (900.0, 'v2'): 5631.125}
+        policies = {'v1': LONG_POLICY_V1, 'v2': LONG_POLICY_V2}
+        for (seconds, version), preparation in expected.items():
+            with self.subTest(seconds=seconds, version=version):
+                self.assertEqual(formats.expected_deadlines('long', 0.0, seconds, policies[version]),
+                                 (preparation, 10800.0))
 
     def test_p660(self) -> None:
         """P = 660 s: v1 R 1680.0, final 2492.5, Dp 6627.5; v2 R 1680.0, final 2403.8, Dp 6716.2."""

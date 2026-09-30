@@ -3,9 +3,10 @@
 A row is readable only while its policy copy is a version this engine knows: exactly v1 (every Long authorized
 before P4), or exactly v2 plus a valid late-delivery mode. A v1 row's deadlines are verified with its own copy, never
 with the current policy; a forged or unknown copy is refused by name on every authority read; a new authorization
-freezes the current policy. Records are in memory and every approval, clip and recorder is a TEST fixture. The
-mixed-forecast admission is stubbed where an authorization is only the way to write a row: what is written, not
-whether it fits, is under test here.
+freezes the current policy. Records are in memory and every approval, clip and recorder is a TEST fixture; each
+record is read as the store returns it, through its own serializer (sorted keys, ``native_budget_store.canonical``),
+so a check that depended on the literal's key order would fail here. The mixed-forecast admission is stubbed where an
+authorization is only the way to write a row: what is written, not whether it fits, is under test here.
 """
 from __future__ import annotations
 
@@ -22,6 +23,7 @@ from _budget_fixture import FakeClock, approval, fake_clock
 from studio import native_budget_schema as schema
 from studio.native_budget_clock import start_anchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
+from studio.native_budget_store import canonical
 from studio.production import formats, long_policy
 from studio.production.long_policy import CURRENT_LONG_POLICY, LONG_POLICY_V1, LONG_POLICY_V2, known_long_policy
 from studio.production.outputs import OutputAuthorization, authorize_output
@@ -50,6 +52,11 @@ def with_policy(record: dict, policy: object) -> dict:
     return record
 
 
+def stored(record: dict) -> dict:
+    """``record`` as the store writes and reads it back: sorted keys, compact JSON (the store's ``canonical``)."""
+    return json.loads(canonical(record))
+
+
 def v2_with(late: object) -> dict:
     """The v2 policy with ``late`` as its late-delivery mode."""
     return {**copy.deepcopy(LONG_POLICY_V2), 'lateDelivery': late}
@@ -63,9 +70,11 @@ class LongPolicyVersionTests(unittest.TestCase):
         record = with_policy(run_with_long(), LONG_POLICY_V1)
         row = record['clips']['L']['output']
         row['preparationElapsed'] = V1_PREPARATION_600
-        schema.validate_record(record)
-        self.assertEqual(known_long_policy(row['policy']), 'v1')
+        schema.validate_record(stored(record))
+        self.assertEqual(known_long_policy(stored(record)['clips']['L']['output']['policy']), 'v1')
         self.assertEqual(formats.expected_deadlines('long', 0.0, 600.0, row['policy']), (6905.0, 10800.0))
+        # Rounded to the millisecond, as recorded: 10800 - 1854.3 - (2.9 x 834.3 + 80) x 1.25 = 5821.3625.
+        self.assertEqual(formats.expected_deadlines('long', 0.0, 834.3, LONG_POLICY_V1), (5821.363, 10800.0))
         self.assertEqual(formats.clip_deadlines(record, record['clips']['L']),
                          {'preparationSeconds': 6905.0, 'draftDecisionSeconds': 6905.0, 'deliverySeconds': 10800.0,
                           'handoffReserveSeconds': 1620.0, 'cleanupReserveSeconds': 45})
@@ -77,7 +86,7 @@ class LongPolicyVersionTests(unittest.TestCase):
         for late in ({'mode': 'refuse'}, {'mode': 'labeled', 'graceSeconds': 3600},
                      {'mode': 'labeled', 'graceSeconds': 1}, {'mode': 'labeled', 'graceSeconds': 10800}):
             with self.subTest(late=late):
-                record = with_policy(run_with_long(), v2_with(late))
+                record = stored(with_policy(run_with_long(), v2_with(late)))
                 schema.validate_record(record)
                 self.assertEqual(known_long_policy(record['clips']['L']['output']['policy']), 'v2')
 
@@ -102,16 +111,19 @@ class LongPolicyVersionTests(unittest.TestCase):
         """``policy`` is no known version, and a record whose Long row carries it is refused by name on read."""
         self.assertIsNone(known_long_policy(policy))
         with self.assertRaisesRegex(ValueError, UNKNOWN):
-            schema.validate_record(with_policy(run_with_long(), policy))
+            schema.validate_record(stored(with_policy(run_with_long(), policy)))
 
     def test_new_authorization_freezes_current_policy(self) -> None:
         """``authorize_output`` writes a copy of the current policy (v2 with its late mode) through the alias."""
-        row = run_with_long()['clips']['L']['output']
+        record = run_with_long()
+        row = record['clips']['L']['output']
+        schema.validate_record(stored(record))
+        self.assertEqual(known_long_policy(stored(record)['clips']['L']['output']['policy']), 'v2')
         self.assertEqual(json.dumps(row['policy'], sort_keys=True), json.dumps(CURRENT_LONG_POLICY, sort_keys=True))
         self.assertIsNot(row['policy'], CURRENT_LONG_POLICY)
         self.assertIs(formats.LONG_POLICY, CURRENT_LONG_POLICY)
-        self.assertEqual((known_long_policy(row['policy']), row['policy']['lateDelivery']),
-                         ('v2', long_policy.LATE_LONG_DELIVERY))
+        self.assertEqual((known_long_policy(row['policy']), row['policy']['version'], row['policy']['lateDelivery']),
+                         ('v2', 2, long_policy.LATE_LONG_DELIVERY))
         self.assertEqual((row['preparationElapsed'], row['deadlineElapsed']),
                          formats.expected_deadlines('long', 0.0, 600.0, CURRENT_LONG_POLICY))
 

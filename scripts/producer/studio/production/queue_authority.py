@@ -51,17 +51,13 @@ def bind_allocation(grant: dict, record: dict, context: dict) -> dict:
 
 
 def credit_delta(grant: dict) -> float:
-    """Read only settled credit since this allocation was created."""
+    """Read only settled credit since this allocation was created, without the batch lock (``queue_credit``)."""
     ref = grant.get('capacityCredit')
     if ref is None:
         return 0.0
     validate_reference(ref)
-    from studio.native_budget_store import read_batch
-    record = read_batch(Path(ref['authority']), ref['batchId'])
-    clip = record['clips'][ref['clipId']]
-    if not queue_clock.enabled(clip) or record['status'] != 'active':
-        return 0.0
-    return max(0.0, queue_clock.excluded(clip) - ref['atGrant'])
+    from studio.production.queue_credit import settled_credit
+    return max(0.0, settled_credit(ref) - ref['atGrant'])
 
 
 def validate_reference(ref: object) -> None:

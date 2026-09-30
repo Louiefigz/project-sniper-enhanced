@@ -73,6 +73,9 @@ def failure_category(result: dict) -> str | None:
         return None
     if result.get('cleanup', {}).get('verified') is not True:
         return 'cleanup-unverified'
+    from studio.production.queue_credit import CREDIT_CATEGORIES
+    if result.get('failureCategory') in CREDIT_CATEGORIES:   # a named abort outranks the text heuristics (X143 m1)
+        return result['failureCategory']
     reason = result.get('abortReason') or ''
     if 'signal' in reason or 'KeyboardInterrupt' in reason or reason.startswith('supervisor received SIG'):
         return 'cancelled'
@@ -136,12 +139,18 @@ def owner_succeeded(owner: NativeRun, output: Path) -> bool:
 
 
 def production_remaining(owner: NativeRun) -> float | None:
-    """Return media time on the original allocation, preserving its cleanup reserve."""
+    """Return media time on the original allocation, preserving its cleanup reserve; a named credit error (P1 B10)
+    records its category on the owner before it propagates (monitor and admission alike, X143 m2)."""
     if owner.hard_deadline is None:
         return None
     from studio.native_budget_clock import allocation_remaining
+    from studio.production.queue_credit import CREDIT_ERRORS, credit_category
     grants = getattr(owner, 'production_allocations', (owner.hard_deadline,))
-    return min(allocation_remaining(grant) - grant['cleanupReserveSeconds'] for grant in grants)
+    try:
+        return min(allocation_remaining(grant) - grant['cleanupReserveSeconds'] for grant in grants)
+    except CREDIT_ERRORS as error:
+        owner.result['failureCategory'] = credit_category(error)
+        raise
 
 
 def require_production_time(owner: NativeRun) -> float | None:
@@ -214,9 +223,15 @@ def require_launch_time(owner: NativeRun) -> None:
 
 
 def monitor_limits(owner: NativeRun) -> bool:
-    """Stop media before either original allocation or independent stage time expires."""
+    """Stop media before either original allocation or independent stage time expires; credit that stays unreadable
+    past its read tolerance, or that went down, stops it by name at once (P1 B10, ``queue_credit``)."""
     import time
-    remaining = production_remaining(owner)
+    from studio.production.queue_credit import CREDIT_ERRORS
+    try:
+        remaining = production_remaining(owner)
+    except CREDIT_ERRORS as error:
+        owner.abort_reason = str(error)     # production_remaining recorded the category
+        return True
     if remaining is not None and remaining <= 0:
         owner.abort_reason = 'Production deadline reached; cleanup reserve retained'
         owner.result['failureCategory'] = 'budget-exhausted'

@@ -1369,3 +1369,20 @@ docs belong to P3b.
   class's worst case fits (`test_trail_reserve_budget`). A failed checkpoint is written once (`_FAILED_CHECKPOINTS`,
   n6); status shows a handed-off Short as not stalled (`queue_stall.shown_state`, s1); a settlement re-track only
   clears a stall. Tests: `test_queue_clock_v2_f.py`, `test_queue_clock_stall_c.py`, `test_trail_reserve_budget.py`.
+- **Lock-free credit reads (M-053; C9).** `production/queue_credit.py` reads a Short's settled credit and a task row
+  without the batch lock (`snapshot`: the atomically replaced `authority.json`, checked only by
+  `queue_clock_schema.problem` for the clip and by the batch status). Credit is cached per clip for
+  `CREDIT_CACHE_SECONDS` (1 s); a failed read returns the last value for at most `CREDIT_READ_TOLERANCE_SECONDS`
+  (15 s, the watchdog's grace), then raises `CapacityCreditUnavailable`; credit below `max(atGrant, last read)`
+  raises `CapacityCreditRegressed` (never tolerated, never transient). `queue_authority.credit_delta` and
+  `process_watch._task_row` read through it; `read_batch` stays only in `owner_context`, `record_observation` and
+  `supporting_contexts`. The owner's monitor stops by name at once (`native_run_lifecycle.monitor_limits`;
+  `production_remaining` records the category before it propagates, on the admission path too; `failure_category`
+  passes both credit categories through before its text checks). The watchdog names the stop only after
+  `DEADLINE_GRACE_SECONDS` past the error's `since`, as a returned reason (SIGTERM, then the cleanup grace;
+  `queue_credit.watchdog_stop`), and `process_settle._name_credit_stop` gives a launch the exporter closed as
+  `cancelled` the watchdog's credit category, so a regression gets no retry. `TRANSIENT` gains
+  `capacity-credit-unavailable` (L-J J1): one retry. Documented limits: the watchdog's claim, cancel and ack checks
+  pause at most 15 s during a credit grace (D-O10); the task row's own tolerance can end one poll before the credit
+  error, which loses the name but not the retry (D3). `process_watch.py` is 299/300: its next editor splits it.
+  Tests: `test_queue_credit_snapshot.py`, `test_queue_credit_aborts.py`, `test_queue_clock_v2_f.GrantDeltaTests`.

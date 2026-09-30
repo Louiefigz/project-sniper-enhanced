@@ -40,7 +40,7 @@ from studio.native_budget_clock import start_anchor
 from studio.native_budget_registry import owner_binding
 from studio.native_budget_store import BudgetAuthorityError
 from studio.native_export import export_adapter
-from studio.production import process, process_group
+from studio.production import process, process_group, queue_credit
 from studio.production.process import ExportLaunch, TaskClaim
 from studio.production.process_settle import STOP_REQUESTED, UNACKNOWLEDGED, Ending, settle
 
@@ -112,27 +112,32 @@ def read_grant(directory: Path) -> dict | None:
     try:
         grant = bound_json(file, maximum=4096)
         allocation_remaining(grant)
+    except queue_credit.CREDIT_ERRORS:
+        raise   # a named credit error is _reason's (X143), never an unreadable grant
     except (OSError, RuntimeError, KeyError, TypeError, ValueError) as error:
         raise ExportRefused(f'The published export grant is unreadable: {error}') from error
     return grant
 
 
 def _task_row(task: TaskClaim) -> dict | None:
-    """The task's row, read without writing; None when unreadable."""
+    """The task's row, read without the batch lock (``queue_credit``); None when unreadable past its tolerance."""
     try:
-        return store.read_batch(store.default_root(), task.batch_id)['production']['tasks'].get(task.task_id)
+        return queue_credit.task_row(store.default_root(), task.batch_id, task.task_id)
     except (BudgetAuthorityError, OSError, ValueError):
         return None
 
 
 def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
-    """Why the child must stop now, or None."""
+    """Why the child must stop now, or None; a named credit error after the owner's grace (queue_credit)."""
     if stops.reason:
         return INTERRUPTED, f'the watchdog {stops.reason}'
-    grant = read_grant(watch.directory)
-    remaining = allocation_remaining(watch.deadline)
-    if grant:
-        remaining = min(remaining, allocation_remaining(grant) + process.DEADLINE_GRACE_SECONDS)
+    try:
+        grant = read_grant(watch.directory)
+        remaining = allocation_remaining(watch.deadline)
+        if grant:
+            remaining = min(remaining, allocation_remaining(grant) + process.DEADLINE_GRACE_SECONDS)
+    except queue_credit.CREDIT_ERRORS as error:
+        return queue_credit.watchdog_stop(error)
     if remaining <= 0:
         return DEADLINE, 'the export ran past its launch grant' if grant else 'the export ran past its batch deadline'
     row = _task_row(watch.task) if watch.task else None

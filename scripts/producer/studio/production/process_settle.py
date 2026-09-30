@@ -19,6 +19,9 @@ child's group and recorded sessions gone. One locked transaction decides, in thi
   interrupted exporter recorded; otherwise an exporter-recorded failure keeps its category, a
   refused reservation fails ``launch-refused`` with the child's published reason, and anything else
   fails ``export-exited-without-outcome``. A launch still marked running is closed with the category.
+  A launch the exporter closed as ``cancelled`` because the watchdog stopped it on a named credit
+  error (``queue_credit.CREDIT_CATEGORIES``) takes that category: the retry rule then sees the
+  credit abort, never the interruption the stop caused (P1 B10: a regression is never transient).
 """
 from __future__ import annotations
 
@@ -32,6 +35,7 @@ from studio.production.host_contract import clip_text
 from studio.production.reconcile import _exact_outcome
 from studio.production.session import transact
 from studio.production.queue_clock import SETTLED, settle_task_capacity
+from studio.production.queue_credit import CREDIT_CATEGORIES
 from studio.production.task_schema import LIVE, MAX_TASK_OWNERS, UNRESOLVABLE, finish
 
 STOP_REQUESTED, UNACKNOWLEDGED = 'stop-requested', 'launch-not-acknowledged'
@@ -63,12 +67,30 @@ def _end(task: dict, state: str, elapsed: float, failure: tuple[str, str] | None
 def _close_attempt(record: dict, task: dict, failure: tuple[str, str], elapsed: float) -> None:
     """Close the task's launch still marked running (or abandoned) with the watchdog's category."""
     attempts = record['clips'][task['clipId']]['attempts'] if task['attempt'] else []
+    _name_credit_stop(attempts, task, failure)
     if not any(row['id'] == task['attempt'] and row['status'] in ('running', 'abandoned') for row in attempts):
         return
     record_outcome(record, {'clipId': task['clipId'], 'attemptId': task['attempt']},
                    {'status': 'failed', 'failureCategory': failure[0], 'failedPhase': None,
                     'errorType': 'ExportWatchdog', 'error': failure[1], 'successStatuses': (), 'stages': []},
                    elapsed)
+
+
+def _name_credit_stop(attempts: list[dict], task: dict, failure: tuple[str, str]) -> None:
+    """Give a launch the exporter closed as ``cancelled`` under the watchdog's named credit stop that category.
+
+    The watchdog's graceful SIGTERM makes the interrupted exporter record ``cancelled``, which is transient; the
+    stop's own category decides the retry instead (X158 D1). Nothing else is changed.
+
+    Args:
+        attempts: The clip's launch rows.
+        task: The settled task (its ``attempt`` names the bound launch).
+        failure: The watchdog's (category, detail).
+    """
+    row = next((row for row in attempts if row['id'] == task['attempt']), None)
+    if failure[0] in CREDIT_CATEGORIES and row is not None and row['status'] == 'failed' \
+            and (row['failure'] or {}).get('category') == 'cancelled':
+        row['failure']['category'] = failure[0]
 
 
 def _attempt_status(record: dict, task: dict) -> str | None:

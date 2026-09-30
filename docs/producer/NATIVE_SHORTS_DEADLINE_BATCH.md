@@ -82,7 +82,10 @@ run-scoped task's deadline gains Short credit, but never past the run's delivery
 deadline. A render owner waiting for the pool extends its own wait only by that
 settled credit: a wait that earns none (other work of the Short runs, or the
 wait is not for occupied capacity) ends after the owner's capacity patience (at
-most 600 seconds) with `capacity-timeout`. Owners retain their independent active-work limits and cleanup reserve.
+most 600 seconds) with `capacity-timeout`. Owners read their credit without the batch lock (a
+snapshot of the replaced record, at most 1 s old); a read that keeps failing for
+15 s stops the render as `capacity-credit-unavailable` (one retry), and credit
+that goes backwards stops it as `capacity-credit-regressed` (never retried). Owners retain their independent active-work limits and cleanup reserve.
 Retries and changed approval records preserve already spent time and counters.
 Long outputs and older saved Short authorizations retain their existing clock
 policy. A Long never borrows a Short's queue credit.

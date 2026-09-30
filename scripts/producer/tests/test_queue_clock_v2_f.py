@@ -3,10 +3,11 @@
 RunScopedDeadlineTests (X190 m1, m3): a run-scoped task's deadline never passes the run's delivery deadline, and
 follows the largest credit of any Short. AuditChainTests (m2, n2, s2): the audit checks every capacity row against its
 predecessor, names a malformed row, and reads committed events only. FailedCheckpointTests (n6): a checkpoint whose
-record replace failed is written once. SecondOwnerTests (n1): pending credit settled after another owner's event is
-no false alarm. SettlementAuditTests (X189 F2, X192): a watchdog or reconcile settlement writes the removed owners and
-the settled credit on its own terminal event, which closes the audit's window; a removal no row explains is named.
-On private authority roots and fake clocks (``AuditCase``, ``_production_task_flow_fixture``) or in memory
+record replace failed is written once. GrantDeltaTests (M-053): a grant gains only the credit since it was bound.
+SecondOwnerTests (n1): pending credit settled after another owner's event is no false alarm. SettlementAuditTests
+(X189 F2, X192): a watchdog or reconcile settlement writes the removed owners and the settled credit on its own
+terminal event, which closes the audit's window; a removal no row explains is named. On private authority roots and
+fake clocks (``AuditCase``, ``CreditCase``, ``_production_task_flow_fixture``) or in memory
 (``test_queue_clock_v2_b.Run``, ``test_queue_clock_stall.Waiter``); no child process is started.
 """
 from __future__ import annotations
@@ -21,6 +22,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from _budget_fixture import CHILD, DISPATCHER, receipt, task_spec
+from _queue_credit_fixture import CreditCase
 from _production_task_flow_fixture import BATCH as FLOW_BATCH, Batch, run_cli
 from studio import native_budget_binding, native_budget_store
 from studio.native_budget_store import BudgetAuthorityError, locked_batch, read_batch
@@ -175,6 +177,16 @@ class FailedCheckpointTests(AuditCase):
         lines = (self.root / 'batches' / BATCH / 'events.jsonl').read_text().splitlines()
         names = [json.loads(line)['event'] for line in lines if line.strip()]
         self.assertEqual((names.count('capacity-checkpoint'), names.count('commit-failed')), (1, 1))
+
+
+class GrantDeltaTests(CreditCase):
+    """M-053: the owner's lock-free credit read gains only the credit settled since its grant (``atGrant``)."""
+
+    def test_a_grant_gains_only_the_credit_since_it_was_bound(self) -> None:
+        """A grant bound when A held 40 s reads 60 once A holds 100 s, never the 100 A holds in all."""
+        self.grant = self.bind(self.credit_record(40.0), 'A')
+        self.put(self.credit_record(100.0))
+        self.assertEqual((self.grant['capacityCredit']['atGrant'], self.delta()), (40.0, 60.0))
 
 
 class SecondOwnerTests(unittest.TestCase):

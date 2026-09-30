@@ -25,7 +25,7 @@ from studio.production.formats import (
 # One retry per clip, shared: host conditions that can clear without changing inputs (a full disk
 # included, so freeing space is not an 'unchanged deterministic failure').
 TRANSIENT = frozenset({'host-memory-pressure', 'measurement-unavailable', 'cancelled',
-                       'abandoned', 'capacity-timeout', 'disk-space'})
+                       'abandoned', 'capacity-timeout', 'disk-space', 'capacity-credit-unavailable'})
 PS_ENVIRONMENT = {'TZ': 'UTC', 'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'}
 
 

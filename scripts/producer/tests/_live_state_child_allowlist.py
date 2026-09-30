@@ -120,6 +120,8 @@ REVIEWED: dict[str, str] = {
     # RACE imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)
     'test_production_tasks.py': ISOLATED_CHILD,
     'test_program_mix_registry.py': STDLIB,
+    # the child only holds locked_batch(<root argument>) while the test reads credit (W2-D2 deferred; M-053)
+    'test_queue_credit_snapshot.py': EXPLICIT_ROOT,
     'test_render_lane.py': NO_OWNER,
     'test_review_packet.py': NO_OWNER,
     # node _isolated_review.ts gets this test's private budget/pool roots (M-020 review)

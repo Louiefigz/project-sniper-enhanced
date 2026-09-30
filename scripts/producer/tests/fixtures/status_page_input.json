@@ -1,0 +1,470 @@
+{
+  "fixtureNote": "Provisional page input (W3-D11): a full status read with P3b-13 coordination blocks. The page reads only the names used here; M-110 meets this shape or the page follows M-110.",
+  "batchId": "batch-page-fixture",
+  "status": "active",
+  "elapsedSeconds": 1265.4,
+  "phase": "preparation",
+  "slaMisses": [],
+  "actions": [],
+  "clips": {
+    "q1": {
+      "production": {
+        "state": "drafting",
+        "coordination": {
+          "owner": {
+            "taskId": "author-q1-r1",
+            "role": "author",
+            "identity": "declared:claude-code:s-00000000000000b2:agent-a41f",
+            "identityBasis": "declared"
+          },
+          "planVersion": {
+            "version": 2,
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "frozenElapsed": 640.0,
+            "changeClass": "repair"
+          },
+          "readiness": {
+            "draftReady": true,
+            "finalReady": false,
+            "reason": "the final critic has not passed"
+          },
+          "activeTasks": [
+            {
+              "taskId": "critic-q1-r1",
+              "kind": "review",
+              "role": "critic",
+              "phase": "review",
+              "responsibilities": [
+                "final-critic"
+              ],
+              "state": "ready",
+              "identity": null,
+              "identityBasis": "none",
+              "claimedElapsed": null,
+              "deadlineElapsed": 2400.0,
+              "overdue": false
+            }
+          ],
+          "queue": {
+            "state": "waiting-for-ai-slot",
+            "reason": "All 4 AI slots of session s-00000000000000b2 (claude-code) are held",
+            "resource": "ai-slot",
+            "position": 2,
+            "ahead": [
+              "repair-q2-r1"
+            ],
+            "since": 1100.0
+          },
+          "clock": {
+            "countedSeconds": 845.2,
+            "remainingSeconds": 1554.8,
+            "wallSeconds": 1265.4,
+            "excludedRenderWaitSeconds": 190.0,
+            "uncertainSeconds": 12.0,
+            "policy": "short-v2",
+            "capacityState": null,
+            "handoff": null
+          },
+          "nextAction": "Launch the final critic for q1 when a slot frees (it is second in this session's order)",
+          "review": {
+            "ready": {
+              "at": 1180.0,
+              "label": "labeled review draft"
+            },
+            "shown": {
+              "at": null
+            },
+            "playedListened": {
+              "played": {
+                "basis": "player-observed-playing",
+                "by": null,
+                "at": 1200.5
+              },
+              "listened": {
+                "basis": "none",
+                "by": null,
+                "at": null
+              }
+            },
+            "editoriallyApproved": {
+              "at": null,
+              "verdict": null
+            }
+          },
+          "findings": [
+            {
+              "id": "f-1",
+              "owner": "author",
+              "state": "open",
+              "severity": "material",
+              "range": [
+                12.0,
+                14.5
+              ]
+            },
+            {
+              "id": "f-2",
+              "owner": "author",
+              "state": "open",
+              "severity": "minor",
+              "range": [
+                30.2,
+                31.0
+              ]
+            },
+            {
+              "id": "f-3",
+              "owner": "operator",
+              "state": "deferred",
+              "severity": "material",
+              "range": null
+            }
+          ],
+          "activeRepair": null,
+          "routedFindings": [],
+          "staffing": "none recorded",
+          "identityNote": "Identities are declared by the coordinator, not authenticated.",
+          "tokensByRole": {
+            "roles": {
+              "author": {
+                "totals": {
+                  "inputTokens": 412300,
+                  "cachedInputTokens": 350120,
+                  "outputTokens": 9870,
+                  "reasoningTokens": 2400
+                },
+                "unknownBecause": []
+              },
+              "critic": {
+                "totals": {
+                  "inputTokens": null,
+                  "cachedInputTokens": null,
+                  "outputTokens": null,
+                  "reasoningTokens": null
+                },
+                "unknownBecause": [
+                  "1 host task(s) have no transcript record"
+                ]
+              }
+            },
+            "team": {
+              "totals": {
+                "inputTokens": null,
+                "cachedInputTokens": null,
+                "outputTokens": null,
+                "reasoningTokens": null
+              },
+              "knownPartial": {
+                "inputTokens": 0,
+                "cachedInputTokens": 0,
+                "outputTokens": 0,
+                "reasoningTokens": 0
+              },
+              "unknownBecause": [
+                "1 host task(s) have no transcript record"
+              ]
+            },
+            "note": "Host-reported token counters; not credits, a bill or a subscription percentage."
+          },
+          "timeByRole": {
+            "roles": {
+              "author": {
+                "tasks": 1,
+                "agentSeconds": 520.0,
+                "wallUnionSeconds": 520.0,
+                "slotWaitSeconds": 0.0
+              }
+            }
+          },
+          "timeAccounting": {
+            "wallSeconds": 1265.4,
+            "countedSeconds": 845.2,
+            "remainingSeconds": 1554.8,
+            "excludedRenderWaitSeconds": 190.0,
+            "uncertainSeconds": 12.0,
+            "policy": "short-v2"
+          },
+          "compact": {
+            "owner": "declared:claude-code:s-00000000000000b2:agent-a41f",
+            "plan": "v2 frozen",
+            "active": "critic-q1-r1 critic (declared)",
+            "queue": "waiting-for-ai-slot #2",
+            "counted": "14:05 used / 25:55 left",
+            "excluded": "3:10 (+0:12 uncertain)",
+            "next": "Launch the final critic for q1 when a slot frees",
+            "review": "ready=draft shown=no played=player-observed listened=none approved=no",
+            "findings": {
+              "author": 2,
+              "operator": 1
+            },
+            "tokens": {
+              "total": "unknown",
+              "unknownBecause": [
+                "1 host task(s) have no transcript record"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "q2": {
+      "production": {
+        "state": "handed-off",
+        "coordination": {
+          "owner": {
+            "taskId": "author-q2-r1",
+            "role": "author",
+            "identity": "declared:claude-code:s-00000000000000a1:agent-77c0",
+            "identityBasis": "declared"
+          },
+          "planVersion": {
+            "version": 2,
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "frozenElapsed": 640.0,
+            "changeClass": "repair"
+          },
+          "readiness": {
+            "draftReady": true,
+            "finalReady": true,
+            "reason": null
+          },
+          "activeTasks": [],
+          "queue": {
+            "state": "handed-off",
+            "reason": "the checked final is handed off",
+            "resource": null,
+            "position": null,
+            "ahead": [],
+            "since": 1150.0
+          },
+          "clock": {
+            "countedSeconds": 1102.0,
+            "remainingSeconds": 1298.0,
+            "wallSeconds": 1265.4,
+            "excludedRenderWaitSeconds": null,
+            "uncertainSeconds": null,
+            "policy": "short-v2",
+            "capacityState": null,
+            "handoff": {
+              "countedToHandoffSeconds": 1102.0,
+              "handoffOnTime": true
+            }
+          },
+          "nextAction": "None: the Short is handed off (checked final & approved)",
+          "review": {
+            "ready": {
+              "at": 1120.0,
+              "label": "checked final"
+            },
+            "shown": {
+              "at": 1150.0
+            },
+            "playedListened": {
+              "played": {
+                "basis": "declared-by-reviewer",
+                "by": "declared:claude-code:s-00000000000000b2:agent-9d21",
+                "at": 1188.0
+              },
+              "listened": {
+                "basis": "declared-by-reviewer",
+                "by": "declared:claude-code:s-00000000000000b2:agent-9d21",
+                "at": 1188.0
+              }
+            },
+            "editoriallyApproved": {
+              "at": 1210.0,
+              "verdict": "approved"
+            }
+          },
+          "findings": [],
+          "activeRepair": null,
+          "routedFindings": [],
+          "staffing": "none recorded",
+          "identityNote": "Identities are declared by the coordinator, not authenticated.",
+          "tokensByRole": {
+            "roles": {
+              "author": {
+                "totals": {
+                  "inputTokens": 380000,
+                  "cachedInputTokens": 301000,
+                  "outputTokens": 8100,
+                  "reasoningTokens": 1900
+                },
+                "unknownBecause": []
+              },
+              "critic": {
+                "totals": {
+                  "inputTokens": 120450,
+                  "cachedInputTokens": 98000,
+                  "outputTokens": 2210,
+                  "reasoningTokens": 640
+                },
+                "unknownBecause": []
+              }
+            },
+            "team": {
+              "totals": {
+                "inputTokens": 500450,
+                "cachedInputTokens": 399000,
+                "outputTokens": 10310,
+                "reasoningTokens": 2540
+              },
+              "knownPartial": {
+                "inputTokens": 500450,
+                "cachedInputTokens": 399000,
+                "outputTokens": 10310,
+                "reasoningTokens": 2540
+              },
+              "unknownBecause": []
+            },
+            "note": "Host-reported token counters; not credits, a bill or a subscription percentage."
+          },
+          "timeByRole": {
+            "roles": {
+              "author": {
+                "tasks": 1,
+                "agentSeconds": 520.0,
+                "wallUnionSeconds": 520.0,
+                "slotWaitSeconds": 0.0
+              }
+            }
+          },
+          "timeAccounting": {
+            "wallSeconds": 1265.4,
+            "countedSeconds": 845.2,
+            "remainingSeconds": 1554.8,
+            "excludedRenderWaitSeconds": 190.0,
+            "uncertainSeconds": 12.0,
+            "policy": "short-v2"
+          },
+          "compact": {
+            "owner": "declared:claude-code:s-00000000000000a1:agent-77c0",
+            "plan": "v1 frozen",
+            "active": "none",
+            "queue": "handed-off",
+            "counted": "18:22 used / 21:38 left",
+            "excluded": "unknown",
+            "next": "None: the Short is handed off",
+            "review": "ready=final shown=yes played=declared listened=declared approved=approved",
+            "findings": {},
+            "tokens": {
+              "total": 913300,
+              "unknownBecause": []
+            }
+          }
+        }
+      }
+    }
+  },
+  "production": {
+    "visibleSlaMisses": [],
+    "coordination": {
+      "sessions": [
+        {
+          "session": "s-00000000000000a1",
+          "host": "claude-code",
+          "hostThreadKnown": true,
+          "slots": 4,
+          "active": 2,
+          "slotsSource": "operator: four slots for this run",
+          "enrolledElapsed": 2.0,
+          "endedElapsed": 610.0,
+          "endedBy": "takeover",
+          "strays": 0
+        },
+        {
+          "session": "s-00000000000000b2",
+          "host": "claude-code",
+          "hostThreadKnown": false,
+          "slots": 4,
+          "active": 3,
+          "slotsSource": "operator: four slots for this run",
+          "enrolledElapsed": 612.5,
+          "endedElapsed": null,
+          "endedBy": null,
+          "strays": 1
+        }
+      ],
+      "governance": {
+        "mode": "declared",
+        "source": "in-conversation subagents were not probed by the 2026-09-27 host gate (it covered headless CLI children); every identity is declared by the coordinator",
+        "limitations": [
+          "AI identities are declared by the coordinator; in-conversation subagents are unqualified (the host gate probed CLI children only) and nothing verifies them",
+          "AI deadlines are enforced only while the coordinator is alive to stop the subagent with the host's own tool; nothing expires it if the coordinator is gone"
+        ]
+      },
+      "director": {
+        "session": "s-00000000000000b2",
+        "lastActionElapsed": 1190.0,
+        "silentSeconds": 75.4,
+        "state": "active",
+        "advice": null
+      },
+      "quarantined": [
+        {
+          "taskId": "repair-q2-r1",
+          "session": "s-00000000000000a1",
+          "reason": "its session was taken over before an end observation was recorded"
+        }
+      ],
+      "unresolved": [
+        {
+          "taskId": "review-q2-r0",
+          "session": "s-00000000000000a1",
+          "reason": "no listed end observation and no evidence that its host process is gone"
+        }
+      ],
+      "strays": [
+        {
+          "session": "s-00000000000000b2",
+          "elapsed": 700.0,
+          "note": "a duplicate launch, stopped with the host tool"
+        }
+      ],
+      "tokensByRole": {
+        "roles": {
+          "director": {
+            "totals": {
+              "inputTokens": null,
+              "cachedInputTokens": null,
+              "outputTokens": null,
+              "reasoningTokens": null
+            },
+            "unknownBecause": [
+              "no host thread was declared at enrolment"
+            ]
+          }
+        },
+        "team": {
+          "totals": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningTokens": null
+          },
+          "knownPartial": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0,
+            "reasoningTokens": 0
+          },
+          "unknownBecause": [
+            "no host thread was declared at enrolment"
+          ]
+        },
+        "note": "Host-reported token counters; not credits, a bill or a subscription percentage."
+      },
+      "timeByRole": {
+        "roles": {}
+      },
+      "fanout": {
+        "staffingDecided": 2,
+        "specialistsCharged": 0,
+        "caps": {
+          "short": 2,
+          "long": 1
+        }
+      }
+    }
+  }
+}

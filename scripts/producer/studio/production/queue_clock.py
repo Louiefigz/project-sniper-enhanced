@@ -13,6 +13,7 @@ from __future__ import annotations
 from studio.production.queue_clock_schema import (  # noqa: F401  new_clock and problem are re-exported
     MAX_WORKERS, POLICIES, POLICY, new_clock, problem,
 )
+from studio.production import queue_stall
 from studio.production.task_schema import LIVE, holds_slot, is_ai
 
 MAX_GAP_SECONDS = 6.0
@@ -101,9 +102,10 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
 
     The row keeps the observation's pool evidence (``ticket``, ``occupants``, ``waitClass``; an observation
     without it, a working owner's, records none). A waiting row's pending interval becomes credit only when that
-    row was a verified wait (``verified_wait``) and the owner has not finished; otherwise it is counted, as
-    uncertain (P1 Step B4). A v1 clock is read-only: nothing is recorded and its earned credit is returned (0.0 for
-    a clip without one).
+    row was a verified wait (``verified_wait``), the owner has not finished and the Short's stall is not truncated
+    (``queue_stall.suppressed``); otherwise it is counted, as uncertain (P1 Step B4). Then ``queue_stall.track``
+    names or clears the Short's ``capacity-stalled`` state (M-050). A v1 clock is read-only: nothing is recorded
+    and its earned credit is returned (0.0 for a clip without one).
     """
     clip = record['clips'][context['clipId']]
     if not writable(clip):
@@ -113,12 +115,20 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
     clock, key = clip['capacityClock'], context['workerId']
     prior = clock['workers'].get(key)
     if prior and prior['state'] == 'waiting':
-        credited = observation['state'] != 'finished' and verified_wait(prior)
+        credited = observation['state'] != 'finished' and verified_wait(prior) and not queue_stall.suppressed(clock)
         clock['excludedSeconds' if credited else 'uncertainSeconds'] += clock['pendingSeconds']
         clock['pendingSeconds'] = 0.0
     if observation['state'] == 'finished':
         clock['workers'].pop(key, None)
-        return clock['excludedSeconds']
+    else:
+        _record_row(clock, context, observation, elapsed)
+    queue_stall.track(clock, elapsed)   # the named stall state (M-050); credit never stops because time passed
+    return clock['excludedSeconds']
+
+
+def _record_row(clock: dict, context: dict, observation: dict, elapsed: float) -> None:
+    """Write the owner's row with its identity and its pool evidence (none for a working owner)."""
+    key = context['workerId']
     if key not in clock['workers'] and len(clock['workers']) >= MAX_WORKERS:
         raise ValueError('Short capacity accounting has too many unsettled owners')
     identity = {name: context[name] for name in ('supervisor', 'boot') if name in context}
@@ -126,7 +136,6 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
                              'taskId': context.get('taskId'), 'attemptId': context.get('attemptId'),
                              'ticket': observation.get('ticket'), 'occupants': list(observation.get('occupants', ())),
                              'waitClass': observation.get('waitClass')}
-    return clock['excludedSeconds']
 
 
 def task_deadline(record: dict, task: dict) -> float:
@@ -144,10 +153,13 @@ def task_deadline(record: dict, task: dict) -> float:
 
 
 def status(clip: dict, elapsed: float) -> dict:
-    """Report wall, counted and uncertain time separately."""
+    """Report wall, counted and uncertain time separately, and a v2 Short's stall state and bound (M-050)."""
     authorized = clip.get('output', {}).get('authorizedElapsed', 0.0)
     clock = clip.get('capacityClock', {})
-    return {'timingPolicy': clock.get('policy', 'elapsed-wall-v1'),
+    v2 = clock.get('policy') == POLICY
+    return {'capacityState': queue_stall.state(clip), 'stall': clock['stall'] if v2 else None,
+            'stallBoundSeconds': queue_stall.stall_seconds() if v2 else None,
+            'timingPolicy': clock.get('policy', 'elapsed-wall-v1'),
             'totalElapsedSeconds': max(0.0, elapsed - authorized),
             'countedProductionSeconds': max(0.0, elapsed - authorized - excluded(clip)),
             'excludedRenderQueueSeconds': excluded(clip),

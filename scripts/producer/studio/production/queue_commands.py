@@ -13,6 +13,10 @@ merges ``HANDLERS`` into its own table (MASTER-PLAN §5: an area adds commands o
 - ``director-activity --task <director> --epoch N --token T (--clip ID ... | --all) --state working|idle`` (M-045)
   records the enrolled director's own declaration for its Shorts (``director_activity``). A Short earns no
   render-queue credit while its director counts as working, which is the default until it declares ``idle``.
+
+- ``capacity-stall --clip ID --decision cancel --reason TEXT`` (M-050) records the operator's cancel of a
+  ``capacity-stalled`` Short (``queue_stall.decide``): its work is frozen and it is closed out for good. It is the
+  only stall decision (X19); a Short that is not stalled is refused by name.
 """
 from __future__ import annotations
 
@@ -22,6 +26,7 @@ from studio import native_budget_store as store
 from studio.production import api
 from studio.production.claims import ClaimRef
 from studio.production.director_activity import DirectorActivity
+from studio.production.queue_stall import DECISIONS, StallDecision
 
 
 def cmd_settle_resource(args: argparse.Namespace) -> dict:
@@ -36,7 +41,14 @@ def cmd_director_activity(args: argparse.Namespace) -> dict:
                                          ClaimRef(args.task, args.epoch, args.token), activity)
 
 
-HANDLERS = {'settle-resource': cmd_settle_resource, 'director-activity': cmd_director_activity}
+def cmd_capacity_stall(args: argparse.Namespace) -> dict:
+    """The operator's recorded cancel of a capacity-stalled Short (the only decision, X19)."""
+    return api.decide_capacity_stall(store.default_root(), args.batch, args.clip,
+                                     StallDecision(args.decision, args.reason))
+
+
+HANDLERS = {'settle-resource': cmd_settle_resource, 'director-activity': cmd_director_activity,
+            'capacity-stall': cmd_capacity_stall}
 
 
 def register(sub: argparse._SubParsersAction) -> None:
@@ -55,3 +67,8 @@ def register(sub: argparse._SubParsersAction) -> None:
     clips.add_argument('--clip', action='append', help='A Short this declaration covers; repeat')
     clips.add_argument('--all', action='store_true', help='Every Short on a v2 clock that is not handed off')
     activity.add_argument('--state', choices=('working', 'idle'), required=True)
+    stall = sub.add_parser('capacity-stall', help='Cancel a capacity-stalled Short: its work is frozen and it '
+                                                  'is closed out (the batch can then close)')
+    stall.add_argument('--clip', required=True)
+    stall.add_argument('--decision', choices=DECISIONS, required=True)
+    stall.add_argument('--reason', required=True, help="The operator's reason, recorded with the decision")

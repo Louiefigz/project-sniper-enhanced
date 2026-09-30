@@ -45,6 +45,8 @@ Production tasks (studio/production/cli.py):
       (records the operator's statement on unresolved or revoked work, never evidence; releases nothing)
   native_batch.py director-activity --batch ID --task ID --epoch N --token HEX (--clip A ... | --all)
                                     --state working|idle     (the enrolled director's own declaration)
+  native_batch.py capacity-stall --batch ID --clip A --decision cancel --reason TEXT
+      (gives up a capacity-stalled Short: its work is frozen and it is closed out; the only stall decision)
   native_batch.py reconcile --batch ID [--host JSON]
   native_batch.py dispatch --batch ID       (starts the detached media dispatcher, or reports it)
   native_batch.py run-media --batch ID --task ID --epoch N --token HEX

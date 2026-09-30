@@ -44,7 +44,20 @@ for unverified cleanup, disk headroom, a qualification session and audio-class
 work earn nothing.
 
 The clock, launch allocations, task deadlines and status use the same settled
-credit. A render owner waiting for the pool extends its own wait only by that
+credit. A verified capacity wait keeps earning credit for as long as it stays verified;
+time passing never stops it. When the live members a Short waits behind have
+not changed for the longest admissible render plus cleanup (derived from policy,
+`queue_stall.stall_seconds`; `status` shows it as `stallBoundSeconds`), the Short is named
+`capacity-stalled` in its record, the trail and `status`, whose first action
+names the holders. A holder past its grant or not progressing is a stuck
+render: its watchdog stops it and frees its slot only on verified cleanup,
+otherwise the slot is quarantined (recover it with
+`native_work_recovery.py <nonce>`). The state clears by itself when the
+holders change or the wait ends. The operator's one decision is
+`capacity-stall --batch SESSION --clip A --decision cancel --reason TEXT`: it
+freezes that Short's work and closes it out. A stalled Short without that
+cancel keeps its batch open (`close` refuses by name), so a batch never closes
+away a stalled Short's remaining authorization. A render owner waiting for the pool extends its own wait only by that
 settled credit: a wait that earns none (other work of the Short runs, or the
 wait is not for occupied capacity) ends after the owner's capacity patience (at
 most 600 seconds) with `capacity-timeout`. Owners retain their independent active-work limits and cleanup reserve.

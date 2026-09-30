@@ -1298,3 +1298,16 @@ docs belong to P3b.
   refusal (`native_queue_accounting.waiting_for_capacity`) is gone. An uncredited wait (other work of the Short, or
   a wait that is not capacity) ends after `capacity_wait_seconds` (at most 600 s) as `capacity-timeout`. This ends
   M-046's interim reading of `capacityOnly` in the owner loop. Tests: `test_native_queue_accounting_waits.py`.
+- **The named stall (M-050; C2 as X19 and G1 correct it).** `production/queue_stall.py`: `stall_seconds()` (the
+  longest admissible render plus cleanup, from policy); `track`, called by `queue_clock.observe_worker` on every v2
+  observation, names `capacity-stalled` once the sorted union of the verified waits' occupants has held that long
+  (cut at 64 with `truncated`; a truncated stall earns nothing, `suppressed`) and clears it, occupants and
+  truncation together, when the union changes or ends. Credit never stops because time passed (no `crediting`).
+  `queue_authority._observe_locked` writes a stall change as a `capacity-observed` event with `capacityState`.
+  `decide` records the operator's one decision, `cancel` (`capacity-stall --clip ID --decision cancel --reason`,
+  `api.decide_capacity_stall`): the Short's work is frozen and it is closed out (`closed_out`: `phase_refusal`
+  refuses its new work, `close_refusal` no longer waits for it). `close_refusal` refuses by name while a Short is
+  stalled without a cancel. `queue_clock.status` adds `capacityState`, `stall` and `stallBoundSeconds`;
+  `clip_status`'s first action names the holders and their watchdog. The stall validator (X180 m7) requires
+  `cancelled` iff one cancel row, a time iff a state, and sorted, distinct occupants. Tests:
+  `test_queue_clock_stall.py`.

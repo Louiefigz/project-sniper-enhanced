@@ -134,9 +134,8 @@ VIOLATIONS = (
     ('nine row occupants', _set('workers./TEST/owner-a.occupants', ['x'] * 9), POOL),
     ('an unknown wait class', _set('workers./TEST/owner-a.waitClass', 'queue'), POOL),
 )
-ACCEPTED = (('an unverified v2 row', _set('workers./TEST/owner-a.state', 'unverified')),
-            ('64 stall occupants', _set('stall.occupants', ['x'] * 64)),
-            ('a union truncated at 64', lambda clock: clock['stall'].update(occupants=['x'] * 64, truncated=True)))
+# The accepted 64-occupant stalls moved to test_queue_clock_stall (M-050, X180 m7: occupants are distinct).
+ACCEPTED = (('an unverified v2 row', _set('workers./TEST/owner-a.state', 'unverified')),)
 # The moved v1 checks keep the P0 engine's messages (P1 B1: v1 validates exactly as today).
 V1_VIOLATIONS = (('totals over the observed time', {'pendingSeconds': 200.0}, 'Short capacity clock totals'),
                  ('a delivery credit not a number', {'deliveryCredits': {'a' * 32: '1'}}, 'Short delivery clock credits'),

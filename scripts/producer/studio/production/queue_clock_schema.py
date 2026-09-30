@@ -158,7 +158,19 @@ def _stall_problem(stall: object) -> str | None:
     decisions = stall['decisions']
     if type(decisions) is not list or len(decisions) > 1 or not all(map(_decision_ok, decisions)):
         return 'Short capacity clock stall decisions: at most one, the operator\'s recorded cancel'
-    return None
+    return None if _stall_consistent(stall) else 'Short capacity clock stall: its state, time, occupants and ' \
+        'decision disagree'
+
+
+def _stall_consistent(stall: dict) -> bool:
+    """X180 m7: ``cancelled`` iff one cancel row; a time iff a state; no state keeps no occupants or truncation
+    (cleared together, X102); occupants sorted and distinct (the union ``queue_stall.track`` writes)."""
+    state, occupants = stall['state'], stall['occupants']
+    if (state == 'cancelled') != (len(stall['decisions']) == 1) or (state is None) != (stall['sinceElapsed'] is None):
+        return False
+    if state is None and (occupants or stall['truncated']):
+        return False
+    return occupants == sorted(set(occupants))
 
 
 def _decision_ok(row: object) -> bool:

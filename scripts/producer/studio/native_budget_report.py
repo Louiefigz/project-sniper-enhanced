@@ -12,6 +12,7 @@ output beside it. ``wait`` and ``close`` keep this authority-only ``batch_status
 from __future__ import annotations
 
 from studio.native_budget_forecast import launch_fits
+from studio.production import queue_stall
 from studio.production.formats import (
     LONG_POLICY, clip_deadlines, clip_limits, clip_rates, is_mixed, long_demand, long_latest_starts, output_format,
 )
@@ -103,6 +104,7 @@ def clip_status(record: dict, clip_id: str, elapsed: float, audit: dict | None =
     miss = elapsed >= clip_deadlines(record, clip)['deliverySeconds'] and not on_time(record, clip) \
         or long_final_missed(record, clip_id, elapsed)
     from studio.production.queue_clock import status as clock_status
+    stall = queue_stall.action(clip_id, clip)   # a capacity-stalled Short's first action, even while it renders
     return {**clock_status(clip, elapsed), 'state': clip['state'], 'addedAfterStart': clip['addedAfterStart'],
             'outputSeconds': clip['outputSeconds'], **_format_status(record, clip), 'phase': phase(record, elapsed, clip),
             'counters': {key: f'{value}/{limits[key]}' if key in limits else value
@@ -111,7 +113,7 @@ def clip_status(record: dict, clip_id: str, elapsed: float, audit: dict | None =
             'runningAttempt': running[-1] if running else None, 'runningRoutes': [row['route'] for row in running],
             'lastFailure': failures[-1] if failures else None, 'deliveries': clip['deliveries'],
             'forecast': fits, 'slaMiss': miss, 'creditVerified': _credit_verified(audit, clip_id),
-            'actions': actions(record, clip_id, fits, (elapsed, running))}
+            'actions': [*([stall] if stall else []), *actions(record, clip_id, fits, (elapsed, running))]}
 
 
 def _credit_verified(audit: dict | None, clip_id: str) -> bool | None:

@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 
-from studio.production import queue_clock
+from studio.production import queue_clock, queue_stall
 from studio.production.queue_clock_schema import MAX_CHECKPOINTS, MAX_ORPHAN_ROWS, number
 
 CHECKPOINT_SECONDS = 300.0
@@ -125,7 +125,8 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     """Inside the batch lock: recover ended and orphaned owners, settle this observation, commit it and its event.
 
     A same-state heartbeat writes no trail event, except the one that brings the Short's credit
-    ``CHECKPOINT_SECONDS`` past its last checkpoint (``capacity-checkpoint``, while fewer than ``MAX_CHECKPOINTS``).
+    ``CHECKPOINT_SECONDS`` past its last checkpoint (``capacity-checkpoint``, while fewer than ``MAX_CHECKPOINTS``)
+    or that names or clears its stall (``capacityState`` in the event, M-050).
     """
     from studio.native_budget_binding import advance_clock
     record = session.read()
@@ -136,15 +137,17 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     prior = clip.get('capacityClock', {}).get('workers', {}).get(context['workerId'])
     heartbeat = not (removed or orphaned) and prior is not None and prior['state'] == state \
         and prior['resource'] == observation['resource']
-    before = queue_clock.excluded(clip)
+    before, stall = queue_clock.excluded(clip), queue_stall.state(clip)
     after = queue_clock.observe_worker(record, context, observation, elapsed)
-    event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat else 'capacity-observed'
+    named = {'capacityState': queue_stall.state(clip)} if queue_stall.state(clip) != stall else {}   # M-050
+    event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat and not named \
+        else 'capacity-observed'
     if event == 'capacity-heartbeat' and _checkpoint_due(clip, after, elapsed):
         event = 'capacity-checkpoint'
     session.commit(record, {'event': event, 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
                             'elapsed': elapsed, 'excludedSeconds': after, 'creditedSeconds': after - before,
                             'resource': observation['resource'], 'evidence': observation['evidence'],
-                            'recoveredWorkers': removed, 'orphanedWorkers': orphaned})
+                            'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named})
     return after
 
 

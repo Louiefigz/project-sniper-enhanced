@@ -22,6 +22,7 @@ from studio.native_budget_store import require_batch_id, require_clip_id
 from studio.native_budget_transcript import transcript_problem
 from studio.production.formats import clip_deadlines, clip_limits, output_format, preparation_passed
 from studio.production.authorization_record import new_authorization
+from studio.production.queue_stall import close_refusal as stall_refusal, closed_out
 
 CREATIVE_KINDS = ('author', 'planReview', 'repairCycle')
 
@@ -192,6 +193,8 @@ def phase_refusal(record: dict, clip: dict | None, elapsed: float) -> str | None
                 'hashes, engine freeze) has not completed; rerun start to finish it')
     if clip is not None and clip['state'] == 'handed-off':
         return 'Clip was handed off; unrequested polishing after handoff is not admitted'
+    if clip is not None and closed_out(clip):   # M-050: the operator's recorded cancel of a stalled Short
+        return "This Short's stalled capacity wait was cancelled by the operator; no new work is admitted for it"
     if elapsed >= clip_deadlines(record, clip)['deliverySeconds']:  # each output's own; the run's latest for run work
         clock = 'Long\'s 180-minute' if clip is not None and output_format(clip) == 'long' else '40-minute'
         return f'The {clock} delivery deadline has passed; report the SLA miss instead of continuing'
@@ -241,11 +244,11 @@ def close_refusal(record: dict, elapsed: float) -> str | None:
     if record['status'] == 'closed':
         return 'The batch is already closed'
     open_clips = [clip_id for clip_id, clip in record['clips'].items() if clip['state'] != 'handed-off'
-                  and elapsed < clip_deadlines(record, clip)['deliverySeconds']]  # an open Long keeps its run open
-    if open_clips:
+                  and not closed_out(clip) and elapsed < clip_deadlines(record, clip)['deliverySeconds']]
+    if open_clips:   # an open Long keeps its run open; a cancelled stalled Short does not (M-050)
         return (f'Clips {", ".join(open_clips)} are not handed off and the delivery deadline has not '
                 'passed; a batch cannot be closed to reset its budgets')
-    return None
+    return stall_refusal(record, elapsed)   # a capacity-stalled Short without a recorded cancel (X19, G1)
 
 
 def change_approval(record: dict, clip_id: str, approval: Approval, elapsed: float) -> dict:

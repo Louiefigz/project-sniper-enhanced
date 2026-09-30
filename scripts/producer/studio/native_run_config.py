@@ -168,7 +168,8 @@ def owner_file_pins() -> dict[str, str]:
         'native_run.py', 'native_owned_processes.py', 'native_measurement_retry.py',
         'native_run_config.py', 'native_run_lifecycle.py', 'native_runtime.py', 'native_workload.py',
         'native_run_admission.py', 'native_queue_accounting.py', 'native_run_disk.py', 'native_export.py',
-        'native_run_lease.py')]
+        'native_run_lease.py',
+        'native_digest_memo.py')]  # X132 mi4: every owner digest runs through the memo
     files += list(studio.parent.glob('native_render_*.py'))
     files += list(studio.parent.glob('native_work_*.py'))
     files += list(studio.glob('native_budget_*.py'))

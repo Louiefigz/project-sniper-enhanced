@@ -6,6 +6,8 @@ authority as corrupt). TEST records in a private root only.
 """
 from __future__ import annotations
 
+import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
+
 import json
 import unittest
 

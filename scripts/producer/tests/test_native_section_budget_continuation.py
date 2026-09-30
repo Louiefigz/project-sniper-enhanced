@@ -9,7 +9,7 @@ from unittest import mock
 
 from _native_section_budget_fixture import SectionBudgetFixture
 from studio import native_budget_continuation as continuation
-from studio.native_budget_clock import BudgetExhausted, allocation_remaining
+from studio.native_budget_clock import BudgetExhausted, allocation, allocation_remaining, start_anchor
 from studio.native_budget_registry import BudgetRefused
 from studio.native_budget_binding import charge_request
 from studio.native_budget_owner import aac_budget_hook
@@ -97,27 +97,52 @@ class ReviewContinuationTests(unittest.TestCase):
             aac_budget_hook(request, 'f' * 64, 'TEST')(1)
         self.assertEqual(self.fixture.record()['clips']['A']['counters']['aacCandidate'], 0)
 
-    def test_review_continuation_preview_sections_restore_or_are_refused(self) -> None:
-        """(M-029d, M18) A continuation reaches prepare_sections only to restore sealed sections; a package it would
-        have to render is refused by the continuation charge before any owner starts, and nothing is charged."""
+    def prepare(self, pipeline: SimpleNamespace, missing: tuple[str, ...]) -> BaseException | None:
+        """Run prepare_sections over two windows with these phases unsealed; return its refusal, if any."""
         from studio import native_preview_sections as sections
+        windows = [{'startFrame': 0, 'endFrame': 25}, {'startFrame': 25, 'endFrame': 50}]
+        with mock.patch.object(sections, 'section_windows', return_value=({}, windows)), \
+                mock.patch.object(sections, 'seal_section'), \
+                mock.patch('studio.native_preview_recovery.restore_section',
+                           side_effect=lambda _pipeline, phase: phase not in missing):
+            try:
+                sections.prepare_sections(pipeline)
+            except BudgetRefused as refused:
+                return refused
+        return None
+
+    def test_review_continuation_preview_sections_restore_or_are_refused(self) -> None:
+        """(M-029d, M18; X132 MA2) A continuation reaches prepare_sections only to restore sealed sections. Any
+        picture or package it would have to render is refused by the review-only guard before any owner starts
+        (the stage-5 probe: an unsealed picture used to launch uncharged), and nothing is charged."""
         budget = self.reserve()
         request = {**self.fixture.request, 'productionBudget': budget, 'output': budget['continuationOutput']}
         launched = []
         pipeline = SimpleNamespace(request=request, worker=lambda phase: None,
                                    supervise=lambda phase, *args: launched.append(phase))
-        windows = [{'startFrame': 0, 'endFrame': 25}, {'startFrame': 25, 'endFrame': 50}]
-        restored = mock.patch('studio.native_preview_recovery.restore_section', return_value=True)
-        missing = mock.patch('studio.native_preview_recovery.restore_section',
-                             side_effect=lambda pipeline, phase: phase != 'preview-package-1')
-        with mock.patch.object(sections, 'section_windows', return_value=({}, windows)), \
-                mock.patch.object(sections, 'seal_section'):
-            with restored:
-                sections.prepare_sections(pipeline)
-            with missing, self.assertRaisesRegex(BudgetRefused, 'only bound final audio candidates'):
-                sections.prepare_sections(pipeline)
+        self.assertIsNone(self.prepare(pipeline, ()))
+        for missing in (('preview-package-1',), ('preview-picture-1',), ('preview-picture-1', 'preview-package-1')):
+            with self.subTest(missing=missing):
+                self.assertRegex(str(self.prepare(pipeline, missing)), 'cannot launch missing or changed section media')
         self.assertEqual(launched, [])
-        self.assertEqual(self.fixture.record()['clips']['A']['counters'].get('previewPackage', 0), 0)
+        counters = self.fixture.record()['clips']['A']['counters']
+        self.assertEqual((counters.get('previewPackage', 0), counters['pictureGeneration']), (0, 0))
+
+    def test_section_picture_timeout_is_clamped_to_the_remaining_budget(self) -> None:
+        """(X132 mi2) A preview picture's child timeout is the allocation's remaining time (255 s) when that is
+        below the section's own limit (600 - 30 s), never the limit itself."""
+        from studio import native_preview_sections as sections
+        root = self.fixture.base / 'clamp'
+        root.mkdir()
+        budget = {**self.fixture.request['productionBudget'], 'allocation': allocation(start_anchor(), 300, 45)}
+        request = {**self.fixture.request, 'productionBudget': budget, 'budget': {'sampleSeconds': 600},
+                   'output': str(root), 'tools': {'node': '/TEST/node'}}
+        window = ({}, [{'startFrame': 0, 'endFrame': 25}])
+        with mock.patch.object(sections, 'section_windows', return_value=window), \
+                mock.patch.object(sections.subprocess, 'run', side_effect=RuntimeError('TEST stop at launch')) as run, \
+                self.assertRaisesRegex(RuntimeError, 'TEST stop at launch'):
+            sections.execute_section(request, {}, 'preview-picture-0')
+        self.assertEqual(run.call_args.kwargs['timeout'], 255)
 
     def test_review_continuation_cannot_charge_picture_or_another_output(self) -> None:
         """The supporting-work exception remains limited to exact continuation audio."""

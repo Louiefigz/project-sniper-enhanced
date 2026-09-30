@@ -85,12 +85,15 @@ def seal_section(pipeline: object, phase: str) -> Path:
 
 def prepare_sections(pipeline: object) -> None:
     """Release resources, seal each window and re-admit capacity before its successor."""
+    from studio.native_budget_continuation import require_review_only
     from studio.native_preview_recovery import restore_section
     _packet, windows = section_windows(pipeline.request)
     phases = [f'preview-{kind}-{index}' for index in range(len(windows)) for kind in ('picture', 'package')]
-    for phase in phases:
-        if restore_section(pipeline, phase):
-            continue
+    missing = [phase for phase in phases if not restore_section(pipeline, phase)]
+    # (X132 MA2) A review continuation only restores: refuse every unsealed section before any owner starts,
+    # as native_segments/supervision.run_sections does. Outside a continuation this is a no-op.
+    require_review_only(pipeline.request, missing)
+    for phase in missing:
         if phase.startswith('preview-package-'):
             charge_request(pipeline.request, 'previewPackage')
         pipeline.supervise(phase, pipeline.worker(phase), section_output(phase), STATUS)

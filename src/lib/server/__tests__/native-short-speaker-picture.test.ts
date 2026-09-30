@@ -62,7 +62,7 @@ test("unresolved interval over a single-person crop is refused", () => {
   assert.deepEqual(codes(plan(), unresolved, observations(both)), ["speaker-unresolved-picture:0-300"]);
   const claimed = plan([RIGHT], [{ startFrame: 0, endFrame: 300, kind: "two-shot", reason: "TEST a claimed two-shot" }]);
   assert.throws(() => assertNativeSpeakerPicture(claimed, unresolved, observations(both)), (error: unknown) => error instanceof NativeCheckError
-    && error.code === "speaker-unresolved-picture" && /frames 0-299: unresolved interval 100-110 s: 0 frame\(s\) .* at 87 two-shot sample/su.test(error.message));
+    && error.code === "speaker-unresolved-picture" && /frames 0-299: unresolved interval 100-110 s: 0 frame\(s\) .* at 87 two-shot sample/u.test(error.message));
 });
 
 test("probable speaker outside the crop is refused", () => {

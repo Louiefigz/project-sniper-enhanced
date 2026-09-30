@@ -199,7 +199,7 @@ function exitRuns(context: Picture, sequence: Sample[], crop: NativeBox): Array<
     if (!sample.dense) continue;
     if (person !== null && !inside.has(person)) { outs.push(sample); continue; }
     close();
-    const subject = speaker ?? (inside.size === 1 ? [...inside][0] : null);
+    const subject: string | null = speaker ?? (inside.size === 1 ? [...inside][0] : null);
     if (subject !== null && inside.has(subject)) person = subject;
   }
   close();

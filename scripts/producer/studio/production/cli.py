@@ -102,15 +102,17 @@ def cmd_complete(args: argparse.Namespace) -> dict:
     if args.failure is not None:
         if args.artifact or args.detail is None:
             raise ValueError('--failure CATEGORY takes --detail TEXT and binds no --artifact')
-        failure = TaskFailure(args.failure, args.detail, usage)
+        failure = TaskFailure(args.failure, args.detail, usage, args.launch_error)
         return api.fail_task(store.default_root(), args.batch, _ref(args), failure)
+    if args.launch_error is not None:
+        raise ValueError('--launch-error goes with --failure: it records a launch call that itself failed')
     result = TaskResult(inputs.receipts(args.artifact or []), usage)
     return api.complete_task(store.default_root(), args.batch, _ref(args), result)
 
 
 def cmd_release(args: argparse.Namespace) -> dict:
-    """The claim holder attests nothing was launched: the slot frees, the charge stays."""
-    return api.release_claim(store.default_root(), args.batch, _ref(args))
+    """Release a claim no execution acknowledged; an AI claim needs the launch tool's own failure (--launch-error)."""
+    return api.release_claim(store.default_root(), args.batch, _ref(args), args.launch_error)
 
 
 def cmd_cancel_request(args: argparse.Namespace) -> dict:
@@ -119,7 +121,7 @@ def cmd_cancel_request(args: argparse.Namespace) -> dict:
 
 
 def cmd_cancelled(args: argparse.Namespace) -> dict:
-    """The caller observed the execution's termination: its slot frees (a host turn may stay unresolved)."""
+    """The caller observed the execution's termination; its slot frees only as ``task_end`` allows (G9)."""
     return api.confirm_cancelled(store.default_root(), args.batch, _ref(args), inputs.usage(args.usage))
 
 
@@ -229,6 +231,8 @@ def _task_parsers(sub: argparse._SubParsersAction) -> None:
     complete.add_argument('--artifact', action='append', type=Path, help='An immutable output file; repeat')
     complete.add_argument('--failure', help='A failure category slug (instead of artifacts)')
     complete.add_argument('--detail', help='The failure detail')
+    for name in ('complete', 'release'):
+        sub.choices[name].add_argument('--launch-error', help="The launch tool's own failure, verbatim (1-512 bytes)")
     for name in ('complete', 'cancelled'):
         sub.choices[name].add_argument('--usage', help='JSON cumulative host token usage')
     cancel = sub.add_parser('cancel-request')

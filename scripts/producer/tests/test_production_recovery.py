@@ -112,8 +112,8 @@ class ClaimBoundaryTests(RecoveryCase):
         attached = api.attach_task(self.root, BATCH, critic, host_turn('critic'))
         self.assertEqual((attached['state'], attached['proceed']), ('abandoned', False))
         self.finish_task(critic, 'findings')                               # the real outcome replaces the mark
-        self.assertEqual((self.state('critic'), self.task('critic')['unresolved']), ('completed', False))
-        self.assertEqual(api.task_status(self.root, BATCH)['ai']['active'], 1)
+        self.assertEqual((self.state('critic'), self.task('critic')['unresolved']), ('completed', True))   # G9
+        self.assertEqual(api.task_status(self.root, BATCH)['ai']['active'], 2)
 
     def test_a_live_claimer_keeps_its_claim(self) -> None:
         self.enqueue(task_spec('draft', 'media'))
@@ -262,7 +262,7 @@ class HostEventTests(RecoveryCase):
         claude = {'type': 'host', 'host': 'claude-code', 'thread': 'TEST-c', 'turn': None}
         api.host_event(self.root, BATCH, self.event('accepted', ref, handle=claude))
         api.host_event(self.root, BATCH, self.event('interrupted', ref, handle=claude))
-        self.assertEqual((self.state('critic'), api.task_status(self.root, BATCH)['ai']['active']), ('cancelled', 1))
+        self.assertEqual((self.state('critic'), api.task_status(self.root, BATCH)['ai']['active']), ('cancelled', 2))
 
     def test_stale_foreign_and_lost_events(self) -> None:
         ref = self.critic()
@@ -365,7 +365,7 @@ class FullTrailTests(RecoveryCase):
         api.complete_task(self.root, BATCH, ClaimRef('director', 1, self.director['token']), TaskResult(()))
         api.settle_resource(self.root, BATCH, 'critic', 'operator saw no tool process left')
         self.assertEqual(native_batch.cmd_close(ns(batch=BATCH))['status'], 'closed')
-        self.assertEqual(self.events(5), ['batch-draining', 'task-cancelled', 'task-completed',
+        self.assertEqual(self.events(5), ['batch-draining', 'task-cancelled', 'task-cancelled',   # D01: director
                                           'task-resource-settled', 'batch-closed'])
 
 

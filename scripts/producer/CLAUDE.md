@@ -1236,3 +1236,11 @@ docs belong to P3b.
   a v2 clock (`new_clock`, re-exported by `queue_clock.py`). `queue_clock.writable` is true for v2 only:
   `checkpoint` and `observe_worker` never advance a v1 clock, which keeps the credit it earned (delivery and
   task settlement still record on it). `queue_authority.bind_allocation` binds only writable clocks.
+- **One end rule (M-041, M-042; G9).** `production/task_end.py` decides every AI task end: `end_cause`,
+  `end_proof` (`EndProof`: `slot_released` and `tool_cleanup` kept apart), `settle_end`, `late_cancel`, and the
+  empty `HOST_END_EVIDENCE` catalog (filled at M-102). `callbacks.complete`/`fail`/`_terminated` and
+  `reconcile._reconcile_one` settle through it; `task_schema.holds_slot` counts an ended task still `unresolved`.
+  A launch-tool failure travels verbatim in events only (`release --launch-error`, `complete --failure
+  launch-failed --launch-error`); `claims.release` refuses an AI release without it. Section readers
+  (`section_results.current`, `sections.require_encoded_task`) keep a completed result that still holds its slot
+  current, and `section_chunk_liveness` reserves slots for early reviews whose authors cannot free theirs.

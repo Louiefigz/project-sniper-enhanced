@@ -35,7 +35,7 @@ from studio.production.callbacks import TaskFailure, TaskResult, complete, confi
 from studio.production.claims import ClaimRef, Outcome, attach, check_claim
 from studio.production.dependencies import refresh
 from studio.production.host_contract import CATEGORY, HostEvent, clip_text
-from studio.production.task_schema import LIVE, UNRESOLVABLE, finish, handle_cleans_up, is_ai
+from studio.production.task_schema import LIVE, TERMINAL, UNRESOLVABLE, finish, handle_cleans_up, is_ai
 from studio.production.tasks import TaskConflict, task_of, tasks_of
 from studio.production.queue_clock import settle_task_workers, task_deadline
 
@@ -201,7 +201,8 @@ def _unresolved(record: dict, task: dict, observation: Observation, elapsed: flo
         if task['attempt'] is not None and (outcome := _exact_outcome(record, task, elapsed)):
             return outcome
         task['owners'] = []
-    task.update(unresolved=False, endConfirmed=True, reason=clip_text(f'{task["reason"]}; termination confirmed'))
+    task.update(unresolved=False, endConfirmed=True,
+                reason=clip_text(f'{task["reason"] or task["state"]}; termination confirmed'))
     return _change(task, task['state'], 'termination confirmed')
 
 
@@ -211,7 +212,7 @@ def _reconcile_one(record: dict, task: dict, observation: Observation, elapsed: 
         return _unacknowledged(record, task, observation, elapsed)
     if task['state'] in LIVE:
         return _live(record, task, observation, elapsed)
-    if task['state'] in UNRESOLVABLE and task['unresolved'] and (task['handle'] is not None or task['owners']):
+    if task['state'] in TERMINAL and task['unresolved'] and (task['handle'] is not None or task['owners']):
         return _unresolved(record, task, observation, elapsed)
     if task['state'] in UNRESOLVABLE and task['unresolved'] and task['claim'] is not None:
         return _fenced_unacknowledged(record, task, observation, elapsed)

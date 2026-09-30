@@ -77,9 +77,9 @@ def claim_task(root: Path, batch_id: str, task_id: str, claimer: dict) -> dict:
     return transact(root, batch_id, lambda record, elapsed: claims.claim(record, task_id, claimer, elapsed))
 
 
-def release_claim(root: Path, batch_id: str, ref: ClaimRef) -> dict:
-    """The claim holder attests nothing was launched: the slot frees, the charge stays."""
-    return transact(root, batch_id, lambda record, elapsed: claims.release(record, ref, elapsed))
+def release_claim(root: Path, batch_id: str, ref: ClaimRef, launch_error: str | None = None) -> dict:
+    """Release a claim no execution acknowledged; an AI claim records the launch tool's failure verbatim (G9)."""
+    return transact(root, batch_id, lambda record, elapsed: claims.release(record, ref, elapsed, launch_error))
 
 
 def attach_task(root: Path, batch_id: str, ref: ClaimRef, handle: dict) -> dict:
@@ -104,7 +104,7 @@ def fail_task(root: Path, batch_id: str, ref: ClaimRef, failure: callbacks.TaskF
 
 
 def confirm_cancelled(root: Path, batch_id: str, ref: ClaimRef, usage: dict | None = None) -> dict:
-    """The execution confirms it stopped: its slot frees."""
+    """The execution confirms it stopped; its slot frees only as ``task_end`` allows (G9)."""
     return transact(root, batch_id, lambda record, elapsed: callbacks.confirm_cancelled(record, ref, usage, elapsed))
 
 

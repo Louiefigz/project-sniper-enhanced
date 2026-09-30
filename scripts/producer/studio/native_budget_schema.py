@@ -18,7 +18,7 @@ the ledger against the landed fields.
     clip capacityClock v2 (production.queue_clock_schema)  M-044                yes         v1 clock, read-only
     capacityClock.stall: None, capacity-stalled or         M-044 / M-050        val         v1 clocks have none
       cancelled; <= 64 occupants (else truncated); <= 1 cancel row
-    task completed with an unresolved resource             M-042                no          holds no such row
+    task completed with an unresolved resource             M-042                yes         holds no such row
     production.closure {closedElapsed, unresolvedAtClose}  M-043                no     opt  absent
     host unresolved-executions.jsonl (its own schema 1)    M-043                no          not a record field
     task assignmentBinding (refused until validated)       M-080, M-082         no     opt  absent

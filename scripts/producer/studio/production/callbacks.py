@@ -4,9 +4,11 @@ Every callback must carry the task's current claim epoch and token (``check_clai
 an older epoch is refused. Repeating a recorded outcome is a no-op only when it is
 the same outcome of the same claim with the same artifact identity; any other
 repetition is a conflict. Cancellation requested is not cancellation complete: a
-live task keeps its slot in ``cancel-requested`` until termination is confirmed.
-A revoked task may still report its end, settling its slot and retaining artifacts
-as history; completion ends superseded without restoring publication. Usage is the host's
+live task keeps its slot in ``cancel-requested`` until termination is confirmed; an
+end reported later ends it ``cancelled`` (history, never published). Every end goes
+through the one end rule, ``task_end``, which alone decides whether a slot is released (G9).
+A revoked task may still report its end (its slot frees only as that rule allows), retaining
+artifacts as history; completion ends superseded without restoring publication. Usage is the host's
 cumulative count and only ever grows; a task without a report stays unknown.
 Acknowledged media completes, fails or confirms cancellation only through its
 export watchdog after owned cleanup; generic callbacks cannot invent that proof.
@@ -18,9 +20,8 @@ from dataclasses import dataclass
 from studio.production.claims import ClaimRef, Outcome, check_claim
 from studio.production.dependencies import approval_stale, refresh
 from studio.production.host_contract import clip_text, merge_usage, valid_failure, valid_receipts
-from studio.production.task_schema import (
-    LIVE, TERMINAL, UNCLAIMED, UNRESOLVABLE, finish, handle_cleans_up, holds_slot, is_ai,
-)
+from studio.production.task_end import EndProof, end_cause, late_cancel, settle_end, settles_only
+from studio.production.task_schema import LIVE, TERMINAL, UNCLAIMED, UNRESOLVABLE, finish, holds_slot, is_ai
 from studio.production.tasks import TaskConflict, TaskRefused, task_of
 from studio.production.queue_clock import task_deadline
 
@@ -35,11 +36,12 @@ class TaskResult:
 
 @dataclass(frozen=True)
 class TaskFailure:
-    """A failure category slug, a bounded detail and (optionally) usage."""
+    """A failure category, a bounded detail, optional usage, and a failed launch call's own error, verbatim."""
 
     category: str
     detail: str
     usage: dict | None = None
+    launch_error: str | None = None
 
 
 def _usage(task: dict, usage: dict | None) -> None:
@@ -89,7 +91,7 @@ def _section_completion(record: dict, ref: ClaimRef, receipts: list[dict]) -> bo
         return False
     if len(receipts) != 1:
         raise ValueError('A section task completes with its single owned result receipt')
-    settling = task['state'] in ('superseded', 'abandoned') and (_may_report(task) or bool(task['receipts']))
+    settling = settles_only(task, _may_report(task))
     validator = validate_settlement_result if settling else validate_result
     validator(record, ref, receipts[0])
     return settling
@@ -103,10 +105,11 @@ def complete(record: dict, ref: ClaimRef, result: TaskResult, elapsed: float) ->
     if not valid_receipts(receipts) or not receipts and task['kind'] != 'director':
         raise ValueError('A completion binds its artifacts: 1-8 distinct receipts {path, sha256, bytes}')
     settling = _section_completion(record, ref, receipts)
-    if task['state'] == 'completed' or task['state'] == 'superseded' and task['receipts'] \
+    if task['state'] == 'completed' or task['state'] in ('superseded', 'cancelled') and task['receipts'] \
             or settling and task['receipts']:
         if task['receipts'] != receipts:
-            raise TaskConflict(f'Task {ref.task_id} already completed with different artifacts')
+            ended = 'ended as cancelled' if task['state'] == 'cancelled' else 'completed'
+            raise TaskConflict(f'Task {ref.task_id} already {ended} with different artifacts')
         return _replay(task)
     _require_nonmedia_outcome(task)
     if task['handle'] is None:
@@ -116,11 +119,15 @@ def complete(record: dict, ref: ClaimRef, result: TaskResult, elapsed: float) ->
     if task.get('sectionBinding', {}).get('chunkPlan') and not settling:
         from studio.production.section_chunk_progress import require_live_review
         elapsed = require_live_review(record, task)
+    if task['cancelRequested'] and not task['revoked']:
+        _usage(task, result.usage)
+        return _late_cancelled(record, ref, (receipts, 'completed', 'interrupt'), elapsed)
     if not task['revoked'] and task['kind'] != 'director' and elapsed > task_deadline(record, task):
         return fail(record, ref, TaskFailure('deadline-expired', 'completion arrived after the task deadline',
                                             result.usage), elapsed)
     _usage(task, result.usage)
-    task.update(receipts=receipts, unresolved=False, endConfirmed=True, approvalStale=approval_stale(record, task))
+    task.update(receipts=receipts, approvalStale=approval_stale(record, task))
+    proof = settle_end(task, end_cause(task, 'completed'))
     if task['revoked'] and task['state'] != 'superseded':
         finish(task, 'superseded', elapsed, f'{task["reason"]}; it completed after its right to publish was revoked')
     elif not task['revoked'] and not settling:
@@ -129,14 +136,17 @@ def complete(record: dict, ref: ClaimRef, result: TaskResult, elapsed: float) ->
     refresh(record, elapsed)
     outcome = _ended(task, ref)
     outcome.event.update(event='task-completed', receipts=receipts, publishable=task['state'] == 'completed',
-                         approvalStale=task['approvalStale'])
+                         approvalStale=task['approvalStale'], unresolved=task['unresolved'], **proof.event_fields())
     return outcome
 
 
 def fail(record: dict, ref: ClaimRef, failure: TaskFailure, elapsed: float) -> Outcome:
-    """Record a failed execution (or a claim that failed before launch); dependents fail with the reason."""
+    """Record a failed execution (or a claim whose launch call failed); dependents fail with the reason."""
     task = task_of(record, ref.task_id)
     check_claim(task, ref)
+    if task['state'] == 'cancelled' and task['cancelRequested'] and task['endConfirmed'] \
+            and task['claim']['epoch'] == ref.epoch:
+        return _replay(task)
     row = {'category': failure.category, 'detail': clip_text(failure.detail) if type(failure.detail) is str else None}
     if not valid_failure(row):
         raise ValueError('A failure names a category slug and a bounded detail')
@@ -145,25 +155,44 @@ def fail(record: dict, ref: ClaimRef, failure: TaskFailure, elapsed: float) -> O
             raise TaskConflict(f'Task {ref.task_id} already failed as {task["failure"]["category"]}')
         return _replay(task)
     _require_nonmedia_outcome(task)
+    cause = end_cause(task, 'failed', failure.launch_error)
+    if task['cancelRequested'] and task['state'] in LIVE:
+        _usage(task, failure.usage)
+        outcome = _late_cancelled(record, ref, ([], row['category'], cause), elapsed)
+        outcome.event.update({'launchError': failure.launch_error} if failure.launch_error else {})
+        return outcome
     if task['state'] in ('completed', 'cancelled') or task['state'] == 'superseded' and not task['unresolved']:
         raise TaskConflict(f'Task {ref.task_id} already ended as {task["state"]}')
     if not _may_report(task):
         raise TaskRefused(f'Task {ref.task_id} is {task["state"]}: its claim was fenced')
     _usage(task, failure.usage)
-    task['endConfirmed'] = True
+    proof = settle_end(task, cause)
     if task['state'] == 'superseded':
-        task.update(unresolved=False, reason=clip_text(f'{task["reason"]}; its execution failed ({row["category"]})'))
+        task['reason'] = clip_text(f'{task["reason"]}; its execution failed ({row["category"]})')
     else:
-        task.update(failure=row, unresolved=False)
+        task['failure'] = row
         finish(task, 'failed', elapsed, row['detail'] or row['category'])
     refresh(record, elapsed)
     outcome = _ended(task, ref)
-    outcome.event.update(event='task-failed', category=row['category'])
+    outcome.event.update(event='task-failed', category=row['category'], unresolved=task['unresolved'],
+                         **proof.event_fields())
+    outcome.event.update({'launchError': failure.launch_error} if failure.launch_error else {})
+    return outcome
+
+
+def _late_cancelled(record: dict, ref: ClaimRef, late: tuple[list[dict], str, str], elapsed: float) -> Outcome:
+    """The event of an end reported after a cancellation request (the rule is ``task_end.late_cancel``)."""
+    task = task_of(record, ref.task_id)
+    proof = late_cancel(task, late, elapsed)
+    refresh(record, elapsed)
+    outcome = _ended(task, ref)
+    outcome.event.update(event='task-cancelled', lateOutcome=late[1], receipts=late[0], publishable=False,
+                         unresolved=task['unresolved'], **proof.event_fields())
     return outcome
 
 
 def confirm_cancelled(record: dict, ref: ClaimRef, usage: dict | None, elapsed: float) -> Outcome:
-    """Termination of a claimed or running execution is confirmed: its slot frees."""
+    """Termination of a claimed or running execution is confirmed; its slot frees only as ``task_end`` allows."""
     task = task_of(record, ref.task_id)
     check_claim(task, ref)
     if task['state'] == 'cancelled' and task['claim']['epoch'] == ref.epoch \
@@ -173,35 +202,26 @@ def confirm_cancelled(record: dict, ref: ClaimRef, usage: dict | None, elapsed: 
     if task['state'] in ('completed', 'failed') or not _may_report(task):
         raise TaskConflict(f'Task {ref.task_id} already ended as {task["state"]}')
     _usage(task, usage)
-    _terminated(record, task, elapsed)
+    proof = _terminated(record, task, elapsed)
     refresh(record, elapsed)
     outcome = _ended(task, ref)
-    outcome.event.update(event='task-cancelled', state=task['state'], unresolved=task['unresolved'])
+    outcome.event.update(event='task-cancelled', state=task['state'], unresolved=task['unresolved'],
+                         **proof.event_fields())
     return outcome
 
 
-def _terminated(record: dict, task: dict, elapsed: float) -> None:
-    """A confirmed end frees the slot only when the end of the exact execution is proved.
+def _terminated(record: dict, task: dict, elapsed: float) -> EndProof:
+    """A confirmed end frees the slot only as the one end rule allows (``task_end.end_proof``, cause interrupt).
 
-    AI work with no bound execution proves nothing (a host turn may have started), and a
-    host turn whose own host was not observed to end its tools on interrupt may leave
-    them running: both are recorded as ended (``cancelled``, or their superseded or
-    abandoned state kept) with the slot ``unresolved``. A cancelled task never completes later.
+    Otherwise the task is recorded as ended (``cancelled``, or its superseded or abandoned
+    state kept) with the slot ``unresolved`` and the rule's note. A cancelled task never completes later.
     """
-    handle = task['handle']
-    if handle is None and is_ai(task):
-        note = 'no execution is bound to this claim, so its termination cannot be confirmed; the slot stays held'
-    elif handle is not None and handle['type'] == 'host' and not handle_cleans_up(handle, 'interruptCleansUp'):
-        note = ('the host confirmed the turn ended but its host was not observed to end its tool processes; the '
-                'slot stays unresolved until evidence or settlement')
-    else:
-        note = None
-    task['endConfirmed'] = True
+    proof = settle_end(task, 'interrupt')
     if task['state'] in LIVE:
-        finish(task, 'cancelled', elapsed, note or 'termination confirmed')
-        task['unresolved'] = note is not None
-        return
-    task.update(unresolved=note is not None, reason=clip_text(f'{task["reason"]}; {note or "termination confirmed"}'))
+        finish(task, 'cancelled', elapsed, proof.note or 'termination confirmed')
+    else:
+        task['reason'] = clip_text(f'{task["reason"]}; {proof.note or "termination confirmed"}')
+    return proof
 
 
 def request_cancel(record: dict, task_id: str, reason: str, elapsed: float) -> Outcome:
@@ -225,7 +245,7 @@ def _mark_cancel(task: dict, reason: str, elapsed: float) -> bool:
     if task['state'] in ('claimed', 'running'):
         task.update(state='cancel-requested', cancelRequested=True, reason=reason)
         return True
-    if holds_slot(task) and not task['cancelRequested']:
+    if task['state'] in UNRESOLVABLE and task['unresolved'] and not task['cancelRequested']:
         task['cancelRequested'] = True
         return True
     return False

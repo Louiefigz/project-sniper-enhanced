@@ -229,7 +229,7 @@ class DependencyTests(TaskCase):
         self.assertEqual((row['state'], row['unresolved']), ('superseded', True))
         self.assertEqual(self.ai()['charged'], 2)
         result = self.finish_task(ref, 'late-findings')
-        self.assertEqual((result['state'], result['unresolved']), ('superseded', False))
+        self.assertEqual((result['state'], result['unresolved']), ('superseded', True))   # G9: held until M-102
         trail = (self.root / 'batches/batch-auth/events.jsonl').read_text().splitlines()
         self.assertFalse(json.loads(trail[-1])['publishable'])
 
@@ -299,8 +299,8 @@ class ClaimTests(TaskCase):
         self.assertEqual((confirmed['state'], confirmed['unresolved']), ('cancelled', True))
         with self.assertRaisesRegex(TaskRefused, 'All 4 AI slots'):
             self.claim('r3')                                       # Codex: an interrupt may leave its tools
-        self.finish_task(refs[1], 'findings')
-        self.assertEqual(self.claim('r3')['epoch'], 1)
+        self.finish_task(refs[1], 'findings')                      # G9: a Codex completion holds its slot too
+        self.assertRaisesRegex(TaskRefused, 'All 4 AI slots', self.claim, 'r3')
 
     def test_a_host_that_ends_tools_on_interrupt_frees_the_slot_on_confirmation(self) -> None:
         self.use_claude_director()
@@ -308,7 +308,7 @@ class ClaimTests(TaskCase):
         ref = self.start_task('critic', {'type': 'host', 'host': 'claude-code', 'thread': 'TEST-c', 'turn': None})
         api.request_cancel(self.root, BATCH, 'critic', 'deadline')
         self.assertEqual(api.confirm_cancelled(self.root, BATCH, ref)['state'], 'cancelled')
-        self.assertEqual(api.task_status(self.root, BATCH)['ai']['active'], 1)
+        self.assertEqual(api.task_status(self.root, BATCH)['ai']['active'], 2)   # G9: held until M-102
 
     def test_charges_are_per_task_never_refunded_and_counted_with_admit(self) -> None:
         import native_batch
@@ -316,7 +316,7 @@ class ClaimTests(TaskCase):
         native_batch.cmd_admit(ns(batch=BATCH, clip='A', kind='author', label='manual'))
         self.enqueue(*[task_spec(f'author-{index}', 'author', parent='director') for index in range(3)])
         first = self.claim('author-0')
-        api.release_claim(self.root, BATCH, self.ref(first))          # definitely not launched
+        api.release_claim(self.root, BATCH, self.ref(first), 'TEST: spawn author ENOENT')   # its launch failed
         second = self.claim('author-0')
         self.assertEqual((first['epoch'], second['epoch']), (1, 2))
         self.claim('author-1')

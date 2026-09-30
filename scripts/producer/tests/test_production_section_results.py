@@ -259,7 +259,7 @@ class SectionResultTests(unittest.TestCase):
             self.finish(task, self.result(task, {'review': review}))
 
     def test_fenced_completion_settles_without_reviving_publication(self) -> None:
-        """Late owned results free an execution slot while retaining its fenced terminal state."""
+        """A late owned result is recorded as history; its slot stays held (G9)."""
         for state in ('superseded', 'abandoned'):
             task = self.task(f'late-{state}', 'author')
             receipt = self.result(task)
@@ -270,7 +270,7 @@ class SectionResultTests(unittest.TestCase):
             self.assertFalse(outcome.event['publishable'])
             self.assertEqual(task['state'], state)
             self.assertTrue(task['endConfirmed'])
-            self.assertFalse(task['unresolved'])
+            self.assertTrue(task['unresolved'])
             self.assertFalse(complete(self.record, ref, TaskResult((receipt,)), 3.0).changed)
             with self.assertRaisesRegex(ValueError, 'not current'):
                 read_completed_result(self.record, task['id'], task['sectionBinding'])

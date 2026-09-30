@@ -24,7 +24,7 @@ Times are batch elapsed seconds; null means not established.
 """
 from __future__ import annotations
 
-from studio.production.task_schema import LIVE, UNRESOLVABLE, is_ai
+from studio.production.task_schema import LIVE, TERMINAL, is_ai
 from studio.production.tasks import tasks_of
 
 RENDER_ROUTES = {'draft': ('draft',), 'final': ('final', 'promote', 'verify', 'resume')}
@@ -151,7 +151,7 @@ def cleanup(record: dict, clip_id: str) -> dict:
     """The output's work still holding a slot, and its running launches."""
     tasks = [task for task in tasks_of(record).values() if task['clipId'] == clip_id]
     live = [task for task in tasks if task['state'] in LIVE]
-    unresolved = [task for task in tasks if task['state'] in UNRESOLVABLE and task['unresolved']]
+    unresolved = [task for task in tasks if task['state'] in TERMINAL and task['unresolved']]   # G9: any ended task
     running = [row for row in record['clips'][clip_id]['attempts'] if row['status'] == 'running']
     return {'status': 'pending' if live or unresolved or running else 'settled',
             'liveTasks': [{'taskId': task['id'], 'kind': task['kind'], 'state': task['state']} for task in live],

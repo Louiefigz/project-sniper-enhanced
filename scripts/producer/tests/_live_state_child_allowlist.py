@@ -113,6 +113,8 @@ REVIEWED: dict[str, str] = {
     'test_production_recovery.py': ISOLATED_CHILD,
     # the child is a sleeper (M-020 review)
     'test_production_settle.py': NO_OWNER,
+    # the child is a TEST time.sleep whose end reconcile observes (W2-D2; L-K, M-042)
+    'test_production_task_end_flow.py': NO_OWNER,
     # RACE imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)
     'test_production_staging.py': ISOLATED_CHILD,
     # RACE imports _budget_fixture (installs the isolation) and uses the root argument (M-020 review)

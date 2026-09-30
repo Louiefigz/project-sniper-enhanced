@@ -79,11 +79,12 @@ class AuthorityUsageTests(Case):
                          (2, 0, 1600))
 
     def test_reservations_per_output_and_per_run(self) -> None:
+        # G9 (M-042): author-A's completed codex turn keeps its slot; no host end event is proven before M-102.
         clip = self.usage('A')['reservations']
         self.assertEqual((clip['dispatchCounters']['author'], clip['chargedTasks'], clip['holdingSlots']),
-                         ('1/3', 1, 0))
+                         ('1/3', 1, 1))
         run = self.usage(None)['reservations']
-        self.assertEqual((run['charged'], run['activeSlots']), (3, 2))  # director + two authors; A completed
+        self.assertEqual((run['charged'], run['activeSlots']), (3, 3))  # director + two authors; A completed, held
 
 
 class TranscriptLinkTests(Case):

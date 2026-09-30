@@ -101,7 +101,9 @@ class BreakdownTests(unittest.TestCase):
         enroll(self.record)
         tasks.enqueue(self.record, (task_spec('author-A', 'author', parent='director'),), 10.0)
         outcome = claims.claim(self.record, 'author-A', CHILD, 100.0)
-        claims.release(self.record, claims.ClaimRef('author-A', 1, outcome.detail['token']), 300.0)
+        # G9 (M-042): an AI claim is released only with its launch tool's verbatim failure (gate m2).
+        claims.release(self.record, claims.ClaimRef('author-A', 1, outcome.detail['token']), 300.0,
+                       'TEST: spawn author ENOENT')
         trail = ({'event': 'task-claimed', 'taskId': 'author-A', 'epoch': 1, 'elapsed': 100.0},
                  {'event': 'task-released', 'taskId': 'author-A', 'epoch': 1, 'elapsed': 300.0})
         timed = breakdown(self.record, 1000.0, None, ('A', trail))

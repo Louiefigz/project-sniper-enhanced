@@ -128,9 +128,9 @@ def task_of(record: dict, task_id: str) -> dict:
 
 
 def current(task: dict, states: tuple[str, ...]) -> None:
-    """A terminal or superseded task cannot regain publication by supplying matching bytes."""
+    """A terminal or superseded task cannot regain publication; a completed one holding its slot (G9) stays current."""
     require(task.get('state') in states and not task.get('supersededBy') and not task.get('revoked')
-            and not task.get('unresolved') and not task.get('approvalStale')
+            and not (task.get('unresolved') and task.get('state') != 'completed') and not task.get('approvalStale')
             and not task.get('cancelRequested'), 'section task is not current')
 
 
@@ -268,9 +268,9 @@ def validate_result(record: dict, ref: ClaimRef, receipt: dict) -> dict:
 
 
 def validate_settlement_result(record: dict, ref: ClaimRef, receipt: dict) -> dict:
-    """Rehash a fenced execution's historical output without renewing any publication permission."""
+    """Rehash a fenced or cancel-requested execution's historical output; no publication permission is renewed."""
     task = task_of(record, ref.task_id)
-    require(task['state'] in ('superseded', 'abandoned') and type(ref.epoch) is int
+    require((task['state'] in ('superseded', 'abandoned') or task.get('cancelRequested')) and type(ref.epoch) is int
             and (ref.epoch, ref.token) == (task['claim']['epoch'], task['claim']['token']),
             'invalid historical settlement claim')
     document = read_document(task, receipt)

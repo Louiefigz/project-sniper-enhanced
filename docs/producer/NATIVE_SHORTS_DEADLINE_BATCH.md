@@ -62,6 +62,17 @@ with `next`, and records real attached handles and artifacts through `attach` an
 claim epoch/token. `change-approval --approval FILE --reason TEXT` revokes stale
 work; a superseded callback cannot satisfy a current dependency.
 
+A logical AI slot is released only on termination evidence that identifies the
+execution (`production/task_end.py`). A completed or failed host turn keeps its
+slot until an end event of that host is proven (none is proven yet), and the
+task's reason says why the slot is held. A process handle's slot is released
+once reconcile sees that exact process identity gone with an empty group. A
+claim whose launch call itself failed is released with the launch tool's own
+output, verbatim: `release --launch-error TEXT`, or `complete --failure
+launch-failed --detail TEXT --launch-error TEXT`; an AI release without it is
+refused. Cancellation wins: a result reported after a cancel request is kept as
+history and never publishes.
+
 Each media request names its exact batch, task, clip, project, fresh output
 folder and allowlisted route/options (`production/media.py`). It carries no
 arbitrary shell command. Start `native_batch.py dispatch --batch SESSION` after

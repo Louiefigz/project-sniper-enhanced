@@ -11,6 +11,7 @@ from unittest import mock
 from studio import native_budget_clock as clock
 from studio.native_budget_batches import create_batch
 from studio.native_budget_policy import BatchSpec, new_batch_record
+from studio.native_budget_schema import AI_POLICY
 from studio.native_budget_store import read_batch
 from studio.production.outputs import OutputAuthorization, _new_output
 from studio.production.task_schema import authorization_identity
@@ -32,7 +33,10 @@ class SectionBudgetFixture:
         test.enterContext(mock.patch('studio.native_budget_sections.own_identity', return_value=SUPERVISOR))
         test.enterContext(mock.patch('studio.native_budget_sections._process_table', return_value={
             7001: (1, 7001, 'TEST supervisor')}))
-        record = new_batch_record(BatchSpec('section-test', ('A',), (), 1), clock.start_anchor())
+        # The TEST batch declares the policy's slot ceiling: each codex section completion holds its slot
+        # until host end evidence exists (G9: none before M-102), so the default 4 would be exhausted.
+        spec = BatchSpec('section-test', ('A',), (), 1, ai_slots=AI_POLICY['slotsCeiling'])
+        record = new_batch_record(spec, clock.start_anchor())
         record['clips']['A'] = _new_output(record, OutputAuthorization('A', 'long', 'TEST', 'TEST',
                                                                       output_seconds=60), 0)
         record['production']['authorization']['identity'] = authorization_identity(record)

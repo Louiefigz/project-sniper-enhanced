@@ -95,7 +95,7 @@ class SupersededUncertainClaims(TaskCase):
         self.enqueue(task_spec('critic', 'review', clip_id='A', parent='director'))
         ref = self.ref(self.claim('critic', DISPATCHER))
         api.supersede_task(self.root, BATCH, 'critic', 'plan v2')
-        api.release_claim(self.root, BATCH, ref)                  # the holder attests nothing launched
+        api.release_claim(self.root, BATCH, ref, 'TEST: spawn critic ENOENT')   # its launch call failed
         self.assertEqual((self.state('critic'), self.task('critic')['unresolved']), ('superseded', False))
 
 
@@ -162,7 +162,7 @@ class RevokedNeverPublishes(TaskCase):
     def check(self) -> None:
         row = self.task('critic')
         self.assertEqual((row['state'], row['revoked'], row['unresolved'], row['receipts'][0]['path']),
-                         ('superseded', True, False, receipt('late')['path']))   # kept as history, slot freed
+                         ('superseded', True, True, receipt('late')['path']))   # kept as history; slot held (G9)
         self.assertEqual(self.state('earlier'), 'superseded')
         with self.assertRaisesRegex(TaskRefused, 'Prerequisite critic is superseded'):
             self.enqueue(task_spec('after', 'check', prerequisites=('critic',)))

@@ -38,8 +38,8 @@ def is_ai(task: dict) -> bool:
 
 
 def holds_slot(task: dict) -> bool:
-    """Live work, and ended work whose resource is unresolved, keep their slot."""
-    return task['state'] in LIVE or (task['state'] in UNRESOLVABLE and task['unresolved'])
+    """Live work, and ended work whose resource is unresolved (any terminal state, G9), keep their slot."""
+    return task['state'] in LIVE or (task['state'] in TERMINAL and task['unresolved'])
 
 
 def settled(task: dict) -> bool:
@@ -183,8 +183,8 @@ def _state_problem(row: dict) -> str | None:
         return 'terminal time does not match the state'
     if (row['failure'] is not None) != (row['state'] == 'failed'):
         return 'a failure category belongs to a failed task only'
-    if row['unresolved'] and row['state'] not in UNRESOLVABLE:
-        return 'only an abandoned, superseded or cancelled task can hold an unresolved resource'
+    if row['unresolved'] and row['state'] not in TERMINAL:
+        return 'only an ended task can hold an unresolved resource'
     if row['state'] in ('superseded', 'completed') and row['revoked'] != (row['state'] == 'superseded'):
         return 'a superseded task is revoked and a completed one is not'
     return None

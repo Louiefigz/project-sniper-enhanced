@@ -79,7 +79,7 @@ class SlotTests(TaskCase):
         self.enqueue(task_spec('critic', 'review', clip_id='A', parent='director'))
         ref = self.start_task('critic', CLAUDE)
         api.request_cancel(self.root, BATCH, 'critic', 'deadline')
-        self.assertEqual(api.confirm_cancelled(self.root, BATCH, ref)['unresolved'], False)
+        self.assertEqual(api.confirm_cancelled(self.root, BATCH, ref)['unresolved'], True)   # G9: held until M-102
 
     def test_enrollment_accepts_a_self_declared_handle(self) -> None:
         api.complete_task(self.root, BATCH, ClaimRef('director', 1, self.director['token']), TaskResult(()))
@@ -126,7 +126,7 @@ class SlotTests(TaskCase):
     def random_step(self, rng: random.Random, refs: dict, step: int) -> None:
         task_id = f't{rng.randrange(24)}'
         actions = {'claim': lambda: refs.__setitem__(task_id, self.ref(self.claim(task_id, host_turn(f'c{step}')))),
-                   'release': lambda: api.release_claim(self.root, BATCH, refs[task_id]),
+                   'release': lambda: api.release_claim(self.root, BATCH, refs[task_id], 'TEST: spawn failed'),
                    'attach': lambda: api.attach_task(self.root, BATCH, refs[task_id], CHILD if self.task(task_id)
                                                      ['kind'] == 'check' else host_turn(task_id)),
                    'complete': lambda: self.finish_task(refs[task_id], f'{task_id}-{step}'),

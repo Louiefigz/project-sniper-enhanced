@@ -216,7 +216,7 @@ def require_encoded_task(record: dict, spec: object) -> None:
         raise SectionReviewPending('Current sealed section has no registered encoded review yet')
     require(task.get('sectionBinding') == spec.section_binding and not task.get('supersededBy')
             and not task.get('approvalStale') and not task.get('revoked')
-            and not task.get('cancelRequested') and not task.get('unresolved')
+            and not task.get('cancelRequested') and not (task.get('unresolved') and task.get('state') != 'completed')
             and stale_inputs(record).get(spec.task_id) is None, 'Encoded review is stale or fenced')
     if task['state'] in ('blocked', 'ready', 'claimed', 'running'):
         raise SectionReviewPending('Current sealed section encoded review is still pending')

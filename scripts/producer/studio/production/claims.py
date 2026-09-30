@@ -5,8 +5,9 @@ not evidence that a child exists. AI work is admitted here against the run's
 host slots and reservations, and (for per-clip dispatch kinds) the existing
 per-clip counters, exactly as ``native_batch.py admit`` would charge it. The
 charge belongs to the task and is never refunded: releasing a claim that was
-definitely not launched frees the slot, and a later re-claim takes a new epoch
-without a second charge. Every AI task other than the enrolled director needs a
+definitely not launched frees the slot (AI work: only with the launch tool's
+recorded failure, G9), and a later re-claim takes a new epoch without a second
+charge. Every AI task other than the enrolled director needs a
 live AI parent: the authority admits no AI task outside the enrolled director's tree (it cannot stop
 host work it is never told about).
 
@@ -26,7 +27,8 @@ from studio.production.dependencies import refresh, stale_inputs
 from studio.production.formats import clip_deadlines
 from studio.production.governance import host_governance, host_rules
 from studio.production.host_contract import clip_text, require_handle
-from studio.production.task_schema import LIVE, UNRESOLVABLE, finish, holds_slot, is_ai
+from studio.production.task_end import end_cause, require_launch_error, settle_end
+from studio.production.task_schema import LIVE, TERMINAL, UNRESOLVABLE, finish, holds_slot, is_ai
 from studio.production.tasks import (
     StaleClaim, TaskConflict, TaskRefused, TaskSpec, active_ai, new_row, require_headroom, require_identity,
     task_of, tasks_of,
@@ -189,36 +191,51 @@ def enroll_director(record: dict, enrollment: Enrollment, elapsed: float) -> Out
                           'governance': record['production']['governance']['mode']}, claim_detail(record, row))
 
 
-def release(record: dict, ref: ClaimRef, elapsed: float) -> Outcome:
-    """The claim holder attests nothing was launched: the slot frees, the charge stays."""
+def release(record: dict, ref: ClaimRef, elapsed: float, launch_error: str | None = None) -> Outcome:
+    """Release a claim no execution acknowledged; the charge stays.
+
+    Media and check claims hold export reservations, not AI slots, so the holder's word releases them. An AI
+    claim is released only with the launch tool's own failure, verbatim (G9): ``task_end.end_cause`` accepts it
+    exactly as it does for ``fail`` (X88, X89). Any given launch error goes into the ``task-released`` event
+    only, never into a record field. When the release ends an AI task, the event also records
+    ``endCause: unlaunched``.
+    """
     task = task_of(record, ref.task_id)
     check_claim(task, ref)
     if task['handle'] is not None:
         raise TaskRefused(f'Task {ref.task_id} was acknowledged by an execution; only its termination frees it')
-    _release(record, task, elapsed)
+    cause = _release(record, task, elapsed, launch_error)
+    event = {'event': 'task-released', 'taskId': ref.task_id, 'epoch': ref.epoch}
+    if launch_error is not None:   # the launch tool's failure, verbatim: in the event only, never a record field
+        event['launchError'] = require_launch_error(launch_error)
+    if cause is not None and task['state'] in TERMINAL:   # an AI end is settled through the one rule, as fail does
+        event.update(settle_end(task, cause).event_fields())
     refresh(record, elapsed)
-    return Outcome(True, {'event': 'task-released', 'taskId': ref.task_id, 'epoch': ref.epoch},
-                   {'taskId': ref.task_id, 'state': task['state']})
+    return Outcome(True, event, {'taskId': ref.task_id, 'state': task['state']})
 
 
-def _release(record: dict, task: dict, elapsed: float) -> None:
+def _release(record: dict, task: dict, elapsed: float, launch_error: str | None) -> str | None:
     """Settle an unlaunched claim: ready again, cancelled when stopping was requested, or its slot freed.
 
-    An abandoned claim is never released: its holder was observed gone, so no one can attest
-    that nothing launched; that slot frees only on confirmed termination or settlement.
+    An abandoned claim is never released: its holder was observed gone, so no one can attest that nothing
+    launched. An AI claim needs the launch tool's failure and returns its cause (``unlaunched``); others None.
     """
     state = task['state']
     if state in ('abandoned', 'cancelled'):
         raise TaskRefused(f'Task {task["id"]} is {state}; releasing it cannot prove that nothing launched')
+    if is_ai(task) and launch_error is None:
+        raise TaskRefused("Releasing an unlaunched claim records the launch tool's failure verbatim (--launch-error)")
+    cause = end_cause(task, 'failed', launch_error) if is_ai(task) else None
     if state == 'superseded' and task['unresolved']:
         task.update(unresolved=False, reason=clip_text(f'{task["reason"] or state}; claim released before launch'))
-        return
+        return cause
     if state == 'cancel-requested' or state == 'claimed' and record['status'] != 'active':
         finish(task, 'cancelled', elapsed, 'claim released before launch; nothing ran')
-        return
+        return cause
     if state != 'claimed':
         raise TaskRefused(f'Task {task["id"]} is {state}; there is no unlaunched claim to release')
     task.update(state='ready', claim=None, reason=None)
+    return cause
 
 
 def attach(record: dict, ref: ClaimRef, handle: dict, elapsed: float) -> Outcome:

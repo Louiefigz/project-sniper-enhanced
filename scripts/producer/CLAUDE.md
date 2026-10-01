@@ -1440,3 +1440,18 @@ docs belong to P3b.
   when it is recorded: credit that accrued before it but settles after it (at most one poll bound, 30 s) does not
   count. Tests: `test_trail_reserve_budget.py`, `test_queue_clock_v2_g.py`, `test_production_settling_writers.py`,
   `test_production_duplication_check_b.py`, `test_production_handoff_clock_b.py`, `test_queue_credit_pins.py`.
+- **A `studio` pool class (M-056; C1).** `native_work_pool_studio.py` (`MODE`, `decide`) admits Studio startups in their
+  own ledger class (`native_work_pool_policy.STUDIO_CLASS`, `STUDIO_SLOTS` 2, `STUDIO_RESERVATION_BYTES` 1 GiB,
+  `STUDIO_DISK_BYTES` 256 MiB: provisional, outside `policy_identity()`, so qualification records stay valid); Studio
+  rows never count as render members or tickets (`native_work_pool_mix`), and every member is still charged against
+  the shared memory and disk budget. `NativeWorkLease.acquire` routes every `LEDGER_CLASSES` lane to the pool;
+  `native_work_pool_disk` and `native_work_pool_recovery` accept the class (a quarantined Studio member is recovered
+  by nonce). `studio/managed_preview_launch.py` holds the launch path moved out of `managed_preview.py` (314 -> 189
+  lines): `launch` takes a Studio slot (`acquire_until`) and completes it after a verified start, when nothing was
+  attempted, and when `settle_failed_launch` verifies a failed start's cleanup, which needs the root gone and no
+  live process in its group (`group_survivors`; `managed_preview_state.discharge_launch`'s "already exited" checks
+  only the root); an unverified cleanup keeps the slot quarantined and the project's `launching` fence. The
+  Studio-slot wait holds the registry lock (REVIEW m5). An older (`4a15560`) client refuses its own admission as
+  quarantined while a Studio start is live. Tests: `test_managed_preview_studio_class.py`,
+  `test_managed_preview_studio_release.py`; patch points moved to `managed_preview_launch` in the fixtures and five
+  test files.

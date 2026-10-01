@@ -3,7 +3,7 @@
 The supervisor owns lifecycle actions. Closing a lease does not assert cleanup;
 only complete() clears its active marker after recorded identities are absent.
 All checkouts use the same private per-user namespace, not a per-project lock.
-The 'heavy' and 'audio' classes are admitted by the bounded host pool
+The 'heavy', 'audio' and 'studio' classes are admitted by the bounded host pool
 (native_work_pool.py); 'preview-control' keeps this exclusive kernel-lock lease.
 A record holds at most MAX_RECORDED_IDENTITIES identities at once; an owner retires
 rows whose processes the process table shows absent (retire_processes), so the bound
@@ -117,8 +117,8 @@ class NativeWorkLease:
         record_processes/complete/close protocol. Pass the same PoolRequest on every
         retry to keep one FIFO position; without it each call is a single attempt.
         """
-        from native_work_pool_policy import POOL_CLASSES
-        if lane in POOL_CLASSES:
+        from native_work_pool_policy import LEDGER_CLASSES
+        if lane in LEDGER_CLASSES:
             from native_work_pool import admit
             return admit(lane, project, request)
         if lane != 'preview-control' or request is not None:

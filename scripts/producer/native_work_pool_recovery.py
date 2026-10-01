@@ -13,7 +13,9 @@ names no processes recovery could check. It is removed by its file name only onc
 liveness lock file is present and proved free; a missing lock file proves nothing (its owner
 may hold a deleted lock), so such a record is refused. Any identity that can still be read
 from it must be absent too. Its proof records exactly that weaker basis and the original
-bytes. A readable record keeps the full rules above.
+bytes. A readable record keeps the full rules above. A Studio member (native_work_pool_studio) is
+always 'admitted' with no processes even when its start spawned the preview server, whose survivors
+the Studio registry tracks: recovering it frees Studio capacity only, and its proof says so.
 """
 from __future__ import annotations
 
@@ -30,9 +32,11 @@ from headless.durable_files import DurableFileError, open_private_file, read_pri
 from native_render_processes import ProcessIdentity, identity_matches, process_table
 from native_work_lease import NativeWorkBusy, NativeWorkLease
 from native_work_pool_disk import readable
-from native_work_pool_policy import LAYOUT, POOL_CLASSES
+from native_work_pool_policy import LAYOUT, LEDGER_CLASSES, STUDIO_CLASS
 
 PHASES = ('admitted', 'launching', 'launch-state-unknown')
+STUDIO_SCOPE = ('; a Studio member records no process, so this frees Studio capacity only: the Studio '
+                'registry tracks its preview server')
 
 
 def process_snapshot() -> dict:
@@ -45,9 +49,9 @@ def process_snapshot() -> dict:
 
 
 def validate_member(record: object, nonce: str) -> dict:
-    """Require the exact pool schema, identities and a known launch phase."""
+    """Require the exact pool schema, identities and a known launch phase (any ledger class, Studio's too)."""
     if not isinstance(record, dict) or record.get('schemaVersion') != 1 or record.get('layout') != LAYOUT \
-            or record.get('nonce') != nonce or record.get('class') not in POOL_CLASSES:
+            or record.get('nonce') != nonce or record.get('class') not in LEDGER_CLASSES:
         raise RuntimeError('Recovery nonce does not match a pool member record')
     supervisor, children = record.get('supervisor'), record.get('processes')
     NativeWorkLease._validate_identity(supervisor)
@@ -195,7 +199,8 @@ def recover_member(namespace: state.Namespace, nonce: str) -> dict:
                         originalRecordSha256=hashlib.sha256(raw).hexdigest(), firstCheck=first,
                         finalCheck=second, memberLockPresent=lock is not None, signals=[],
                         status='recorded-process-absence-verified',
-                        scope='Explicit recovery only; no output quality or unobserved-child claim')
+                        scope='Explicit recovery only; no output quality or unobserved-child claim'
+                        + (STUDIO_SCOPE if record['class'] == STUDIO_CLASS else ''))
         _release(namespace, nonce, (proof, evidence), lock)
     finally:
         if lock is not None:

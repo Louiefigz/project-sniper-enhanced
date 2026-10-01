@@ -3,39 +3,28 @@
 Opening reuses a project's exact live server or starts one (only its own stale-runtime server or
 the survivor of its own interrupted launch is replaced); at most MAX_MANAGED_PREVIEWS run and a
 refusal stops nothing. A Studio server is one small Node process that renders nothing, so startup holds a
-host-pool slot only until ready. Unverified startup keeps that slot quarantined. An unfinished launch fences
-only its own project, and only while a process of it still runs. Studio is served only from the
-qualified runtime whose analytics are switched off. ``open_view`` is the owned open a hand-off uses
-(ownership, holds and refusals: ``managed_preview_holds``; release: ``managed_preview_owned``).
+Studio pool slot, never a render slot, only until ready; unverified startup keeps that Studio slot quarantined
+(launch, admission and the failure record: ``managed_preview_launch``). An unfinished launch fences only its
+own project, and only while a process of it still runs. Studio is served only from the qualified runtime
+whose analytics are switched off. ``open_view`` is the owned open a hand-off uses (ownership, holds and
+refusals: ``managed_preview_holds``; release: ``managed_preview_owned``).
 """
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-import time
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from native_render_resources import read_snapshot
-from native_render_policy import adaptive_admission_reasons, capacity_policy
 from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
-from studio.native_runtime import install_runtime, runtime_identity
-from studio.studio_server import (
-    ServerRecord, StudioServerError, is_live_preview, launch_preview,
-    pick_free_port, read_record,
-)
+from studio.managed_preview_launch import close_dead, launch, persist, running_record, uses_runtime
+from studio.native_runtime import install_runtime
+from studio.studio_server import ServerRecord, StudioServerError, is_live_preview, read_record
 
 DEFAULT_WAIT_SECONDS = 60.0
-
-
-def _utc() -> str:
-    """Wall-clock evidence for registry records."""
-    return datetime.now(timezone.utc).isoformat()
 
 
 def _project(directory: str) -> str:
@@ -44,41 +33,6 @@ def _project(directory: str) -> str:
     if not (project / 'index.html').is_file():
         raise StudioServerError('Native preview requires an existing index.html')
     return str(project)
-
-
-def _running(project: str, record: ServerRecord) -> dict:
-    """Bind readiness to live process identity before releasing startup exclusion."""
-    result = dict(schemaVersion=2, state='running', project=project,
-                  record=record.to_json(), identity=state.verified_preview(project, record))
-    state._validate_running(result)
-    return state.snapshot_owned(result)
-
-
-def _uses_runtime(value: dict, cli: str) -> bool:
-    """Require this qualified runtime: its exact CLI, or another checkout's copy of the same content."""
-    command = value['identity']['command']
-    if command.partition(' ')[2].startswith(f'{cli} preview '):
-        return True
-    served, identity = state.served_cli(command), runtime_identity(cli)
-    return identity is not None and served is not None and runtime_identity(served) == identity
-
-
-def _persist(reg: registry.Registry) -> Callable[[dict], None]:
-    """A writer that records one entry in this registry transaction."""
-    return lambda value: registry.write_entry(reg, value)
-
-
-def _close_dead(reg: registry.Registry, entry: dict) -> dict:
-    """Close a running record only when its whole recorded tree has exited on its own."""
-    if entry['state'] != 'running' or state.matches(entry):
-        return entry
-    owned = state.snapshot_owned(entry)
-    if state.live_owned(owned):
-        return owned
-    closed = dict(owned, state='stopped', stoppedAt=time.time(),
-                  cleanup={'verified': True, 'survivors': [], 'reason': 'exited-before-this-observation'})
-    registry.write_entry(reg, closed)
-    return closed
 
 
 def _adopt_legacy(reg: registry.Registry) -> None:
@@ -92,19 +46,6 @@ def _adopt_legacy(reg: registry.Registry) -> None:
         return
     registry.write_entry(reg, dict(state.snapshot_owned(legacy), schemaVersion=2,
                                    adoptedFrom='legacy-single-slot-registry'))
-
-
-def _require_capacity(reg: registry.Registry, project: str) -> None:
-    """Refuse beyond the bound, naming every other view that still holds resources."""
-    rows = [_close_dead(reg, state.settle_launch(_persist(reg), entry)) for entry in registry.entries(reg)
-            if entry['project'] != project]
-    active = [row for row in rows if row['state'] != 'stopped']
-    if len(active) < registry.MAX_MANAGED_PREVIEWS:
-        return
-    views = '; '.join(f"{row['project']} [{row['state']}] {row.get('record', {}).get('url', '')}".strip()
-                      for row in active)
-    raise StudioServerError(f'Managed Studio limit of {registry.MAX_MANAGED_PREVIEWS} views reached; running: '
-                            f'{views}. Nothing was stopped; stop one with managed_preview.py stop <project>.')
 
 
 def _rebound(entry: dict, adopted: bool, binding: dict | None) -> dict | None:
@@ -122,87 +63,21 @@ def _plan(reg: registry.Registry, project: str, cli: str,
     including another holder's MP4 binding, exactly as it was (operator review item #5)."""
     prior = registry.read_entry(reg, project)
     if prior and prior['state'] == 'launching':
-        prior = state.settle_launch(_persist(reg), prior)
+        prior = state.settle_launch(persist(reg), prior)
     if prior and prior['state'] == 'launching':
         return None, prior, None  # its own interrupted launch's survivors, replaced only after admission
     if prior and prior['state'] == 'running':
-        prior = _close_dead(reg, prior)
+        prior = close_dead(reg, prior)
     adopted = not prior or prior['state'] == 'stopped'
     if adopted:
         existing = read_record(project)
         if not existing or not is_live_preview(project, existing):
             return None, None, None
-        prior = dict(_running(project, existing), media=binding)
+        prior = dict(running_record(project, existing), media=binding)
     pending = _rebound(prior, adopted, binding)
-    if state.matches(prior) and _uses_runtime(prior, cli):
+    if state.matches(prior) and uses_runtime(prior, cli):
         return state.record_from(prior), None, pending
     return None, prior, pending
-
-
-def _settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseException) -> None:
-    """Record a failed launch as stopped only when the preview it started is verified gone.
-
-    A started but unverified server is stopped by its exact identity. Otherwise the 'launching'
-    record keeps its survivors, fencing only this project until they exit or ``stop`` stops them.
-    """
-    if not launch['attempted']:
-        return
-    if getattr(error, 'preview_spawned', True) is False:  # studio_server tagged a failure before any child
-        cleanup = dict(verified=True, survivors=[], signals=[], reason='startup failed before spawning a process')
-    else:
-        pid = launch['pid'] or getattr(error, 'preview_pid', None)
-        cleanup = state.discharge_launch(launch['project'], launch['port'], pid)
-    outcome = dict(state='stopped', stoppedAt=time.time()) if cleanup['verified'] else \
-        dict(state='launching', settledAt=time.time())
-    registry.write_entry(reg, dict(schemaVersion=2, project=launch['project'], port=launch['port'], cli=launch['cli'],
-                                   cleanup=cleanup, processes=cleanup.get('survivors', []), **outcome, **registry.owned_by(launch)))
-
-
-def _retire(reg: registry.Registry, stale: dict) -> None:
-    """Stop this project's own stale view, or its interrupted launch's survivors, verified."""
-    if stale['state'] == 'launching':
-        state.settle_launch(_persist(reg), stale, discharge=True)
-        return
-    state.stop_registered(_persist(reg), stale)
-
-
-def _launch(reg: registry.Registry, project: str, request: dict, stale: dict | None) -> ServerRecord:
-    """Admit, start and register one preview; an unverified outcome fences only this project."""
-    _require_capacity(reg, project)
-    from native_work_lease import NativeWorkLease
-    heavy = NativeWorkLease.acquire('heavy', project)
-    launch = dict(project=project, attempted=False, port=None, pid=None, cli=request['cli'], owner=request['owner'])
-    try:
-        if stale:
-            _retire(reg, stale)
-        snapshot = read_snapshot(Path(project))
-        reasons = adaptive_admission_reasons(snapshot, capacity_policy(snapshot))
-        if reasons:
-            raise StudioServerError('Preview admission refused: ' + '; '.join(reasons))
-        launch['port'] = pick_free_port() if request['port'] is None else request['port']
-        registry.write_entry(reg, dict(schemaVersion=2, state='launching', project=project, port=launch['port'],
-                                       cli=request['cli'], launchedAt=_utc(), **registry.owned_by(request)))
-        launch['attempted'] = True
-        record = launch_preview(request['cli'], project, launch['port'], open_browser=False)
-        launch['pid'] = record.pid
-        running = _running(project, record)
-        if not _uses_runtime(running, request['cli']):
-            raise StudioServerError('Started preview does not use the qualified native runtime')
-        registry.write_entry(reg, dict(running, media=request['media'], openedAt=_utc(), **registry.owned_by(request)))
-        heavy.complete()
-        return record
-    except BaseException as error:
-        try:
-            _settle_failed_launch(reg, launch, error)
-        except Exception as cleanup_error:  # noqa: BLE001 - the fence stays; both causes are reported.
-            error.add_note(f'Studio startup cleanup was not verified: {cleanup_error}')
-        raise
-    finally:
-        try:
-            if not launch['attempted'] and not heavy.completed:
-                heavy.complete()
-        finally:
-            heavy.close()
 
 
 def _open(directory: str, options: dict, wait_seconds: float) -> tuple[ServerRecord, bool]:
@@ -216,8 +91,8 @@ def _open(directory: str, options: dict, wait_seconds: float) -> tuple[ServerRec
         _adopt_legacy(reg)
         reused, stale, pending = _plan(reg, project, cli, binding)
         registry.admit_open(reg, (project, reused, stale), options['owner'], pending)
-        request = dict(port=port, cli=cli, media=binding, owner=options['owner'])
-        return (reused, False) if reused else (_launch(reg, project, request, stale), True)
+        request = dict(port=port, cli=cli, media=binding, owner=options['owner'], until=until)
+        return (reused, False) if reused else (launch(reg, project, request, stale), True)
 
 
 def open_preview(directory: str, port: int | None = None, media: Path | None = None,
@@ -247,7 +122,7 @@ def _merge_adoption(prior: dict | None, candidate: dict) -> dict:
 def adopt_preview(directory: str, record: ServerRecord, wait_seconds: float = DEFAULT_WAIT_SECONDS) -> ServerRecord:
     """Register an explicitly identified existing server without restarting it."""
     project = _project(directory)
-    candidate = _running(project, record)
+    candidate = running_record(project, record)
     with registry.transaction(registry.monotonic_until(wait_seconds)) as reg:
         registry.write_entry(reg, _merge_adoption(registry.read_entry(reg, project), candidate))
     return record
@@ -259,15 +134,15 @@ def stop_preview(directory: str, wait_seconds: float = DEFAULT_WAIT_SECONDS) -> 
     with registry.transaction(registry.monotonic_until(wait_seconds)) as reg:
         prior = registry.read_entry(reg, project)
         if prior and prior['state'] == 'running':
-            state.stop_registered(_persist(reg), prior)
+            state.stop_registered(persist(reg), prior)
         if prior and prior['state'] == 'launching':
-            state.settle_launch(_persist(reg), prior, discharge=True)
+            state.settle_launch(persist(reg), prior, discharge=True)
 
 
 def _status(reg: registry.Registry, entry: dict | None) -> dict:
     """Refresh descendant witnesses and report exact identity and review-media currency."""
     if entry and entry['state'] == 'launching':
-        entry = state.settle_launch(_persist(reg), entry)
+        entry = state.settle_launch(persist(reg), entry)
     if entry and entry['state'] == 'running':
         entry = state.snapshot_owned(entry)
         registry.write_entry(reg, entry)

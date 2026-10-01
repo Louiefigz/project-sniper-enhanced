@@ -11,6 +11,7 @@ from native_render_resources import GIB, ProcessRequest, parse_snapshot
 from test_native_render_resources import raw_sample
 from _native_pool_fixture import members
 from studio import managed_preview as managed
+from studio import managed_preview_launch as launching
 from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
 from studio.studio_server import ServerRecord
@@ -34,10 +35,10 @@ class ManagedPreviewFixture:
         self.cli = str(self.runtime / 'dist/cli.js')
         self.snapshot = parse_snapshot(raw_sample(), ProcessRequest(), 40 * GIB)
         patches = [mock.patch.object(work, 'state_root', return_value=self.root / 'registry'),
-                   mock.patch.object(managed, 'read_snapshot', return_value=self.snapshot),
-                   mock.patch.object(managed, 'adaptive_admission_reasons',
-                                     wraps=managed.adaptive_admission_reasons),
-                   mock.patch.object(managed, 'launch_preview', side_effect=self.launch),
+                   mock.patch.object(launching, 'read_snapshot', return_value=self.snapshot),
+                   mock.patch.object(launching, 'adaptive_admission_reasons',
+                                     wraps=launching.adaptive_admission_reasons),
+                   mock.patch.object(launching, 'launch_preview', side_effect=self.launch),
                    mock.patch.object(state, 'process_identity', side_effect=lambda pid: self.identities.get(pid)),
                    mock.patch.object(state, 'read_tree_table', side_effect=self.tree),
                    mock.patch.object(managed, 'install_runtime', return_value=self.runtime),
@@ -51,7 +52,7 @@ class ManagedPreviewFixture:
         return self.root / checkout / 'templates/motion/.sniper-native-runtime' / identity / 'hyperframes'
 
     def heavy_fence(self) -> bool:
-        """Whether an unverified heavy pool member record (the startup fence) remains."""
+        """Whether any pool member record remains (since M-056 a startup holds a Studio slot, never a render slot)."""
         return bool(members(self.root / 'registry'))
 
     def tree(self) -> dict:

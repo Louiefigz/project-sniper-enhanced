@@ -1,6 +1,7 @@
 """M1 (P0 Step 5.1): opening a view while another project's view is registered goes through the state API.
 
-``managed_preview._require_capacity`` settles every other registered view with ``managed_preview_state.
+``managed_preview_launch.require_capacity`` (moved from managed_preview at M-056) settles every other
+registered view with ``managed_preview_state.
 settle_launch``; before M-025 src's state module (the add8f82c file) lacked it, so any open beside another view
 raised AttributeError. TEST folders and a private registry only; no process is started or signalled.
 """
@@ -14,7 +15,7 @@ from pathlib import Path
 from unittest import mock
 
 import native_work_lease as work
-from studio import managed_preview as managed
+from studio import managed_preview_launch as launching
 from studio import managed_preview_registry as registry
 
 
@@ -33,7 +34,7 @@ class OtherViewTests(unittest.TestCase):
         entry = {'schemaVersion': 2, 'state': 'stopped', 'project': str(other)}
         with registry.transaction(registry.monotonic_until(5.0)) as reg:
             registry.write_entry(reg, entry)
-            managed._require_capacity(reg, str(mine))
+            launching.require_capacity(reg, str(mine))
             self.assertEqual(registry.read_entry(reg, str(other)), entry)
 
 

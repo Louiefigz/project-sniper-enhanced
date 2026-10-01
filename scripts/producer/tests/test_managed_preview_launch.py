@@ -20,10 +20,10 @@ from unittest import mock
 
 import native_work_lease as work
 from _managed_preview_fixture import ManagedPreviewFixture
-from _pending import pending
 from graphics.render_tools import resolve_tools
 from native_render_resources import GIB, ProcessRequest, parse_snapshot
 from studio import managed_preview as managed
+from studio import managed_preview_launch as launching
 from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
 from studio.studio_server import ServerRecord, StudioServerError
@@ -41,7 +41,7 @@ class InterruptedLaunchTests(ManagedPreviewFixture, unittest.TestCase):
             self.launch(cli, project, port, **options)
             raise KeyboardInterrupt('TEST opener killed while waiting for readiness')
         self.mocks[3].side_effect = killed
-        with mock.patch.object(managed, '_settle_failed_launch'), self.assertRaises(KeyboardInterrupt):
+        with mock.patch.object(launching, 'settle_failed_launch'), self.assertRaises(KeyboardInterrupt):
             self.open(index)
         self.mocks[3].side_effect = self.launch
         self.assertEqual(json.loads(self.record(index).read_text())['state'], 'launching')
@@ -51,8 +51,6 @@ class InterruptedLaunchTests(ManagedPreviewFixture, unittest.TestCase):
         """Every managed record by project, as ``list`` reports it."""
         return {row['preview']['project']: row['preview'] for row in managed.list_previews()}
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'an unverified startup quarantines it host-wide')
     def test_open_replaces_its_own_orphan_and_leaves_other_projects_alone(self) -> None:
         orphan = self.interrupted()
         other = self.open(1)
@@ -66,8 +64,6 @@ class InterruptedLaunchTests(ManagedPreviewFixture, unittest.TestCase):
         self.assertIn(other.pid, self.identities)
         self.assertEqual(json.loads(self.record(0).read_text())['state'], 'running')
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'an unverified startup quarantines it host-wide')
     def test_a_launch_whose_server_already_exited_closes_without_any_signal(self) -> None:
         self.identities.pop(self.interrupted())
         with mock.patch.object(state.os, 'kill') as stop:
@@ -75,8 +71,6 @@ class InterruptedLaunchTests(ManagedPreviewFixture, unittest.TestCase):
             self.assertIn(self.open().pid, self.identities)
         stop.assert_not_called()
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'an unverified startup quarantines it host-wide')
     def test_stop_discharges_the_fence_and_frees_its_view_slot(self) -> None:
         orphan = self.interrupted()
         opened = [self.open(index) for index in range(1, registry.MAX_MANAGED_PREVIEWS)]
@@ -133,8 +127,6 @@ class InterruptedLaunchTests(ManagedPreviewFixture, unittest.TestCase):
             managed.stop_preview(str(self.projects[0]))
         self.assertEqual(json.loads(self.record(0).read_text())['state'], 'launching')
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'an unverified startup quarantines it host-wide')
     def test_a_survivor_that_will_not_exit_keeps_only_its_project_fenced(self) -> None:
         orphan = self.interrupted()
         with mock.patch.object(state, 'terminate_tree', return_value=dict(verified=False, survivors=[], signals=[])), \
@@ -207,7 +199,7 @@ class KilledOpenerProcessTests(unittest.TestCase):
         self.runtime = self.root / 'templates/motion/.sniper-native-runtime/TEST-identity/hyperframes'
         self.cli = self.server_code(self.runtime / 'dist/cli.js')
         self.enterContext(mock.patch.object(work, 'state_root', return_value=self.root / 'registry'))
-        self.enterContext(mock.patch.object(managed, 'read_snapshot', return_value=parse_snapshot(
+        self.enterContext(mock.patch.object(launching, 'read_snapshot', return_value=parse_snapshot(
             raw_sample(), ProcessRequest(), 40 * GIB)))
         self.enterContext(mock.patch.object(managed, 'install_runtime', return_value=self.runtime))
 
@@ -277,11 +269,9 @@ class KilledOpenerProcessTests(unittest.TestCase):
         self.assertIsNone(state.process_identity(orphan))
         self.assertIsNone(stranger.poll())
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'an unverified startup quarantines it host-wide')
     def test_open_replaces_the_orphan_with_a_registered_server(self) -> None:
         orphan = self.kill_opener()
-        with mock.patch.object(managed, 'launch_preview', side_effect=self.launch):
+        with mock.patch.object(launching, 'launch_preview', side_effect=self.launch):
             record = managed.open_preview(str(self.project), 3990, None, 5)
         self.assertIsNone(state.process_identity(orphan))
         self.assertEqual((self.entry()['state'], self.entry()['identity']['pid']), ('running', record.pid))

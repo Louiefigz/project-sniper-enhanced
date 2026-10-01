@@ -25,6 +25,9 @@ Derivation (policy, not an SDK or OS quota; the owner guard enforces it by sampl
   free space minus other members' reservations to cover its own plus the existing
   10 GiB reserve. Heavy 3 GiB = 2.6x the largest audited Short attempt directory
   (1.16 GiB, IMG_5954 E preview-v6); audio 1 GiB (prepared WAV/AAC are tens of MB).
+- Studio startup (native_work_pool_studio.py) has its own ledger class and slots. Its
+  reservations are PROVISIONAL: no Studio startup tree has been measured yet (P1 R-9).
+  They are outside policy_identity(), so every committed qualification record stays valid.
 """
 from __future__ import annotations
 
@@ -41,6 +44,11 @@ RESERVATION_BYTES = {'heavy': 6 * GIB, 'audio': 1 * GIB}
 DISK_RESERVATION_BYTES = {'heavy': 3 * GIB, 'audio': 1 * GIB}
 DISK_RESERVE_BYTES = 10 * GIB
 SLOT_BOUNDS = {'heavy': (2, 5), 'audio': (1, 2)}
+STUDIO_CLASS = 'studio'  # a Studio view's startup: its own slots, never a render slot
+STUDIO_SLOTS = 2  # provisional
+STUDIO_RESERVATION_BYTES = RESERVATION_BYTES['audio']  # 1 GiB, provisional (unmeasured, P1 R-9)
+STUDIO_DISK_BYTES = 256 * 1024 ** 2  # provisional (unmeasured, P1 R-9)
+LEDGER_CLASSES = (*POOL_CLASSES, STUDIO_CLASS)  # every class a member record may carry
 QUEUE_SECONDS = 600
 HOST_IDENTITY_TIMEOUT_SECONDS = 3  # bounds one sysctl read; the queue clock's poll bound counts it
 MEASURED_EVIDENCE = {

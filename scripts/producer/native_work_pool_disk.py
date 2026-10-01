@@ -29,7 +29,7 @@ import os
 from typing import NamedTuple
 
 import native_work_pool_storage as storage
-from native_work_pool_policy import DISK_RESERVE_BYTES, POOL_CLASSES
+from native_work_pool_policy import DISK_RESERVE_BYTES, LEDGER_CLASSES
 from native_work_pool_storage import DiskUnaccountable
 
 DEVICE_LIMIT = 8
@@ -114,8 +114,8 @@ def root_space(record: dict, device: int) -> str:
 
 
 def readable(record: object) -> bool:
-    """Admission can read the record's class, memory reservation and disk rows."""
-    return isinstance(record, dict) and record.get('class') in POOL_CLASSES \
+    """Admission can read the record's class (a Studio member's too), memory reservation and disk rows."""
+    return isinstance(record, dict) and record.get('class') in LEDGER_CLASSES \
         and type(record.get('reservationBytes')) is int and record_disks(record) is not None
 
 

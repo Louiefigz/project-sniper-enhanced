@@ -12,6 +12,7 @@ from unittest import mock
 
 from _handoff_fixture import OWNER, TITLE, WORDS, HandoffFixture
 from studio import managed_preview as managed
+from studio import managed_preview_launch as launching
 from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
 from studio import native_handoff as handoff
@@ -27,7 +28,7 @@ class HandoffOwnershipTests(HandoffFixture, unittest.TestCase):
     def test_unrelated_views_are_preserved_and_never_reused(self) -> None:
         """A user's view and another owner's view survive this hand-off and its release."""
         user = self.open(1)
-        with mock.patch.object(managed, 'pick_free_port', return_value=3992):
+        with mock.patch.object(launching, 'pick_free_port', return_value=3992):
             other, _launched = managed.open_view(str(self.projects[2]), registry.ViewOwner('batch-OTHER', 'c' * 32))
         with mock.patch.object(state.os, 'kill') as stop:
             record = handoff.hand_off(self.request())
@@ -130,7 +131,7 @@ class HandoffOwnershipTests(HandoffFixture, unittest.TestCase):
         draft = self.draft_short('Other')
         self.enterContext(mock.patch.dict(inventory.RECEIPT_READERS, {DRAFT_STATUS: lambda export: None}))
         mine = handoff.hand_off(self.request('mine.json'))
-        with mock.patch.object(managed, 'pick_free_port', return_value=3993):
+        with mock.patch.object(launching, 'pick_free_port', return_value=3993):
             theirs = handoff.hand_off(self.request('theirs.json', attempt=draft, player=None))
         with mock.patch.object(state.os, 'kill', side_effect=self.stop_signal) as stop:
             handoff.release([self.root / 'mine.json'], self.root / 'release.json', 10.0)

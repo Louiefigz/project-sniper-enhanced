@@ -34,10 +34,11 @@ def run_opener(node: str, root: str, runtime: str, project: str) -> None:
     import native_work_lease as work
     from native_render_resources import GIB, ProcessRequest, parse_snapshot
     from studio import managed_preview as managed
+    from studio import managed_preview_launch as launching
     from test_native_render_resources import raw_sample
 
     work.state_root = lambda: Path(root)
-    managed.read_snapshot = lambda _project: parse_snapshot(raw_sample(), ProcessRequest(), 40 * GIB)
+    launching.read_snapshot = lambda _project: parse_snapshot(raw_sample(), ProcessRequest(), 40 * GIB)
     managed.install_runtime = lambda: Path(runtime)
 
     def launch(cli: str, studio: str, port: int, **_options: object) -> None:
@@ -45,7 +46,7 @@ def run_opener(node: str, root: str, runtime: str, project: str) -> None:
         print('SPAWNED', start_server(node, cli, studio, port).pid, flush=True)
         time.sleep(60)  # waiting for SDK readiness when the opener is killed
 
-    managed.launch_preview = launch
+    launching.launch_preview = launch
     managed.open_preview(project, 3990, None, 5)
 
 

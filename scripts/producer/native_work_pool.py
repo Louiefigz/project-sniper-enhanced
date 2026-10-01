@@ -1,4 +1,4 @@
-"""Fair, reservation-accounted host pool for native 'heavy' and 'audio' work.
+"""Fair, reservation-accounted host pool for native 'heavy' and 'audio' work and Studio startup.
 
 Every admission is one short transaction under the pool ledger lock: observe members,
 tickets and legacy fences, enqueue the caller once (FIFO by ticket sequence within its
@@ -14,6 +14,7 @@ caller's monotonic deadline. Budget derivation: native_work_pool_policy.py.
 Disk is charged per shared space, an APFS container or one filesystem (native_work_pool_disk.py);
 a running member grows its reservation with native_work_pool_expand.expand_disk. Whether a wait
 earns Short credit is native_work_pool_credit.py: it only annotates the decision's context.
+A Studio view's startup has its own small class and slots (native_work_pool_studio.py).
 """
 from __future__ import annotations
 
@@ -32,7 +33,7 @@ import native_work_qualification as qualification
 import native_work_pool_state as state
 from native_work_pool_observe import observe
 from native_work_pool_lease import Ticket, enqueue, install
-from native_work_pool_policy import DISK_RESERVATION_BYTES, POOL_CLASSES, PoolMode
+from native_work_pool_policy import DISK_RESERVATION_BYTES, LEDGER_CLASSES, STUDIO_CLASS, PoolMode
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued  # noqa: F401  (public API)
 
 
@@ -41,7 +42,7 @@ class PoolRequest:
     """One owner's request; pass the same object on every retry to keep its FIFO ticket.
 
     Attributes:
-        lane: 'heavy' (browser/video) or 'audio' (ffmpeg-only, small).
+        lane: 'heavy' (browser/video), 'audio' (ffmpeg-only, small) or 'studio' (Studio startup).
         project: Project path recorded as metadata and for session matching.
         root: Owner output directory (session matching and disk device).
         receipt: Owner receipt path, recorded for evidence and qualification summaries.
@@ -72,7 +73,7 @@ class PoolRequest:
 
     def __post_init__(self) -> None:
         """Validate the class and canonicalize paths before any transaction."""
-        if self.lane not in POOL_CLASSES:
+        if self.lane not in LEDGER_CLASSES:
             raise ValueError('Unknown native pool class')
         self.project = str(Path(self.project).resolve())
         self.root = str(Path(self.root).resolve()) if self.root else None
@@ -193,6 +194,9 @@ def decide(view: state.PoolView, request: PoolRequest, host: dict,
 
     native_work_pool_credit.classify then records whether the wait is credited; it changes no reason.
     """
+    if request.lane == STUDIO_CLASS:  # its own slots; no profile, mix, fence or credit
+        from native_work_pool_studio import decide as studio_decide  # it builds on this module
+        return studio_decide(view, request, host)
     physical = host['memsizeBytes']
     session = mix.session_of(view, host)
     rows = _member_charges(view, physical)
@@ -261,7 +265,7 @@ def admit(lane: str, project: str, request: PoolRequest | None = None) -> object
     host = policy.host_identity()
     try:
         committed = qualification.committed(host)
-        mix.describe(request, committed.needs_engine)
+        mix.describe(request, committed.needs_engine)  # a Studio request is never described (no profile or mix)
         return _transact(lane, request, host, committed)
     finally:
         if transient:

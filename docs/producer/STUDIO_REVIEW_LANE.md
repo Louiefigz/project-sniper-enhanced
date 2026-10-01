@@ -294,9 +294,18 @@ project never stops or switches an existing view, repeated open of the same
 project reuses its exact live server (also one another checkout started from a runtime
 with the same content identity), and replacing that project's own stale-runtime server
 first verifies its cleanup. Beyond the bound the refusal names every running view and
-stops nothing. In this build Studio startup takes one heavy host-pool slot until the
-server is ready, and keeps it quarantined when startup cannot be verified
-(`studio/managed_preview.py`, `_launch`). A startup that fails
+stops nothing. Studio startup takes a slot of its own host-pool class, `studio`
+(`native_work_pool_studio.py`: two slots, 1 GiB memory and 256 MiB disk, all provisional until a Studio startup
+tree is measured), never a render slot, so a finished Short's view opens while other Shorts render; it still
+waits for the memory budget and disk headroom every member shares. The slot is released once the server is
+ready, when nothing was started, and when a failed start's cleanup is verified: nothing was spawned, or what was
+spawned is gone, root and process group (`managed_preview_launch.settle_failed_launch`, `group_survivors`; a
+descendant that left the session with `setsid` is not covered, as for every tool process). Only a failed start
+whose cleanup is unverified keeps its slot quarantined (recover it with `native_work_recovery.py <nonce>`) and
+its project fenced. The wait for a Studio slot holds the Studio registry lock, so other projects' `open`, `stop`
+and `status` wait with it, up to the open's deadline (60 s by default). An older install (the `4a15560` engine)
+reads a live Studio start as a quarantined member and refuses its own admission while one runs (it fails closed):
+do not upgrade while batches of an older engine run. A startup that fails
 before any child exists is recorded as stopped. An unfinished launch (an opener that was
 killed or interrupted, or a server whose stop was not verified) keeps only that project's
 record in `launching`, and only while a process of that launch still runs: its retained

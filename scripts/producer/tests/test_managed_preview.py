@@ -14,9 +14,8 @@ from unittest import mock
 
 import native_work_lease as work
 from native_render_resources import GIB
-from _native_pool_fixture import members
+from _native_pool_fixture import members, plan_project, qualify_fixture_host
 from _managed_preview_fixture import ManagedPreviewFixture
-from _pending import pending
 from studio import managed_preview as managed
 from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
@@ -25,6 +24,15 @@ from studio.studio_server import ServerRecord, StudioServerError
 
 class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
     """Real private registry I/O with inert preview-process leaves."""
+
+    def assert_studio_quarantined(self) -> None:
+        """P1 B14, X150: a failed start whose cleanup is unverified keeps one Studio slot, never a render slot."""
+        self.assertEqual([json.loads(path.read_text())['class'] for path in members(self.root / 'registry')],
+                         ['studio'])
+        qualify_fixture_host(self, {'heavy': 2, 'audio': 1})  # a covered render is admitted beside it
+        render = work.NativeWorkLease.acquire('heavy', str(plan_project(self, 'short', 45.0)))
+        render.complete()
+        render.close()
 
     def test_same_draft_reuses_exact_live_server(self) -> None:
         """Repeated open cannot accumulate a second preview or new browser."""
@@ -77,10 +85,8 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
             self.assertEqual(self.open(), existing)
         self.mocks[3].assert_not_called()
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_runtime_upgrade_does_not_wait_for_a_render(self) -> None:
-        """Studio takes no pool slot: a render holding the heavy lane never delays a runtime upgrade."""
+        """A Studio slot, never a render slot: a render holding the heavy lane never delays a runtime upgrade."""
         first = self.open()
         self.mocks[6].return_value = self.checkout_runtime('checkout-a', 'TEST-identity-b')
         heavy = work.NativeWorkLease.acquire('heavy', str(self.projects[0]))
@@ -89,7 +95,7 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
                 upgraded = self.open(wait_seconds=0.5)
             self.assertNotIn(first.pid, self.identities)
             self.assertIn(upgraded.pid, self.identities)
-            self.assertEqual(len(members(self.root / 'registry')), 1)  # only the render's own member
+            self.assertEqual(len(members(self.root / 'registry')), 1)  # the render's; the Studio slot was released
             heavy.complete()
         finally:
             heavy.close()
@@ -105,8 +111,6 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
         self.assertEqual(self.mocks[3].call_count, 1)
         self.assertFalse(self.heavy_fence())
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_wrong_runtime_after_launch_is_stopped_by_identity_and_releases_the_lane(self) -> None:
         """A started server that fails verification is stopped exactly; no host-wide fence remains."""
         self.mocks[3].side_effect = lambda _cli, project, port, **options: self.launch(
@@ -123,8 +127,6 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
         self.mocks[3].side_effect = self.launch
         self.assertIn(self.open().pid, self.identities)
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_unverified_stop_of_a_failed_launch_fences_this_project_with_its_identity(self) -> None:
         """A survivor keeps only this project fenced, recorded so an operator can clear it once it exits."""
         self.mocks[3].side_effect = lambda _cli, project, port, **options: self.launch(
@@ -136,10 +138,8 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
         fence = json.loads(self.record(0).read_text())
         self.assertEqual(fence['state'], 'launching')
         self.assertEqual([row['pid'] for row in fence['processes']], list(self.identities))
-        self.assertFalse(self.heavy_fence())
+        self.assert_studio_quarantined()
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_handled_startup_failure_with_its_reaped_child_releases_the_lane(self) -> None:
         """The launcher reaped its own child: verified absent, so only nothing stays fenced."""
         def failed(_cli: str, _project: str, _port: int, **_options: object) -> ServerRecord:
@@ -167,8 +167,6 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
         listed = {row['preview']['project']: row['live'] for row in managed.list_previews()}
         self.assertEqual(listed, {str(self.projects[0]): True, str(self.projects[1]): True})
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_busy_heavy_lane_does_not_block_another_projects_view(self) -> None:
         """A render in progress neither delays nor disturbs Studio for another project."""
         first = self.open()
@@ -238,8 +236,6 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
             self.open(1)
         stop.assert_not_called()
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_startup_failure_is_unverified_until_no_process_of_it_is_found(self) -> None:
         """A launcher error is no proof that no child survived; the next open looks for survivors."""
         self.mocks[3].side_effect = RuntimeError('TEST uncertain startup')
@@ -247,7 +243,7 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
             self.open()
         fence = json.loads(self.record(0).read_text())
         self.assertEqual((fence['state'], fence['cleanup']['reason']), ('launching', 'launched process identity unknown'))
-        self.assertFalse(self.heavy_fence())  # the fence is this project's, never the host pool's
+        self.assert_studio_quarantined()  # the fence is this project's; the pool keeps only a Studio slot
         self.mocks[3].side_effect = self.launch
         with mock.patch.object(state.os, 'kill') as stop:
             self.assertIn(self.open().pid, self.identities)
@@ -335,12 +331,10 @@ class ManagedPreviewTests(ManagedPreviewFixture, unittest.TestCase):
             os.close(held)
         self.assertEqual(self.mocks[3].call_count, 1)
 
-    @pending('P1', 'capacityClock C1: src takes a heavy slot at Studio startup (managed_preview.py:171-173); '
-                   'P1 M-056 gives Studio its own pool class')
     def test_reviewers_open_concurrently_while_an_export_runs_and_mappings_stay_current(self) -> None:
         """Two reviewers, one running export and an existing user view: nothing switches or stops.
 
-        Studio takes no pool slot, so reviewers open while the export holds the heavy lane.
+        Studio takes a Studio slot, never a render slot, so reviewers open while the export holds the heavy lane.
         """
         media = [self.root / f'review-{index}.mp4' for index in range(3)]
         for index, file in enumerate(media):

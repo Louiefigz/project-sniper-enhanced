@@ -10,7 +10,9 @@ already present allow. Mixes are decided before capacity:
   member its profile does not cover, and terminally (recover first) beside such a member
   whose cleanup is unverified: uncertain owners keep their charge and their exclusivity.
 - Without any record the pool is the pre-pool exclusive pool: requests queue as before.
-Waiting stays reserved for capacity (slots, memory, disk, FIFO order).
+Waiting stays reserved for capacity (slots, memory, disk, FIFO order). Studio startup members
+(native_work_pool_studio) take part in no profile or mix decision, and a Studio request queues
+only behind Studio tickets.
 """
 from __future__ import annotations
 
@@ -21,11 +23,17 @@ import native_work_pool_fence as fence
 import native_work_qualification as qualification
 import native_work_pool_state as state
 import native_work_workload as workloads
-from native_work_pool_policy import POOL_CLASSES, PoolMode, queue_key
+from native_work_pool_policy import LEDGER_CLASSES, STUDIO_CLASS, PoolMode, queue_key
 
 
 def describe(request: object, needs_engine: bool) -> None:
-    """Describe the workload once per request, outside the ledger lock (engine only if needed)."""
+    """Describe the workload once per request, outside the ledger lock (engine only if needed).
+
+    A Studio request is never described: its workload is the unrecorded 'studio' row.
+    """
+    if request.lane == STUDIO_CLASS:
+        request.workload = workloads.unrecorded(STUDIO_CLASS)
+        return
     if request.workload is None:
         request.workload = workloads.describe(request.project, request.receipt, request.lane)
     if needs_engine and request.workload['engine'] is None:
@@ -42,10 +50,12 @@ def readable(view: state.PoolView, unknown: set[str]) -> state.PoolView:
 
 
 def members(view: state.PoolView) -> list[tuple[str, dict, str]]:
-    """(nonce, workload, state) of every member; an older client's member is 'unrecorded'."""
+    """(nonce, workload, state) of every member but Studio's; an older client's member is 'unrecorded'."""
     rows = []
     for member in view.members:
         record = member['record'] if isinstance(member['record'], dict) else {}
+        if record.get('class') == STUDIO_CLASS:
+            continue
         mode_record = record.get('modeRecord') if isinstance(record.get('modeRecord'), dict) else {}
         workload = mode_record.get('workload')
         workload = workload if isinstance(workload, dict) else workloads.unrecorded(record.get('class'))
@@ -63,9 +73,10 @@ def request_mode(session: dict | None, committed: qualification.Committed, row: 
 
 
 def _exclusive(view: state.PoolView) -> list[tuple[str, str]]:
-    """(nonce, state) of every member admitted in exclusive mode."""
+    """(nonce, state) of every member admitted in exclusive mode (never a Studio member)."""
     return [(member['nonce'], member['state']) for member in view.members
-            if isinstance(member['record'], dict) and member['record'].get('mode') == 'exclusive']
+            if isinstance(member['record'], dict) and member['record'].get('mode') == 'exclusive'
+            and member['record'].get('class') != STUDIO_CLASS]
 
 
 def _unmatched(mode: PoolMode, view: state.PoolView, own: object) -> list[str]:
@@ -129,13 +140,17 @@ def competing(view: state.PoolView, fenced: bool) -> list[dict]:
 def fifo_reasons(view: state.PoolView, request: object, mode: PoolMode, context: tuple) -> list[str]:
     """Only the earliest live request ticket competing for the same capacity may be admitted.
 
-    `context` is (session, committed profiles, whether this request holds or now takes a fence).
+    `context` is (session, committed profiles, whether this request holds or now takes a fence). A
+    Studio request competes only with Studio tickets, and a Studio ticket is never ahead of a render.
     """
     session, committed, fenced = context
     ahead = 0
     for ticket in competing(view, fenced):
         record = ticket['record'] or {}
-        if ticket['sequence'] >= request.ticket.sequence or record.get('class') not in POOL_CLASSES:
+        if ticket['sequence'] >= request.ticket.sequence or record.get('class') not in LEDGER_CLASSES:
+            continue
+        if STUDIO_CLASS in (record['class'], request.lane):
+            ahead += record['class'] == request.lane
             continue
         other, _outside = request_mode(session, committed, record)
         ahead += queue_conflict((mode, request.lane), (other, record['class']))

@@ -22,7 +22,7 @@ from urllib.parse import urlsplit
 import test_native_review_admission as admission
 from _fake_studio_server import FakeStudio
 from _managed_preview_fixture import ManagedPreviewFixture
-from studio import managed_preview as managed
+from studio import managed_preview_launch as launching
 from studio import native_budget_store
 from studio import native_handoff as handoff
 from studio import native_handoff_approval as approval_reader
@@ -73,7 +73,7 @@ class HandoffFixture(ManagedPreviewFixture):
         self.export, self.project = helper.f.root, helper.f.project
         self.studio = FakeStudio()
         self.addCleanup(self.studio.close)
-        self.enterContext(mock.patch.object(managed, 'pick_free_port', return_value=self.studio.port))
+        self.enterContext(mock.patch.object(launching, 'pick_free_port', return_value=self.studio.port))
         self.enterContext(mock.patch.object(native_budget_store, 'default_root', return_value=self.root / 'budgets'))
         self.approvals: dict[str, dict] = {}
         self.request_packet = self.source_inputs()

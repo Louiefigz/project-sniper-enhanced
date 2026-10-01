@@ -36,6 +36,17 @@ if {Path(module.__file__).resolve().parent for module in (native_work_pool, nati
 import native_pool_driver  # noqa: E402
 
 
+def fixed_free(free: str) -> None:
+    """TEST volumes for the base client: its own free-space read (``native_work_pool._disk_free``) reports the given
+    bytes. The base engine has no ``native_work_pool_disk``; importing this checkout's would bind this engine's policy
+    names (``LEDGER_CLASSES``, M-056) against the base policy, which lacks them."""
+    real = native_work_pool._disk_free
+    native_work_pool._disk_free = lambda path: (real(path)[0], int(free))
+
+
+native_pool_driver.fixed_free = fixed_free   # admit-disk reads the module global
+
+
 def disk_view(project: str, *roots: str) -> None:
     """Report the disk figures the base client computes for each root, in one ledger transaction.
 

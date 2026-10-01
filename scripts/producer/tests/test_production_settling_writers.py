@@ -50,6 +50,26 @@ class DrainingCloseTests(unittest.TestCase):
         self.assertEqual([row['event'] for row in batch.events()].count('batch-draining'), 1)
 
 
+class DrainingAnswerTests(unittest.TestCase):
+    """X246 n4: a close that records nothing answers with the committed record, not with its unrecorded reconcile."""
+
+    def test_a_draining_close_answers_with_the_committed_record(self) -> None:
+        """check-a's claimer exits while media-a stays live: the close that leaves the batch draining still lists
+        check-a, as the committed record does (its in-memory reconcile would have settled it)."""
+        other = {'type': 'process', 'pid': 7003, 'pgid': 7003, 'started': 'Sun Sep 27 10:00:07 2026'}
+        batch = Batch(self)
+        batch.table = table(CHILD, DISPATCHER, other)
+        batch.enqueue(('media-a', 'media', ()), ('check-a', 'check', ()))
+        batch.claim('media-a', CHILD, DISPATCHER)
+        batch.claim('check-a', None, other)
+        self.assertEqual(close(batch)['status'], 'draining')
+        batch.table = table(CHILD, DISPATCHER)                     # check-a's claimer is gone
+        result = api.close(batch.root, BATCH)
+        self.assertEqual((result['status'], result['committed']), ('draining', False))
+        self.assertIn('check-a', result['unsettled'])
+        self.assertIn('check-a', api.task_status(batch.root, BATCH)['unsettled'])
+
+
 class StatementTests(unittest.TestCase):
     """m2b: ``settle-resource`` records one statement per task and phase."""
 

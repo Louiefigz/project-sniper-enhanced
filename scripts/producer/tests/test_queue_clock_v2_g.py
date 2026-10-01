@@ -18,9 +18,10 @@ from unittest import mock
 
 from _budget_fixture import CHILD, table
 from _production_task_flow_fixture import BATCH as FLOW_BATCH, close, run_cli
-from studio import native_budget_binding, native_budget_status, native_budget_store
+from studio import native_budget_binding, native_budget_store
 from studio.native_budget_store import BudgetAuthorityError, locked_batch
-from studio.production import process_settle, queue_authority
+from studio.production import process_settle
+from studio.production.approvals import trail_events
 from studio.production.queue_audit import SETTLE_TOLERANCE, _capacity_rows, owner_digest
 from studio.production.queue_authority import CHECKPOINT_SECONDS
 from studio.production.queue_clock import SETTLED
@@ -152,8 +153,7 @@ class CommitGapTests(AuditCase):
         self.assertEqual(code, 2, result)
 
     def test_the_checkpoint_after_a_failed_one_is_written(self) -> None:
-        """R7: the failed checkpoint is not written again, but the next one is."""
-        self.addCleanup(queue_authority._FAILED_CHECKPOINTS.clear)
+        """R7 and X246 m2: the failed checkpoint is committed once its record is, and the next one is written too."""
         self.observe('working')
         self.clock.advance(1000.0)
         self.observe('waiting', POOL)
@@ -162,12 +162,15 @@ class CommitGapTests(AuditCase):
             self.clock.advance(2.0)
             self.assertRaises(BudgetAuthorityError, self.observe, 'waiting', POOL)
         self.clock.advance(2.0)
-        self.observe('waiting', POOL)                     # the failed one, now record-only
+        self.observe('waiting', POOL)                     # the failed one: record committed, then its line
         self.clock.advance(700.0)
         hand_edit(self.root, BATCH, 600.0)
         self.clock.advance(2.0)
         self.observe('waiting', POOL)                     # the next checkpoint: written
-        self.assertEqual([row['event'] for row in trail_lines(self.root, BATCH)].count('capacity-checkpoint'), 2)
+        raw = trail_lines(self.root, BATCH)
+        committed = trail_events((self.root / 'batches' / BATCH / 'events.jsonl').read_bytes())
+        self.assertEqual([row['event'] for row in raw].count('capacity-checkpoint'), 3)   # one failed, two committed
+        self.assertEqual([row['event'] for row in committed].count('capacity-checkpoint'), 2)
 
     def test_a_heartbeat_needs_no_settlement_room(self) -> None:
         """R5: with no room left for settlements, new work is refused but a heartbeat still commits."""
@@ -181,11 +184,13 @@ class CommitGapTests(AuditCase):
 
 
 class AbandonmentOnceTests(FullTrailCase):
-    """m3: at a full trail, while the record cannot be replaced, a dead launch's line is written once."""
+    """X217 m3 as X246 m2 rules: at a full trail, while the record cannot be replaced, a dead launch's line is written
+    once; once the record holds the abandonment its line is appended, so the committed trail names it exactly once.
+    Nothing is kept between statuses (each CLI status is its own process): the writer reads the trail."""
 
     def test_status_writes_the_abandoned_line_once_while_the_record_cannot_be_replaced(self) -> None:
-        """Three failing statuses write one observed line and one commit-failed; the next success writes none."""
-        self.addCleanup(native_budget_status._FAILED_ABANDONMENTS.clear)
+        """Three failing statuses write one observed line and one commit-failed; the next success commits the record
+        and appends the committed line: two abandoning lines in all, one committed."""
         running = {**ATTEMPT, 'status': 'running', 'resultStatus': None, 'completedElapsed': None}
         self.commit(lambda record: record['clips']['A'].update(attempts=[running]))
         self.table.side_effect, self.table.return_value = None, table()     # the launch's supervisor is gone
@@ -196,8 +201,12 @@ class AbandonmentOnceTests(FullTrailCase):
         lines = [json.loads(line) for line in self.trail.read_text().splitlines()[-2:]]
         self.assertEqual([(row['event'], row.get('abandoned')) for row in lines],
                          [('observed', [ATTEMPT['id']]), ('commit-failed', None)])
-        self.status()                                     # the record commits now; no second line
-        self.assertEqual(self.trail.read_text().count('"abandoned":["'), 1)
+        self.status()                                     # the record commits now, then its line follows it
+        self.assertEqual(self.trail.read_text().count('"abandoned":["'), 2)
+        committed = [row for row in trail_events(self.trail.read_bytes()) if row.get('abandoned')]
+        self.assertEqual([row['abandoned'] for row in committed], [[ATTEMPT['id']]])
+        self.status()                                     # nothing more is owed
+        self.assertEqual(self.trail.read_text().count('"abandoned":["'), 2)
 
 
 if __name__ == '__main__':

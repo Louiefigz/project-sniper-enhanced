@@ -36,8 +36,9 @@ def record_handoff(record: dict, clip: dict, elapsed: float) -> dict | None:
     credit it holds now, and whether the hand-off met it.
 
     Returns the row, or None for a clip without a writable clock (a v1 Short or a Long: its rules are unchanged).
-    A second call is refused by name. Credit that accrued before the hand-off but settles after it (at most one poll
-    bound later, M-055) is not counted: the hand-off is judged with the credit settled when it is recorded (X218 K7).
+    A second call is refused by name. The hand-off is judged with the credit settled when it is recorded; credit still
+    pending then (at most one poll bound, 30 s, M-055) does not count. This errs against us: a miss can be reported
+    early, but an on-time result is never claimed falsely (X246 m5, which supersedes X218's K7 sentence).
     """
     if not writable(clip):
         return None

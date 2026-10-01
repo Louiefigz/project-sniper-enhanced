@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -33,7 +32,7 @@ from studio.native_budget_report import TrailViews, batch_status
 from studio.native_budget_run_status import run_status
 from studio.native_budget_store import EVENTS, MAX_EVENT_BYTES, BudgetAuthorityError, TrailFull, locked_batch
 from studio.native_budget_usage import ai_usage
-from studio.production.approvals import append_pending_decisions, trail_events
+from studio.production.approvals import append_pending_decisions, committed_rows
 from studio.production.duplication_check import pending_report, recorded_checks
 
 TRAIL_EVENTS = ('clip-handed-off', 'task-claimed', 'task-released', 'packet-resolved', 'review-submitted',
@@ -44,9 +43,6 @@ SECTIONS = ('preparation', 'encoding', 'visibleMp4', 'matchingStudio', 'editoria
 SLA_BASIS = {'slaMisses': "a v2 Short's recorded visible hand-off after its delivery deadline; otherwise no complete "
                           'MP4 encoded by the delivery deadline (necessary, not sufficient)',
              'visibleSlaMisses': 'no visible hand-off recorded on the batch clock by the delivery deadline'}
-# (trail directory device, inode, attempt id) of each abandonment whose ``observed`` line is on the trail while its
-# record replace failed (X217 m3). Per process, like X190 n6's checkpoint memo: a restarted reader writes it once more.
-_FAILED_ABANDONMENTS: set = set()
 
 
 @dataclass(frozen=True)
@@ -79,47 +75,50 @@ def status_arguments(parser: argparse.ArgumentParser) -> None:
 
 def _trail(session: object) -> tuple[tuple[dict, ...], list[dict]]:
     """Inside the caller's batch lock: the trail events status reads (``TRAIL_EVENTS``) and every committed event
-    (``approvals.trail_events``: an event followed by its own failure is dropped), from one read."""
+    (``approvals.committed_rows``: an event followed by its own failure is dropped), from one read and one parse of
+    every line (X246 m4: two parses held both lists, 432 MiB at a 27 MiB trail)."""
     from headless.durable_files import DurableFileError, read_private_file
     try:
         data = read_private_file(session.dir_fd, EVENTS, MAX_EVENT_BYTES)
-        rows = [json.loads(line) for line in data.decode('utf-8').splitlines() if line.strip()]
-        committed = trail_events(data)
+        parsed = [json.loads(line) for line in data.splitlines() if line.strip()]
     except (OSError, DurableFileError, UnicodeError, ValueError) as error:
         raise BudgetAuthorityError(f'Budget event trail for {session.batch_id} is unreadable: {error}') from error
-    return tuple(row for row in rows if isinstance(row, dict) and row.get('event') in TRAIL_EVENTS), committed
+    del data
+    return tuple(row for row in parsed if isinstance(row, dict) and row.get('event') in TRAIL_EVENTS), \
+        committed_rows(parsed)
 
 
 def commit_observation(session: object, record: dict, elapsed: float, abandoned: list[str]) -> None:
     """Commit a read-only observation (status, wait, archive) with its ``observed`` line. At a full trail one that
     marked nothing commits the record alone, as a heartbeat does (X189 F1): status and wait stay readable, and
     ``observed`` never becomes a settling event, since nothing bounds how often it is read. One that marked dead
-    launches abandoned is a launch outcome, always written (``native_budget_store._terminal``, X190), once per
-    attempt (X217 m3): when its line reached the trail but the record replace failed, a later observation names only
-    the attempts with no line yet, and one left with none commits the record alone (``_FAILED_ABANDONMENTS``)."""
-    where = os.fstat(session.dir_fd)
-    keys = {attempt: (where.st_dev, where.st_ino, attempt) for attempt in abandoned}
-    fresh = [attempt for attempt in abandoned if keys[attempt] not in _FAILED_ABANDONMENTS]
+    launches abandoned is a launch outcome, always written (``native_budget_store._terminal``, X190). Each attempt's
+    line is written at most twice, read from the trail so it holds across processes (X246 m2): an attempt whose only
+    abandoning lines are each followed by commit-failed (the record replace failed) is committed record-only, and once
+    the record holds it its line is appended, so the committed trail names it exactly once."""
+    failed = _failed_abandonments(session, abandoned) if abandoned else set()
+    fresh = [attempt for attempt in abandoned if attempt not in failed]
     event = {'event': 'observed' if fresh or not abandoned else 'observed-record-only', 'elapsed': elapsed,
              'abandoned': fresh}
-    size = _trail_bytes(session)
     try:
         session.commit(record, event)
     except TrailFull:   # only an empty observation reaches here: one with abandoned launches is terminal
         session.commit(record, {**event, 'event': 'observed-record-only'})
-    except BudgetAuthorityError:
-        if fresh and _trail_bytes(session) > size:   # the line is on the trail; the record is not
-            _FAILED_ABANDONMENTS.update(keys[attempt] for attempt in fresh)
-        raise
-    _FAILED_ABANDONMENTS.difference_update(keys.values())   # committed: the record now holds them
+    if failed:   # the record holds them now: their line follows it, so the committed trail names them once
+        session.event({'event': 'observed', 'elapsed': elapsed, 'abandoned': sorted(failed)})
 
 
-def _trail_bytes(session: object) -> int:
-    """The trail's size now (0 when it cannot be read; ``commit_observation`` compares two reads)."""
-    try:
-        return os.stat(EVENTS, dir_fd=session.dir_fd).st_size
-    except OSError:
-        return 0
+def _failed_abandonments(session: object, abandoned: list[str]) -> set:
+    """The attempts of ``abandoned`` whose only abandoning lines on the trail are each followed by commit-failed.
+
+    Only lines naming ``"observed"`` are decoded (``BatchSession.lines_naming``)."""
+    rows = session.lines_naming('observed')
+    failed, committed = set(), set()
+    for row, after in zip(rows, [*rows[1:], {}]):
+        names = set(row.get('abandoned') or ()) & set(abandoned) if row.get('event') == 'observed' else set()
+        lost = after.get('event') == 'commit-failed' and after.get('failedEvent') == 'observed'
+        (failed if lost else committed).update(names)
+    return failed - committed
 
 
 def _observe(root: Path, batch_id: str) -> tuple[dict, float, tuple[tuple[dict, ...], list[dict]]]:

@@ -39,7 +39,8 @@ VERIFIER = ('studio.native_handoff_confirm', 'verify_confirmation')
 MAX_RECORD_BYTES = 4 * 1024 ** 2
 CLOCK_TOLERANCE_SECONDS = 2.0
 # The hand-off's settling line (``clip-handed-off``) carries its evidence paths and times, so both are bounded for
-# the trail's reserve (X217 M1): a path to DELIVERY_PATH_BYTES encoded, as a delivery's; a time to these characters.
+# the trail's reserve (X217 M1): a path to DELIVERY_PATH_BYTES encoded, as a delivery's; a time to these encoded bytes
+# (X246 n1: fromisoformat accepts any one character as the separator, an astral one included).
 TIME_CHARS = 64
 
 
@@ -89,11 +90,12 @@ def _json(path: Path) -> tuple[dict, dict]:
 def _time(value: object, name: str) -> datetime:
     """An ISO-8601 timestamp with its offset."""
     try:
-        moment = datetime.fromisoformat(value) if type(value) is str and len(value) <= TIME_CHARS else None
+        moment = datetime.fromisoformat(value) if type(value) is str and encoded_length(value) <= TIME_CHARS else None
     except ValueError:
         moment = None
     if moment is None or moment.tzinfo is None:
-        raise HandoffEvidenceError(f'{name} is not an ISO-8601 time with its offset (at most {TIME_CHARS} characters)')
+        raise HandoffEvidenceError(f'{name} is not an ISO-8601 time with its offset (at most {TIME_CHARS} encoded '
+                                   'bytes)')
     return moment
 
 

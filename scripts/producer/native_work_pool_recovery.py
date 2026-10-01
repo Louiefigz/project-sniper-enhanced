@@ -13,9 +13,11 @@ names no processes recovery could check. It is removed by its file name only onc
 liveness lock file is present and proved free; a missing lock file proves nothing (its owner
 may hold a deleted lock), so such a record is refused. Any identity that can still be read
 from it must be absent too. Its proof records exactly that weaker basis and the original
-bytes. A readable record keeps the full rules above. A Studio member (native_work_pool_studio) is
-always 'admitted' with no processes even when its start spawned the preview server, whose survivors
-the Studio registry tracks: recovering it frees Studio capacity only, and its proof says so.
+bytes. A readable record keeps the full rules above. A Studio member (native_work_pool_studio) records
+its failed start's known survivors (phase 'launching'), so they must be absent like any child. Whether
+or not it records any, its start must also be over by its project's Studio registry record
+(studio_launch_evidence, X244 b'): refused by name while a process of that start runs, and refused
+when the record is missing or unreadable (fail closed).
 """
 from __future__ import annotations
 
@@ -35,8 +37,8 @@ from native_work_pool_disk import readable
 from native_work_pool_policy import LAYOUT, LEDGER_CLASSES, STUDIO_CLASS
 
 PHASES = ('admitted', 'launching', 'launch-state-unknown')
-STUDIO_SCOPE = ('; a Studio member records no process, so this frees Studio capacity only: the Studio '
-                'registry tracks its preview server')
+STUDIO_SCOPE = ("; a Studio member: its recorded survivors are absent, and its project's Studio registry record "
+                'shows no live process of its start (studio_launch_evidence)')
 
 
 def process_snapshot() -> dict:
@@ -78,6 +80,32 @@ def verify_absence(record: dict) -> dict:
                 recordedIdentityCount=len(record['processes']),
                 supervisorPidReused=supervisor.pid in table,
                 reusedChildPids=[row['pid'] for row in record['processes'] if row['pid'] in table])
+
+
+def studio_launch_evidence(record: dict, nonce: str) -> dict:
+    """A Studio member's start is over only by its project's Studio registry record (X244 b').
+
+    Refused by name while managed_preview_state.launch_survivors finds a process of a 'launching' record (the
+    retained identities, and the server by its exact command even when its PID was never learned or its opener
+    was killed), and when the record is missing or unreadable. A record no longer 'launching' was settled by the
+    registry: its start's processes were verified gone, or a later start discharged them before replacing it.
+    """
+    from studio import managed_preview_registry as registry
+    from studio import managed_preview_state as preview
+    from studio.studio_server import StudioServerError
+    try:
+        entry = registry.read_unlocked(record['project'])
+        survivors = preview.launch_survivors(entry) if entry is not None and entry['state'] == 'launching' else []
+    except (OSError, ValueError, DurableFileError, StudioServerError) as error:
+        raise NativeWorkBusy(f'Studio member {nonce}: its Studio registry record cannot be read ({error}); '
+                             'recovery refused') from error
+    if entry is None:
+        raise NativeWorkBusy(f'Studio member {nonce} has no Studio registry record for {record["project"]}, so '
+                             'nothing proves its start ended; recovery refused')
+    if survivors:
+        raise NativeWorkBusy(f'Studio member {nonce}: its start still runs (pids {[row["pid"] for row in survivors]});'
+                             f' stop it with managed_preview.py stop {record["project"]}, then recover')
+    return dict(registryState=entry['state'], liveLaunchProcesses=0)
 
 
 def _hold_member_lock(namespace: state.Namespace, nonce: str) -> int | None:
@@ -190,6 +218,7 @@ def recover_member(namespace: state.Namespace, nonce: str) -> dict:
         if record is None:
             return _recover_unreadable(namespace, nonce, raw, lock)
         first = verify_absence(record)
+        studio = studio_launch_evidence(record, nonce) if record['class'] == STUDIO_CLASS else None
         if os.path.lexists(os.path.join(namespace.pool, proof)):
             raise RuntimeError('Recovery evidence already exists; inspect partial recovery first')
         second = verify_absence(record)
@@ -198,7 +227,7 @@ def recover_member(namespace: state.Namespace, nonce: str) -> dict:
         evidence = dict(schemaVersion=1, layout=LAYOUT, nonce=nonce, originalRecord=record,
                         originalRecordSha256=hashlib.sha256(raw).hexdigest(), firstCheck=first,
                         finalCheck=second, memberLockPresent=lock is not None, signals=[],
-                        status='recorded-process-absence-verified',
+                        status='recorded-process-absence-verified', studioLaunch=studio,
                         scope='Explicit recovery only; no output quality or unobserved-child claim'
                         + (STUDIO_SCOPE if record['class'] == STUDIO_CLASS else ''))
         _release(namespace, nonce, (proof, evidence), lock)

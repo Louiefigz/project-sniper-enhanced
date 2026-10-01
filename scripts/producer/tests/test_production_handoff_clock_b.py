@@ -196,8 +196,12 @@ class EvidenceBoundTests(unittest.TestCase):
     def test_a_time_longer_than_its_bound_is_refused(self) -> None:
         """A valid ISO time is read; one with 100 fractional digits is refused by name."""
         self.assertIsNotNone(handoff._time('2026-09-30T12:00:00.123456+00:00', 'visibleHandoffAt'))
-        with self.assertRaisesRegex(handoff.HandoffEvidenceError, r'\(at most 64 characters\)$'):
+        with self.assertRaisesRegex(handoff.HandoffEvidenceError, r'\(at most 64 encoded bytes\)$'):
             handoff._time('2026-09-30T12:00:00.' + '1' * 100 + '+00:00', 'visibleHandoffAt')
+        astral = '2026-09-30\U0001F600' + '12:00:00.' + '1' * 33 + '+00:00'   # 59 characters, 70 encoded bytes
+        self.assertLessEqual(len(astral), 64)
+        with self.assertRaisesRegex(handoff.HandoffEvidenceError, r'\(at most 64 encoded bytes\)$'):
+            handoff._time(astral, 'visibleHandoffAt')   # X246 n1: the bound is in encoded bytes
 
     def test_a_path_longer_than_its_encoded_bound_is_refused(self) -> None:
         """A 780-byte path of control characters encodes past 4096 bytes and is refused by name."""

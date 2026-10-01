@@ -86,9 +86,9 @@ def _evidence(record: dict, handle: dict, observation: Observation) -> str | Non
 
 
 def _change(task: dict, before: str, reason: str) -> dict:
-    """One reconciliation change, as reported and recorded."""
+    """One reconciliation change, as reported and recorded; its reason clipped as the record's is (X246 n1)."""
     return {'taskId': task['id'], 'from': before, 'to': task['state'], 'unresolved': task['unresolved'],
-            'reason': reason}
+            'reason': clip_text(reason)}
 
 
 def _abandon(task: dict, unresolved: bool, reason: str, elapsed: float) -> dict:

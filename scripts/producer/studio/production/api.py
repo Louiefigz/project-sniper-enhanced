@@ -193,13 +193,14 @@ def close(root: Path, batch_id: str, host: dict | None = None) -> dict:
     def operation(record: dict, elapsed: float) -> Outcome:
         """Close, or drain while media work is live (the process table is read under the lock)."""
         observation, before = current_observation(host), record['status']
+        committed = {'unsettled': lifecycle.unsettled(record), 'runningAttempts': lifecycle.running_attempts(record)}
         reconcile_running(record, elapsed)
         refusal = close_refusal(record, elapsed)
         if refusal:
             raise TaskRefused(refusal)
         result = lifecycle.close_or_drain(record, elapsed, observation, root)
-        if before == result['status'] == 'draining':
-            return Outcome(False, {}, {**result, 'reconciled': []})
+        if before == result['status'] == 'draining':   # nothing recorded: answer with the committed record's (n4)
+            return Outcome(False, {}, {**result, 'reconciled': [], **committed})
         event = 'batch-closed' if result['status'] == 'closed' else 'batch-draining'
         settled = [change for change in result['reconciled'] if SETTLED in change]
         return Outcome(True, {'event': event, 'unsettled': result['unsettled'],

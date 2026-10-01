@@ -3,20 +3,22 @@
 F-m5: during a named credit error's grace the watchdog still stops a child whose batch deadline has passed, read
 without credit (``native_budget_clock.uncredited_remaining``); only D-O10's claim, cancel and acknowledgement checks
 wait for the grace (``reviews/P1-RP5B-evidence/probe_rp5b_watch.py`` showed the deadline stop waiting too). F-m6:
-``credit_delta`` refuses a malformed reference before its unlocked read (the reviewer's pin, mutant N3). Private
-TEST authority roots and mocked clocks; no child process is started or signalled.
+``credit_delta`` refuses a malformed reference before its unlocked read (the reviewer's pin, mutant N3). X246 m3: a
+passed launch grant, read without credit, stops the child inside a credit grace too. Private TEST authority roots and
+mocked clocks; no child process is started or signalled.
 """
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import json
 import unittest
 from unittest import mock
 
-from _queue_credit_fixture import GRANTED, CreditCase
+from _queue_credit_fixture import BATCH, GRANTED, CreditCase
 from studio import native_budget_clock as clock
-from studio.native_budget_clock import allocation_remaining, uncredited_remaining
-from studio.production import process_watch
+from studio.native_budget_clock import allocation, allocation_remaining, uncredited_remaining
+from studio.production import process, process_watch, queue_authority
 from test_queue_credit_aborts import GRACE, WatchCase
 
 LATER = 10_000.0                         # seconds past the fixture's clocks: the batch deadline is long gone
@@ -69,6 +71,36 @@ class DeadlineDuringGraceTests(WatchCase):
         """Without credit the remaining time is exactly the 30 s of credit shorter."""
         self.assertLessEqual(uncredited_remaining(self.grant), allocation_remaining(self.grant))
         self.assertEqual(allocation_remaining(self.grant) - uncredited_remaining(self.grant), 30.0)
+
+
+class GrantDuringGraceTests(WatchCase):
+    """X246 m3: a passed launch grant stops the child inside a credit grace too, as a deadline stop."""
+
+    def test_a_passed_launch_grant_stops_at_once_inside_the_grace(self) -> None:
+        """A 100 s launch grant, 160 s on: stopped by the grant at once, readable credit or a regression alike."""
+        short = queue_authority.bind_allocation(allocation(self.anchor, 100.0, 45.0), self.record,
+                                                {'authority': str(self.root), 'batchId': BATCH, 'clipId': 'A'})
+        (self.watch.directory / process.GRANT).write_text(json.dumps(short))
+        stop = (process_watch.DEADLINE, 'the export ran past its launch grant')
+        wall, continuous = past_deadline(160.0)
+        with wall, continuous:
+            self.now = 2.0
+            self.assertEqual(process_watch._reason(self.watch, self.stops), stop)
+            self.put(self.credit_record(10.0))                     # a regression from here
+            for now in (3.0, 3.0 + GRACE):
+                self.now = now
+                self.assertEqual(process_watch._reason(self.watch, self.stops), stop)
+
+    def test_an_unpassed_launch_grant_leaves_the_grace_to_run(self) -> None:
+        """A 600 s launch grant, 160 s on, has not passed: a regression is named only after its grace."""
+        (self.watch.directory / process.GRANT).write_text(json.dumps(self.grant))
+        wall, continuous = past_deadline(160.0)
+        with wall, continuous:
+            self.put(self.credit_record(10.0))
+            self.now = 3.0
+            self.assertIsNone(process_watch._reason(self.watch, self.stops))
+            self.now = 3.5 + GRACE
+            self.assertEqual(process_watch._reason(self.watch, self.stops)[0], 'capacity-credit-regressed')
 
 
 class ReferenceTests(CreditCase):

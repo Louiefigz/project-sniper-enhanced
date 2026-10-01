@@ -191,6 +191,16 @@ class BatchSession:
         if not replaced:
             raise BudgetAuthorityError(f'Budget authority for {self.batch_id} is unwritable: {error}') from error
 
+    def lines_naming(self, name: str) -> list[dict]:
+        """The trail's lines that mention ``name`` (as a JSON string), decoded in order; no other line is parsed. An
+        event and its own ``commit-failed`` (``failedEvent``) both name it, adjacent (X246 m2, X217 m2b)."""
+        needle = json.dumps(name).encode()
+        try:
+            raw = read_private_file(self.dir_fd, EVENTS, 2 * MAX_EVENT_BYTES)
+            return [json.loads(line) for line in raw.splitlines() if needle in line]
+        except (OSError, DurableFileError, UnicodeError, ValueError) as error:
+            raise BudgetAuthorityError(f'Budget event trail for {self.batch_id} is unreadable: {error}') from error
+
     def event(self, value: dict) -> None:
         """Append one fsynced transition; the trail is bounded and never rewritten."""
         line = canonical(value)

@@ -56,9 +56,9 @@ def ids(count: int, value: str) -> int:
 
 
 def checkpoint() -> int:
-    """<= MAX_CHECKPOINTS per Short (its record's count; X190 n6 never repeats a written one), each written only
-    within CHECKPOINT_EVENT_BYTES (``queue_authority._checkpoint_due``)."""
-    return MAX_CHECKPOINTS * CLIPS * CHECKPOINT_EVENT_BYTES
+    """<= MAX_CHECKPOINTS per Short (its record's count), each written at most twice, one failed and one committed
+    (``queue_authority._commit_checkpoint``, X246 m2), and only within CHECKPOINT_EVENT_BYTES (``_checkpoint_due``)."""
+    return 2 * MAX_CHECKPOINTS * CLIPS * CHECKPOINT_EVENT_BYTES
 
 
 def stall_decided() -> int:
@@ -82,8 +82,9 @@ def capacity_settled() -> int:
 
 
 def observed() -> int:
-    """An abandoning observation names each attempt once (its record marks it; X217 m3 writes a failed one once)."""
-    return ATTEMPTS * line(event='observed', abandoned=[ATTEMPT])
+    """An abandoning observation names each attempt at most twice, one failed and one committed (its record marks it;
+    ``native_budget_status.commit_observation``, X246 m2)."""
+    return 2 * ATTEMPTS * line(event='observed', abandoned=[ATTEMPT])
 
 
 def task_completed() -> int:
@@ -101,9 +102,11 @@ def task_completed() -> int:
 
 
 def task_failed() -> int:
-    """A claim refused at its deadline fails the task once (``claims.expired_claim``); callback ends are counted in
-    ``task_completed``."""
-    return TASKS * line(event='task-failed', taskId=TASK, category='deadline-expired', checkedElapsed=BIG)
+    """A claim refused at its deadline fails the task once (``claims.expired_claim``), and so does an AI execution
+    attaching after its claim's deadline, whose line also carries its handle and end fields (``claims.attach``, X246
+    n1); callback ends are counted in ``task_completed``."""
+    return TASKS * line(event='task-failed', taskId=TASK, epoch=MAX_COUNT, category='deadline-expired',
+                        checkedElapsed=BIG, handle=HOST, unresolved=True, **END)
 
 
 def task_cancelled() -> int:
@@ -219,8 +222,8 @@ def failed_widest() -> int:
 
 
 def commit_failed() -> int:
-    """One failed attempt of each automatic writer that never repeats a written line: a checkpoint (X190 n6) and an
-    abandoned launch (X217 m3)."""
+    """One failed attempt of each automatic writer that never repeats a written line, read from the trail: a
+    checkpoint and an abandoned launch (X246 m2)."""
     return (MAX_CHECKPOINTS * CLIPS + ATTEMPTS) * failed_widest()
 
 

@@ -14,10 +14,12 @@ passes, and only while an owner waits, so:
   ``capacity-checkpoint`` once credit is ``CHECKPOINT_SECONDS`` past the last, so while the Short has fewer than
   ``MAX_CHECKPOINTS`` such lines and every waiting owner's line fits ``CHECKPOINT_EVENT_BYTES``, credit cannot grow
   further without a line, however long the waiter is silent. An edit made before a settlement therefore stays
-  visible after it. Known limit: a checkpoint whose record replace failed is written once (X190 n6) and drops out
-  of the committed trail, so the window then falls short by one cadence: a false ``exceeds-trail``, failing closed.
-Both bounds allow ``SETTLE_TOLERANCE``: pending credit (at most ``POLL_BOUND_SECONDS``) accrued before one owner's
-event can settle at another's heartbeat after it (X190 n1). A clip is:
+  visible after it. A checkpoint whose record replace failed is committed once its record is, its line appended
+  after the record (``queue_authority._commit_checkpoint``, X246 m2), so the committed trail keeps the cadence.
+Both bounds allow ``SETTLE_TOLERANCE`` only where the trail leaves an owner waiting: pending credit (at most
+``POLL_BOUND_SECONDS``) accrued before one owner's event can settle at another's heartbeat after it (X190 n1), and it
+accrues only while an owner waits. Elsewhere the bound is exact (``TOLERANCE``), so edits below the settle tolerance
+cannot accumulate over links with no waiting owner (X246 m1). A clip is:
 - ``consistent`` inside those bounds (or with no credit and no row);
 - ``exceeds-trail`` above them (a hand-edited or forged total);
 - ``below-trail`` under the last row (an event the record never took, or a lowered total);
@@ -173,7 +175,8 @@ def _chain_break(trail: list[dict]) -> bool:
     for prior, row in zip(trail, trail[1:]):
         _step(waiting, prior)
         checkpoints += prior['event'] == 'capacity-checkpoint'
-        growth = row['excludedSeconds'] - prior['excludedSeconds'] - SETTLE_TOLERANCE
+        # Pending credit is outstanding only while an owner waits: no waiting owner, no settle tolerance (X246 m1).
+        growth = row['excludedSeconds'] - prior['excludedSeconds'] - (SETTLE_TOLERANCE if waiting else TOLERANCE)
         if growth <= 0.0:
             continue
         if not waiting or growth > min(row['elapsed'] - prior['elapsed'], _cap(waiting, prior.get('clipId'),
@@ -197,7 +200,7 @@ def _audit_clip(clip: dict, events: list[dict]) -> dict:
     checkpoints = sum(1 for row in trail if row['event'] == 'capacity-checkpoint')
     window = min(max(0.0, observed - last['elapsed']), _cap(waiting, last.get('clipId'), checkpoints)) \
         if waiting else 0.0
-    ceiling = last['excludedSeconds'] + window + SETTLE_TOLERANCE
+    ceiling = last['excludedSeconds'] + window + (SETTLE_TOLERANCE if waiting else TOLERANCE)
     status = 'unexplained-removal' if waiting - set(clock['workers']) else 'below-trail' \
         if recorded < last['excludedSeconds'] else 'exceeds-trail' \
         if recorded > ceiling or _chain_break(trail) else 'consistent'

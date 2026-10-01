@@ -299,10 +299,13 @@ stops nothing. Studio startup takes a slot of its own host-pool class, `studio`
 tree is measured), never a render slot, so a finished Short's view opens while other Shorts render; it still
 waits for the memory budget and disk headroom every member shares. The slot is released once the server is
 ready, when nothing was started, and when a failed start's cleanup is verified: nothing was spawned, or what was
-spawned is gone, root and process group (`managed_preview_launch.settle_failed_launch`, `group_survivors`; a
-descendant that left the session with `setsid` is not covered, as for every tool process). Only a failed start
-whose cleanup is unverified keeps its slot quarantined (recover it with `native_work_recovery.py <nonce>`) and
-its project fenced. The wait for a Studio slot holds the Studio registry lock, so other projects' `open`, `stop`
+spawned is gone, root and process group (`managed_preview_launch.settle_failed_launch`, `group_survivors`,
+polled for up to 2 seconds so a group member that exits with the root still counts as gone; a process that left
+the group, with `setsid` or `setpgid`, is not covered, as for every tool process). Only a failed start whose
+cleanup is unverified keeps its slot quarantined and its project fenced. Recover such a slot with
+`native_work_recovery.py <nonce>` once the start is over: recovery refuses while a known survivor (recorded on the
+pool member) or any process of that start found through the project's Studio registry record still runs (stop it
+with `managed_preview.py stop <project>` first), and refuses when that registry record is missing (X244). The wait for a Studio slot holds the Studio registry lock, so other projects' `open`, `stop`
 and `status` wait with it, up to the open's deadline (60 s by default). An older install (the `4a15560` engine)
 reads a live Studio start as a quarantined member and refuses its own admission while one runs (it fails closed):
 do not upgrade while batches of an older engine run. Uncovered work of this engine (a Long, an unexercised stage)

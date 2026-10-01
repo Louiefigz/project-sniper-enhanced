@@ -5,7 +5,9 @@ A Studio server is one small Node process that renders nothing. Its startup
 budget and disk accounting as every member, but in its own capacity:
 - STUDIO_SLOTS slots counted over Studio members only. A quarantined Studio member (a failed start
   whose cleanup is unverified: X150) keeps its slot; once every slot is quarantined the open is refused by name
-  until native_work_recovery.py <nonce> recovers one. A render slot is never taken or quarantined.
+  until native_work_recovery.py <nonce> recovers one. In a qualified pool a render slot is never taken or
+  quarantined; in an exclusive (no-record) pool every member counts, so a quarantined Studio member refuses
+  renders until it is recovered, as the pre-M-056 heavy-slot startup did (X244 m3).
 - Memory against the aggregate budget with every member charged; disk admission in its own space.
 - The legacy-exclusive and qualification-session reasons, both waitable.
 - FIFO among Studio tickets only; a Studio ticket is never ahead of a render request
@@ -17,9 +19,12 @@ still waits the seconds a startup takes. The Studio figures are provisional
 (native_work_pool_policy.STUDIO_*) and outside policy_identity().
 Rollout (X107 M1): the base 4a15560 pool client reads a Studio member, an unknown class, as
 quarantined even while it is live, so its own admission is refused as quarantined for the seconds a
-Studio start runs (fail closed: nothing over-commits; test_native_work_pool_liveness pins it). The
-72de76f3-generation client charges it maximally and waits. Neither can recover a quarantined Studio
-member (this engine's native_work_recovery.py can). Do not upgrade while old-engine batches run.
+Studio start runs (fail closed for slots and memory; its disk accounting charges an unknown class 0 bytes,
+so it does not see the Studio member's STUDIO_DISK_BYTES for those seconds; the M-057 liveness test
+test_base_client_is_refused_as_quarantined_beside_a_live_studio_start pins it). The 72de76f3-generation
+client charges it maximally and waits; its recovery removes a quarantined Studio member as an unreadable
+record on its free liveness lock, without this engine's checks; the base client cannot recover one (X244 m3).
+Do not upgrade while old-engine batches run.
 """
 from __future__ import annotations
 

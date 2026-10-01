@@ -26,7 +26,7 @@ from _queue_credit_fixture import CreditCase
 from _production_task_flow_fixture import BATCH as FLOW_BATCH, Batch, run_cli
 from studio import native_budget_binding, native_budget_store
 from studio.native_budget_store import BudgetAuthorityError, locked_batch, read_batch
-from studio.production import api, callbacks, process_settle, queue_authority, queue_clock
+from studio.production import api, callbacks, process_settle, queue_clock
 from studio.production.director_activity import DirectorActivity
 from studio.production.formats import clip_deadlines
 from studio.production.queue_audit import _audit_clip, _waiting_after, audit_record, capacity_audit
@@ -164,8 +164,7 @@ class FailedCheckpointTests(AuditCase):
 
     def test_a_failed_checkpoint_is_written_once(self) -> None:
         """A hand edit makes a checkpoint due; while the record cannot be replaced, two heartbeats fail, and the
-        trail holds that checkpoint and its commit-failed once."""
-        self.addCleanup(queue_authority._FAILED_CHECKPOINTS.clear)
+        trail holds that checkpoint and its commit-failed once (read from the trail since X246 m2)."""
         self.observe('working')
         self.clock.advance(1000.0)
         self.observe('waiting', POOL)

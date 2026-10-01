@@ -126,12 +126,31 @@ def admit_open(registry: Registry, opened: tuple[str, object, dict | None], owne
 
 def read_entry(registry: Registry, project: str) -> dict | None:
     """This project's record, or None when it has never been managed here."""
+    return _read_record(registry.directory, project)
+
+
+def read_unlocked(project: str) -> dict | None:
+    """This project's record read without the registry lock (each record is replaced whole), or None when it has
+    never been managed here. For pool recovery, which holds the pool ledger that an open takes while it holds the
+    registry lock, so waiting for that lock there could stall both (native_work_pool_recovery, X244 b')."""
+    folder = native_work_lease.state_root() / REGISTRY_DIR
+    if not folder.is_dir():
+        return None
+    directory = open_private_dir(str(folder))
+    try:
+        return _read_record(directory, project)
+    finally:
+        os.close(directory)
+
+
+def _read_record(directory: int, project: str) -> dict | None:
+    """One project's validated record in the registry directory ``directory``, or None when it has none."""
     name = record_name(project)
     try:
-        os.stat(name, dir_fd=registry.directory, follow_symlinks=False)
+        os.stat(name, dir_fd=directory, follow_symlinks=False)
     except FileNotFoundError:
         return None
-    return _validate(json.loads(read_private_file(registry.directory, name)), project)
+    return _validate(json.loads(read_private_file(directory, name)), project)
 
 
 def write_entry(registry: Registry, value: dict) -> None:

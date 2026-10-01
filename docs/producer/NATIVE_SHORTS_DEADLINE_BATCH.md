@@ -178,9 +178,8 @@ after the Short's next event carries it, even one made while its waiting owner
 was silent. A watchdog, reconcile, close or drain settlement writes the credit
 and the owners it removed on its own settling line; an owner the record lost
 with no line explaining it is `unexplained-removal`, and a malformed line is
-`malformed-trail`. A checkpoint whose record could not be replaced is written
-once and leaves the committed trail, so the next audit window is one cadence
-short: a false `exceeds-trail`, never a missed edit. This detects a hand-edited
+`malformed-trail`. The poll-bound tolerance applies only while an owner waits,
+so small edits cannot add up across lines with no waiting owner. This detects a hand-edited
 record, not a writer who rewrites the record and its trail together. New work
 stops 15 MiB into the trail. Past that point only settling lines are written
 (outcomes, settlements, statements, stall decisions, abandoned launches,
@@ -188,10 +187,11 @@ hand-offs, the close), each a bounded number of times, and their worst case
 fits the trail's 12 MiB reserve (`test_trail_reserve_budget`), so a full trail
 can still settle every task and close. A close that leaves a draining batch
 draining records nothing, and `settle-resource` takes one statement per task
-and phase. One limit: a commit whose record cannot be replaced writes its line
-and `commit-failed`, and the reserve holds one such failure only for the
-automatic writers (checkpoints, abandoned launches); repeating a command under a
-persistent write failure is outside it. A delivered Short's counted time
+and phase. A checkpoint or an abandoned launch whose record could not be
+replaced is written at most twice, once failed and once committed after its
+record, however many processes retry it. One limit: repeating a command under a
+persistent write failure writes its line and `commit-failed` each time, which is
+outside the reserve. A delivered Short's counted time
 stops at its first delivery (`countedAtDeliverySeconds`, from the credit frozen
 there). `handoff` records on the Short's clock its counted and total time and
 whether the visible hand-off met the Short's deadline with the credit it held
@@ -229,7 +229,9 @@ Long; a live member's own (same-project) work always passes, and a request that 
 passes the younger tickets that ticket holds back. A covered stage beside a live exclusive member of its own
 project is refused at once by name (`NativeWorkUnsupportedMix`): it could never be admitted by waiting, and such
 a wait is never credited. Limits: a nested owner of another project arriving after the 4 passes stalls (no such
-owner exists in the engine today), and a passer that starts and ends inside one 2-second poll is not counted.
+owner exists in the engine today), a passer that starts and ends inside one 2-second poll is not counted, and
+`PASS_LIMIT` does not bind Studio starts: they compete only with Studio tickets, so each passes a waiting uncovered
+Long, which stays bounded because the Studio registry lock lets one start run at a time.
 The reasons are in the owner receipt (`pool.modeRecord.unmatched`).
 `studio/pool_qualification.py show` prints the host identity, the pool mode it
 currently yields and the policy constants.

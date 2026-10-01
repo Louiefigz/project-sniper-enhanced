@@ -1367,7 +1367,8 @@ docs belong to P3b.
   (`observed-record-only`, `native_budget_store.RECORD_ONLY`), one that marked dead launches abandoned is always
   written (`native_budget_store._terminal`, F1). The trail's reserve was raised to 4 MiB and its bound to 19 MiB (12
   and 27 MiB since M-RP5, which counts every settling class; `test_trail_reserve_budget`). A failed checkpoint is
-  written once (`_FAILED_CHECKPOINTS`, n6); status shows a handed-off Short as not stalled (`queue_stall.shown_state`,
+  written once (n6; read from the trail since M-RP6); status shows a handed-off Short as not stalled
+  (`queue_stall.shown_state`,
   s1); a settlement re-track only clears a stall. Tests: `test_queue_clock_v2_f.py`, `test_queue_clock_stall_c.py`,
   `test_trail_reserve_budget.py`.
 - **Lock-free credit reads (M-053; C9).** `production/queue_credit.py` reads a Short's settled credit and a task row
@@ -1429,16 +1430,18 @@ docs belong to P3b.
   the trail lines naming the event, so it works at a full or padded trail. `queue_audit._cap`
   caps the waiting window by the checkpoint cadence (m1); `_capacity_rows` reads only the event, its `changes` and
   its `reconciled` (n1). `native_budget_status.commit_observation` writes an abandoned launch's line once per attempt
-  while its record cannot be replaced (`_FAILED_ABANDONMENTS`, m3). `change-approval` refuses, by `outputs.same_job`'s
+  while its record cannot be replaced (m3; read from the trail since M-RP6). `change-approval` refuses, by
+  `outputs.same_job`'s
   text, a change into another clip's job (m4). Known limit (m5): a kept word is identified by its transcript index, so
   the same source seconds bound to a re-numbered transcript of that source are a new job.
   X218: the hand-off row validator refuses an `onTime` that disagrees with the row's times, times outside
   `countedSeconds <= totalSeconds <= elapsed`, and a row on a clip not handed off (F-m1); `record_handoff` refuses a
   second call by name (F-m2); `native_budget_status.SLA_BASIS` names a recorded late hand-off (F-m3); inside a credit
   grace the watchdog still stops a passed batch deadline, read without credit
-  (`native_budget_clock.uncredited_remaining`, F-m5). By design (K7), a hand-off is judged with the credit settled
-  when it is recorded: credit that accrued before it but settles after it (at most one poll bound, 30 s) does not
-  count. Tests: `test_trail_reserve_budget.py`, `test_queue_clock_v2_g.py`, `test_production_settling_writers.py`,
+  (`native_budget_clock.uncredited_remaining`, F-m5). A hand-off is judged with the credit settled when it is
+  recorded; credit still pending then (at most one poll bound, 30 s) does not count, which errs against us (a miss
+  can be reported early, an on-time result is never claimed falsely; X246 m5, superseding X218's K7 sentence). Tests:
+  `test_trail_reserve_budget.py`, `test_queue_clock_v2_g.py`, `test_production_settling_writers.py`,
   `test_production_duplication_check_b.py`, `test_production_handoff_clock_b.py`, `test_queue_credit_pins.py`.
 - **A `studio` pool class (M-056; C1).** `native_work_pool_studio.py` (`MODE`, `decide`) admits Studio startups in their
   own ledger class (`native_work_pool_policy.STUDIO_CLASS`, `STUDIO_SLOTS` 2, `STUDIO_RESERVATION_BYTES` 1 GiB,
@@ -1466,10 +1469,34 @@ docs belong to P3b.
   it holds back (`_held`, X107 B1). A covered stage beside a live exclusive member of its own project is refused at
   once by name, never queued or credited (X107 m1). `native_work_pool.decide` reads `problems(mode, view, outside,
   request)` and may run only inside the ledger. Limits: a cross-project nested owner after 4 passes stalls; a passer
-  inside one 2 s poll is not counted (X111). `native_work_pool_mix.py` 242 lines; `native_work_pool.py` 299/300 (its
+  inside one 2 s poll is not counted (X111); `PASS_LIMIT` does not bind Studio starts, which compete only with Studio
+  tickets and so pass a waiting uncovered Long, bounded by the Studio registry lock that serializes them (X244 n2).
+  `native_work_pool_mix.py` 242 lines; `native_work_pool.py` 299/300 (its
   next editor extracts first). Tests: `test_native_work_pool_mix_wait.py`, `test_native_work_pool_liveness.py` (the
   480-order enumeration), `test_native_work_profiles.py`.
 - **A mix refusal before any stage keeps the one retry (M-058; P1 M2).** `native_budget_launch.WAITABLE =
   {'pool-unsupported-mix'}` (L-J J3) joins `TRANSIENT`; `_retry_decision` returns no decision for a `WAITABLE` failure
   that ran no stage: the same identity relaunches fresh, its launch counter charged but not the clip's one transient
   retry (the pool frees; nothing ran). After a stage it is transient as before. Tests: `test_native_budget_mix_transient.py`.
+- **P1 fix round (M-RP6; X244, RP6B on M-056).** A quarantined Studio member needs evidence that its start is over
+  before recovery by nonce releases it (M1, G9): `managed_preview_launch.settle_failed_launch` keeps a failed start's
+  known survivors and `_release` records them on the member (`mark_launching`, `record_processes`), so
+  `native_work_pool_recovery.verify_absence` refuses while one lives; and for every Studio member
+  `native_work_pool_recovery.studio_launch_evidence` reads the project's Studio registry record without its lock
+  (`managed_preview_registry.read_unlocked`: recovery holds the pool ledger, which an open takes inside the registry
+  lock) and refuses while `managed_preview_state.launch_survivors` finds a process of a 'launching' record (the server
+  by its exact command too, when its PID was never learned or the opener was killed after spawning), and when the
+  record is missing or unreadable. The proof records `studioLaunch`. `group_survivors` is polled for up to
+  `GROUP_SETTLE_SECONDS` (2 s) before a failed start's cleanup counts as unverified (m1).
+  X246 (RP6A on M-055..M-RP5P): `queue_audit` applies `SETTLE_TOLERANCE` only where the trail leaves an owner waiting
+  (m1); the abandonment and checkpoint memos are read from the trail (`native_budget_status._failed_abandonments`,
+  `queue_authority._failed_checkpoint`; the per-process sets are gone): an item whose only line was followed by
+  `commit-failed` commits its record alone and its line follows, so each is written at most twice across processes
+  and the reserve counts both (m2). Inside a credit grace a passed launch grant, read without credit, stops the
+  child as a deadline stop (`process_watch._grant_passed`, m3). `status` parses the trail once
+  (`approvals.committed_rows`, m4). Reconcile change reasons are clipped and hand-off times bounded in encoded
+  bytes (n1); a draining close answers with the committed record's `unsettled` and `runningAttempts` (n4). Known
+  limit (n3): a review continuation's outcome line does not name its output, and one live continuation per
+  original attempt, which the reserve counts on, is not enforced by the record. Tests:
+  `test_managed_preview_studio_recovery.py`, `test_managed_preview_studio_class.StudioPoolTests`,
+  `test_queue_clock_v2_h.py`, `test_queue_credit_pins.GrantDuringGraceTests`.

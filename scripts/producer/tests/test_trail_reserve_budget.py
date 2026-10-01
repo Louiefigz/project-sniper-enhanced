@@ -68,7 +68,8 @@ class WriterBoundTests(unittest.TestCase):
                                             'error': text})), failed_widest())
 
     def test_every_reader_reads_the_trail_at_its_bound(self) -> None:
-        """Each read of ``events.jsonl`` in studio passes MAX_EVENT_BYTES (or a multiple) as its limit."""
+        """Each ``read_private_file`` of a batch's ``EVENTS`` trail in studio passes MAX_EVENT_BYTES (or a multiple)
+        as its limit (other readers, such as a discarded staging's two-line trail, are not matched; X246 n5)."""
         reads = {path.name: READ.findall(path.read_text()) for path in STUDIO.rglob('*.py')}
         found = {name: limits for name, limits in reads.items() if limits}
         self.assertGreaterEqual(len(found), 4, found)

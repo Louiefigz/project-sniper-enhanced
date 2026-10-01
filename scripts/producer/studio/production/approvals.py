@@ -15,6 +15,7 @@ same reason dropping the latest approval from the record looks exactly like a ki
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -185,20 +186,18 @@ def committed_events(session: BatchSession, batch_id: str, name: str) -> list[di
     """The committed ``name`` events of the locked batch's trail. Only the lines that mention ``name`` are decoded (an
     event and its own ``commit-failed`` both do, and are adjacent), so the rest of the trail, however long or padded,
     is never parsed: a settling command that reads its own earlier lines works at a full trail (X217 m2b)."""
-    try:
-        raw = read_private_file(session.dir_fd, EVENTS, 2 * MAX_EVENT_BYTES)
-        needle = json.dumps(name).encode()
-        rows = trail_events(b'\n'.join(line for line in raw.splitlines() if needle in line))
-    except (OSError, DurableFileError, UnicodeError, ValueError) as error:
-        raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
-    return [row for row in rows if row.get('event') == name]
+    return [row for row in committed_rows(session.lines_naming(name)) if row.get('event') == name]
 
 
 def trail_events(raw: bytes) -> list[dict]:
     """The trail's committed events: an event followed by its own ``commit-failed`` never happened."""
+    return committed_rows(json.loads(line) if line.strip() else None for line in raw.splitlines())
+
+
+def committed_rows(rows: Iterable[object]) -> list[dict]:
+    """``trail_events`` over lines already parsed (anything but a dict is skipped), for a reader that parses once."""
     events: list[dict] = []
-    for line in raw.splitlines():
-        row = json.loads(line) if line.strip() else None
+    for row in rows:
         if type(row) is not dict:
             continue
         if row.get('event') == 'commit-failed' and events and events[-1].get('event') == row.get('failedEvent'):

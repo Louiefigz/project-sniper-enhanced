@@ -10,10 +10,12 @@ their sum must fit the reserve.
 The worst cases count transitions. Past the stop no claim, launch, owner row, task or clip can begin (each begins
 with a line that is not a settling line, which the trail refuses), so every settling line settles something that
 existed at the stop, a bounded number of times. A transition whose record replace fails leaves the record unchanged,
-with its line and a ``commit-failed`` line on the trail. The reserve holds one such failure for each automatic
-writer that never repeats a written line: a checkpoint (X190 n6) and an abandoned launch (X217 m3). It does not hold
-an operator's or a process's repeated attempts under a persistent replace failure; the authority is then unwritable
-and refuses new work anyway (``BudgetAuthorityError``).
+with its line and a ``commit-failed`` line on the trail. The automatic writers, a checkpoint and an abandoned launch,
+read the trail before writing (X246 m2): an item whose only line was followed by ``commit-failed`` commits its record
+alone, and its line follows once the record holds it, so each is written at most twice (one failed, one committed)
+across every process, and the reserve counts both. It does not hold an operator's or a process's repeated attempts
+under a persistent replace failure; the authority is then unwritable and refuses new work anyway
+(``BudgetAuthorityError``).
 """
 from __future__ import annotations
 

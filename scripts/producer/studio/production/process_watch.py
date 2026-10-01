@@ -126,11 +126,23 @@ def _task_row(task: TaskClaim) -> dict | None:
         return None
 
 
+def _grant_passed(directory: Path) -> bool:
+    """Whether the child's published launch grant has passed with its grace, read without credit (X246 m3); an
+    unreadable grant has not (the credit error's own grace still applies)."""
+    file = directory / process.GRANT
+    try:
+        grant = bound_json(file, maximum=4096) if file.is_file() else None
+        return bool(grant) and uncredited_remaining(grant) + process.DEADLINE_GRACE_SECONDS <= 0
+    except (OSError, RuntimeError, KeyError, TypeError, ValueError):
+        return False
+
+
 def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
     """Why the child must stop now, or None; a named credit error after the owner's grace (queue_credit).
 
-    The grace pauses the claim, cancel and acknowledgement checks only: while it runs, the batch deadline still stops
-    the child, read without credit (``uncredited_remaining``, never later than the credited deadline, X218 F-m5).
+    The grace pauses the claim, cancel and acknowledgement checks only: while it runs, the batch deadline and the
+    published launch grant still stop the child, each read without credit (``uncredited_remaining``, never later than
+    the credited deadline; X218 F-m5, X246 m3).
     """
     if stops.reason:
         return INTERRUPTED, f'the watchdog {stops.reason}'
@@ -142,6 +154,8 @@ def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
     except queue_credit.CREDIT_ERRORS as error:
         if uncredited_remaining(watch.deadline) <= 0:
             return DEADLINE, 'the export ran past its batch deadline'
+        if _grant_passed(watch.directory):
+            return DEADLINE, 'the export ran past its launch grant'
         return queue_credit.watchdog_stop(error)
     if remaining <= 0:
         return DEADLINE, 'the export ran past its launch grant' if grant else 'the export ran past its batch deadline'

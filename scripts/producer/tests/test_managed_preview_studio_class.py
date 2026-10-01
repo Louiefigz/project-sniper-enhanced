@@ -28,6 +28,7 @@ from native_render_processes import process_table
 from native_render_resources import GIB
 from native_work_pool_policy import LEDGER_CLASSES, POOL_CLASSES, STUDIO_CLASS
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued
+from studio import managed_preview_registry as registry
 from studio.studio_server import StudioServerError
 from _managed_preview_fixture import ManagedPreviewFixture
 from _native_pool_fixture import TEST_HOST, isolate_pool, members, plan_project, qualify_fixture_host
@@ -163,14 +164,22 @@ class StudioPoolTests(PoolHelpers, unittest.TestCase):
         self.admit_queued(waiting)
 
     def test_quarantined_studio_member_is_recoverable_by_nonce(self) -> None:
-        """An unverified startup's Studio member declares no launch, so recovery by nonce releases its slot."""
+        """An unverified startup's Studio member is recovered by nonce once its project's Studio registry record
+        shows the start over (X244 b'); with no record it is refused (fail closed). The proof says so (m5)."""
         studio = self.lease(STUDIO_CLASS, self.view, declares_launch=True)
         studio.close()  # attempted and unverified: the member stays quarantined
         record = self.records(self.root)[0]
         self.assertEqual((record['class'], record['phase'], record['processes']), (STUDIO_CLASS, 'admitted', []))
+        with self.assertRaisesRegex(work.NativeWorkBusy, 'has no Studio registry record'):
+            self.recover_as_crashed(self.root, studio.nonce)
+        with registry.transaction(registry.monotonic_until(5)) as reg:   # the registry settled the start
+            registry.write_entry(reg, dict(schemaVersion=2, state='stopped', project=str(self.view)))
         result = self.recover_as_crashed(self.root, studio.nonce)
         self.assertEqual((result['kind'], result['memberClass']), ('pool-member', STUDIO_CLASS))
         self.assertEqual(members(self.root), [])
+        proof = json.loads(Path(result['proof']).read_text())
+        self.assertTrue(proof['scope'].endswith(pool_recovery.STUDIO_SCOPE), proof['scope'])
+        self.assertEqual(proof['studioLaunch'], {'registryState': 'stopped', 'liveLaunchProcesses': 0})
 
 
 class StudioOpenTests(PoolHelpers, ManagedPreviewFixture, unittest.TestCase):

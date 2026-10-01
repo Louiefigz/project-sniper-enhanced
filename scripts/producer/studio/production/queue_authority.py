@@ -24,10 +24,6 @@ CHECKPOINT_SECONDS = 300.0
 # X183 m5: the largest checkpoint event written. MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) such events
 # fill at most 512 KiB of native_budget_store.TERMINAL_RESERVE_BYTES (test_queue_clock_v2_c, test_trail_reserve_budget).
 CHECKPOINT_EVENT_BYTES = 512
-# (authority, batch, checkpoint count, clip) whose line was written but whose record was not (X190 n6). It lives only
-# in this process: a supervisor restarted under a persistent replace failure appends that checkpoint once more per
-# restart (a bound, not a defect: X217 n6).
-_FAILED_CHECKPOINTS: set = set()
 
 
 @dataclass(frozen=True)
@@ -158,7 +154,7 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
             'elapsed': elapsed, 'excludedSeconds': after}
     if heartbeat and event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
         count = clip['capacityClock']['checkpoint']['count']   # the checkpoint this heartbeat makes due
-        _commit_checkpoint(session, record, mark, (context.get('authority'), context.get('batchId'), count))
+        _commit_checkpoint(session, record, mark, count)
         return after
     from studio.native_budget_store import TrailFull
     line = _settled_line(mark, removed, orphaned, named) if settles else {
@@ -185,20 +181,32 @@ def _settled_line(mark: dict, removed: list[str], orphaned: list[str], named: di
             'orphanedDigests': sorted(map(owner_digest, orphaned)), **named}
 
 
-def _commit_checkpoint(session: object, record: dict, mark: dict, key: tuple) -> None:
-    """Commit a checkpoint. One whose record replace failed is on the trail already (its line, then ``commit-failed``),
-    so this process never appends it again: a later heartbeat that makes the same checkpoint due commits the record
-    alone (X190 n6), and the 32-per-Short bound counts that line."""
-    from studio.native_budget_store import BudgetAuthorityError
-    key = (*key, mark['clipId'])
-    if key in _FAILED_CHECKPOINTS:
+def _commit_checkpoint(session: object, record: dict, mark: dict, count: int) -> None:
+    """Commit checkpoint ``count`` of the Short. Its line is written at most twice, read from the trail so this holds
+    across processes (X190 n6 as X246 m2 rules): while the trail holds its line followed by commit-failed (the record
+    replace failed), the record is committed alone, and once the record holds it the line is appended, so the
+    committed trail names it exactly once."""
+    if _failed_checkpoint(session, mark['clipId'], count):
         session.commit(record, {**mark, 'event': 'capacity-heartbeat'})
+        session.event(mark)
         return
-    try:
-        session.commit(record, mark)
-    except BudgetAuthorityError:
-        _FAILED_CHECKPOINTS.add(key)
-        raise
+    session.commit(record, mark)
+
+
+def _failed_checkpoint(session: object, clip_id: str, count: int) -> bool:
+    """Whether the trail holds checkpoint ``count`` of ``clip_id`` (a line written after ``count - 1`` committed ones)
+    followed by its commit-failed. Only lines naming ``"capacity-checkpoint"`` are decoded
+    (``BatchSession.lines_naming``)."""
+    rows = session.lines_naming('capacity-checkpoint')
+    committed = 0
+    for row, after in zip(rows, [*rows[1:], {}]):
+        if row.get('event') != 'capacity-checkpoint' or row.get('clipId') != clip_id:
+            continue
+        lost = after.get('event') == 'commit-failed' and after.get('failedEvent') == 'capacity-checkpoint'
+        if lost and committed == count - 1:
+            return True
+        committed += not lost
+    return False
 
 
 def _checkpoint_due(clip: dict, mark: dict) -> bool:

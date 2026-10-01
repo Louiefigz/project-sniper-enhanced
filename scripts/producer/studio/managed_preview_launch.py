@@ -7,12 +7,13 @@ this module never imports managed_preview. Startup holds a Studio pool slot
 and status calls wait with it). The slot is released (completed) after a verified start and after a
 failed start whose cleanup is verified: nothing was attempted, the start failed before spawning
 anything (studio_server's ``preview_spawned = False``), or what it spawned is proved gone (X97 ruling
-3, X150). It stays quarantined only when that cleanup is unverified. The member records no process:
-such a start's survivors are the registry's
-'launching' record (managed_preview_state), which fences only this project while one of them runs
-and which ``stop`` discharges. So the member is a declaring owner that never marks a launch (phase
-'admitted'), and native_work_recovery.py <nonce> releases its Studio slot once the opener has exited;
-that frees capacity only, never a process.
+3, X150). It stays quarantined only when that cleanup is unverified. Such a start's survivors are the
+registry's 'launching' record (managed_preview_state), which fences only this project while one of them
+runs and which ``stop`` discharges; when they are known, the quarantined member records them too (phase
+'launching', X244 M1), so native_work_recovery.py <nonce> refuses while any of them lives. A member whose
+survivors are unknown (the launched PID was never learned, or the opener was killed after spawning) stays
+in phase 'admitted' with no process: its recovery checks the project's registry record instead
+(native_work_pool_recovery.studio_launch_evidence, X244 b'). Recovery never signals a process.
 """
 from __future__ import annotations
 
@@ -27,6 +28,8 @@ from studio import managed_preview_registry as registry
 from studio import managed_preview_state as state
 from studio.native_runtime import runtime_identity
 from studio.studio_server import ServerRecord, StudioServerError, launch_preview, pick_free_port
+
+GROUP_SETTLE_SECONDS = 2.0   # how long a failed start's own group may take to empty before it counts as surviving
 
 
 def _utc() -> str:
@@ -93,12 +96,23 @@ def group_survivors(pid: int | None) -> list[dict]:
     studio_server starts the preview in its own session and reaps only the root on a failed start, so a
     process the preview started there (a browser) can outlive it; state.discharge_launch's "already exited"
     proves only the root gone. While any process has that group ID, no new process can take the PID, so an
-    empty group and an absent root prove gone every process that stayed in the session. One that left it
-    (setsid) is not covered, the same limit as for every tool process.
+    empty group and an absent root prove gone every process that stayed in the group. One that left it
+    (setsid, or setpgid into another group) is not covered, the same limit as for every tool process.
     """
     if pid is None:
         return []
     return [dict(pid=key, pgid=row[1], started=row[2]) for key, row in state.read_tree_table().items() if row[1] == pid]
+
+
+def settled_group(pid: int | None) -> list[dict]:
+    """``group_survivors`` polled for up to GROUP_SETTLE_SECONDS: a group member that exits on its own once the
+    root dies (a helper seeing EOF) can still be in the table for a moment (X244 m1)."""
+    deadline = time.monotonic() + GROUP_SETTLE_SECONDS
+    group = group_survivors(pid)
+    while group and time.monotonic() < deadline:
+        time.sleep(0.1)
+        group = group_survivors(pid)
+    return group
 
 
 def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseException) -> bool:
@@ -116,9 +130,10 @@ def settle_failed_launch(reg: registry.Registry, launch: dict, error: BaseExcept
     else:
         pid = launch['pid'] or getattr(error, 'preview_pid', None)
         cleanup = state.discharge_launch(launch['project'], launch['port'], pid)
-        group = group_survivors(pid) if cleanup['verified'] else []
+        group = settled_group(pid) if cleanup['verified'] else []
         if group:  # a process of the failed start's own session still runs: not proved gone
             cleanup = dict(cleanup, verified=False, survivors=group, reason='a process of the failed start still runs')
+    launch['survivors'] = cleanup.get('survivors', [])  # the quarantined Studio member records them too (_release)
     outcome = dict(state='stopped', stoppedAt=time.time()) if cleanup['verified'] else \
         dict(state='launching', settledAt=time.time())
     registry.write_entry(reg, dict(schemaVersion=2, project=launch['project'], port=launch['port'], cli=launch['cli'],
@@ -157,11 +172,15 @@ def _release(slot: object, attempt: dict) -> None:
 
     A failed start releases it when its cleanup is verified (X97 ruling 3, X150): nothing was attempted,
     nothing was spawned (studio_server's tag), or what was spawned is proved gone. Only an unverified
-    cleanup leaves it quarantined (its survivors are the registry's).
+    cleanup leaves it quarantined; its known survivors are recorded on the member as well as in the registry
+    (X244 M1), so recovery by nonce must find them gone.
     """
     try:
         if not slot.completed and attempt['verified'] is True:
             slot.complete()
+        elif not slot.completed and attempt.get('survivors'):
+            slot.mark_launching()
+            slot.record_processes(attempt['survivors'])
     finally:
         slot.close()
 

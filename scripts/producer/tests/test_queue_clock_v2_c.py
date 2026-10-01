@@ -208,6 +208,10 @@ class MemorySession:
         if event['event'] != 'capacity-heartbeat':
             self.trail.append(event)
 
+    def lines_naming(self, name: str) -> list[dict]:
+        """The trail's lines naming ``name``, as ``BatchSession.lines_naming`` reads them (no commit fails here)."""
+        return [row for row in self.trail if name in (row.get('event'), row.get('failedEvent'))]
+
 
 class CheckpointTests(unittest.TestCase):
     """Trail checkpoints: one per 300 credited seconds, at most 32 per Short, never refused by a full trail; each only

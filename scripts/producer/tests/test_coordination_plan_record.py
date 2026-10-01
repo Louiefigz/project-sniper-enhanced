@@ -113,12 +113,15 @@ class Derived(Case):
                          'Coordination plan: derived: derived section holds differs from its executable home')
 
     def test_unlisted_key_is_global(self) -> None:
-        """A path the table does not derive, below the writer's closed top level and canvas, is a global entry."""
+        """A path the table does not derive, below the writer's closed top level and canvas, joins its root's global
+        entry (X232 D-2: one ``key-<root>`` per top-level key)."""
         plan = copy.deepcopy(self.plan)
         plan['strategy']['futureKey'] = {'TEST': 1}
         self.assertIn('plan.strategy.futureKey', unlisted_keys(plan))
-        rows = {row['id']: row for row in short_sections(self.project(plan, name='future', evidence=self.evidence))['graphics']}
-        self.assertEqual(rows['key-plan.strategy.futureKey']['isolation'], 'global')
+        before = {row['id']: row for row in short_sections(self.project(self.plan, name='present'))['graphics']}
+        rows = {row['id']: row for row in short_sections(self.project(plan, name='future'))['graphics']}
+        self.assertEqual((rows['key-plan.strategy']['isolation'], set(rows) == set(before)), ('global', True))
+        self.assertNotEqual(rows['key-plan.strategy']['digest'], before['key-plan.strategy']['digest'])
 
     def test_missing_regions_file_is_one_global_unit(self) -> None:
         """Without REVIEW-REGIONS.json the compositions are one global ``project`` unit."""

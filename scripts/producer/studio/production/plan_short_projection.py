@@ -8,8 +8,9 @@ as X201, X205 and X211 correct it:
   ``project`` unit; the regions are the pinned bytes, validated by ``native_short_regions.checked_rows`` (one read);
 - ``preparedSources`` (its sha256) joins ``audio-finishing``, ``caption-style`` and every picture view (X211(1));
 - a motion covers its tween and the held end pose, to its target cue's end (X211(5));
+- each visual-plan decision's authored execution mapping is a scoped entry over its window (X232 D-1);
 - the sealed record gives ``sourceFacts`` and the ``speaker-evidence`` framing entry (``plan_short_evidence``);
-- every path the table does not derive is a global ``key-<path>`` graphics entry (``plan_short_unlisted``).
+- every path the table does not derive joins its root's global ``key-<root>`` graphics entry (``plan_short_unlisted``).
 An absent optional structure derives a fixed shape (no beats: one beat over the clock; no scenes: no holds or
 transitions; no caption groups: only ``caption-style``), never a guess; an unknown writer key stops by name.
 """
@@ -23,7 +24,9 @@ from studio.native_short_regions import DERIVATION, REGIONS, checked_rows
 from studio.production.coordination_catalog import PROJECT_UNIT, SHORT_DERIVATION, UNMAPPED_COMPOSITIONS
 from studio.production.plan_fields import PREFIX, check, derived_entry, read_pinned_json, refuse
 from studio.production.plan_short_evidence import sealed_sections
-from studio.production.plan_short_unlisted import catalog_unprojected, prepared_digest, unlisted, vocabulary_problem
+from studio.production.plan_short_unlisted import (
+    catalog_unprojected, key_root, prepared_digest, unhashed, unlisted, vocabulary_problem,
+)
 
 CAPTION_STYLE = ('captionCorrections', 'captionMode', 'captionViews', 'captionProtectedPhrases', 'captionSuppressions')
 SPEECH = (('occurrencesSha256', 'occurrences'), ('cutsSha256', 'cuts'), ('segmentsSha256', 'segments'))
@@ -113,8 +116,14 @@ def _graphics(native_plan: dict, project: Path, rows: list[dict]) -> list[dict]:
                  for index, row in enumerate(canvas[key])]
     cues += [derived_entry(f'motion-{index}', _motion_range(canvas, row), row) for index, row in enumerate(canvas['motion'])]
     cues.append(derived_entry('visual-sources', None, (native_plan.get('visualSources') or {}).get('decisions')))
-    keys = [{'id': f'key-{path}', 'range': None, 'isolation': 'global', 'digest': digest(value)}
-            for path, value in sorted(unlisted(native_plan, {row['file'] for row in rows}).items())]
+    application = native_plan['strategy'].get('visualPlanApplication') or {}
+    cues += [derived_entry(f'visual-plan-{index}', [row['startFrame'], row['endFrameExclusive']], unhashed(row))
+             for index, row in enumerate(application.get('decisions') or [])]
+    grouped: dict[str, dict] = {}
+    for path, value in unlisted(native_plan, {row['file'] for row in rows}).items():
+        grouped.setdefault(key_root(path), {})[path] = value
+    keys = [{'id': f'key-{root}', 'range': None, 'isolation': 'global', 'digest': digest(paths)}
+            for root, paths in sorted(grouped.items())]
     return _regions(native_plan, project, rows) + [{**cue, 'isolation': 'scoped'} for cue in cues] + keys
 
 

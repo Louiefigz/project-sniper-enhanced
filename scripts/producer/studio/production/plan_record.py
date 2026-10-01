@@ -142,7 +142,7 @@ def _long_rules(plan: dict) -> None:
 def _sections(plan: dict, clock: dict) -> None:
     """Every content section, then the cross-section Long rules and unique entry ids."""
     authored, sections = plan['format'] == 'long', plan['sections']
-    validate_story(plan['story'], clock)
+    validate_story(plan['story'], clock, authored)
     validate_framing(plan['framing'], clock)
     validate_captions(plan['captions'], clock, authored)
     validate_graphics(plan['graphics'], clock, authored)

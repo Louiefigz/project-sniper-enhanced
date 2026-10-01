@@ -13,7 +13,7 @@ from __future__ import annotations
 from role_packet_evidence_speakers import BASES, CERTAINTIES
 from studio.native_budget_schema import BOUNDS as BUDGET_BOUNDS
 from studio.production.coordination_catalog import (
-    ENTRY_SECTIONS, PLAN_BOUNDS, RESPONSIBILITIES, TEXT_BYTES, WORK_COUNTERS,
+    ENTRY_SECTIONS, PLAN_BOUNDS, RESPONSIBILITIES, SHORT_PLAN_BOUNDS, TEXT_BYTES, WORK_COUNTERS,
 )
 from studio.production.plan_fields import (
     PREFIX, authored_digest, check, closed, contiguous, count, frame_range, hex64, identifier, identifiers,
@@ -30,9 +30,9 @@ DISPOSITIONS = ('accepted', 'accepted-with-changes', 'rejected', 'deferred')
 CONFLICT_KINDS = ('same-entry', 'lane-overlap', 'hold-crosses-boundary', 'declared')
 
 
-def _entries(value: object, section: str, keys: tuple[str, ...]) -> list[dict]:
-    """A bounded list of closed entries with an id and a digest each."""
-    found = rows(value, section, (0, PLAN_BOUNDS[section]))
+def _entries(value: object, section: str, keys: tuple[str, ...], authored: bool = False) -> list[dict]:
+    """A bounded list of closed entries with an id and a digest each (a Long's bound is P3a's, a Short's the writer's)."""
+    found = rows(value, section, (0, (PLAN_BOUNDS if authored else SHORT_PLAN_BOUNDS)[section]))
     for row in found:
         closed(row, keys, section)
         identifier(row['id'], section)
@@ -45,9 +45,9 @@ def _isolation(entry: dict, section: str) -> None:
     check(entry['isolation'] in ('scoped', 'global'), section, f'{entry["id"]} isolation must be scoped or global')
 
 
-def validate_story(value: object, clock: dict) -> list[dict]:
-    """1..64 beats tiling the clock; ``occurrenceIds`` a word-id list or null, ``purpose`` text(500) or null."""
-    beats = _entries(value, 'story', ('id', 'range', 'occurrenceIds', 'purpose', 'digest'))
+def validate_story(value: object, clock: dict, authored: bool = False) -> list[dict]:
+    """Beats tiling the clock; ``occurrenceIds`` a word-id list or null, ``purpose`` text(500) or null."""
+    beats = _entries(value, 'story', ('id', 'range', 'occurrenceIds', 'purpose', 'digest'), authored)
     check(len(beats) >= 1, 'story', 'needs at least one beat')
     for beat in beats:
         frame_range(beat['range'], clock, 'story')
@@ -83,10 +83,10 @@ def _graphic_rule(rule: dict, clock: dict) -> None:
 
 
 def validate_graphics(value: object, clock: dict, authored: bool = False) -> list[dict]:
-    """At most 128 entries: Short derived ``{id, range, isolation, digest}``; Long authored rules."""
+    """Short derived ``{id, range, isolation, digest}`` (the writer's bound); Long authored rules (128)."""
     keys = ('id', 'lane', 'range', 'revealFrame', 'hiddenUntilReveal', 'source', 'feasibility', 'evidence',
             'isolation', 'digest') if authored else ('id', 'range', 'isolation', 'digest')
-    entries = _entries(value, 'graphics', keys)
+    entries = _entries(value, 'graphics', keys, authored)
     for entry in entries:
         _isolation(entry, 'graphics')
         if authored:
@@ -109,7 +109,7 @@ def _audio_event(event: dict, clock: dict, inputs: list[dict]) -> None:
 def validate_audio(value: object, clock: dict, inputs: list[dict], authored: bool = False) -> list[dict]:
     """At most 64 entries: Short ``{id, range, digest}``; Long events (``kind``, ``asset``, ``levelDb``, ``isolation``)."""
     keys = ('id', 'kind', 'range', 'asset', 'levelDb', 'isolation', 'digest') if authored else ('id', 'range', 'digest')
-    entries = _entries(value, 'audio', keys)
+    entries = _entries(value, 'audio', keys, authored)
     for entry in entries:
         if authored:
             _audio_event(entry, clock, inputs)
@@ -122,7 +122,7 @@ def validate_transitions(value: object, clock: dict, sections: list[dict], autho
     """At most 64 boundaries with ``a < boundaryFrame < b``; a Long's also carry sides, state and owner."""
     keys = ('id', 'boundaryFrame', 'range', 'outgoing', 'incoming', 'state', 'owner', 'digest') if authored \
         else ('id', 'boundaryFrame', 'range', 'digest')
-    entries = _entries(value, 'transitions', keys)
+    entries = _entries(value, 'transitions', keys, authored)
     for entry in entries:
         start, end = frame_range(entry['range'], clock, 'transitions')
         frame = entry['boundaryFrame']
@@ -138,7 +138,7 @@ def validate_transitions(value: object, clock: dict, sections: list[dict], autho
 def validate_holds(value: object, ids: set[str], clock: dict, authored: bool = False) -> list[dict]:
     """At most 128 holds: Short ``{id, range, holdFrames}``; Long ``{id, subject, range, minimumFrames}``."""
     keys = ('id', 'subject', 'range', 'minimumFrames', 'digest') if authored else ('id', 'range', 'holdFrames', 'digest')
-    entries = _entries(value, 'holds', keys)
+    entries = _entries(value, 'holds', keys, authored)
     for entry in entries:
         start, end = frame_range(entry['range'], clock, 'holds')
         if not authored:
@@ -152,7 +152,8 @@ def validate_holds(value: object, ids: set[str], clock: dict, authored: bool = F
 
 def validate_captions(value: object, clock: dict, authored: bool = False) -> list[dict]:
     """At most 512 entries: Short ``{id, range, digest}``; Long rules add ``rule`` text(500)."""
-    entries = _entries(value, 'captions', ('id', 'range', 'rule', 'digest') if authored else ('id', 'range', 'digest'))
+    entries = _entries(value, 'captions', ('id', 'range', 'rule', 'digest') if authored else ('id', 'range', 'digest'),
+                       authored)
     for entry in entries:
         maybe_range(entry['range'], clock, 'captions')
         if authored:

@@ -23,8 +23,14 @@ derivation table as the rulings correct it (checked against the writer at stack 
   intervals on this source form the ``speaker-evidence`` framing entry.
 - X211(4): the writer-verified summaries in ``SUMMARY_SOURCES`` are derived paths; each source they cover moves
   its own slice (``test_coordination_writer_plan`` proves it per source).
-- X211 minor (W3-D8): a top-level or canvas key outside ``WRITER_KEYS``/``CANVAS_KEYS`` stops the derivation by
-  name, so a renamed P2 field can never pass as a new global key.
+- X211 minor (W3-D8), X232 D-3 (accepted as a P3a S2 amendment): a top-level or canvas key outside
+  ``WRITER_KEYS``/``CANVAS_KEYS`` stops the derivation by name, so a renamed P2 field never passes as a new global key;
+  a change that adds a writer key updates these tuples and the derivation table in the same change.
+- X232 D-1: ``strategy.visualPlanApplication`` is not a summary. Only its writer-verified hashes are derived
+  (``visualPlanSha256`` and the ``APPLICATION_HASHES`` leaves); each decision's authored execution mapping is a scoped
+  graphics entry over its window.
+- X232 D-2: Short section bounds come from the writer's own limits (``SHORT_DERIVED_MAXIMA``); global keys are one
+  entry per top-level root, so their count is bounded by the closed vocabulary (``KEY_ROOT_BOUND``).
 """
 from __future__ import annotations
 
@@ -56,7 +62,7 @@ SHORT_DERIVATION = {
                  'canvas.captionViews', 'canvas.captionProtectedPhrases', 'canvas.captionSuppressions',
                  'preparedSources'),
     'graphics': ('REVIEW-REGIONS.json', 'compositions/*.html', 'canvas.titleCard', 'canvas.text', 'canvas.shapes',
-                 'canvas.motion', 'visualSources.decisions', 'catalogFiles'),
+                 'canvas.motion', 'visualSources.decisions', 'catalogFiles', 'strategy.visualPlanApplication.decisions'),
     'transitions': ('strategy.scenes',),
     'audio': ('audioFinishing', 'preparedSources'),
     'sourceFacts': ('homes.sharedEvidence', 'canvas.cuts', 'canvas.segments', 'assets'),
@@ -91,7 +97,7 @@ SUMMARY_SOURCES = {
                                     'strategy.hookReasonToWatch', 'strategy.payoff', 'expectations', 'request',
                                     'requestPacket', 'canvas', 'extension', 'assets', 'strategy.scenes',
                                     'strategy.supportingSearch'),
-    'strategy.visualPlanApplication': ('canvas', 'extension', 'catalogFiles', 'catalogTitle', 'visualPlan'),
+    'strategy.visualPlanApplication.visualPlanSha256': ('visualPlan',),
 }
 SUMMARY_WRITERS = {   # where the writer computes each summary (file:line at stack 35eca01b)
     'strategy.pacing.timingHash': 'native-short-pacing-observations.ts:20-21',
@@ -99,11 +105,15 @@ SUMMARY_WRITERS = {   # where the writer computes each summary (file:line at sta
     'visualSources.subjectSha256': 'visual-source-admission.ts:15-16, 30-32',
     'strategy.assetUse.revisionHash': 'native-short-asset-use.ts:13-18, 42',
     'strategy.story.revisionHash': 'native-short-story.ts:27-31, 51',
-    'strategy.visualPlanApplication': 'native-visual-plan-application.ts:115-128; native-visual-execution-binding.ts:1',
+    'strategy.visualPlanApplication.visualPlanSha256': 'native-visual-plan-application.ts:206 (equals the visualPlan pin)',
 }
+# Hash leaves inside a visual-plan decision (X232 D-1): each is the sha256 of executable bytes the writer derives from
+# plan inputs that move their own slices, and the writer refuses any other value (native-visual-plan-application.ts:124;
+# native-visual-execution-binding.ts:103-144, :176-182). Every other decision leaf is authored or copied: digested.
+APPLICATION_HASHES = ('implementationSha256', 'elementSha256', 'contentSha256', 'configurationSha256')
 # Native-plan paths outside plan_projection the derivation covers; every other one is global (F-4, F-5).
 PLAN_DERIVED = ('strategy.scenes', 'visualSources.decisions', 'sharedEvidence', 'preparedSources', 'speakerPictureDecisions',
-                *SUMMARY_SOURCES)
+                'strategy.visualPlanApplication.decisions', *SUMMARY_SOURCES)
 # The writer's key vocabulary at stack 35eca01b plus P2's fields (native-short-project.ts:34-55,
 # native-short-composition.ts:33-47; P2-05 P2-EARLY-CHECKS:590, P2-08 :721-722). Anything else stops by name.
 WRITER_KEYS = ('visualSources', 'catalogFiles', 'catalogTitle', 'schemaVersion', 'request', 'strategy', 'canvas',
@@ -115,6 +125,7 @@ CANVAS_KEYS = ('title', 'frameRate', 'totalFrames', 'background', 'sourceSize', 
 P2_FIELDS = ('canvas.captionProtectedPhrases', 'sharedEvidence', 'speakerPictureDecisions')   # not yet integrated
 SPEAKER_EVIDENCE = 'speaker-evidence'             # the sealed record's picture-relevant facts (X211(3))
 SPEAKER_DECISIONS = 'speaker-picture-decisions'   # the plan's answers to those facts (P2-08; L-R 4f1f4704)
+FRAMING_EVIDENCE = (SPEAKER_EVIDENCE, SPEAKER_DECISIONS)   # whole-output framing entries beside the picture views
 UNMAPPED_COMPOSITIONS = 'compositions-unmapped'   # compositions no region row covers (F-1)
 PROJECT_UNIT = 'project'                          # no REVIEW-REGIONS.json: one global graphics unit
 
@@ -167,14 +178,33 @@ DECISION_KINDS = {
 }
 OUTPUTLESS_DECISIONS = ('staffing', 'operator-input-needed', 'operator-input-received', 'coordinator-note')
 
+# The writer's own list limits at stack 35eca01b (X232 D-2), and the most entries each Short section can derive.
+WRITER_LIMITS = {'pictureViews': 128, 'cues': 128, 'motion': 128,      # native-short-composition.ts:125-127
+                 'regions': 128,                                        # native_short_regions.py:119 (REVIEW-REGIONS)
+                 'beats': 128,                                          # native-short-pacing.ts:41
+                 'scenes': 64,                                          # native-short-strategy.ts:90
+                 'visualPlanDecisions': 256}                            # planner/visual_plan_fields.py:178
+KEY_ROOT_BOUND = len(WRITER_KEYS) + 1      # one key-<root> per top-level writer key, plus plan_projection's `brief`
+SHORT_DERIVED_MAXIMA = {
+    'story': WRITER_LIMITS['beats'],
+    'holds': WRITER_LIMITS['scenes'],
+    'transitions': WRITER_LIMITS['scenes'] - 1,
+    'framing': WRITER_LIMITS['pictureViews'] + len(FRAMING_EVIDENCE),
+    'graphics': (WRITER_LIMITS['regions'] + 1 + 1 + WRITER_LIMITS['cues'] + WRITER_LIMITS['motion'] + 1
+                 + WRITER_LIMITS['visualPlanDecisions'] + KEY_ROOT_BOUND),   # +1 unmapped/project, title card, sources
+    'audio': 1,
+}
 # Record and artifact bounds (§4.0.1). The result document bound is section_results.MAX_RESULT_BYTES (4 MiB).
 BOUNDS = {'planRecordBytes': 1_048_576, 'bindingBytes': 8_192, 'inputPinBytes': 256 * 1024 ** 2,
           'planVersions': 8, 'decisionsPerBatch': 1_024, 'decisionEventBytes': 2_048,
           'planDepth': 32}   # JSON nesting; the lane's bound (X211 minor), far above a record's real depth
-# Plan-record list bounds (§4.0.2). `framing` and `audio` have no stated bound; the lane chose 128 and 64 (U-T7).
-PLAN_BOUNDS = {'story': 64, 'holds': 128, 'framing': 128, 'captions': 512, 'graphics': 128, 'transitions': 64,
-               'audio': 64, 'sourceFacts': 128, 'unresolved': 64, 'ownership': 64, 'contributions': 32,
+# Plan-record list bounds (§4.0.2). `framing` and `audio` have no stated bound: framing is the writer's views plus the
+# evidence entries (X232 D-2), audio the lane's 64 (U-T7).
+PLAN_BOUNDS = {'story': 64, 'holds': 128, 'framing': SHORT_DERIVED_MAXIMA['framing'], 'captions': 512, 'graphics': 128,
+               'transitions': 64, 'audio': 64, 'sourceFacts': 128, 'unresolved': 64, 'ownership': 64, 'contributions': 32,
                'conflicts': 32, 'decisions': 128, 'sections': 3, 'inputs': 64, 'totalFrames': 54_000}
+# A Short's derived sections are bounded by what the writer admits (X232 D-2); a Long's authored ones by P3a.
+SHORT_PLAN_BOUNDS = {**PLAN_BOUNDS, **{key: max(PLAN_BOUNDS[key], value) for key, value in SHORT_DERIVED_MAXIMA.items()}}
 TEXT_BYTES = {'statement': 500, 'purpose': 500, 'speaker': 120, 'rule': 500, 'evidence': 500}
 
 

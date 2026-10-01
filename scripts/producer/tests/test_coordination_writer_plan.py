@@ -12,7 +12,9 @@ from pathlib import Path
 
 from _coordination_fixture import PlanFixture, leaves, moved, perturbed, summarised
 from studio.native_short_regions import region_map, shared_inputs
-from studio.production.coordination_catalog import GENERATED_EXEMPT, PREPARED_READERS, SUMMARY_SOURCES
+from studio.production.coordination_catalog import (
+    APPLICATION_HASHES, GENERATED_EXEMPT, PREPARED_READERS, SUMMARY_SOURCES,
+)
 from studio.production.plan_record import changed_entries, classify
 from studio.production.plan_short_unlisted import unlisted_keys
 
@@ -95,7 +97,43 @@ class Summaries(Case):
         for path in ('visualSources.subjectSha256', 'strategy.visualPlanApplication'):
             self.assertNotEqual(value_at(after, path), value_at(before, path), path)
         region = self.short_record(homes)
-        self.assertEqual((classify(self.record, region), moved(self.record, region)), ('local', frozenset({'graphics-motion'})))
+        self.assertEqual((classify(self.record, region), [row['id'] for row in changed_entries(self.record, region)]),
+                         ('local', ['region-0']))   # the decision's implementationSha256 followed: a hash leaf (D-1)
+
+
+class Application(Case):
+    """X232 D-1: a visual-plan decision's authored execution mapping is a scoped entry over its window."""
+
+    CHANGES = {'visibleIds': lambda row: row.update(visibleIds=['label']),
+               'binding': lambda row: row.update(binding={'kind': 'custom-native', 'visibleIds': ['label'],
+                                                          'implementationSha256': '5' * 64,
+                                                          'outputRange': {'startFrame': 15, 'endFrameExclusive': 45}}),
+               'anatomy': lambda row: row.update(anatomy='TEST other')}
+
+    def test_authored_execution_choices_move_their_window(self) -> None:
+        """The reviewer's three changes (visibleIds, the executing binding, anatomy) each move visual-plan-0 only."""
+        entry = {row['id']: row for row in self.record['graphics']}['visual-plan-0']
+        self.assertEqual((entry['range'], entry['isolation']), ([15, 45], 'scoped'))
+        for name, change in self.CHANGES.items():
+            with self.subTest(field=name):
+                after, _plan = self.after(lambda plan: change(plan['strategy']['visualPlanApplication']['decisions'][0]),
+                                          f'application-{name}')
+                self.assertEqual((classify(self.record, after), [row['id'] for row in changed_entries(self.record, after)]),
+                                 ('local', ['visual-plan-0']))
+
+    def test_every_authored_application_leaf_moves_a_slice(self) -> None:
+        """Every leaf of the application but its hash leaves moves a slice or is refused; hash leaves are recomputed."""
+        homes = self.project(self.plan, name='plain-application')
+        plain, base = self.short_record(homes), Path(homes['nativePlan']['path']).read_bytes()
+        found = {}
+        for leaf in [leaf for leaf in leaves(self.plan) if leaf[:2] == ('strategy', 'visualPlanApplication')]:
+            kind, after = self.leaf_outcome(self.plan, leaf, base)
+            found[leaf] = bool(moved(plain, after)) if kind == 'derived' else kind
+        hashes = {leaf for leaf in found if leaf[-1] in (*APPLICATION_HASHES, 'visualPlanSha256')}
+        self.assertEqual({leaf for leaf, kind in found.items() if kind is False}, {('strategy', 'visualPlanApplication',
+                                                                                    'visualPlanSha256')})
+        self.assertTrue(all(found[leaf] in ('recomputed', False) for leaf in hashes))
+        self.assertGreater(len(found) - len(hashes), 15)
 
 
 class Prepared(Case):

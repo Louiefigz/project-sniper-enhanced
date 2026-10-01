@@ -1,7 +1,8 @@
 """What the Short derivation does not derive (global entries) and the writer vocabulary it stops on (P3a S2, M-081).
 
 Every ``plan_projection(plan, local)`` path outside ``PROJECTION_DERIVED`` (X201 F-3) and every other native-plan path
-outside ``PLAN_DERIVED`` (X205 F-5) becomes a global ``key-<path>`` entry, except ``GENERATED_EXEMPT`` (X211(1)).
+outside ``PLAN_DERIVED`` (X205 F-5) is global, except ``GENERATED_EXEMPT`` (X211(1)); the paths are grouped into one
+``key-<root>`` entry per top-level root (``key_root``), so the closed vocabulary bounds their count (X232 D-2).
 Row fields the projection drops (X211(2)) are digested too: an asset row whole but its location in ``key-assets``;
 a catalog file row's in its region entry when the row is region-bound (``catalog_unprojected``), else in
 ``key-catalogFiles``. A top-level or canvas key outside the writer vocabulary, or a malformed binding or P2 field,
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 from studio.native_short_regions import EXECUTABLE_PLAN, plan_projection
 from studio.production.coordination_catalog import (
-    CANVAS_KEYS, GENERATED_EXEMPT, LOCATION_KEYS, PLAN_DERIVED, PROJECTION_DERIVED, WRITER_KEYS,
+    APPLICATION_HASHES, CANVAS_KEYS, GENERATED_EXEMPT, LOCATION_KEYS, PLAN_DERIVED, PROJECTION_DERIVED, WRITER_KEYS,
 )
 from studio.production.plan_fields import check
 
@@ -86,6 +87,19 @@ def unlisted(native_plan: dict, local: set[str]) -> dict[str, object]:
 def unlisted_keys(native_plan: dict) -> list[str]:
     """Paths of the native plan that SHORT_DERIVATION does not derive; each is a global ``key-<path>`` entry."""
     return sorted(unlisted(native_plan, set()))
+
+
+def key_root(path: str) -> str:
+    """The global entry an unlisted path joins: its top-level key (``plan.<key>`` outside the projection)."""
+    parts = path.split('.')
+    return '.'.join(parts[:2]) if parts[0] == 'plan' else parts[0]
+
+
+def unhashed(value: object) -> object:
+    """A visual-plan decision without its writer-verified hash leaves (``APPLICATION_HASHES``; X232 D-1)."""
+    if isinstance(value, dict):
+        return {key: unhashed(item) for key, item in value.items() if key not in APPLICATION_HASHES}
+    return [unhashed(item) for item in value] if isinstance(value, list) else value
 
 
 def prepared_digest(native_plan: dict) -> str | None:

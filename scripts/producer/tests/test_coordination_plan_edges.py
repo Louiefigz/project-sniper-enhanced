@@ -16,13 +16,17 @@ from unittest import mock
 from _coordination_fixture import BATCH, TASK, UNIT, PlanFixture, authored, long_record, pin_of
 from role_packet_native import plan_hash
 from studio.native_short_regions import DERIVATION
-from studio.production.coordination_catalog import RESPONSIBILITIES
+from studio.production.coordination_catalog import (
+    FRAMING_EVIDENCE, KEY_ROOT_BOUND, PLAN_BOUNDS, RESPONSIBILITIES, SHORT_DERIVED_MAXIMA, SHORT_PLAN_BOUNDS,
+    WRITER_LIMITS,
+)
 from studio.production.plan_fields import nesting_problem, raw_depth
 from studio.production.plan_record import (
     affected_sections, approved_content_problem, classify, changed_entries, homes_problem, read_plan_record, task_slice,
     validate_plan_record,
 )
 from studio.production.plan_short_projection import derived_problem, short_sections
+from studio.production.plan_short_unlisted import key_root, unlisted_keys
 
 RANGES = {('graphics', 'region-0'): [15, 45], ('graphics', 'title-card'): [0, 30], ('graphics', 'text-0'): [30, 60],
           ('graphics', 'shape-0'): [40, 50], ('graphics', 'motion-0'): [32, 60], ('graphics', 'visual-sources'): None,
@@ -144,6 +148,46 @@ class Homes(Case):
     def test_a_short_without_a_native_plan_is_refused(self) -> None:
         """A Short whose ``homes.nativePlan`` is null is refused by the shape check (S2 edge case)."""
         refused(self, {**self.record, 'homes': {**self.homes, 'nativePlan': None}}, 'Coordination plan: homes')
+
+
+class ShortBounds(Case):
+    """X232 D-2: a Short's derived sections fit bounds taken from the writer's own limits."""
+
+    def test_every_derived_maximum_fits_its_bound(self) -> None:
+        """Each section's writer-legal maximum is within the Short bound; framing = views + evidence entries."""
+        self.assertEqual(SHORT_DERIVED_MAXIMA['framing'], WRITER_LIMITS['pictureViews'] + len(FRAMING_EVIDENCE))
+        for section, most in SHORT_DERIVED_MAXIMA.items():
+            with self.subTest(section=section):
+                self.assertLessEqual(most, SHORT_PLAN_BOUNDS[section])
+        self.assertEqual((PLAN_BOUNDS['graphics'], PLAN_BOUNDS['story']), (128, 64))   # a Long keeps P3a's bounds
+
+    def test_writer_legal_plans_with_many_views_and_cues_validate(self) -> None:
+        """128 picture views plus both evidence entries (130 framing), and 128 cues (graphics past 128), validate."""
+        plan = copy.deepcopy(self.plan)
+        view, cue = plan['canvas']['pictureViews'][0], plan['canvas']['text'][0]
+        plan['canvas']['pictureViews'] = [{**view, 'startFrame': 0, 'endFrame': 60} for _ in range(128)]
+        plan['canvas']['text'] += [{**cue, 'id': f'cue-{index}'} for index in range(126)]
+        plan['speakerPictureDecisions'] = []
+        record = self.short_record(self.project(plan, name='crowded', evidence=self.evidence))
+        self.assertEqual(len(record['framing']), 130)
+        self.assertGreater(len(record['graphics']), 128)
+        validate_plan_record(record)
+
+    def test_global_keys_are_one_per_root(self) -> None:
+        """Unlisted paths join one ``key-<root>`` each, so their count stays within KEY_ROOT_BOUND."""
+        keys = [row['id'] for row in self.record['graphics'] if row['id'].startswith('key-')]
+        self.assertLess(len(keys), len(unlisted_keys(json.loads(Path(self.homes['nativePlan']['path']).read_text()))))
+        self.assertLessEqual(len(keys), KEY_ROOT_BOUND)
+        self.assertTrue(all(key_root(key[len('key-'):]) == key[len('key-'):] for key in keys), keys)
+
+    def test_a_short_story_past_64_beats_validates(self) -> None:
+        """The writer admits 128 beats; a Short record with 100 validates (a Long keeps 64)."""
+        beats = [{'id': f'beat-{index}', 'range': [index * 3, index * 3 + 3], 'occurrenceIds': None, 'purpose': None}
+                 for index in range(100)]
+        story = [{**beat, 'digest': '0' * 64} for beat in beats]
+        ownership = [{**row, 'range': [0, 300]} for row in self.record['ownership']]
+        validate_plan_record({**self.record, 'clock': {'frameRate': '30/1', 'totalFrames': 300}, 'story': story,
+                              'ownership': ownership})
 
 
 class Depth(unittest.TestCase):

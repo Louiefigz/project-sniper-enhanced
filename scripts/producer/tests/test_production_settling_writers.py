@@ -33,6 +33,7 @@ class DrainingCloseTests(unittest.TestCase):
     """m2a: ``close`` on a draining batch with live media writes nothing until it closes."""
 
     def test_close_while_draining_writes_once(self) -> None:
+        """Five closes of a draining batch change nothing; the close after the media ends closes it."""
         batch = Batch(self)
         batch.table = table(CHILD, DISPATCHER)                     # media stays live
         batch.enqueue(('media-a', 'media', ()))
@@ -53,6 +54,7 @@ class StatementTests(unittest.TestCase):
     """m2b: ``settle-resource`` records one statement per task and phase."""
 
     def test_a_second_statement_on_an_unresolved_resource_is_refused_by_name(self) -> None:
+        """The second statement on an unresolved slot is refused by name and nothing is written."""
         batch = held_batch(self)
         api.settle_resource(batch.root, BATCH, 'critic', STATEMENT)
         authority = batch.root / 'batches' / BATCH / 'authority.json'
@@ -65,6 +67,7 @@ class StatementTests(unittest.TestCase):
         self.assertEqual(line['phase'], 'unresolved resource')
 
     def test_revoked_live_work_takes_one_statement_on_its_revocation(self) -> None:
+        """Revoked live work takes one statement, recorded with its revocation phase."""
         batch = Batch(self)
         batch.enqueue(('critic', 'specialist', ()))
         batch.claim('critic', host('critic'))
@@ -84,6 +87,7 @@ class ContinuationLineTests(unittest.TestCase):
         continuation_tests.ReviewContinuationTests.setUp(self)
 
     def test_the_outcome_line_is_bounded(self) -> None:
+        """A 10,000-character result status is cut to RESULT_TEXT_BYTES and the output path is not repeated."""
         budget = continuation_tests.ReviewContinuationTests.reserve(self)
         request = {**self.fixture.request, 'productionBudget': budget}
         event = continuation.apply_review_outcome(self.fixture.record(), request, {'status': 'x' * 10_000}, 0)
@@ -105,6 +109,7 @@ class CommitLineTests(FullTrailCase):
                 session.commit(record, {'event': 'task-superseded', 'taskIds': [], 'reason': 'TEST'})
 
     def test_a_failed_commit_line_carries_the_escaped_cut_error(self) -> None:
+        """A failed replace's commit-failed line carries error_text of the error, 96 characters."""
         error = OSError('\U0001F600\n' * 1000)
         with self.assertRaises(BudgetAuthorityError):
             self.commit_with(error)
@@ -113,9 +118,11 @@ class CommitLineTests(FullTrailCase):
         self.assertEqual(len(line['error']), ERROR_TEXT_CHARS)
 
     def test_past_the_stop_an_unsynced_commit_stands_without_its_line(self) -> None:
+        """At a full trail a replaced but unsynced commit stands and its commit-unsynced line is not written."""
         real = store.write_pending_replace
 
         def replace_then_fail(dir_fd: int, names: tuple, data: bytes) -> None:
+            """Replace the record, then fail as a lost directory sync would."""
             real(dir_fd, names, data)
             raise OSError('TEST directory fsync failed')
         self.fill()

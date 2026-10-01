@@ -50,6 +50,7 @@ class BoundaryTests(unittest.TestCase):
     """K1: a hand-off exactly at the deadline is on time (``<=``, as ``on_time`` and the milestone read it)."""
 
     def test_a_handoff_exactly_at_the_deadline_is_on_time(self) -> None:
+        """K1: a hand-off at the deadline itself is on time."""
         record = short_record()
         clip = delivered(record, 1500.0, 0.0)
         deadline = clip_deadlines(record, clip)['deliverySeconds']
@@ -60,6 +61,7 @@ class AddedShortTests(unittest.TestCase):
     """K2-K4: an added Short's hand-off is timed on its own clock, from its own authorization."""
 
     def test_an_added_short_is_timed_from_its_own_authorization(self) -> None:
+        """K2-K4: B, authorized at 600 s, is timed and judged from 600 s against its own 3000 s."""
         record = short_record()
         added = with_added_short(record, 600.0)
         deliver(added, 2000.0, 'TEST-b')
@@ -69,6 +71,7 @@ class AddedShortTests(unittest.TestCase):
         self.assertEqual(queue_clock.status(added, 2900.0)['totalAtDeliverySeconds'], 1400.0)
 
     def test_a_declared_short_is_not_timed_against_a_later_added_one(self) -> None:
+        """K2: A is judged against its own deadline, never the run's later one."""
         record = short_record()
         with_added_short(record, 600.0)
         clip = delivered(record, 1500.0, 0.0)
@@ -80,6 +83,7 @@ class FrozenTests(unittest.TestCase):
     the total at the hand-off is the hand-off's, never the delivery's."""
 
     def test_counted_to_handoff_uses_the_credit_held_then_and_delivery_time_stays(self) -> None:
+        """K5, K6, X-R6: the row counts the credit held at the hand-off; delivery and hand-off totals stay apart."""
         record = short_record()
         clip = delivered(record, 1500.0, 120.0)
         clip['capacityClock'].update(excludedSeconds=300.0, observedElapsed=1900.0)
@@ -89,6 +93,7 @@ class FrozenTests(unittest.TestCase):
         self.assertEqual((row['totalAtHandoffSeconds'], row['totalAtDeliverySeconds']), (2000.0, 1500.0))
 
     def test_a_late_handoff_is_frozen_too(self) -> None:
+        """K10: after a late hand-off nothing grows either."""
         record = short_record()
         clip = delivered(record, 1500.0, 0.0)
         late = clip_deadlines(record, clip)['deliverySeconds'] + 60.0
@@ -101,6 +106,7 @@ class LateCommandTests(RegistryCase):
     """K11 (X191): ``handoff`` is timed at the command's elapsed, never at the export it hands off."""
 
     def test_a_late_handoff_of_an_on_time_export_is_an_sla_miss(self) -> None:
+        """K11: an export on time, handed off 30 s past the deadline, is timed at the command and missed."""
         budget = self.reserve(self.project, route='draft')
         mp4 = test_mp4(self.work / 'attempt')
         binding.record_request_outcome({'productionBudget': budget}, {
@@ -129,12 +135,23 @@ class RowTests(unittest.TestCase):
         self.assertIsNone(problem(clip))
         return clip
 
+    def test_a_handoff_exactly_at_the_deadline_validates(self) -> None:
+        """X238: the validator's boundary is ``<=``, as ``record_handoff``'s is."""
+        record = short_record()
+        clip = delivered(record, 1500.0, 0.0)
+        row = record_handoff(record, clip, clip_deadlines(record, clip)['deliverySeconds'])
+        clip['state'] = 'handed-off'
+        self.assertEqual((row['elapsed'], row['onTime']), (row['deadlineElapsed'], True))
+        self.assertIsNone(problem(clip))
+
     def test_a_forged_on_time_verdict_is_refused(self) -> None:
+        """An onTime flag set against its own times is refused by name."""
         clip = self.handed()
         clip['capacityClock']['handoff']['onTime'] = True
         self.assertEqual(problem(clip), 'Short capacity clock hand-off: its times and its on-time verdict disagree')
 
     def test_counted_above_total_or_total_above_elapsed_is_refused(self) -> None:
+        """A row whose counted time exceeds its total, or total its elapsed, is refused by name."""
         for field, delta in (('countedSeconds', 1e6), ('totalSeconds', 1e6)):
             with self.subTest(field=field):
                 clip = self.handed()
@@ -143,6 +160,7 @@ class RowTests(unittest.TestCase):
                                  'Short capacity clock hand-off: its times and its on-time verdict disagree')
 
     def test_a_row_on_a_clip_not_handed_off_is_refused(self) -> None:
+        """A hand-off row on an active clip is refused by name."""
         clip = self.handed()
         clip['state'] = 'active'
         self.assertEqual(problem(clip), 'Short capacity clock hand-off on a clip that is not handed off')
@@ -152,6 +170,7 @@ class OnceTests(unittest.TestCase):
     """F-m2: ``record_handoff`` refuses to replace a recorded row by name (a clock is never reset)."""
 
     def test_a_second_record_is_refused(self) -> None:
+        """A second hand-off row is refused by name and the first one stays."""
         record = short_record()
         clip = delivered(record, 1500.0, 0.0)
         deadline = clip_deadlines(record, clip)['deliverySeconds']
@@ -166,6 +185,7 @@ class BasisTests(unittest.TestCase):
     """F-m3: status names what ``slaMisses`` holds since M-054: a recorded late hand-off, else no MP4 in time."""
 
     def test_the_sla_basis_names_the_recorded_handoff(self) -> None:
+        """The slaMisses basis names the recorded hand-off first, then the export rule."""
         self.assertIn("a v2 Short's recorded visible hand-off after its delivery deadline", SLA_BASIS['slaMisses'])
         self.assertIn('otherwise no complete MP4 encoded by the delivery deadline', SLA_BASIS['slaMisses'])
 
@@ -174,11 +194,13 @@ class EvidenceBoundTests(unittest.TestCase):
     """X217 M1: the ``clip-handed-off`` line carries the evidence's paths and times, so both are bounded."""
 
     def test_a_time_longer_than_its_bound_is_refused(self) -> None:
+        """A valid ISO time is read; one with 100 fractional digits is refused by name."""
         self.assertIsNotNone(handoff._time('2026-09-30T12:00:00.123456+00:00', 'visibleHandoffAt'))
         with self.assertRaisesRegex(handoff.HandoffEvidenceError, r'\(at most 64 characters\)$'):
             handoff._time('2026-09-30T12:00:00.' + '1' * 100 + '+00:00', 'visibleHandoffAt')
 
     def test_a_path_longer_than_its_encoded_bound_is_refused(self) -> None:
+        """A 780-byte path of control characters encodes past 4096 bytes and is refused by name."""
         holder = tempfile.TemporaryDirectory(prefix='sniper-test-handoff-')
         self.addCleanup(holder.cleanup)
         folder = Path(holder.name).resolve()

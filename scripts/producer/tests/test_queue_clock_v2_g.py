@@ -21,7 +21,8 @@ from _production_task_flow_fixture import BATCH as FLOW_BATCH, close, run_cli
 from studio import native_budget_binding, native_budget_status, native_budget_store
 from studio.native_budget_store import BudgetAuthorityError, locked_batch
 from studio.production import process_settle, queue_authority
-from studio.production.queue_audit import _capacity_rows, owner_digest
+from studio.production.queue_audit import SETTLE_TOLERANCE, _capacity_rows, owner_digest
+from studio.production.queue_authority import CHECKPOINT_SECONDS
 from studio.production.queue_clock import SETTLED
 from test_budget_schema_shapes import ATTEMPT
 from test_queue_clock_stall_c import BATCH as FULL_BATCH, FullTrailCase
@@ -77,7 +78,28 @@ class CadenceCapTests(unittest.TestCase):
         self.assertTrue(process_settle.settle(claim, process_settle.Ending(CHILD['pid'], None, (), None))['settled'])
         self.assertEqual(audit_status(self), 'exceeds-trail')
 
+    def edit_past_the_cadence(self, beyond: float) -> str:
+        """X238: the waiter falls silent, and 1200 s later its credit is edited to ``beyond`` seconds past one
+        cadence plus the tolerance above the last row; the audit's verdict."""
+        batch, _claim = v2_f.SettlementAuditTests.batch_waiting(self)
+        batch.clock.advance(1200)
+        code, result = run_cli('status', '--batch', FLOW_BATCH)
+        self.assertEqual(code, 0, result)
+        row = result['capacityAudit']['A']
+        bound = row['trailSeconds'] + CHECKPOINT_SECONDS + SETTLE_TOLERANCE
+        hand_edit(batch.root, FLOW_BATCH, bound + beyond - row['recordedSeconds'])
+        return audit_status(self)
+
+    def test_an_edit_just_over_one_cadence_is_seen(self) -> None:
+        """X238: one second past one cadence plus the tolerance is exceeds-trail."""
+        self.assertEqual(self.edit_past_the_cadence(1.0), 'exceeds-trail')
+
+    def test_an_edit_just_under_one_cadence_is_within_the_window(self) -> None:
+        """X238: one second short of one cadence plus the tolerance stays consistent."""
+        self.assertEqual(self.edit_past_the_cadence(-1.0), 'consistent')
+
     def test_an_honest_silent_waiter_stays_consistent(self) -> None:
+        """A waiter silent for 1200 s, then settled by its watchdog, stays consistent."""
         batch, claim = v2_f.SettlementAuditTests.batch_waiting(self)
         batch.clock.advance(1200)
         self.assertEqual(audit_status(self), 'consistent')
@@ -89,6 +111,7 @@ class ReaderTests(unittest.TestCase):
     """n1: a settlement entry is read from the event, its ``changes`` and its ``reconciled``, never another list."""
 
     def test_only_the_settling_lists_are_read(self) -> None:
+        """Entries in the event, its changes and its reconciled are read; one in receipts is not."""
         entry = {'A': {'elapsed': 10.0, 'excludedSeconds': 5.0, 'removedWorkers': [owner_digest('/TEST/w')]}}
         read = [{'event': 'tasks-reconciled', 'changes': [{'taskId': 't', SETTLED: entry}]},
                 {'event': 'batch-closed', 'reconciled': [{'taskId': 't', SETTLED: entry}]},
@@ -101,16 +124,19 @@ class OwnerEndTests(AuditCase):
     """M1: an owner's end is a compact settling line, and only when it removes an owner row."""
 
     def test_an_owner_end_names_owners_by_digest(self) -> None:
+        """An owner's end writes the compact digest line, and the audit reads it as consistent."""
         self.observe('waiting', POOL)
         self.clock.advance(20.0)
         self.observe('waiting', POOL)
         self.observe('finished')
         line = trail_lines(self.root, BATCH)[-1]
-        self.assertEqual((line['event'], line['workerDigest']), ('capacity-settled', owner_digest('/TEST/owner-a.json')))
+        self.assertEqual((line['event'], line['workerDigest']),
+                         ('capacity-settled', owner_digest('/TEST/owner-a.json')))
         self.assertFalse({'worker', 'resource', 'evidence', 'creditedSeconds'} & set(line))
         self.assertEqual(audit_status(self, BATCH), 'consistent')
 
     def test_the_end_of_an_owner_the_record_no_longer_holds_writes_no_line(self) -> None:
+        """A finish of an owner with no row adds no trail line."""
         before = len(trail_lines(self.root, BATCH))
         self.observe('finished')
         self.assertEqual(len(trail_lines(self.root, BATCH)), before)
@@ -120,11 +146,13 @@ class CommitGapTests(AuditCase):
     """m6 (R10, R7, R5): reviewer gap tests (``reviews/P1-RP5A-evidence/gaps_rp5a.py``) and the room exemption."""
 
     def test_an_unwritable_trail_fails_status(self) -> None:
+        """R10: with the trail unwritable, status fails (exit 2), never record-only."""
         with mock.patch.object(native_budget_store, 'write_all', side_effect=OSError('TEST unwritable')):
             code, result = run_cli('status', '--batch', BATCH)
         self.assertEqual(code, 2, result)
 
     def test_the_checkpoint_after_a_failed_one_is_written(self) -> None:
+        """R7: the failed checkpoint is not written again, but the next one is."""
         self.addCleanup(queue_authority._FAILED_CHECKPOINTS.clear)
         self.observe('working')
         self.clock.advance(1000.0)
@@ -143,19 +171,20 @@ class CommitGapTests(AuditCase):
 
     def test_a_heartbeat_needs_no_settlement_room(self) -> None:
         """R5: with no room left for settlements, new work is refused but a heartbeat still commits."""
-        with mock.patch.object(native_budget_store, 'settlement_reserve',
-                               return_value=native_budget_store.MAX_RECORD_BYTES):
-            with locked_batch(self.root, BATCH) as session:
-                record = session.read()
-                with self.assertRaisesRegex(BudgetAuthorityError, 'no room left'):
-                    session.commit(record, {'event': 'TEST-new-work'})
-                session.commit(record, {'event': 'capacity-heartbeat'})
+        full = mock.patch.object(native_budget_store, 'settlement_reserve',
+                                 return_value=native_budget_store.MAX_RECORD_BYTES)
+        with full, locked_batch(self.root, BATCH) as session:
+            record = session.read()
+            with self.assertRaisesRegex(BudgetAuthorityError, 'no room left'):
+                session.commit(record, {'event': 'TEST-new-work'})
+            session.commit(record, {'event': 'capacity-heartbeat'})
 
 
 class AbandonmentOnceTests(FullTrailCase):
     """m3: at a full trail, while the record cannot be replaced, a dead launch's line is written once."""
 
     def test_status_writes_the_abandoned_line_once_while_the_record_cannot_be_replaced(self) -> None:
+        """Three failing statuses write one observed line and one commit-failed; the next success writes none."""
         self.addCleanup(native_budget_status._FAILED_ABANDONMENTS.clear)
         running = {**ATTEMPT, 'status': 'running', 'resultStatus': None, 'completedElapsed': None}
         self.commit(lambda record: record['clips']['A'].update(attempts=[running]))

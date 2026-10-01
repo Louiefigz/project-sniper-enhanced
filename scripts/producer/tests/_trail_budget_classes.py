@@ -68,7 +68,7 @@ def stall_decided() -> int:
 
 
 def settled_widest() -> int:
-    """The widest ``capacity-settled`` line naming no recovered or orphaned owner (``queue_authority._settled_line``)."""
+    """The widest ``capacity-settled`` line with no recovered or orphaned owner (``queue_authority._settled_line``)."""
     return len(canonical({'event': 'capacity-settled', 'clipId': CLIP, 'workerDigest': DIGEST, 'state': 'finished',
                           'elapsed': BIG, 'excludedSeconds': BIG, 'recoveredDigests': [], 'orphanedDigests': [],
                           'capacityState': 'capacity-stalled'}))

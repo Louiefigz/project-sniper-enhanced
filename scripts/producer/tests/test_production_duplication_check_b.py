@@ -26,6 +26,7 @@ class ChangeIntoAnotherJobTests(add_clip_tests.AddClipCase):
     """m4: a rename of one clip into another clip's job is refused like an add of it."""
 
     def test_a_change_into_another_clips_job_is_refused_by_name(self) -> None:
+        """C, added later as its own job, cannot be changed into A's title and script; nothing is written."""
         self.clock.advance(1200)
         self.add('C', approval('C'))
         authority = self.root / 'batches' / 'batch-auth' / 'authority.json'
@@ -36,6 +37,7 @@ class ChangeIntoAnotherJobTests(add_clip_tests.AddClipCase):
         self.assertEqual(self.trail('approval-changed'), [])
 
     def test_a_clip_may_return_to_its_own_earlier_revision(self) -> None:
+        """A renamed and renamed back is its own lineage, never another clip's job (M-162's revisions)."""
         api.record_script_change(self.root, 'batch-auth', 'A', ApprovalChange(approval('A', title='TEST renamed A'),
                                                                               CHANGE_REASON))
         back = api.record_script_change(self.root, 'batch-auth', 'A', ApprovalChange(approval('A'), CHANGE_REASON))
@@ -47,9 +49,11 @@ class DecisionLineGapTests(add_clip_tests.AddClipCase):
     other clip's current approval (D-P-4), not its first (``reviews/P1-RP5A-evidence/gaps_rp5a.py``)."""
 
     def test_status_writes_an_owed_line_on_a_draining_batch(self) -> None:
+        """K2: a decision line refused at the add is written by status even after the batch drains."""
         original = BatchSession.event
 
         def event(session: BatchSession, value: dict) -> None:
+            """The store append, with the decision line refused as at a full trail."""
             if value.get('event') == 'coordination-decision':
                 raise TrailFull('Budget event trail is full: TEST')
             original(session, value)
@@ -61,6 +65,7 @@ class DecisionLineGapTests(add_clip_tests.AddClipCase):
         self.assertEqual(len(self.trail('coordination-decision')), 1)
 
     def test_overlap_is_against_the_current_approval(self) -> None:
+        """K3: A moved to other seconds, so T's seconds overlap nothing A holds now."""
         api.record_script_change(self.root, 'batch-auth', 'A', ApprovalChange(
             approval('A', **add_clip_tests.script(500, 529)), CHANGE_REASON))
         added = self.add('T', approval('T', title='TEST trim of A', **add_clip_tests.script(12, 39, (50, 79))))

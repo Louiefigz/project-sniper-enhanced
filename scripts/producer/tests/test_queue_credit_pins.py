@@ -13,7 +13,7 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 import unittest
 from unittest import mock
 
-from _queue_credit_fixture import CreditCase
+from _queue_credit_fixture import GRANTED, CreditCase
 from studio import native_budget_clock as clock
 from studio.native_budget_clock import allocation_remaining, uncredited_remaining
 from studio.production import process_watch
@@ -22,16 +22,17 @@ from test_queue_credit_aborts import GRACE, WatchCase
 LATER = 10_000.0                         # seconds past the fixture's clocks: the batch deadline is long gone
 
 
-def past_deadline() -> tuple:
-    """Both clocks ``LATER`` seconds on, as context managers."""
-    return (mock.patch.object(clock.time, 'time', lambda: 1_800_000_000.0 + LATER),
-            mock.patch.object(clock, 'continuous_now', lambda: 5_000.0 + LATER))
+def past_deadline(later: float = LATER) -> tuple:
+    """Both clocks ``later`` seconds on, as context managers."""
+    return (mock.patch.object(clock.time, 'time', lambda: 1_800_000_000.0 + later),
+            mock.patch.object(clock, 'continuous_now', lambda: 5_000.0 + later))
 
 
 class DeadlineDuringGraceTests(WatchCase):
     """A batch deadline long past is stopped at once, on readable credit and inside a credit grace alike."""
 
     def test_the_deadline_stops_the_child_inside_a_credit_grace(self) -> None:
+        """Long past the deadline: stopped at once on readable credit, and through a credit grace too."""
         wall, continuous = past_deadline()
         with wall, continuous:
             self.now = 2.0
@@ -42,7 +43,21 @@ class DeadlineDuringGraceTests(WatchCase):
                 self.now = now
                 self.assertEqual(process_watch._reason(self.watch, self.stops)[0], process_watch.DEADLINE)
 
+    def test_one_second_past_the_uncredited_deadline_stops_inside_the_grace(self) -> None:
+        """X238: the boundary. One second past the grant's own deadline, readable credit still extends it; once the
+        credit read fails, the child stops at once, never a grace later (a 15 s pause is what F-m5 forbids)."""
+        wall, continuous = past_deadline(GRANTED + 1.0)
+        with wall, continuous:
+            self.now = 2.0
+            self.assertLess(uncredited_remaining(self.grant), 0.0)
+            self.assertIsNone(process_watch._reason(self.watch, self.stops))     # 30 s of credit: 29 s left
+            self.put(self.credit_record(10.0))                                     # a credit error from here
+            self.now = 3.0
+            self.assertEqual(process_watch._reason(self.watch, self.stops),
+                             (process_watch.DEADLINE, 'the export ran past its batch deadline'))
+
     def test_inside_the_deadline_the_grace_still_runs(self) -> None:
+        """Inside the deadline a regression is still named only after its grace."""
         self.put(self.credit_record(10.0))
         for now in (1.0, 1.0 + GRACE):
             self.now = now
@@ -51,6 +66,7 @@ class DeadlineDuringGraceTests(WatchCase):
         self.assertEqual(process_watch._reason(self.watch, self.stops)[0], 'capacity-credit-regressed')
 
     def test_the_uncredited_remaining_never_exceeds_the_credited(self) -> None:
+        """Without credit the remaining time is exactly the 30 s of credit shorter."""
         self.assertLessEqual(uncredited_remaining(self.grant), allocation_remaining(self.grant))
         self.assertEqual(allocation_remaining(self.grant) - uncredited_remaining(self.grant), 30.0)
 
@@ -59,6 +75,7 @@ class ReferenceTests(CreditCase):
     """F-m6 (N3): a malformed reference is refused, never read."""
 
     def test_a_negative_at_grant_is_refused(self) -> None:
+        """A reference whose atGrant is below zero is refused before any read."""
         self.grant = self.bind(self.credit_record(40.0), 'A')
         self.grant['capacityCredit']['atGrant'] = -100.0
         with self.assertRaisesRegex(ValueError, 'Malformed capacity-credit allocation reference'):

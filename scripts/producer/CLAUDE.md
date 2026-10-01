@@ -70,8 +70,8 @@ per-job evidence; a 'mixed' claim needs the jobs' own audio-stage owners overlap
 owners) and selects one. The schema-1 record keeps serving, as `legacy-v1`, whatever no
 schema-2 profile covers: Shorts until a Short profile exists, unbound supporting owners and
 older clients' unrecorded owners, never Longs. `native_work_pool_mix.py` decides mixes before
-capacity: uncovered work starts only on an idle pool and otherwise fails at once with
-`NativeWorkUnsupportedMix` (never queued, so it holds up no other class); profile-admitted
+capacity: uncovered work starts only on an idle pool (since M-057 it waits as a ticket for the live members;
+see the Phase 1 line); profile-admitted
 work is refused the same way beside a live exclusive or out-of-profile member, and
 terminally beside such a member with unverified cleanup. `native_work_pool_fence.py` is the
 one compatibility fence for older pool clients (E3 exclusive members, schema-2 members,
@@ -1455,3 +1455,17 @@ docs belong to P3b.
   quarantined while a Studio start is live. Tests: `test_managed_preview_studio_class.py`,
   `test_managed_preview_studio_release.py`; patch points moved to `managed_preview_launch` in the fixtures and five
   test files.
+- **Mix refusal becomes a waitable ticket (M-057; P1 M1 as X97, X107, X111 and X123 amend it).**
+  `native_work_pool_mix._unmatched` makes an uncovered request wait for the live members only (none live: admitted;
+  a live member of its own project: unsupported at once; X242, an owner deviation: a live member of an older pool
+  client, whose record `native_work_pool_fence.is_current` does not accept, makes it unsupported at once by name,
+  never queued or credited, since that client predates the wait); queue order stays with `fifo_ahead`, where the pass rule
+  (`may_pass`) applies only to an uncovered request's own ticket: younger requests pass it at most `PASS_LIMIT` (4)
+  times (the waiter's tally, `_tally_passes`, rewritten in place by `native_work_pool_fence.rewrite_ticket`), a live
+  member's own-project work always passes, and a request that passes an uncovered ticket passes the younger tickets
+  it holds back (`_held`, X107 B1). A covered stage beside a live exclusive member of its own project is refused at
+  once by name, never queued or credited (X107 m1). `native_work_pool.decide` reads `problems(mode, view, outside,
+  request)` and may run only inside the ledger. Limits: a cross-project nested owner after 4 passes stalls; a passer
+  inside one 2 s poll is not counted (X111). `native_work_pool_mix.py` 242 lines; `native_work_pool.py` 299/300 (its
+  next editor extracts first). Tests: `test_native_work_pool_mix_wait.py`, `test_native_work_pool_liveness.py` (the
+  480-order enumeration), `test_native_work_profiles.py`.

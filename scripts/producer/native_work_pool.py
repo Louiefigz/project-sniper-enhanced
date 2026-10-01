@@ -8,8 +8,8 @@ the qualification profile covering its workload, and whether it may join the wor
 is decided first (native_work_pool_mix.py). A member whose guarantee older pool clients
 cannot see holds a compatibility fence (native_work_pool_fence.py). Refusals say whether
 waiting can help (NativeWorkQueued, message contains 'already active') or not
-(NativeWorkQuarantined, 'cleanup is unverified'; NativeWorkUnsupportedMix, no profile
-covers the mix). Nothing here sleeps except acquire_until, which is bounded by the
+(NativeWorkQuarantined, 'cleanup is unverified'; NativeWorkUnsupportedMix, work that can
+never join while it waits). Nothing here sleeps except acquire_until, which is bounded by the
 caller's monotonic deadline. Budget derivation: native_work_pool_policy.py.
 Disk is charged per shared space, an APFS container or one filesystem (native_work_pool_disk.py);
 a running member grows its reservation with native_work_pool_expand.expand_disk. Whether a wait
@@ -190,9 +190,9 @@ def _reason_groups(view: state.PoolView, request: PoolRequest, decision: Decisio
 
 def decide(view: state.PoolView, request: PoolRequest, host: dict,
            committed: qualification.Committed) -> Decision:
-    """Apply profile, queue order, slots, aggregate memory and shared disk to one request.
+    """Apply profile, queue order, slots, aggregate memory and shared disk to one request; only inside the ledger.
 
-    native_work_pool_credit.classify then records whether the wait is credited; it changes no reason.
+    Mix may rewrite the waiter's ticket; credit.classify then records whether the wait is credited, changing no reason.
     """
     if request.lane == STUDIO_CLASS:  # its own slots; no profile, mix, fence or credit
         from native_work_pool_studio import decide as studio_decide  # it builds on this module
@@ -206,7 +206,8 @@ def decide(view: state.PoolView, request: PoolRequest, host: dict,
     decision = Decision(mode, policy.reservation_bytes(mode, request.lane, physical, request.fixed_owned_gib),
                         request.disk_bytes if request.disk_bytes is not None
                         else DISK_RESERVATION_BYTES[request.lane], 0, lane=request.lane)
-    decision.unsupported, terminal = mix.problems(mode, readable, outside, request.ticket)
+    waits, decision.unsupported, terminal = mix.problems(mode, readable, outside, request)
+    decision.reasons += waits  # a waitable mix ('already active'); credited per its live blockers
     decision.terminal += terminal
     groups = _reason_groups(view, request, decision, (session, rows, physical))
     requested = (*request.fence_reasons, *disk.fence_reasons(decision.space))
@@ -218,7 +219,9 @@ def decide(view: state.PoolView, request: PoolRequest, host: dict,
     fenced = bool(decision.fence or request.fence_tickets)
     fifo = mix.fifo_reasons(view, request, mode, (session, committed, fenced))
     decision.reasons += fifo
-    credit.classify(decision, _occupancy(rows, mode, request.lane), credit.ReasonGroups(fifo=tuple(fifo), **groups))
+    live = tuple(mix.blockers(mode, readable, outside)) if waits else ()
+    credit.classify(decision, _occupancy(rows, mode, request.lane),
+                    credit.ReasonGroups(mix=tuple(waits), fifo=tuple(fifo), blockers=live, **groups))
     decision.context['ticket'] = request.sequence
     return decision
 

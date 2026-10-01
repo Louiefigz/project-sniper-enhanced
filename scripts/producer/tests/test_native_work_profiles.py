@@ -16,7 +16,6 @@ import native_work_profiles as profiles
 import native_work_qualification as qualification
 import native_work_workload as workloads
 from native_render_resources import GIB
-from native_work_pool_fence import NativeWorkUnsupportedMix
 from native_work_pool_state import NativeWorkQuarantined, NativeWorkQueued
 from _native_pool_fixture import (
     SHORT_PIXELS, TEST_ENGINE, TEST_HOST, fixture_job, fixture_profile, isolate_pool,
@@ -163,8 +162,8 @@ class ProfileAdmissionTests(unittest.TestCase):
         self.addCleanup(lease.close)
         return lease
 
-    def test_long_under_a_short_profile_runs_only_on_an_idle_pool(self) -> None:
-        """No profile covers the Long: refused at once beside Shorts, never queued ahead of them; alone when idle."""
+    def test_long_under_a_short_profile_waits_for_an_idle_pool(self) -> None:
+        """No profile covers the Long: it keeps a ticket, holds later Shorts back and runs alone once idle."""
         qualify_fixture_profiles(self, [fixture_profile(SHORT_SLOTS)])
         short = self.acquire(self.request(self.short))
         admission = short.admission
@@ -172,28 +171,31 @@ class ProfileAdmissionTests(unittest.TestCase):
         self.assertEqual((admission['modeRecord']['profile'], admission['modeRecord']['workload']['stage']),
                          ('TEST-short-heavy-only-h3a1', 'pipeline'))
         long_request = self.request(self.long)
-        with self.assertRaisesRegex(NativeWorkUnsupportedMix, 'no SLA is promised') as caught:
+        with self.assertRaisesRegex(NativeWorkQueued, 'already active: an uncovered workload waits for an idle pool'):
             self.acquire(long_request)
-        self.assertNotIn('already active', str(caught.exception))
-        long_request.withdraw()
-        self.acquire(self.request(self.short)).complete()  # the refused Long left nothing queued ahead of it
+        self.assertIsNotNone(long_request.ticket)  # it keeps its place in the queue
+        later = self.request(plan_project(self, 'short', 45.0))  # another Short: not the live Short's nested work
+        with self.assertRaisesRegex(NativeWorkQueued, r'queued behind 1 earlier request\(s\)'):
+            self.acquire(later)
         short.complete()
         long = self.acquire(long_request)
         self.assertEqual((long.admission['mode'], long.reservation_bytes), ('exclusive', 16 * GIB))
         self.assertIn('format long was not exercised', long.admission['modeRecord']['unmatched'][0])
-        with self.assertRaisesRegex(NativeWorkUnsupportedMix, 'run exclusive or outside'):
-            self.acquire(self.request(self.short))
+        with self.assertRaisesRegex(NativeWorkQueued, 'waiting for member') as caught:
+            self.acquire(later)
+        self.assertIs(caught.exception.capacity_only, True)
         long.close()  # unverified cleanup: the exclusive member keeps its exclusivity while quarantined
         with self.assertRaisesRegex(NativeWorkQuarantined, 'outside qualification profile .* unverified cleanup'):
             self.acquire(self.request(self.short))
 
-    def test_live_member_outside_the_selected_profile_is_an_unsupported_mix(self) -> None:
-        """A Long admitted under a Long-only profile never shares the host with a Short-only profile's owners."""
+    def test_live_member_outside_the_selected_profile_is_a_mix_wait(self) -> None:
+        """A Short under a Short-only profile waits while a Long admitted under a Long-only profile runs."""
         qualify_fixture_profiles(self, [fixture_profile(SHORT_SLOTS), long_profile()])
         long = self.acquire(self.request(self.long))
         self.assertEqual(long.admission['modeRecord']['profile'], 'TEST-long-heavy-only-h2a1')
         short = self.request(self.short)
-        with self.assertRaisesRegex(NativeWorkUnsupportedMix, 'outside qualification profile TEST-short-heavy-only'):
+        with self.assertRaisesRegex(NativeWorkQueued, 'waiting for member.* outside qualification profile '
+                                                      'TEST-short-heavy-only'):
             self.acquire(short)
         long.complete()
         self.acquire(short).complete()
@@ -208,7 +210,7 @@ class ProfileAdmissionTests(unittest.TestCase):
         ticket = self.root / 'pool-v1' / waiting.ticket.name
         self.assertIsNone(json.loads(ticket.read_text())['workload']['engine'])
         qualify_fixture_profiles(self, [fixture_profile(SHORT_SLOTS)], directory=directory)
-        with self.assertRaises(NativeWorkUnsupportedMix):  # schema-1 holders are outside the schema-2 profile
+        with self.assertRaises(NativeWorkQueued):  # schema-1 holders are outside the schema-2 profile: a wait
             self.acquire(waiting)
         self.assertEqual(json.loads(ticket.read_text())['workload']['engine'], TEST_ENGINE['identity'])
         for lease in holders:

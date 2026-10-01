@@ -305,7 +305,8 @@ whose cleanup is unverified keeps its slot quarantined (recover it with `native_
 its project fenced. The wait for a Studio slot holds the Studio registry lock, so other projects' `open`, `stop`
 and `status` wait with it, up to the open's deadline (60 s by default). An older install (the `4a15560` engine)
 reads a live Studio start as a quarantined member and refuses its own admission while one runs (it fails closed):
-do not upgrade while batches of an older engine run. A startup that fails
+do not upgrade while batches of an older engine run. Uncovered work of this engine (a Long, an unexercised stage)
+then fails closed too: beside an older install's live member it is refused at once by name, never queued (X242). A startup that fails
 before any child exists is recorded as stopped. An unfinished launch (an opener that was
 killed or interrupted, or a server whose stop was not verified) keeps only that project's
 record in `launching`, and only while a process of that launch still runs: its retained

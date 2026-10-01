@@ -220,9 +220,17 @@ profile is bound to the engine identity and to the longest output it exercised:
 uses the batch's longest known output of each format, so a Short longer than the
 profile forecasts one slot. At admission, work no profile covers (a Short longer
 than its profile, an unexercised stage or class, another engine, a Long) starts
-only on an idle pool; beside running work it fails at once with
-`NativeWorkUnsupportedMix`, never queuing ahead of the batch. The reasons are in
-the owner receipt (`pool.modeRecord.unmatched`).
+only on an idle pool: beside running work it waits, as a queued ticket, for the live members only, and queue
+order stays first-come (`native_work_pool_mix.fifo_ahead`). Beside a live member of an older install (the
+`4a15560` engine) it does not wait: it fails at once with `NativeWorkUnsupportedMix`, naming that member, because
+the older install predates the wait and nothing bounds it. Younger requests may pass an uncovered ticket at most
+`PASS_LIMIT` (4) times, after which queue order holds for it, so a stream of audio work cannot starve an uncovered
+Long; a live member's own (same-project) work always passes, and a request that passes an uncovered ticket also
+passes the younger tickets that ticket holds back. A covered stage beside a live exclusive member of its own
+project is refused at once by name (`NativeWorkUnsupportedMix`): it could never be admitted by waiting, and such
+a wait is never credited. Limits: a nested owner of another project arriving after the 4 passes stalls (no such
+owner exists in the engine today), and a passer that starts and ends inside one 2-second poll is not counted.
+The reasons are in the owner receipt (`pool.modeRecord.unmatched`).
 `studio/pool_qualification.py show` prints the host identity, the pool mode it
 currently yields and the policy constants.
 

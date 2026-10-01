@@ -131,16 +131,20 @@ def fence_member(namespace: state.Namespace, view: state.PoolView, lease: object
     lease.fence = take(namespace, view, lease.record, reasons)
 
 
+def rewrite_ticket(ticket: Ticket, record: dict) -> None:
+    """Rewrite a held ticket in place, so its lock stays on the same inode (the caller holds the ledger)."""
+    os.ftruncate(ticket.fd, 0)
+    os.lseek(ticket.fd, 0, os.SEEK_SET)
+    write_all(ticket.fd, (json.dumps(record, sort_keys=True) + '\n').encode())
+    os.fsync(ticket.fd)
+
+
 def refresh_ticket(namespace: state.Namespace, ticket: Ticket, workload: dict) -> None:
     """Rewrite a held request ticket's workload in place (its engine became known later)."""
     record = state.read_json(namespace.pool_fd, ticket.name)
     if not isinstance(record, dict) or record.get('workload') == workload:
         return
-    data = (json.dumps(dict(record, workload=workload), sort_keys=True) + '\n').encode()
-    os.ftruncate(ticket.fd, 0)
-    os.lseek(ticket.fd, 0, os.SEEK_SET)
-    write_all(ticket.fd, data)
-    os.fsync(ticket.fd)
+    rewrite_ticket(ticket, dict(record, workload=workload))
 
 
 def refusal(lane: str, decision: object) -> NativeWorkBusy:

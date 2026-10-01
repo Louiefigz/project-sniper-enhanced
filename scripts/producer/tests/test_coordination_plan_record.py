@@ -16,7 +16,9 @@ from cross_runtime_canonical_json import canonical_compact_json
 from studio.production.plan_record import (
     approved_content_problem, homes_problem, read_plan_record, validate_plan_record,
 )
-from studio.production.plan_short_projection import _output_spans, derived_problem, short_sections, unlisted_keys
+from studio.production.plan_short_evidence import _output_spans
+from studio.production.plan_short_projection import derived_problem, short_sections
+from studio.production.plan_short_unlisted import unlisted_keys
 
 LIMIT = 1_048_576
 
@@ -111,15 +113,12 @@ class Derived(Case):
                          'Coordination plan: derived: derived section holds differs from its executable home')
 
     def test_unlisted_key_is_global(self) -> None:
-        """A key the table does not name becomes a global graphics entry."""
-        plan = {**self.plan, 'futureKey': {'TEST': 1}}
-        plan['canvas'] = {**plan['canvas'], 'futureCanvasKey': 2}
-        self.assertIn('plan.futureKey', unlisted_keys(plan))
-        self.assertIn('canvas.futureCanvasKey', unlisted_keys(plan))
-        graphics = short_sections(self.project(plan, name='future'))['graphics']
-        rows = {row['id']: row for row in graphics}
-        self.assertEqual(rows['key-plan.futureKey']['isolation'], 'global')
-        self.assertEqual(rows['key-canvas.futureCanvasKey']['isolation'], 'global')
+        """A path the table does not derive, below the writer's closed top level and canvas, is a global entry."""
+        plan = copy.deepcopy(self.plan)
+        plan['strategy']['futureKey'] = {'TEST': 1}
+        self.assertIn('plan.strategy.futureKey', unlisted_keys(plan))
+        rows = {row['id']: row for row in short_sections(self.project(plan, name='future', evidence=self.evidence))['graphics']}
+        self.assertEqual(rows['key-plan.strategy.futureKey']['isolation'], 'global')
 
     def test_missing_regions_file_is_one_global_unit(self) -> None:
         """Without REVIEW-REGIONS.json the compositions are one global ``project`` unit."""

@@ -4,17 +4,22 @@
 (``section_results.validate_pin``); ``range`` a half-open integer frame range ``[a, b]`` with ``0 <= a < b <=
 totalFrames``; ``text(n)`` one non-empty line without NUL whose canonical encoding fits ``n`` bytes
 (``host_contract.encoded_length``). Every refusal is ``ValueError('Coordination plan: <rule>: <detail>')``; a pin
-refused by ``section_results`` is re-raised in that form. Nothing here reads a file.
+refused by ``section_results`` is re-raised in that form. The only file read is ``read_pinned_json`` (exact pinned
+bytes, no link).
 """
 from __future__ import annotations
 
+import re
+from pathlib import Path
 from typing import NoReturn
 
-from cut_preview_io import digest
+from cut_preview_io import bound_json, digest
 from studio.production.host_contract import encoded_length
-from studio.production.section_results import IDENTIFIER, SHA256, matches, validate_pin, validate_pins
+from studio.production.section_results import IDENTIFIER, SHA256, matches, rehash, validate_pin, validate_pins
 
 PREFIX = 'Coordination plan'
+# Structural JSON tokens only (a whole string, or a bracket), to bound nesting before parsing; never semantics.
+STRUCTURE = re.compile(rb'"(?:[^"\\]|\\.)*"|[\[\]{}]')
 
 
 def refuse(rule: str, detail: str) -> NoReturn:
@@ -126,3 +131,44 @@ def pins(value: object, rule: str) -> list[dict]:
 def authored_digest(entry: dict) -> str:
     """The code-computed ``digest`` of an authored entry: the canonical digest of its other fields."""
     return digest({key: value for key, value in entry.items() if key != 'digest'})
+
+
+def nesting_problem(value: object, limit: int) -> str | None:
+    """Why a value nests lists and objects deeper than ``limit`` (checked without recursion), or None."""
+    stack = [(value, 1)]
+    while stack:
+        item, depth = stack.pop()
+        if not isinstance(item, (dict, list)):
+            continue
+        if depth > limit:
+            return f'nests deeper than {limit} levels'
+        stack.extend((child, depth + 1) for child in (item.values() if isinstance(item, dict) else item))
+    return None
+
+
+def raw_depth(raw: bytes) -> int:
+    """The deepest bracket nesting of JSON bytes, strings skipped (a bound checked before ``json.loads``)."""
+    depth = deepest = 0
+    for match in STRUCTURE.finditer(raw):
+        token = match.group()
+        if token in (b'[', b'{'):
+            depth += 1
+            deepest = max(deepest, depth)
+        elif token in (b']', b'}'):
+            depth -= 1
+    return deepest
+
+
+def read_pinned_json(value: object, rule: str) -> dict:
+    """Rehash a pin (canonical path, no link, exact bytes and size) and parse its JSON object, from one read."""
+    found = pin(value, rule)
+    try:
+        rehash(found)
+        return bound_json(Path(found['path']), found['sha256'], maximum=found['bytes'])
+    except (ValueError, RuntimeError, OSError) as error:
+        refuse(rule, f'{found["path"]}: {error}')
+
+
+def derived_entry(entry_id: str, span: list | None, source: object) -> dict:
+    """A derived entry: code-assigned id, frames and the digest of what it was derived from."""
+    return {'id': entry_id, 'range': span, 'digest': digest(source)}

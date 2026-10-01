@@ -3,21 +3,24 @@
 Every coordination module reads its names, kinds, bounds and derivation paths from here; nothing restates them.
 Overrides in force: ``COORDINATION_LIMITS`` holds ``planning: 3`` only (X9, C-1): the specialist cap is P3b's
 ``team_catalog.SPECIALIST_CAP`` (M-088), the single source, never copied here. ``SHORT_DERIVATION`` is P3a's Short
-derivation table as corrected by X201 (F-1..F-4, checked against the writer at stack 35eca01b):
-- F-1: declared reveals are ``data-hf-reveal`` attributes in catalog composition files (L-B,
-  ``native-reveal-declarations.ts:18``), not a native-plan field. A region entry digests its composition file's
-  bytes, and compositions outside every region form one global entry (``UNMAPPED_COMPOSITIONS``).
-- F-2: no music or sound-effect asset role exists (``native-short-strategy.ts:14``), so ``audio`` derives only
-  ``audio-finishing`` and ``assets`` stays an unlisted, global key.
-- F-3: ``native_short_regions.plan_projection(plan, local)`` is called with the region rows' files as ``local``.
-- F-4: P2-08's ``speakerPictureDecisions`` lies outside ``plan_projection``; it is a global entry until L-R or
-  M-073 places it.
-- F-5 (lane, the same widening; for ruling): every native-plan key outside ``plan_projection`` is global too, except
-  the generated bindings (``role_packet_native.GENERATED_BINDINGS``, which ``planHash`` also leaves out) and the
-  derived ``PLAN_DERIVED`` paths. F-4 is one case of this rule.
-Anything the table does not name is global: every projection path not in ``PROJECTION_DERIVED`` and every other plan
-path not in ``PLAN_DERIVED`` becomes a ``key-<path>`` graphics entry with global isolation ("unproved isolation is
-global"). A dict key mapped to () is derived whole; one mapped to names is derived only at those sub-keys.
+derivation table as the rulings correct it (checked against the writer at stack 35eca01b). The governing rule
+(X211): no plan input change may move no slice, and a derived summary never makes everything global.
+- X201 F-1: declared reveals are ``data-hf-reveal`` attributes in catalog composition files (L-B,
+  ``native-reveal-declarations.ts:18``). A region entry digests its composition's bytes; compositions outside every
+  region form one global entry (``UNMAPPED_COMPOSITIONS``).
+- X201 F-2: no music or sound-effect asset role exists (``native-short-strategy.ts:14``): ``audio`` derives
+  ``audio-finishing`` only, and ``assets`` is a global key.
+- X201 F-3: ``native_short_regions.plan_projection(plan, local)`` gets the region rows' files as ``local``.
+- X201 F-4, X205 F-5: every native-plan path neither derived nor generated is a global ``key-<path>`` entry.
+- X211(1): only ``GENERATED_EXEMPT`` is skipped; ``preparedSources`` is an input its ``PREPARED_READERS`` digest.
+- X211(2): row fields ``plan_projection`` drops are digested (global for assets, the region's own entry for a
+  region-bound catalog file, else global); only a row's ``path`` (a location its sha256 pins) is not.
+- X211(3): the sealed record's people with a face region on this source, its speaker observations and its
+  intervals on this source form the ``speaker-evidence`` framing entry.
+- X211(4): the writer-verified summaries in ``SUMMARY_SOURCES`` are derived paths; each source they cover moves
+  its own slice (``test_coordination_writer_plan`` proves it per source).
+- X211 minor (W3-D8): a top-level or canvas key outside ``WRITER_KEYS``/``CANVAS_KEYS`` stops the derivation by
+  name, so a renamed P2 field can never pass as a new global key.
 """
 from __future__ import annotations
 
@@ -44,25 +47,68 @@ SHORT_DERIVATION = {
     'speech': ('canvas.occurrences', 'canvas.cuts', 'canvas.segments'),
     'story': ('strategy.pacing.beats',),
     'holds': ('strategy.scenes',),
-    'framing': ('canvas.pictureViews',),
+    'framing': ('canvas.pictureViews', 'preparedSources', 'homes.sharedEvidence'),
     'captions': ('canvas.captionGroups', 'canvas.occurrences', 'canvas.captionCorrections', 'canvas.captionMode',
-                 'canvas.captionViews', 'canvas.captionProtectedPhrases', 'canvas.captionSuppressions'),
+                 'canvas.captionViews', 'canvas.captionProtectedPhrases', 'canvas.captionSuppressions',
+                 'preparedSources'),
     'graphics': ('REVIEW-REGIONS.json', 'compositions/*.html', 'canvas.titleCard', 'canvas.text', 'canvas.shapes',
-                 'canvas.motion', 'visualSources.decisions'),
+                 'canvas.motion', 'visualSources.decisions', 'catalogFiles'),
     'transitions': ('strategy.scenes',),
-    'audio': ('audioFinishing',),
+    'audio': ('audioFinishing', 'preparedSources'),
     'sourceFacts': ('homes.sharedEvidence', 'canvas.cuts', 'canvas.segments', 'assets'),
 }
-# `plan_projection` paths the derivation covers; every other projection path is a global `key-<path>` entry.
-PROJECTION_DERIVED = {
-    'canvas': ('frameRate', 'totalFrames', 'occurrences', 'cuts', 'segments', 'pictureViews', 'captionGroups',
-               'captionCorrections', 'captionMode', 'captionViews', 'captionProtectedPhrases', 'captionSuppressions',
-               'titleCard', 'text', 'shapes', 'motion'),
-    'audioFinishing': (),
-    'brief': ('visualSourceDecisions',),
+# X211(1)/(3) inputs folded into existing entries: preparedSources (audio, captions, framing) and the sealed record's
+# people, observations and intervals (the framing entry SPEAKER_EVIDENCE).
+# `plan_projection` paths the derivation covers (dotted); every other projection path is a global `key-<path>` entry.
+PROJECTION_DERIVED = ('canvas.frameRate', 'canvas.totalFrames', 'canvas.occurrences', 'canvas.cuts', 'canvas.segments',
+                      'canvas.pictureViews', 'canvas.captionGroups', 'canvas.captionCorrections', 'canvas.captionMode',
+                      'canvas.captionViews', 'canvas.captionProtectedPhrases', 'canvas.captionSuppressions',
+                      'canvas.titleCard', 'canvas.text', 'canvas.shapes', 'canvas.motion', 'audioFinishing',
+                      'brief.visualSourceDecisions')
+# Bindings the engine generates from plan fields that already move slices (X211(1)); the TS plan hash leaves them out
+# too (native-short-prebuild-review.ts:40-42), as it does preparedSources, which X211(1) rules is a real input.
+GENERATED_EXEMPT = ('prebuildReview', 'guidedBinding', 'draft')
+# The prepared working media (native-short-project.ts:47; native-selected-sources.ts:9-17: per-source video and audio):
+# its sha256 joins audio-finishing, caption-style and every picture view.
+PREPARED_READERS = ('audio', 'captions', 'framing')
+LOCATION_KEYS = ('path',)   # a row's location; the row's own sha256 pins its bytes (X211(2))
+# Writer-verified summaries (X211(4)) -> the plan paths each covers, per the writer at stack 35eca01b.
+SUMMARY_SOURCES = {
+    'strategy.pacing.timingHash': ('canvas.sourceFile', 'canvas.cuts', 'canvas.segments', 'canvas.frameRate',
+                                   'canvas.totalFrames', 'canvas.occurrences', 'canvas.captionGroups'),
+    'strategy.pacing.visualHash': ('canvas.pictureViews', 'canvas.captionViews', 'canvas.captionMode',
+                                   'canvas.captionCorrections', 'canvas.captionSuppressions', 'canvas.text',
+                                   'canvas.shapes', 'canvas.motion', 'canvas.titleCard', 'extension', 'strategy.scenes',
+                                   'strategy.supportingSearch', 'assets'),
+    'visualSources.subjectSha256': ('canvas', 'extension', 'catalogFiles', 'catalogTitle'),
+    'strategy.assetUse.revisionHash': ('request', 'requestPacket', 'canvas', 'extension', 'assets', 'strategy.scenes',
+                                       'strategy.supportingSearch'),
+    'strategy.story.revisionHash': ('strategy.assetUse', 'strategy.pacing', 'strategy.viewerBenefit',
+                                    'strategy.hookReasonToWatch', 'strategy.payoff', 'expectations', 'request',
+                                    'requestPacket', 'canvas', 'extension', 'assets', 'strategy.scenes',
+                                    'strategy.supportingSearch'),
+    'strategy.visualPlanApplication': ('canvas', 'extension', 'catalogFiles', 'catalogTitle', 'visualPlan'),
 }
-# Native-plan keys outside plan_projection that the derivation covers (F-5); every other one is global (F-4, F-5).
-PLAN_DERIVED = {'strategy': ('scenes',), 'visualSources': ('decisions',), 'sharedEvidence': ()}
+SUMMARY_WRITERS = {   # where the writer computes each summary (file:line at stack 35eca01b)
+    'strategy.pacing.timingHash': 'native-short-pacing-observations.ts:20-21',
+    'strategy.pacing.visualHash': 'native-short-pacing-observations.ts:22-29',
+    'visualSources.subjectSha256': 'visual-source-admission.ts:15-16, 30-32',
+    'strategy.assetUse.revisionHash': 'native-short-asset-use.ts:13-18, 42',
+    'strategy.story.revisionHash': 'native-short-story.ts:27-31, 51',
+    'strategy.visualPlanApplication': 'native-visual-plan-application.ts:115-128; native-visual-execution-binding.ts:1',
+}
+# Native-plan paths outside plan_projection the derivation covers; every other one is global (F-4, F-5).
+PLAN_DERIVED = ('strategy.scenes', 'visualSources.decisions', 'sharedEvidence', 'preparedSources', *SUMMARY_SOURCES)
+# The writer's key vocabulary at stack 35eca01b plus P2's fields (native-short-project.ts:34-55,
+# native-short-composition.ts:33-47; P2-05 P2-EARLY-CHECKS:590, P2-08 :721-722). Anything else stops by name.
+WRITER_KEYS = ('visualSources', 'catalogFiles', 'catalogTitle', 'schemaVersion', 'request', 'strategy', 'canvas',
+               'assets', 'requestPacket', 'visualPlan', 'prebuildReview', 'draft', 'preparedSources', 'guidedBinding',
+               'audioFinishing', 'extension', 'expectations', 'sharedEvidence', 'speakerPictureDecisions')
+CANVAS_KEYS = ('title', 'frameRate', 'totalFrames', 'background', 'sourceSize', 'sourceFile', 'cuts', 'segments',
+               'occurrences', 'captionGroups', 'captionCorrections', 'captionMode', 'captionSuppressions',
+               'pictureViews', 'captionViews', 'text', 'shapes', 'motion', 'titleCard', 'captionProtectedPhrases')
+P2_FIELDS = ('canvas.captionProtectedPhrases', 'sharedEvidence', 'speakerPictureDecisions')   # not yet integrated
+SPEAKER_EVIDENCE = 'speaker-evidence'             # the sealed record's picture-relevant facts (X211(3))
 UNMAPPED_COMPOSITIONS = 'compositions-unmapped'   # compositions no region row covers (F-1)
 PROJECT_UNIT = 'project'                          # no REVIEW-REGIONS.json: one global graphics unit
 
@@ -117,7 +163,8 @@ OUTPUTLESS_DECISIONS = ('staffing', 'operator-input-needed', 'operator-input-rec
 
 # Record and artifact bounds (§4.0.1). The result document bound is section_results.MAX_RESULT_BYTES (4 MiB).
 BOUNDS = {'planRecordBytes': 1_048_576, 'bindingBytes': 8_192, 'inputPinBytes': 256 * 1024 ** 2,
-          'planVersions': 8, 'decisionsPerBatch': 1_024, 'decisionEventBytes': 2_048}
+          'planVersions': 8, 'decisionsPerBatch': 1_024, 'decisionEventBytes': 2_048,
+          'planDepth': 32}   # JSON nesting; the lane's bound (X211 minor), far above a record's real depth
 # Plan-record list bounds (§4.0.2). `framing` and `audio` have no stated bound; the lane chose 128 and 64 (U-T7).
 PLAN_BOUNDS = {'story': 64, 'holds': 128, 'framing': 128, 'captions': 512, 'graphics': 128, 'transitions': 64,
                'audio': 64, 'sourceFacts': 128, 'unresolved': 64, 'ownership': 64, 'contributions': 32,

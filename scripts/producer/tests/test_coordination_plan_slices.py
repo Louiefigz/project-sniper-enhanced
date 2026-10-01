@@ -8,7 +8,6 @@ import _live_state_isolation  # noqa: F401  private budget/pool roots; live stat
 
 import copy
 import unittest
-from pathlib import Path
 
 from _coordination_fixture import PlanFixture, authored, long_record
 from studio.production.coordination_catalog import RESPONSIBILITIES, reads
@@ -36,9 +35,8 @@ class Slices(PlanFixture):
 
     def test_local_change_changes_only_owner_slices(self) -> None:
         """A new reveal cue in region unit lower-third (frames 15-45) moves graphics-motion there and nothing else."""
-        homes = self.project(self.plan, name='cue', evidence=self.evidence)
-        (Path(homes['project']) / 'compositions' / 'lower-third.html').write_text('<div data-hf-reveal="0.6">TEST</div>')
-        after = self.short_record(homes)
+        with self.staged({'lower-third.html': '<div data-hf-reveal="0.6">TEST</div>'}):
+            after = self.short_record(self.project(self.plan, name='cue', evidence=self.evidence))
         self.assertEqual(classify(self.record, after), 'local')
         self.assertEqual(changed_entries(self.record, after),
                          [{'section': 'graphics', 'id': 'region-0', 'responsibility': 'graphics-motion', 'range': [15, 45]}])

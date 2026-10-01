@@ -12,22 +12,18 @@ import copy
 from collections.abc import Callable
 from pathlib import Path
 
-from _coordination_fixture import PlanFixture
-from studio.production.coordination_catalog import RESPONSIBILITIES, SHORT_DERIVATION
-from studio.production.plan_record import classify, slice_digest
+from _coordination_fixture import PlanFixture, leaves, moved, summarised
+from studio.production.coordination_catalog import GENERATED_EXEMPT, RESPONSIBILITIES, SHORT_DERIVATION
+from studio.production.plan_record import classify
 
-WHOLE = {'range': None, 'entryIds': None}
 ALL = frozenset(RESPONSIBILITIES)
 GRAPHICS = frozenset({'graphics-motion'})
 SCENE = frozenset({'graphics-motion', 'transitions'})
-# Plan leaves whose change moves no slice, by rule: a generated binding (planHash leaves it out too) and an asset's
-# location, whose bytes the asset's own sha256 pins (plan_projection omits paths).
-EXEMPT = {('prebuildReview', 'path'), ('prebuildReview', 'sha256'), ('assets', 0, 'path')}
-
-
-def moved(before: dict, after: dict) -> frozenset[str]:
-    """Responsibilities whose whole-output slice differs."""
-    return frozenset(name for name in RESPONSIBILITIES if slice_digest(before, name, WHOLE) != slice_digest(after, name, WHOLE))
+PREPARED = frozenset({'audio-dialogue', 'captions-timing', 'source-speaker-fidelity'})
+# Plan leaves whose change moves no slice, by rule: a generated binding (X211(1)) and a row's location, whose bytes the
+# row's own sha256 pins (X211(2); test_coordination_writer_plan.RowFields proves the executable identity unchanged).
+EXEMPT = {('prebuildReview', 'path'), ('prebuildReview', 'sha256'), ('assets', 0, 'path'), ('assets', 1, 'path'),
+          ('catalogFiles', 0, 'path'), ('catalogFiles', 1, 'path'), ('preparedSources', 'path')}
 
 
 def planned(change: Callable[[dict], object]) -> Callable:
@@ -40,12 +36,11 @@ def planned(change: Callable[[dict], object]) -> Callable:
 
 
 def composed(file: str, content: str) -> Callable:
-    """A row that edits one composition file of the written project."""
+    """A row that stages other bytes for one composition; the writer refresh follows (catalog, subject, plan hashes)."""
     def edit(case: PlanFixture, plan: dict, name: str) -> dict:
-        """Write the project, then the composition."""
-        homes = case.project(plan, name=name, evidence=case.evidence)
-        (Path(homes['project']) / 'compositions' / file).write_text(content)
-        return homes
+        """Write the project with the staged composition."""
+        with case.staged({file: content}):
+            return case.project(plan, name=name, evidence=case.evidence)
     return edit
 
 
@@ -73,7 +68,7 @@ ROWS = (
      frozenset({'source-speaker-fidelity'})),
     ('captions', 'canvas.captionGroups (:38)', canvas('captionGroups', [[0], [1, 2]]), 'local', frozenset({'captions-timing'})),
     ('captions', 'canvas.captionProtectedPhrases (P2-05 plan text; L-R, not integrated)',
-     canvas('captionProtectedPhrases', [[0, 1]]), 'local', frozenset({'captions-timing'})),
+     canvas('captionProtectedPhrases', []), 'local', frozenset({'captions-timing'})),
     ('captions', 'canvas.captionSuppressions (:43)',
      canvas('captionSuppressions', [{'startFrame': 50, 'endFrame': 60, 'reason': 'TEST'}]), 'local',
      frozenset({'captions-timing'})),
@@ -107,29 +102,17 @@ ROWS = (
      planned(lambda plan: plan['strategy']['pacing']['holds'][0].update(minimumFrames=6)), 'global', ALL),
     ('graphics', 'an unlisted projection key: extension (F-3; native-short-project.ts:52)',
      planned(lambda plan: plan.__setitem__('extension', {'markup': '', 'css': 'TEST', 'motion': ''})), 'global', ALL),
+    ('audio', 'preparedSources sha256 (X211(1); native-short-project.ts:47)',
+     planned(lambda plan: plan['preparedSources'].update(sha256='5' * 64)), 'local', PREPARED),
+    ('graphics', 'assets[].origin, dropped by plan_projection (X211(2))',
+     planned(lambda plan: plan['assets'][0]['origin'].update(sha256='6' * 64)), 'global', ALL),
+    ('graphics', 'assets[].webCapture, dropped by plan_projection (X211(2))',
+     planned(lambda plan: plan['assets'][1]['webCapture'].update(sha256='7' * 64)), 'global', ALL),
+    ('graphics', 'catalogFiles[].sourceSha256 of a region file: its region entry (X211(2))',
+     planned(lambda plan: plan['catalogFiles'][0].update(sourceSha256='8' * 64)), 'local', GRAPHICS),
+    ('graphics', 'catalogFiles[].sourceSha256 outside every region: global (X211(2))',
+     planned(lambda plan: plan['catalogFiles'][1].update(sourceSha256='9' * 64)), 'global', ALL),
 )
-
-
-def leaves(value: object, path: tuple = ()) -> list[tuple]:
-    """Every scalar, and every empty list or object, of a JSON value, as its key path."""
-    if isinstance(value, dict) and value:
-        return [leaf for key, item in value.items() for leaf in leaves(item, (*path, key))]
-    if isinstance(value, list) and value:
-        return [leaf for index, item in enumerate(value) for leaf in leaves(item, (*path, index))]
-    return [path]
-
-
-def perturbed(plan: dict, path: tuple) -> dict:
-    """A copy of ``plan`` with the leaf at ``path`` changed."""
-    changed = copy.deepcopy(plan)
-    holder = changed
-    for key in path[:-1]:
-        holder = holder[key]
-    value = holder[path[-1]]
-    swaps = {bool: lambda: not value, int: lambda: value + 1, float: lambda: value + 0.5, str: lambda: value + 'x',
-             list: lambda: [*value, 'TEST'], dict: lambda: {**value, 'TEST': 1}, type(None): lambda: 'TEST'}
-    holder[path[-1]] = swaps[type(value)]()
-    return changed
 
 
 class DerivationRows(PlanFixture):
@@ -170,28 +153,24 @@ class DerivationRows(PlanFixture):
     def test_without_regions_a_composition_change_is_global(self) -> None:
         """With no REVIEW-REGIONS.json, a change to any composition moves every slice (the project unit)."""
         before = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-before'))
-        homes = bare(self, copy.deepcopy(self.plan), 'bare-after')
-        (Path(homes['project']) / 'compositions' / 'extra.html').write_text('<div>TEST changed</div>')
-        after = self.short_record(homes)
+        with self.staged({'extra.html': '<div>TEST changed</div>'}):
+            after = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-after'))
         self.assertEqual(classify(before, after), 'global')
         self.assertEqual(moved(before, after), ALL)
 
 
 class NoSilentChange(PlanFixture):
-    """The X201 attack: a change to any native-plan leaf moves a slice or refuses the derivation."""
+    """The X201/X211 attack: a change to any writer-shaped plan leaf moves a slice or is refused."""
 
     def test_every_plan_leaf_moves_a_slice_or_refuses(self) -> None:
-        """Only the named exemptions move nothing; every other leaf change is seen."""
+        """Only the named exemptions move nothing; every other leaf change is seen or refused by name."""
         plan = self.native_plan()
-        before = self.short_record(self.project(plan))
-        silent, refused = set(), 0
-        for index, path in enumerate(leaves(plan)):
-            try:
-                after = self.short_record(self.project(perturbed(plan, path), name=f'leaf-{index}'))
-            except ValueError as error:
-                self.assertTrue(str(error).startswith('Coordination plan: '), str(error))
-                refused += 1
-                continue
-            silent |= set() if moved(before, after) else {path}
-        self.assertEqual(silent, EXEMPT)
-        self.assertLess(refused, len(leaves(plan)) // 4)
+        homes = self.project(plan)
+        before, base = self.short_record(homes), Path(homes['nativePlan']['path']).read_bytes()
+        silent, counts = set(), {}
+        for path in [leaf for leaf in leaves(plan) if not summarised(leaf)]:
+            kind, after = self.leaf_outcome(plan, path, base)
+            counts[kind] = counts.get(kind, 0) + 1
+            silent |= {path} if kind == 'derived' and not moved(before, after) else set()
+        self.assertEqual(silent, EXEMPT | {leaf for leaf in leaves(plan) if leaf[0] in GENERATED_EXEMPT})
+        self.assertLess(counts.get('refused', 0) + counts.get('writer-refused', 0), sum(counts.values()) // 4)

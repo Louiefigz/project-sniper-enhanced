@@ -21,14 +21,14 @@ from cut_preview_io import read_bytes
 from studio.native_short_regions import REGIONS
 from studio.production.coordination_catalog import BOUNDS, PLAN_BOUNDS
 from studio.production.plan_fields import (
-    PREFIX, check, closed, contiguous, frame_range, hex64, identifier, identifiers, maybe_pin, pin, pins, refuse, rows,
+    PREFIX, check, closed, contiguous, frame_range, hex64, identifier, identifiers, maybe_pin, nesting_problem, pin, pins,
+    raw_depth, read_pinned_json, refuse, rows,
 )
 from studio.production.plan_sections import (
     entry_digest_problem, entry_rows, validate_audio, validate_captions, validate_conflicts, validate_contributions,
     validate_framing, validate_graphics, validate_holds, validate_ownership, validate_source_facts, validate_story,
     validate_transitions, validate_unresolved, validate_work_plan,
 )
-from studio.production.plan_short_projection import read_pinned_json
 from studio.production.plan_slices import (  # noqa: F401  re-exported: P3a names them on plan_record
     affected_sections, changed_entries, classify, entry_digest, global_digest, responsibility_of, slice_digest,
     task_slice,
@@ -169,6 +169,8 @@ def validate_plan_record(value: object) -> dict:
     Raises:
         ValueError: ``Coordination plan: <rule>: <detail>`` for the first refused field.
     """
+    problem = nesting_problem(value, BOUNDS['planDepth'])
+    check(problem is None, 'shape', f'the record {problem}')
     plan = closed(value, TOP_KEYS, 'shape')
     try:
         size = len(canonical_compact_json(plan).encode())
@@ -199,6 +201,7 @@ def read_plan_record(record_pin: dict) -> dict:
         refuse('read', f'plan record cannot be read: {error}')
     check(len(raw) == found['bytes'] and hashlib.sha256(raw).hexdigest() == found['sha256'], 'read',
           'plan record bytes changed')
+    check(raw_depth(raw) <= BOUNDS['planDepth'], 'read', f'plan record nests deeper than {BOUNDS["planDepth"]} levels')
     try:
         value = json.loads(raw)
         canonical = (canonical_compact_json(value) + '\n').encode()
@@ -269,6 +272,8 @@ def _check_homes(plan: dict) -> None:
     check((homes['regions'] is not None) == (Path(homes['project']) / REGIONS).is_file(), 'homes',
           f'regions are pinned exactly when the project has {REGIONS}')
     bound = native.get('sharedEvidence')
-    named = None if bound is None else (bound.get('path'), bound.get('sha256'))
+    check(bound is None or type(bound) is dict and all(type(bound.get(key)) is str for key in ('path', 'sha256')), 'homes',
+          "the native plan's sharedEvidence binding is malformed")
+    named = None if bound is None else (bound['path'], bound['sha256'])
     pinned = None if homes['sharedEvidence'] is None else (homes['sharedEvidence']['path'], homes['sharedEvidence']['sha256'])
     check(named == pinned, 'homes', 'sharedEvidence must pin the sealed record the native plan binds')

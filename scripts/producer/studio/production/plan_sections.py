@@ -60,10 +60,10 @@ def validate_story(value: object, clock: dict) -> list[dict]:
 
 
 def validate_framing(value: object, clock: dict) -> list[dict]:
-    """At most 128 picture views ``{id, range, digest}``."""
+    """At most 128 entries ``{id, range, digest}``: picture views, and whole-output (null range) speaker evidence."""
     views = _entries(value, 'framing', ('id', 'range', 'digest'))
     for view in views:
-        frame_range(view['range'], clock, 'framing')
+        maybe_range(view['range'], clock, 'framing')
     return views
 
 

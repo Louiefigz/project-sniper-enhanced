@@ -190,18 +190,19 @@ class GrantDeltaTests(CreditCase):
 
 
 class SecondOwnerTests(unittest.TestCase):
-    """X190 n1: pending credit accrued before a second owner's event settles after it, within MAX_GAP_SECONDS."""
+    """X190 n1: pending credit accrued before a second owner's event settles after it, within the poll bound."""
 
     def test_a_second_owner_joining_a_wait_is_no_false_alarm(self) -> None:
-        """Owner 1 waits 0-20 s, owner 2 registers working at 21.9 s, owner 1 beats at 22.0 s: consistent."""
+        """Owner 1 waits 0-20 s, owner 2 registers working at 44.9 s, owner 1 beats at 45.0 s: the 24.9 s pending
+        settles after owner 2's event, within the poll bound (M-055), so the audit says consistent."""
         waiter = Waiter(self)
         for step in range(11):
             waiter.now[0] = 2.0 * step
             waiter.observe('waiting', {'ticket': 1, 'occupants': ['a' * 32], 'waitClass': 'capacity'},
                            '/TEST/owner-1.json')
-        waiter.now[0] = 21.9
+        waiter.now[0] = 44.9
         waiter.observe('working', key='/TEST/owner-2.json')
-        waiter.now[0] = 22.0
+        waiter.now[0] = 45.0
         waiter.observe('waiting', {'ticket': 1, 'occupants': ['a' * 32], 'waitClass': 'capacity'},
                        '/TEST/owner-1.json')
         clip = waiter.session.record['clips']['A']

@@ -1358,7 +1358,7 @@ docs belong to P3b.
   fold is not a homoglyph defence. Tests: `test_production_add_clip_clock.py`, `test_production_duplication_check.py`.
 - **P1 fix round (M-RPIF; X189 as X190 widens it, X190, X192).** A run-scoped task's deadline never passes the run's
   delivery deadline (`queue_clock.task_deadline`, m1). `queue_audit` checks each capacity row against its predecessor
-  (`_chain_break`, m2) with `SETTLE_TOLERANCE` (`MAX_GAP_SECONDS`, n1), names a malformed row (`malformed-trail`, n2)
+  (`_chain_break`, m2) with `SETTLE_TOLERANCE` (the poll bound, n1), names a malformed row (`malformed-trail`, n2)
   and a lost owner no row explains (`unexplained-removal`, X192). A watchdog or reconcile settlement
   (`queue_clock.settle_task_capacity`) puts each Short's settled credit and removed owners (16-hex digests,
   `queue_audit.settlement_entry`) on its own terminal event under `capacitySettled` (F2); every other removal already
@@ -1397,3 +1397,15 @@ docs belong to P3b.
   decide `slaMiss` (minute 40 is the visible hand-off; the export time stays in `deliveries`). The hand-off timing
   lives in `production/queue_handoff.py` (split from `queue_clock` for its line budget). Tests:
   `test_production_handoff_clock.py`.
+- **Bounded trail and poll bound (M-055; C13, P2).** `native_queue_accounting.pool_observation` records a pool
+  refusal that is not for occupied capacity as one `unverified` observation (no `finished`-then-`working` pair):
+  `queue_clock.observe_worker` makes a prior waiting row's pending interval uncertain on it (`UNCONFIRMING`),
+  `productive` counts it like `working`, and its repeats are heartbeats (`queue_authority._observe_locked` compares
+  state and resource), so 300 polls of a disk refusal add at most 2 events. `queue_recovery._recoverable` ends a
+  dead `unverified` row like a dead waiter (`PRE_ADMISSION`: both are written only before any launch).
+  `capacity-settled` stays in `TERMINAL_EVENTS` (once per owner end). `queue_clock.POLL_BOUND_SECONDS` (30 s)
+  replaces the 6 s gap: the admission loop's 2 s sleep, `LEDGER_WAIT_SECONDS`, `INSPECTION_ATTEMPTS` x
+  `native_work_pool_policy.HOST_IDENTITY_TIMEOUT_SECONDS` (L-I I2) plus backoff, and
+  `native_budget_launch.PS_TIMEOUT_SECONDS` (L-J J2) = 27.5 s; `queue_audit.SETTLE_TOLERANCE` follows it (M-RPIF's
+  n1 tolerance). Tests: `test_queue_clock_v2_c.CadenceTests`,
+  `test_native_queue_accounting_waits.TrailBoundTests`, `test_queue_clock_v2_d.OrphanTests`.

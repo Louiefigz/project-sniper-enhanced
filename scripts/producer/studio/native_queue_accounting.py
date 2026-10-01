@@ -57,14 +57,13 @@ def pool_observation(owner: NativeRun, error: Exception | None) -> float:
     if not contexts:
         return 0.0
     waiting = bool(error and getattr(error, 'capacity_only', False))
-    state = 'waiting' if waiting else 'working'
+    # An unknown or non-capacity refusal is one 'unverified' observation (C13): it confirms no preceding pending
+    # interval (that becomes uncertain), and its repeats are heartbeats, so they add no trail rows.
+    state = 'working' if error is None else 'waiting' if waiting else 'unverified'
     evidence = json.dumps(getattr(error, 'capacity_evidence', {}), sort_keys=True) if error else 'admitted'
     pool = pool_evidence(error)
-    # Unknown/non-capacity refusals do not confirm the preceding pending interval.
     before = owner.capacity_credit
     for context in contexts:
-        if error is not None and not waiting:
-            record_observation(context, 'finished', ('heavy-pool', 'unverified wait ended'))
         credit = record_observation(context, state, ('heavy-pool', evidence[:2048]), pool)
         if context is owner.capacity_context:
             owner.capacity_credit = credit

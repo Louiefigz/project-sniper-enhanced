@@ -16,7 +16,16 @@ from studio.production.queue_clock_schema import (  # noqa: F401  new_clock and 
 from studio.production import queue_stall
 from studio.production.task_schema import LIVE, holds_slot, is_ai
 
-MAX_GAP_SECONDS = 6.0
+# The longest gap between two observations of one waiting owner that still credits the interval (P1 Step B13, P2):
+# the admission loop's own bounds, summed: a 2 s poll sleep (native_run_admission.wait_capacity) + the 10 s ledger
+# wait (native_work_pool_state.LEDGER_WAIT_SECONDS) + 3 host inspections of 3 s (INSPECTION_ATTEMPTS x
+# native_work_pool_policy.HOST_IDENTITY_TIMEOUT_SECONDS) + 1.5 s of their backoff + one 5 s process-table read
+# (native_budget_launch.PS_TIMEOUT_SECONDS, read by recovery_evidence) = 27.5 s, rounded up. A longer gap (a laptop
+# sleep, a stopped process, an unbounded authority lock wait) is counted, as uncertain.
+POLL_BOUND_SECONDS = 30.0
+# After these a waiting row's pending interval is uncertain, never credit: the owner ended, or a refusal that is not
+# for occupied capacity (P1 Step B12, C13) could not confirm it.
+UNCONFIRMING = ('finished', 'unverified')
 SETTLED = 'capacitySettled'   # the key a settling event (or one of its changes) carries entries under (X189 F2)
 
 
@@ -95,7 +104,7 @@ def _checkpoint_clip(record: dict, clip_id: str, elapsed: float) -> None:
     # Work is judged at the interval's start: a task that stops being work mid-interval still counts for it.
     if not waiting or hold_open or productive(record, clip_id, workers, elapsed - delta):
         return
-    if any(elapsed - row['seenElapsed'] > MAX_GAP_SECONDS for row in waiting):
+    if any(elapsed - row['seenElapsed'] > POLL_BOUND_SECONDS for row in waiting):
         clock['uncertainSeconds'] += clock['pendingSeconds'] + delta
         clock['pendingSeconds'] = 0.0
         return
@@ -112,7 +121,8 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
 
     The row keeps the observation's pool evidence (``ticket``, ``occupants``, ``waitClass``; an observation
     without it, a working owner's, records none). A waiting row's pending interval becomes credit only when that
-    row was a verified wait (``verified_wait``), the owner has not finished and the Short's stall is not truncated
+    row was a verified wait (``verified_wait``), the next state is not ``UNCONFIRMING`` (the owner finished, or an
+    ``unverified`` refusal that is not for capacity, C13) and the Short's stall is not truncated
     (``queue_stall.suppressed``); otherwise it is counted, as uncertain (P1 Step B4). Then ``queue_stall.track``
     names or clears the Short's ``capacity-stalled`` state (M-050). A v1 clock is read-only: nothing is recorded
     and its earned credit is returned (0.0 for a clip without one).
@@ -125,7 +135,8 @@ def observe_worker(record: dict, context: dict, observation: dict, elapsed: floa
     clock, key = clip['capacityClock'], context['workerId']
     prior = clock['workers'].get(key)
     if prior and prior['state'] == 'waiting':
-        credited = observation['state'] != 'finished' and verified_wait(prior) and not queue_stall.suppressed(clock)
+        credited = observation['state'] not in UNCONFIRMING and verified_wait(prior) \
+            and not queue_stall.suppressed(clock)
         clock['excludedSeconds' if credited else 'uncertainSeconds'] += clock['pendingSeconds']
         clock['pendingSeconds'] = 0.0
     if observation['state'] == 'finished':

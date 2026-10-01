@@ -120,6 +120,16 @@ class OrphanTests(AuditCase):
         self.assertEqual((clock['excludedSeconds'], clock['orphans']['count']), (62.0, 0))
         self.assertNotIn('/TEST/dead-00.json', clock['workers'])
 
+    def test_a_dead_unverified_owner_is_recovered(self) -> None:
+        """C13 with P3: an ``unverified`` row (a pool refusal not for capacity) is also written before any launch, so
+        once its supervisor is gone it is ended, not left counting as the Short's work; the next wait is credited."""
+        self.plant(state='unverified', resource='heavy-pool', evidence='{}')
+        self.use_table(table())
+        self.wait(62, POOL)
+        clock = self.clock_of()
+        self.assertEqual((clock['excludedSeconds'], clock['orphans']['count']), (62.0, 0))
+        self.assertNotIn('/TEST/dead-00.json', clock['workers'])
+
     def test_a_live_working_owner_is_not_orphaned(self) -> None:
         """O6: a working owner whose supervisor still runs (planted under the dead-row name) stays the Short's work:
         no orphan, and the wait beside it earns nothing."""

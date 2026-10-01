@@ -10,7 +10,7 @@ passes, and only while an owner waits, so:
 - each row's total may exceed its predecessor's only by the seconds between them while the trail up to the
   predecessor leaves an owner waiting (``_chain_break``, X190 m2), so a hand edit stays visible after the engine's
   next event carries it.
-Both bounds allow ``SETTLE_TOLERANCE``: pending credit (at most ``MAX_GAP_SECONDS``) accrued before one owner's
+Both bounds allow ``SETTLE_TOLERANCE``: pending credit (at most ``POLL_BOUND_SECONDS``) accrued before one owner's
 event can settle at another's heartbeat after it (X190 n1). A clip is:
 - ``consistent`` inside those bounds (or with no credit and no row);
 - ``exceeds-trail`` above them (a hand-edited or forged total);
@@ -32,13 +32,13 @@ import hashlib
 from pathlib import Path
 
 from studio.production.approvals import trail_events
-from studio.production.queue_clock import MAX_GAP_SECONDS, SETTLED, writable
+from studio.production.queue_clock import POLL_BOUND_SECONDS, SETTLED, writable
 from studio.production.queue_clock_schema import number
 
 CAPACITY_EVENTS = ('capacity-observed', 'capacity-checkpoint', 'capacity-settled')
 SETTLEMENT = 'capacity-settlement'   # one settlement entry, read as a row of its Short (X189 F2)
 TOLERANCE = 1e-6
-SETTLE_TOLERANCE = MAX_GAP_SECONDS + TOLERANCE
+SETTLE_TOLERANCE = POLL_BOUND_SECONDS + TOLERANCE
 
 
 def owner_digest(worker: str) -> str:

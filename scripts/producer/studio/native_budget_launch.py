@@ -27,6 +27,7 @@ from studio.production.formats import (
 TRANSIENT = frozenset({'host-memory-pressure', 'measurement-unavailable', 'cancelled',
                        'abandoned', 'capacity-timeout', 'disk-space', 'capacity-credit-unavailable'})
 PS_ENVIRONMENT = {'TZ': 'UTC', 'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'}
+PS_TIMEOUT_SECONDS = 5  # one process-table read; a bound the queue clock's poll bound counts
 
 
 @dataclass(frozen=True)
@@ -63,7 +64,7 @@ def launch_family(route: str) -> str:
 def _process_table() -> dict:
     """One process-table read with a fixed clock and locale, so identities compare exactly."""
     output = subprocess.run(['/bin/ps', '-axo', 'pid=,ppid=,pgid=,lstart='], env=PS_ENVIRONMENT,
-                            check=True, capture_output=True, text=True, timeout=5)
+                            check=True, capture_output=True, text=True, timeout=PS_TIMEOUT_SECONDS)
     return process_table(output.stdout)
 
 

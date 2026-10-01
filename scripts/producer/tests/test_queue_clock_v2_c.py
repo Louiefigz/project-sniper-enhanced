@@ -154,6 +154,42 @@ class AuditTests(AuditCase):
         self.assertEqual((self.root / 'batches' / BATCH / 'authority.json').read_bytes(), before)
 
 
+class CadenceTests(AuditCase):
+    """P2 (P1 Step B13, M-055): a waiting owner's observation gap is credited up to a bound derived from the admission
+    loop's own bounds; a longer gap is counted, as uncertain."""
+
+    def steps(self, seconds: float, count: int) -> dict:
+        """Wait for the pool with ``count`` gaps of ``seconds`` between observations, then be admitted."""
+        self.observe('waiting', POOL)
+        for _ in range(count):
+            self.clock.advance(seconds)
+            self.observe('waiting', POOL)
+        self.observe('working')
+        return self.clock_of()
+
+    def test_poll_bound_covers_the_loop_bounds(self) -> None:
+        """The 2 s poll sleep (``native_run_admission.wait_capacity``), the ledger wait, three host inspections with
+        their 0.5 s and 1 s backoff, and one process-table read: 27.5 s, within the 30 s bound."""
+        from native_work_pool_policy import HOST_IDENTITY_TIMEOUT_SECONDS
+        from native_work_pool_state import LEDGER_WAIT_SECONDS
+        from studio.native_budget_launch import PS_TIMEOUT_SECONDS
+        from studio.native_run_admission import INSPECTION_ATTEMPTS, INSPECTION_BACKOFF_SECONDS
+        backoff = INSPECTION_BACKOFF_SECONDS * (2 ** (INSPECTION_ATTEMPTS - 1) - 1)
+        loop = 2 + LEDGER_WAIT_SECONDS + INSPECTION_ATTEMPTS * HOST_IDENTITY_TIMEOUT_SECONDS + backoff + PS_TIMEOUT_SECONDS
+        self.assertEqual(loop, 27.5)
+        self.assertGreaterEqual(queue_clock.POLL_BOUND_SECONDS, loop)
+
+    def test_25_second_steps_credit_fully(self) -> None:
+        """Four 25 s gaps (each inside the bound) are credited in full."""
+        clock = self.steps(25.0, 4)
+        self.assertEqual((clock['excludedSeconds'], clock['uncertainSeconds']), (100.0, 0.0))
+
+    def test_31_second_gap_is_uncertain(self) -> None:
+        """One 31 s gap (past the bound: a sleep, a stopped process) is counted as uncertain, never credited."""
+        clock = self.steps(31.0, 1)
+        self.assertEqual((clock['excludedSeconds'], clock['uncertainSeconds']), (0.0, 31.0))
+
+
 class MemorySession:
     """An in-memory stand-in for ``BatchSession``: validated commits, and a trail without heartbeats, as the store."""
 

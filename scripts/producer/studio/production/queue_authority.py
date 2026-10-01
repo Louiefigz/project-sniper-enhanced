@@ -104,7 +104,8 @@ def record_observation(context: dict | None, state: str, evidence: tuple[str, st
 
     Args:
         context: The owner's accounting context (``owner_context``), or None for an unbound owner.
-        state: ``working``, ``waiting`` or ``finished``.
+        state: ``working``, ``waiting``, ``unverified`` (a pool refusal not for occupied capacity: one row whose
+            repeats are heartbeats, C13) or ``finished``.
         evidence: (resource, evidence text) of the observation.
         pool: The pool's evidence for a wait; None records none, and such a wait earns nothing (C11).
 

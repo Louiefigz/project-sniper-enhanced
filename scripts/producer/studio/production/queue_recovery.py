@@ -15,6 +15,8 @@ from pathlib import Path
 from studio.production import queue_clock
 from studio.production.queue_clock_schema import MAX_ORPHAN_ROWS
 
+PRE_ADMISSION = ('waiting', 'unverified')   # row states only a pool refusal writes, before any launch (C13)
+
 
 @dataclass(frozen=True)
 class Recovery:
@@ -48,9 +50,10 @@ def recovery_evidence(record: dict, context: dict) -> Recovery:
 def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
     """A reboot, completed cleanup, or a dead prelaunch waiter proves an owner ended.
 
-    A waiting row is written only before pool admission (``native_run_admission.acquire_capacity``: ``join_queue``
-    precedes ``lease.mark_launching``), so its owner launched no child: once its supervisor is gone, a surviving
-    member of its process group cannot be its work (P3), and the group is not checked.
+    A waiting or ``unverified`` row is written only before pool admission, from a pool refusal
+    (``native_run_admission.acquire_capacity``: ``join_queue`` precedes ``lease.mark_launching``), so its owner
+    launched no child: once its supervisor is gone, a surviving member of its process group cannot be its work (P3),
+    and the group is not checked.
     """
     key, row = worker
     boot, table = observed
@@ -58,7 +61,7 @@ def _recoverable(worker: tuple, clip: dict, observed: tuple) -> bool:
         return True
     if _finished_receipt(key):
         return True
-    if row['state'] != 'waiting' or table is None:
+    if row['state'] not in PRE_ADMISSION or table is None:
         return False  # A dead working supervisor alone cannot prove detached-child cleanup (it is orphaned).
     identity = row.get('supervisor')
     if identity is None:

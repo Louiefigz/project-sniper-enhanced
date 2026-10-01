@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
+import json
 import os
 import unittest
 from pathlib import Path
@@ -147,6 +148,56 @@ class OwnerWaitTests(unittest.TestCase):
         self.assertEqual(failure_category(owner.result), 'capacity-timeout')
         self.assertEqual(self.credit(), 0.0)
         self.assertGreaterEqual(production_remaining(owner), GRANTED - RESERVE - PATIENCE - 2.0)
+
+
+class TrailBoundTests(unittest.TestCase):
+    """C13 (P1 Step B12, M-055): a pool refusal that is not for occupied capacity is one ``unverified`` observation;
+    its repeats are heartbeats, so a long non-capacity wait adds no trail rows, and it confirms no pending interval.
+    No pool is used: the owner loop's ``native_queue_accounting.pool_observation`` receives the refusals."""
+
+    def setUp(self) -> None:
+        """Batch A on the private authority root; a TEST owner of A whose supervisor is this process."""
+        self.clock = self.enterContext(fake_clock(FakeClock()))
+        self.root = native_budget_store.default_root()
+        create_batch(self.root, new_batch_record(BatchSpec(BATCH, ('A',), (), 3, approvals={'A': approval('A')}),
+                                                 start_anchor()))
+        context = {'authority': str(self.root), 'batchId': BATCH, 'clipId': 'A', 'workerId': '/TEST/owner-a.json',
+                   'supervisor': {'pid': os.getpid(), 'pgid': os.getpgid(0), 'started': 'TEST start'},
+                   'boot': self.clock.boot, 'taskId': None, 'attemptId': None}
+        self.owner = SimpleNamespace(capacity_context=context, supporting_contexts=[], capacity_credit=0.0,
+                                     capacity_wait_started=None, deadline=GRANTED, result={})
+
+    def refuse(self, capacity: bool) -> None:
+        """One pool refusal: capacity-only with its evidence, or a disk refusal."""
+        error = RuntimeError('TEST pool refusal')
+        error.capacity_only = capacity
+        error.capacity_evidence = {'ticket': 7, 'occupants': ['a' * 32], 'waitClass': 'capacity'} if capacity \
+            else {'reason': 'TEST disk headroom', 'waitClass': 'other'}
+        native_queue_accounting.pool_observation(self.owner, error)
+
+    def capacity_events(self) -> list[str]:
+        """The capacity events on A's trail."""
+        lines = (self.root / 'batches' / BATCH / 'events.jsonl').read_text().splitlines()
+        return [event for event in (json.loads(line).get('event', '') for line in lines) if event.startswith('capacity')]
+
+    def test_non_capacity_wait_trail_is_bounded(self) -> None:
+        """300 polls of a disk refusal add at most 2 capacity events (the finished-then-working pair wrote 601)."""
+        before = len(self.capacity_events())
+        for _ in range(300):
+            self.refuse(False)
+            self.clock.advance(2.0)
+        self.assertLessEqual(len(self.capacity_events()) - before, 2)
+        workers = read_batch(self.root, BATCH)['clips']['A']['capacityClock']['workers']
+        self.assertEqual(workers['/TEST/owner-a.json']['state'], 'unverified')
+
+    def test_waiting_then_unverified_moves_pending_to_uncertain(self) -> None:
+        """A verified capacity wait earns its first 2 s; the pending 2 s before a disk refusal become uncertain."""
+        self.refuse(True)
+        for capacity in (True, False):
+            self.clock.advance(2.0)
+            self.refuse(capacity)
+        clock = read_batch(self.root, BATCH)['clips']['A']['capacityClock']
+        self.assertEqual((clock['excludedSeconds'], clock['uncertainSeconds']), (2.0, 2.0))
 
 
 if __name__ == '__main__':

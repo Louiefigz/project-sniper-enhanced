@@ -53,7 +53,12 @@ heavy render's wait counts only while every live heavy slot is occupied, or
 while a live exclusive, out-of-profile or older-engine exclusive member holds
 the pool. Queue order or memory while a live slot is free, slots quarantined
 for unverified cleanup, disk headroom, a qualification session and audio-class
-work earn nothing.
+work earn nothing. A pool refusal that is not for occupied capacity (disk, memory, an inspection failure) is one
+`unverified` row on the Short's clock: it confirms no pending wait (that time is counted, as uncertain), and its
+repeats are heartbeats, so a long non-capacity wait adds no trail lines. Observations of a waiting owner more than
+30 seconds apart (`queue_clock.POLL_BOUND_SECONDS`: the admission loop's own sleep, ledger wait, host inspections
+and process-table read, 27.5 s, rounded up) are counted too. `capacity-settled` stays a settling event: it is
+written once per owner end, and a full trail must never refuse an owner's last settlement.
 
 The clock, launch allocations, task deadlines and status use the same settled
 credit. A run-scoped task (shared review, check or planning work) gains the

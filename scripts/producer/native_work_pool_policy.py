@@ -42,6 +42,7 @@ DISK_RESERVATION_BYTES = {'heavy': 3 * GIB, 'audio': 1 * GIB}
 DISK_RESERVE_BYTES = 10 * GIB
 SLOT_BOUNDS = {'heavy': (2, 5), 'audio': (1, 2)}
 QUEUE_SECONDS = 600
+HOST_IDENTITY_TIMEOUT_SECONDS = 3  # bounds one sysctl read; the queue clock's poll bound counts it
 MEASURED_EVIDENCE = {
     'source': 'SHORTS_FULL_RUN_AUDIT_2026_09_27 owner resource logs',
     'samples': 2324, 'largestHeavyTreeBytes': int(3.165 * GIB),
@@ -91,8 +92,8 @@ def policy_identity() -> dict:
 
 def host_identity() -> dict:
     """Read CPU model, core counts, physical RAM and OS version in one sysctl call."""
-    result = subprocess.run(['/usr/sbin/sysctl', '-n', *HOST_KEYS], capture_output=True,
-                            text=True, check=True, timeout=3, env={'PATH': '/usr/bin:/bin', 'LC_ALL': 'C'})
+    result = subprocess.run(['/usr/sbin/sysctl', '-n', *HOST_KEYS], capture_output=True, text=True, check=True,
+                            timeout=HOST_IDENTITY_TIMEOUT_SECONDS, env={'PATH': '/usr/bin:/bin', 'LC_ALL': 'C'})
     lines = result.stdout.splitlines()
     if result.stderr.strip() or len(lines) != len(HOST_KEYS) or not all(line.strip() for line in lines):
         raise PoolPolicyError('Host identity sysctl output is incomplete')

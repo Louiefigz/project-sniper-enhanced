@@ -2,7 +2,7 @@
  * (`evidenceCheck.run` is replaced). A two-person source, regions [0,900] and [960,1920], seconds 100-110 at 30 fps. */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test, type TestContext } from "node:test";
@@ -10,7 +10,8 @@ import { NativeCheckError } from "../native-check-error";
 import { evidenceCheck, type SharedSpeakerFacts, type SharedSpeakerInterval } from "../native-review-shared-evidence";
 import type { NativePictureView } from "../native-short-composition";
 import type { NativeShortProjectInput } from "../native-short-project";
-import type { NativeSpeakerPictureDecision, SpeakerFace } from "../native-short-speaker-evidence";
+import { nativeSpeakerPictureDecisions, sealedPhraseStatus, speakerObservations, type NativeSpeakerPictureDecision,
+  type SpeakerFace } from "../native-short-speaker-evidence";
 import { assertNativeSharedEvidence, assertNativeSpeakerPicture, nativeSharedEvidenceMeasure, nativeSpeakerAttributionFindings,
   nativeSpeakerPictureFindings, type SpeakerObservations } from "../native-short-speaker-picture";
 
@@ -146,13 +147,15 @@ test("uncovered retained word is refused", () => {
 });
 
 test("unmapped face is refused", () => {
-  const right = facts([interval(100, 110, "right")]);
-  assert.deepEqual(codes(plan(), right, observations((t) => (t >= 101 && t < 102 ? [...both(), face(855)] : both()))), ["speaker-face-unmapped:30-55"]);
-  assert.deepEqual(codes(plan(), facts([interval(100, 110, "right")], regions([0, 1000])), observations(() => [face(905)])),
+  const right = facts([interval(100, 110, "right")]), WIDE: NativePictureView = { ...RIGHT, crop: [800, 0, 607.5, 1080] };
+  const walkIn = observations((t) => (t >= 101 && t < 102 ? [...both(), face(855)] : both()));
+  assert.deepEqual(codes(plan([WIDE]), right, walkIn), ["speaker-face-unmapped:30-55"]);
+  assert.deepEqual(codes(plan(), right, walkIn), [], "U-R7 (X228): the same face outside every crop is read by no rule and not judged");
+  assert.deepEqual(codes(plan(), facts([interval(100, 110, "right")], regions([0, 1100])), observations(() => [face(1000, 100)])),
     ["speaker-face-unmapped:0-300", "speaker-not-in-picture:0-300"], "a centre in two regions belongs to nobody");
   assert.deepEqual(codes(plan([{ ...RIGHT, endFrame: 150 }, { ...LEFT, startFrame: 150 }]), facts([interval(100, 105, "right"),
-    interval(105, 110, "left")]), observations((t) => (t < 105 ? both() : [LEFT_FACE, face(910, 40)]))), ["speaker-face-unmapped:150-300"]);
-  assert.deepEqual(codes(plan(), right, observations(() => [face(885), face(825)])), ["speaker-not-in-picture:0-300"],
+    interval(105, 110, "left")]), observations((t) => (t < 105 ? both() : [LEFT_FACE, face(910, 40)]))), [], "beside the crop: not judged");
+  assert.deepEqual(codes(plan([WIDE]), right, observations(() => [face(885), face(825)])), [],
     "region edges are inclusive: centres 960 and 900 map to right and left");
   assert.deepEqual(codes(plan([{ ...RIGHT, endFrame: 150 }]), right, observations((t) => (t < 105 ? [RIGHT_FACE] : [RIGHT_FACE, face(855)]))), [],
     "a face at an output frame no picture view shows is not judged");
@@ -165,13 +168,76 @@ test("in the picture means at least half of the face box inside a crop", () => {
   }
 });
 
-test("unsampled frames are unmeasured, and a later interval governs where two overlap", () => {
+test("unsampled frames are unmeasured; in an overlap the spoken word's interval governs, in silence the later one", () => {
   const late = facts([interval(100, 105, "right"), interval(105, 110, "left", { certainty: "probable" })]);
   assert.deepEqual(codes(plan(), late, observations(both, 105)), [], "frames 150-299 are unsampled, never 'face absent'");
   assert.deepEqual(codes(plan(), late, observations(both)), ["speaker-not-in-picture:150-300"]);
-  const overlap = facts([interval(100, 106, "left"), interval(105, 110, "right")]);
-  assert.deepEqual(codes(plan([LEFT]), overlap, observations((t) => (t >= 105 ? [LEFT_FACE, RIGHT_FACE] : [RIGHT_FACE]))),
-    ["speaker-not-in-picture:0-150", "speaker-not-in-picture:150-300"], "left's only pictured samples fall where the later interval governs");
+  // U-R4 (X228), on a record the seal accepts: word 9 [104.5, 105) has its midpoint only in A, word 10 only in B.
+  const sealable = facts([interval(100, 105, "right"), interval(104.8, 110, null)]);
+  const shot = plan([{ ...RIGHT, endFrame: 150 }, ...SPLIT.map((view) => ({ ...view, startFrame: 150 }))],
+    [{ startFrame: 150, endFrame: 300, kind: "two-shot", reason: "TEST both people" }]);
+  assert.deepEqual(codes(shot, sealable, observations(both)), [], "frames 144-149 show right finishing his own word 9");
+  const silent = { ...observations(both), words: observations(both).words.map((row) => (row.sourceWord === 1009 ? { ...row, end: 104.75 } : row)) };
+  assert.deepEqual(codes(shot, sealable, silent), ["speaker-unresolved-picture:144-150"], "no word spans 104.8-105 s: the later interval");
+  const tie = facts([interval(100, 104.8, "right"), interval(104.8, 105, "left"), interval(104.8, 110, "right")]);
+  assert.deepEqual(codes(plan(), tie, silent), [], "equal starts in silence: the later row governs, so the silent left interval shows nothing");
+});
+
+test("the box rule is two-dimensional, and a reason of exactly 20 characters counts", () => {
+  const right = facts([interval(100, 110, "right")]), cropped = (height: number) => plan([{ ...RIGHT, crop: [1000, 0, 607.5, height] }]);
+  assert.deepEqual(codes(cropped(349), right, observations(() => [face(1300, 100)])), ["speaker-not-in-picture:0-300"], "49 % vertically");
+  assert.deepEqual(codes(cropped(350), right, observations(() => [face(1300, 100)])), [], "50 % vertically");
+  const reacting = plan([RIGHT], [{ startFrame: 0, endFrame: 300, kind: "listener-reaction", reason: "TEST twenty chars ok" }]);
+  assert.deepEqual(codes(reacting, facts([interval(100, 110, "left", { certainty: "probable" })]), observations(both)), []);
+});
+
+test("samples from a gap between two cuts are shown by neither cut", () => {
+  const input = plan(), canvas = input.canvas, kept = [0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19];
+  Object.assign(canvas, { totalFrames: 240, cuts: [{ start: 100, end: 104, speed: 1 }, { start: 106, end: 110, speed: 1 }],
+    segments: [{ startFrame: 0, endFrameExclusive: 120 }, { startFrame: 120, endFrameExclusive: 240 }],
+    pictureViews: [{ ...RIGHT, endFrame: 240 }], captionGroups: kept.map((_, id) => [id]),
+    occurrences: kept.map((k, id) => [id, k < 8 ? 0 : 1, 1000 + k, id * 15, id * 15 + 15, `w${k}`, 0]) });
+  const gapFace = observations((t) => (t >= 104 && t < 106 ? [...both(), face(1000, 100)] : both()));
+  assert.deepEqual(codes(input, facts([interval(100, 110, "right")], regions([0, 1100])), gapFace), []);
+  assert.deepEqual(codes(input, facts([interval(100, 103, "right")]), observations(both)), ["speaker-facts-missing:90-120", "speaker-facts-missing:120-240"],
+    "a run of uncovered words never spans a cut");
+});
+
+test("decisions, observation records, record files and source rows are validated, never assumed", (t) => {
+  const decision = (row: Record<string, unknown>) => plan([RIGHT], [{ startFrame: 0, endFrame: 300, kind: "two-shot", reason: "TEST", ...row } as never]);
+  assert.equal(nativeSpeakerPictureDecisions(decision({})).length, 1);
+  for (const row of [{ endFrame: 301 }, { startFrame: 300 }, { startFrame: -1 }, { kind: "wide-shot" }, { reason: "" }, { reason: "x".repeat(1001) }, { extra: 1 }]) {
+    assert.throws(() => nativeSpeakerPictureDecisions(decision(row)), /speakerPictureDecisions\[0\]/u, JSON.stringify(row));
+  }
+  const many = (count: number) => plan([RIGHT], Array.from({ length: count }, () => ({ startFrame: 0, endFrame: 1, kind: "two-shot" as const, reason: "TEST" })));
+  assert.equal(nativeSpeakerPictureDecisions(many(256)).length, 256);
+  assert.throws(() => nativeSpeakerPictureDecisions(many(257)), /at most 256/u);
+  const seen = observations(both);
+  assert.equal(speakerObservations(seen).faces.length, seen.faces.length);
+  assert.throws(() => nativeSpeakerPictureFindings(plan(), facts([interval(100, 110, "right")]), { ...seen, words: seen.words.filter((row) => row.sourceWord !== 1003) }),
+    /Speaker observations lack covered source word 1003; the record and its coverage disagree/u);
+  const broken: Array<[(value: Record<string, unknown>) => void, RegExp]> = [
+    [(value) => { (value.faces as unknown[]).pop(); }, /face rows and sampled frames differ/u],
+    [(value) => { (value.faces as Array<{ t: number }>)[3].t += 0.01; }, /face rows and sampled frames differ/u],
+    [(value) => { (value.sampling as { frames: Array<{ dense: unknown }> }).frames[0].dense = "yes"; }, /dense must be true or false/u],
+    [(value) => { (value.faces as Array<{ faces: Array<{ w: number }> }>)[0].faces[0].w = 0; }, /has no area/u],
+    [(value) => { value.kind = "TEST-other"; }, /not a schema-1 sniper-speaker-observations record/u]];
+  for (const [change, text] of broken) {
+    const value = JSON.parse(JSON.stringify(seen)) as Record<string, unknown>;
+    change(value);
+    assert.throws(() => speakerObservations(value), text);
+  }
+  const linked = sealed(t, (record) => { record.captionPhrases = []; });
+  copyFileSync(linked.file, `${linked.file}.TEST-copy`); unlinkSync(linked.file); symlinkSync(`${linked.file}.TEST-copy`, linked.file);
+  assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: linked.binding }), /is not a regular file of at most 16 MiB/u);
+  const twice = sealed(t, (record) => { record.captionPhrases = []; record.sources = [{ id: "TEST-raw-1", sourceSha256: SOURCE },
+    { id: "TEST-raw-1b", sourceSha256: SOURCE }]; });
+  assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: twice.binding }), /shared evidence describes sources/u);
+  const phrase = { source: "TEST-raw-1", sourceWordIndexes: [1005, 1006] as [number, number], display: "Butter Cuts", decidedBy: "operator" as const };
+  const swapped = plan().canvas;
+  [swapped.occurrences[6][2], swapped.occurrences[7][2]] = [1007, 1006];
+  assert.equal(sealedPhraseStatus({ ...swapped, captionProtectedPhrases: [[5, 6]] }, phrase), "dropped", "kept but not adjacent");
+  assert.equal(sealedPhraseStatus({ ...plan().canvas, captionProtectedPhrases: [[5, 6]] }, phrase), "kept");
 });
 
 test("the refusal names the first blocking code and lists every blocking finding", () => {
@@ -223,7 +289,8 @@ test("an absent, foreign, uncovered or stale binding is never a pass", (t) => {
   t.mock.method(evidenceCheck, "run", () => { throw new Error("TEST the check must not run"); });
   assert.doesNotThrow(() => assertNativeSharedEvidence(plan()), "a plan without sharedEvidence builds as before");
   assert.deepEqual(nativeSharedEvidenceMeasure(plan()), { speakerPicture: null, protectedPhrases: null });
-  assert.throws(() => assertNativeSharedEvidence(plan([RIGHT], [])), /speakerPictureDecisions need sharedEvidence/u);
+  assert.throws(() => assertNativeSharedEvidence(plan([RIGHT], [])), (error: unknown) => error instanceof NativeCheckError
+    && error.code === "shared-evidence-unbound", "decisions without a binding (X229)");
   const v1 = sealed(t, (record) => { record.schemaVersion = 1; delete record.coverage; delete record.captionPhrases; });
   assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: v1.binding }), (error: unknown) => error instanceof NativeCheckError
     && error.code === "speaker-facts-missing" && /v3 \(schema 1\) seals no speaker coverage/u.test(error.message));
@@ -232,7 +299,8 @@ test("an absent, foreign, uncovered or stale binding is never a pass", (t) => {
     new RegExp(`shared evidence describes sources \\["${"f".repeat(64)}"\\], not this plan's source ${SOURCE}`, "u"));
   const moved = sealed(t);
   t.mock.method(evidenceCheck, "run", () => ({ status: "shared-evidence-current", ...moved.binding, sha256: "0".repeat(64) }));
-  assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: moved.binding }), /no longer current/u);
+  assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: moved.binding }), (error: unknown) => error instanceof NativeCheckError
+    && error.code === "stale-evidence" && /no longer current/u.test(error.message));
   const seen = sealed(t, (record) => { record.captionPhrases = []; });
   writeFileSync(seen.resultFile, "{}");
   assert.throws(() => assertNativeSharedEvidence({ ...plan(), sharedEvidence: seen.binding }), /Speaker observations .* differs from its recorded sha256/u);

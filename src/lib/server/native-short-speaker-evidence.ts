@@ -1,24 +1,23 @@
 /** The sealed shared evidence a native plan binds (P2-08), read for the build's picture and phrase rules.
- * The record is read only after the engine's own check (`recheckSharedEvidence`, which re-observes it, its inputs,
- * its coverage and its bound speaker observations with the owner digest) and only at the bytes that check reported;
- * the speaker-observation record (P2-06) is read through the sealed reference at its recorded sha256. Split from
- * native-short-speaker-picture.ts for the 300-line rule: reading, the plan's source, protected-phrase obligations
- * and the plan's picture decisions live here; the SP rules live there. */
+ * The record is read at the bytes the plan's binding names (its sha256, inside the project hash) and the speaker
+ * observations (P2-06) through the sealed reference at its recorded sha256; whether the binding is still current is
+ * judged at admission only (native-short-speaker-binding.ts, X228). Split from native-short-speaker-picture.ts for the
+ * 300-line rule: reading, the plan's source, protected-phrase obligations, the plan's picture decisions and the face
+ * geometry live here; the SP rules live there. */
 import { createHash } from "node:crypto";
 import { lstatSync, readFileSync } from "node:fs";
 import { objectValue, sha256, stringValue, type JsonRecord } from "@/lib/producer/contracts/validation";
 import { NativeCheckError } from "./native-check-error";
 import type { NativeBox, NativeCanvasInput } from "./native-short-composition";
 import type { NativeShortProjectInput } from "./native-short-project";
-import { recheckSharedEvidence, sharedCaptionPhrases, sharedSpeakerFacts, type SharedCaptionPhrase,
-  type SharedCoverageClip, type SharedSpeakerFacts } from "./native-review-shared-evidence";
+import { sharedCaptionPhrases, sharedSpeakerFacts, type SharedCaptionPhrase, type SharedCoverageClip,
+  type SharedSpeakerFacts } from "./native-review-shared-evidence";
+import { nativeSharedEvidenceBinding } from "./native-short-speaker-binding";
 
 /** Sealed records and observation records are bounded like every inspection result (`cut_preview_io.MAX_JSON`). */
 const MAX_JSON_BYTES = 16 * 1024 * 1024;
 /** P2-08 decision kinds, verbatim. */
 export const SPEAKER_PICTURE_KINDS = ["two-shot", "supporting-visual", "listener-reaction", "exit-cover", "accepted-exit"] as const;
-/** A plan's binding of one sealed shared-evidence record (the fields `recheckSharedEvidence` compares). */
-export interface NativeSharedEvidenceBinding { path: string; sha256: string; contentSha256: string; version: number }
 /** An authored picture decision over output frames `[startFrame, endFrame)`; `reason` is judged by the critic. */
 export interface NativeSpeakerPictureDecision {
   startFrame: number; endFrame: number; kind: (typeof SPEAKER_PICTURE_KINDS)[number]; reason: string;
@@ -67,11 +66,12 @@ function planSource(input: NativeShortProjectInput, record: JsonRecord): { id: s
   return { id: match[0].id as string, sourceSha256: planned! };
 }
 
-/** Re-check the plan's bound record with the engine check, then read exactly the bytes it reported. */
-export function readSealedSharedEvidence(input: NativeShortProjectInput): SealedSharedEvidence {
-  const bound = recheckSharedEvidence(objectValue(input.sharedEvidence, "sharedEvidence"))!;
-  const record = objectValue(sealedJson(String(bound.path), String(bound.sha256), "Shared evidence"), "shared evidence record");
-  return { version: input.sharedEvidence!.version, record, facts: sharedSpeakerFacts(record), source: planSource(input, record) };
+/** The record the plan binds, read at the bytes its binding names (no currency judgment; null without a binding). */
+export function readBoundSharedEvidence(input: NativeShortProjectInput): SealedSharedEvidence | null {
+  const binding = nativeSharedEvidenceBinding(input);
+  if (!binding) return null;
+  const record = objectValue(sealedJson(binding.path, binding.sha256, "Shared evidence"), "shared evidence record");
+  return { version: binding.version, record, facts: sharedSpeakerFacts(record), source: planSource(input, record) };
 }
 
 /** A finite JSON number or a named refusal. */

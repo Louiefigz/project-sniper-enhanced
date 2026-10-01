@@ -3,14 +3,16 @@
  * Faces come from the sealed speaker observations (P2-06) at their sampled source frames only: an output frame that no
  * sample reaches is unmeasured, never "face absent" (X59(4)). A face is in the picture when at least half of its box
  * lies inside an active picture view's crop; it belongs to the one person whose inclusive `faceRegion.xRange` holds its
- * centre x (none or two: unmapped). An output frame, or a sample, lying in two speaker intervals is governed by the one
- * that started last (a later turn has begun; equal starts: the later row) (X127; U-R4 in the lane record). */
+ * centre x (none or two: unmapped). Where speaker intervals overlap, an output frame or sample belongs to the interval
+ * holding the midpoint of the retained word spoken there (X127, ruled by X228); in silence, to the one that started
+ * last. Admission (currency, binding agreement) lives in native-short-speaker-binding.ts; readers never judge it. */
 import { NativeCheckError } from "./native-check-error";
 import type { SharedSpeakerFacts, SharedSpeakerInterval } from "./native-review-shared-evidence";
 import { buildNativeCanvas, type NativeBox } from "./native-short-composition";
 import { nativePacingVisualWindows } from "./native-short-pacing-observations";
 import type { NativeShortProjectInput } from "./native-short-project";
-import { assertSealedPhrasesKept, faceInCrop, faceOwner, nativePlanSourceSha256, nativeSpeakerPictureDecisions, noCoverageText, readSealedSharedEvidence,
+import { assertSharedEvidenceAdmitted } from "./native-short-speaker-binding";
+import { assertSealedPhrasesKept, faceInCrop, faceOwner, nativePlanSourceSha256, nativeSpeakerPictureDecisions, noCoverageText, readBoundSharedEvidence,
   readSpeakerObservations, sealedPhraseReport, type NativeSpeakerPictureDecision, type SealedSharedEvidence,
   type SpeakerFace, type SpeakerObservations } from "./native-short-speaker-evidence";
 export type { SpeakerObservations } from "./native-short-speaker-evidence";
@@ -38,33 +40,38 @@ interface Picture {
   frames: Map<number, number[]>; decisions: NativeSpeakerPictureDecision[]; visuals: () => Array<{ startFrame: number; endFrame: number }>;
 }
 
-/** The interval governing source time t: the latest-started one containing it (`[start, end)`), else -1. */
-function governing(intervals: SharedSpeakerInterval[], t: number): number {
-  let chosen = -1;
-  intervals.forEach((row, index) => {
-    if (row.startSeconds <= t && t < row.endSeconds && (chosen < 0 || row.startSeconds >= intervals[chosen].startSeconds)) chosen = index;
-  });
-  return chosen;
+/** The interval governing source time t (`[start, end)`; -1 for none). One holding interval governs; where several
+ * hold t, the one holding the midpoint of the retained word spoken at t (unique by the seal), and in silence the one
+ * that started last (equal starts: the later row). */
+function governor(intervals: SharedSpeakerInterval[], words: SpeakerObservations["words"]): (t: number) => number {
+  const holds = (row: SharedSpeakerInterval, doubled: number) => 2 * row.startSeconds <= doubled && doubled < 2 * row.endSeconds;
+  return (t) => {
+    const holding = intervals.flatMap((row, index) => (holds(row, 2 * t) ? [index] : []));
+    if (holding.length < 2) return holding.length ? holding[0] : -1;
+    const word = words.find((row) => row.start <= t && t < row.end);
+    const spoken = word ? intervals.findIndex((row) => holds(row, word.start + word.end)) : -1;
+    return spoken >= 0 ? spoken : holding.reduce((a, b) => (intervals[b].startSeconds >= intervals[a].startSeconds ? b : a));
+  };
 }
 
 /** Every sampled frame the plan shows, at its output frame, with the crops active there, in output order. */
-function shownSamples(input: NativeShortProjectInput, observations: SpeakerObservations, intervals: SharedSpeakerInterval[], rate: number): Sample[] {
+function shownSamples(input: NativeShortProjectInput, observations: SpeakerObservations, governing: (t: number) => number, rate: number): Sample[] {
   const { cuts, segments, pictureViews } = input.canvas;
   return observations.sampling.frames.flatMap((row, at) => segments.flatMap((segment, index) => {
     const cut = cuts[index], frame = segment.startFrame + Math.floor((row.t - cut.start) / cut.speed * rate + 1e-9);
     if (row.t < cut.start || frame >= segment.endFrameExclusive) return [];
     const crops = pictureViews.filter((view) => view.startFrame <= frame && frame < view.endFrame).map((view) => view.crop);
-    return [{ frame, segment: index, t: row.t, dense: row.dense, faces: observations.faces[at].faces, crops, interval: governing(intervals, row.t) }];
+    return [{ frame, segment: index, t: row.t, dense: row.dense, faces: observations.faces[at].faces, crops, interval: governing(row.t) }];
   })).sort((a, b) => a.frame - b.frame || a.t - b.t);
 }
 
 /** Output frames per governing interval, from each frame's own source time. */
-function framesByInterval(input: NativeShortProjectInput, intervals: SharedSpeakerInterval[], rate: number): Map<number, number[]> {
+function framesByInterval(input: NativeShortProjectInput, governing: (t: number) => number, rate: number): Map<number, number[]> {
   const result = new Map<number, number[]>();
   input.canvas.segments.forEach((segment, index) => {
     const cut = input.canvas.cuts[index];
     for (let frame = segment.startFrame; frame < segment.endFrameExclusive; frame++) {
-      const owner = governing(intervals, cut.start + (frame - segment.startFrame) / rate * cut.speed);
+      const owner = governing(cut.start + (frame - segment.startFrame) / rate * cut.speed);
       if (!result.has(owner)) result.set(owner, []);
       result.get(owner)!.push(frame);
     }
@@ -80,8 +87,9 @@ function picture(input: NativeShortProjectInput, facts: SharedSpeakerFacts, obse
   let windows: Array<{ startFrame: number; endFrame: number }> | undefined;
   const visuals = () => (windows ??= nativePacingVisualWindows(input, buildNativeCanvas(input.canvas) + (input.extension?.markup ?? ""))
     .filter((row) => !NOT_VISUAL.test(row.id)));
-  return { input, facts, observations, rate, intervals, regions, samples: shownSamples(input, observations, intervals, rate),
-    frames: framesByInterval(input, intervals, rate), decisions: nativeSpeakerPictureDecisions(input), visuals };
+  const governing = governor(intervals, observations.words);
+  return { input, facts, observations, rate, intervals, regions, samples: shownSamples(input, observations, governing, rate),
+    frames: framesByInterval(input, governing, rate), decisions: nativeSpeakerPictureDecisions(input), visuals };
 }
 
 /** People in the picture at a sample, through the given crops. */
@@ -148,11 +156,13 @@ function factFindings(context: Picture): SpeakerPictureFinding[] {
   });
 }
 
-/** SP2: every face at a sample the plan pictures maps to exactly one person. */
+/** SP2 (X228's U-R7 amendment): every face in the picture (at least half inside an active crop), the faces the other
+ * rules read, maps to exactly one person; a face outside every crop is not judged. */
 function unmappedFindings(context: Picture): SpeakerPictureFinding[] {
-  const flagged = (sample: Sample) => sample.crops.length > 0 && sample.faces.some((face) => faceOwner(face, context.regions) === null);
-  return runs(context.samples, (sample) => (flagged(sample) ? "unmapped" : null)).map((run) => {
-    const face = run[0].faces.find((row) => faceOwner(row, context.regions) === null)!;
+  const judged = (sample: Sample) => sample.faces.filter((face) => sample.crops.some((crop) => faceInCrop(face, crop))
+    && faceOwner(face, context.regions) === null);
+  return runs(context.samples, (sample) => (judged(sample).length ? "unmapped" : null)).map((run) => {
+    const face = judged(run[0])[0];
     return finding("speaker-face-unmapped", run.map((row) => row.frame), [run[0].t, run.at(-1)!.t], `faces at ${run.length} sampled frame(s) `
       + `have a centre in no person's face region or in two (first: centre x ${face.x + face.w / 2} at source ${run[0].t} s)`);
   });
@@ -217,8 +227,7 @@ function exitFindings(context: Picture): SpeakerPictureFinding[] {
       + `exit-cover or accepted-exit decision whose reason has at least ${MIN_REASON} characters`)));
 }
 
-/**
- * Every P2-08 finding for a plan against sealed speaker facts and their observations, blocking or not; never throws
+/** Every P2-08 finding for a plan against sealed speaker facts and their observations, blocking or not; never throws
  * for a finding (the build's `measure` lists them).
  * @param input the native plan
  * @param facts `sharedSpeakerFacts` of the record the plan binds
@@ -237,10 +246,8 @@ export function nativeSpeakerPictureFindings(input: NativeShortProjectInput, fac
     ...context.intervals.flatMap((row, index) => intervalFindings(context, row, index)), ...exitFindings(context)];
 }
 
-/**
- * Refuse a plan whose picture contradicts the sealed speaker facts: one NativeCheckError whose code is the first
- * blocking finding's and whose message lists every blocking finding with its code and output frames.
- */
+/** Refuse a plan whose picture contradicts the sealed speaker facts: one NativeCheckError whose code is the first
+ * blocking finding's and whose message lists every blocking finding with its code and output frames. */
 export function assertNativeSpeakerPicture(input: NativeShortProjectInput, facts: SharedSpeakerFacts, observations: SpeakerObservations): void {
   const blocking = nativeSpeakerPictureFindings(input, facts, observations).filter((row) => row.blocking);
   if (!blocking.length) return;
@@ -248,19 +255,13 @@ export function assertNativeSpeakerPicture(input: NativeShortProjectInput, facts
     .map((row) => `${row.code} frames ${row.startFrame}-${row.endFrame - 1}: ${row.message}`).join("; ")}`);
 }
 
-/** Picture decisions answer sealed speaker facts, so a plan without `sharedEvidence` may not carry them. */
-function unboundDecisions(input: NativeShortProjectInput): void {
-  if (input.speakerPictureDecisions !== undefined) throw new Error("speakerPictureDecisions need sharedEvidence: they answer sealed speaker facts");
-}
-
-/**
- * The build's shared-evidence rules, called once from `assembleNativeShortHtml`. Without `sharedEvidence` the plan
- * builds as before. With it: the engine re-check, then (a) sealed protected phrases the plan keeps whole are protected
- * caption phrases, then (b) `assertNativeSpeakerPicture`.
- */
+/** The build's shared-evidence rules at admission (the project writer; never a reader): the binding agrees with the
+ * review (`shared-evidence-unbound`, X229) and, when present, is current (`stale-evidence`); then (a) sealed phrases the
+ * plan keeps whole are protected caption phrases, and (b) `assertNativeSpeakerPicture`. A plan that may omit it builds as before. */
 export function assertNativeSharedEvidence(input: NativeShortProjectInput): void {
-  if (input.sharedEvidence === undefined) return unboundDecisions(input);
-  const sealed = readSealedSharedEvidence(input);
+  assertSharedEvidenceAdmitted(input);
+  const sealed = readBoundSharedEvidence(input);
+  if (!sealed) return;
   assertSealedPhrasesKept(input, sealed);
   assertNativeSpeakerPicture(input, sealed.facts, readSpeakerObservations(sealed));
 }
@@ -271,21 +272,21 @@ function sealedFindings(input: NativeShortProjectInput, sealed: SealedSharedEvid
   return nativeSpeakerPictureFindings(input, sealed.facts, readSpeakerObservations(sealed));
 }
 
-/** `measure`'s view of the shared evidence: every speaker-picture finding and each sealed phrase's status (nulls
- * without a binding). A finding never throws here; an unreadable, stale or foreign record still refuses. */
+/** `measure`'s view of the shared evidence (admission): every speaker-picture finding and each sealed phrase's status
+ * (nulls without a binding). A finding never throws here; an unbound, stale, unreadable or foreign binding refuses. */
 export function nativeSharedEvidenceMeasure(input: NativeShortProjectInput) {
-  if (input.sharedEvidence === undefined) {
-    unboundDecisions(input);
-    return { speakerPicture: null, protectedPhrases: null };
-  }
-  const sealed = readSealedSharedEvidence(input);
+  assertSharedEvidenceAdmitted(input);
+  const sealed = readBoundSharedEvidence(input);
+  if (!sealed) return { speakerPicture: null, protectedPhrases: null };
   return { speakerPicture: sealedFindings(input, sealed), protectedPhrases: sealedPhraseReport(input, sealed) };
 }
 
-/** SP6 as open draft findings (`SPEAKER-ATTRIBUTION-PROBABLE`): a draft lists them and a final build refuses them. */
+/** SP6 as open draft findings (`SPEAKER-ATTRIBUTION-PROBABLE`), judged on the bound bytes with no currency check, so a
+ * draft reader lists them; a final build refuses them and `build-draft` records them. */
 export function nativeSpeakerAttributionFindings(input: NativeShortProjectInput) {
-  if (input.sharedEvidence === undefined) return [];
-  return sealedFindings(input, readSealedSharedEvidence(input)).filter((row) => row.code === "speaker-attribution-probable")
+  const sealed = readBoundSharedEvidence(input);
+  if (!sealed) return [];
+  return sealedFindings(input, sealed).filter((row) => row.code === "speaker-attribution-probable")
     .map((row) => ({ code: "SPEAKER-ATTRIBUTION-PROBABLE", severity: "major", lane: "speaker-picture",
       message: `frames ${row.startFrame}-${row.endFrame - 1}: ${row.message}`,
       requiredAction: "Listen to the interval or record an operator statement, reseal the shared evidence, then rebuild",

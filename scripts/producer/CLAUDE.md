@@ -1469,3 +1469,7 @@ docs belong to P3b.
   inside one 2 s poll is not counted (X111). `native_work_pool_mix.py` 242 lines; `native_work_pool.py` 299/300 (its
   next editor extracts first). Tests: `test_native_work_pool_mix_wait.py`, `test_native_work_pool_liveness.py` (the
   480-order enumeration), `test_native_work_profiles.py`.
+- **A mix refusal before any stage keeps the one retry (M-058; P1 M2).** `native_budget_launch.WAITABLE =
+  {'pool-unsupported-mix'}` (L-J J3) joins `TRANSIENT`; `_retry_decision` returns no decision for a `WAITABLE` failure
+  that ran no stage: the same identity relaunches fresh, its launch counter charged but not the clip's one transient
+  retry (the pool frees; nothing ran). After a stage it is transient as before. Tests: `test_native_budget_mix_transient.py`.

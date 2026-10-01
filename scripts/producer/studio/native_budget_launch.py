@@ -22,10 +22,11 @@ from studio.production.formats import (
     LONG_POLICY, clip_deadlines, clip_limits, long_latest_starts, output_format, preparation_passed,
 )
 
+WAITABLE = frozenset({'pool-unsupported-mix'})  # clears when the pool frees; before any stage, no retry is used
 # One retry per clip, shared: host conditions that can clear without changing inputs (a full disk
 # included, so freeing space is not an 'unchanged deterministic failure').
 TRANSIENT = frozenset({'host-memory-pressure', 'measurement-unavailable', 'cancelled',
-                       'abandoned', 'capacity-timeout', 'disk-space', 'capacity-credit-unavailable'})
+                       'abandoned', 'capacity-timeout', 'disk-space', 'capacity-credit-unavailable'}) | WAITABLE
 PS_ENVIRONMENT = {'TZ': 'UTC', 'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'}
 PS_TIMEOUT_SECONDS = 5  # one process-table read; a bound the queue clock's poll bound counts
 
@@ -96,13 +97,16 @@ def reconcile_running(record: dict, elapsed: float, table: dict | None = None) -
 
 
 def _retry_decision(clip: dict, launch: LaunchRequest) -> Decision | None:
-    """Unchanged deterministic failures get zero retries; transient ones share one per clip."""
+    """Unchanged deterministic failures get zero retries; transient ones share one per clip. After a waitable
+    failure that ran no stage the same identity relaunches fresh: its launch counter is charged, the retry is not."""
     family = launch_family(launch.route)
     previous = [row for row in clip['attempts']
                 if launch_family(row['route']) == family and row['status'] in ('failed', 'abandoned')]
     if not previous or previous[-1]['identity'] != launch.identity:
         return None
     failure = previous[-1]['failure'] or {}
+    if failure.get('category') in WAITABLE and not previous[-1]['stages']:
+        return None
     if failure.get('category') not in TRANSIENT:
         return Decision(False, 'Unchanged deterministic failure: the same inputs already failed '
                         f'({failure.get("category")}: {failure.get("signature")}). Change the inputs '

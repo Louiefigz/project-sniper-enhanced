@@ -18,8 +18,9 @@ Each milestone has its own source and none implies another (plan §5 "Scheduling
   from the current active or draining batch.
 - cleanup: the output's live or unresolved tasks and running launches. Delivery never waits for
   cleanup, and cancellation requested is not cancellation complete.
-- SLA: met only by a visible hand-off by the delivery deadline (minute 40). The older
-  ``slaMiss`` beside these (no MP4 encoded by minute 40) is necessary, not sufficient.
+- SLA: met only by a visible hand-off by the delivery deadline (minute 40). The ``slaMiss``
+  beside these is a v2 Short's recorded hand-off after minute 40 (M-054); without a recorded
+  hand-off it is no MP4 encoded by minute 40, which is necessary, not sufficient (X218 F-m3).
 Times are batch elapsed seconds; null means not established.
 """
 from __future__ import annotations

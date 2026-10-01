@@ -27,7 +27,7 @@ from headless.process_runner import LEDGER_ENV
 from studio import native_budget_binding as binding
 from studio.native_budget_clock import allocation, allocation_remaining, start_anchor
 from studio.native_budget_store import BudgetAuthorityError
-from studio.production import process, process_group, process_watch
+from studio.production import process, process_group, process_output, process_watch
 from studio.production.process import ExportLaunch, TaskClaim
 from studio.production.process_watch import DEADLINE, INTERRUPTED, ExportWatch, OutputRelay
 
@@ -302,7 +302,7 @@ class WatchdogTests(unittest.TestCase):
     def test_the_relayed_output_is_bounded(self) -> None:
         child = self.child('import sys\nsys.stdout.write("x" * 50000)\nsys.stdout.flush()\n')
         out, err = io.StringIO(), io.StringIO()
-        with mock.patch.object(process_watch, 'OUTPUT_LIMIT_BYTES', 1000), contextlib.redirect_stdout(out), \
+        with mock.patch.object(process_output, 'OUTPUT_LIMIT_BYTES', 1000), contextlib.redirect_stdout(out), \
                 contextlib.redirect_stderr(err):
             relay = OutputRelay(child)
             process_watch.watch_child(child, self.watch(), process._Stops(), relay)

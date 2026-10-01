@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -39,6 +40,13 @@ TRAIL_EVENTS = ('clip-handed-off', 'task-claimed', 'task-released', 'packet-reso
                 'clip-added', 'output-authorized',   # the adding events carry each added clip's duplicationCheck
                 'coordination-decision')             # which decision lines they already have (X144)
 SECTIONS = ('preparation', 'encoding', 'visibleMp4', 'matchingStudio', 'editorialApproval', 'cleanup', 'slaMiss')
+# What each miss list means (X218 F-m3: since M-054 a v2 Short's recorded hand-off decides its ``slaMiss``).
+SLA_BASIS = {'slaMisses': "a v2 Short's recorded visible hand-off after its delivery deadline; otherwise no complete "
+                          'MP4 encoded by the delivery deadline (necessary, not sufficient)',
+             'visibleSlaMisses': 'no visible hand-off recorded on the batch clock by the delivery deadline'}
+# (trail directory device, inode, attempt id) of each abandonment whose ``observed`` line is on the trail while its
+# record replace failed (X217 m3). Per process, like X190 n6's checkpoint memo: a restarted reader writes it once more.
+_FAILED_ABANDONMENTS: set = set()
 
 
 @dataclass(frozen=True)
@@ -86,12 +94,32 @@ def commit_observation(session: object, record: dict, elapsed: float, abandoned:
     """Commit a read-only observation (status, wait, archive) with its ``observed`` line. At a full trail one that
     marked nothing commits the record alone, as a heartbeat does (X189 F1): status and wait stay readable, and
     ``observed`` never becomes a settling event, since nothing bounds how often it is read. One that marked dead
-    launches abandoned is a launch outcome, always written (``native_budget_store._terminal``, X190)."""
-    event = {'event': 'observed', 'elapsed': elapsed, 'abandoned': abandoned}
+    launches abandoned is a launch outcome, always written (``native_budget_store._terminal``, X190), once per
+    attempt (X217 m3): when its line reached the trail but the record replace failed, a later observation names only
+    the attempts with no line yet, and one left with none commits the record alone (``_FAILED_ABANDONMENTS``)."""
+    where = os.fstat(session.dir_fd)
+    keys = {attempt: (where.st_dev, where.st_ino, attempt) for attempt in abandoned}
+    fresh = [attempt for attempt in abandoned if keys[attempt] not in _FAILED_ABANDONMENTS]
+    event = {'event': 'observed' if fresh or not abandoned else 'observed-record-only', 'elapsed': elapsed,
+             'abandoned': fresh}
+    size = _trail_bytes(session)
     try:
         session.commit(record, event)
     except TrailFull:   # only an empty observation reaches here: one with abandoned launches is terminal
         session.commit(record, {**event, 'event': 'observed-record-only'})
+    except BudgetAuthorityError:
+        if fresh and _trail_bytes(session) > size:   # the line is on the trail; the record is not
+            _FAILED_ABANDONMENTS.update(keys[attempt] for attempt in fresh)
+        raise
+    _FAILED_ABANDONMENTS.difference_update(keys.values())   # committed: the record now holds them
+
+
+def _trail_bytes(session: object) -> int:
+    """The trail's size now (0 when it cannot be read; ``commit_observation`` compares two reads)."""
+    try:
+        return os.stat(EVENTS, dir_fd=session.dir_fd).st_size
+    except OSError:
+        return 0
 
 
 def _observe(root: Path, batch_id: str) -> tuple[dict, float, tuple[tuple[dict, ...], list[dict]]]:
@@ -167,8 +195,7 @@ def production_status(record: dict, elapsed: float, inputs: StatusInputs) -> dic
         'run': run_status(record, elapsed, inputs.dispatcher), 'ai': ai_usage(record, None, transcripts),
         'elapsedBreakdown': breakdown(record, elapsed, timing, (None, inputs.events)), 'evidence': found,
         'timingJournal': journal, 'visibleSlaMisses': misses,
-        'slaBasis': {'slaMisses': 'no complete MP4 encoded by the delivery deadline (necessary, not sufficient)',
-                     'visibleSlaMisses': 'no visible hand-off recorded on the batch clock by the delivery deadline'}}
+        'slaBasis': dict(SLA_BASIS)}
     return status if inputs.full else compact(status)
 
 

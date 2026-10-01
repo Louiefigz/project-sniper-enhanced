@@ -19,6 +19,9 @@ fixture and the ledger against the landed fields.
     capacityClock.stall: None, capacity-stalled or         M-044 / M-050        yes         v1 clocks have none
       cancelled; <= 64 occupants (else truncated); <= 1 cancel row; occupants sorted and distinct; cancelled iff one
       cancel row; a state names its occupants, not after the clock's observed time, its cancel not before it
+    capacityClock.handoff: None or {elapsed, countedSeconds, M-044 / M-054        yes         v1 clocks have none
+      totalSeconds, deadlineElapsed, onTime}; only on a handed-off clip; onTime iff elapsed <= deadlineElapsed;
+      countedSeconds <= totalSeconds <= elapsed (X218 F-m1); written once (queue_handoff.record_handoff)
     task completed with an unresolved resource             M-042                yes         holds no such row
     production.closure {closedElapsed, unresolvedAtClose}  M-043                yes    opt  absent
     host unresolved-executions.jsonl (its own schema 1)    M-043                yes         not a record field
@@ -32,7 +35,8 @@ fixture and the ledger against the landed fields.
     production.storage {ceilingBytes, minimumFreeBytes,    M-044 / M-147        val    opt  absent
       basis} (production.production_optional)
     source-store extractionRaster, if held in the record   M-150                no          M-150 states it
-    launchError travels in events only and adds no record field (M-042).
+    launchError travels in events only and adds no record field (M-042); so do the hand-off's clock on its
+    clip-handed-off event (M-054) and a statement's phase on task-resource-settled (X217 m2b).
 
 Version 7 adds bounded logical section families within existing counted attempts.
 Version 6 adds closed section-owner history; lifting schema 5/6 preserves clocks and counters.

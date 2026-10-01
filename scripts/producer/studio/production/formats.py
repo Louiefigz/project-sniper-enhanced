@@ -201,7 +201,7 @@ def clip_deadlines(record: dict, clip: dict | None) -> dict:
 def run_deadlines(record: dict) -> dict:
     """The run's deadlines: run-scoped work ends with the latest output's milestones.
 
-    A Shorts-only run gets exactly the values of ``record['deadlines']``.
+    A Shorts-only run gets its Shorts' latest own deadlines, which added Shorts and credit move (M-052, X217 n2).
     """
     rows = [clip_deadlines(record, clip) for clip in record['clips'].values()]
     return {**record['deadlines'], **{key: max(row[key] for row in rows) for key in TIMED}}

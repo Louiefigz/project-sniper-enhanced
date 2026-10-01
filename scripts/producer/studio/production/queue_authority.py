@@ -24,7 +24,9 @@ CHECKPOINT_SECONDS = 300.0
 # X183 m5: the largest checkpoint event written. MAX_CHECKPOINTS (32) per Short x BOUNDS['clips'] (32) such events
 # fill at most 512 KiB of native_budget_store.TERMINAL_RESERVE_BYTES (test_queue_clock_v2_c, test_trail_reserve_budget).
 CHECKPOINT_EVENT_BYTES = 512
-# (authority, batch, checkpoint count, clip) whose line was written but whose record was not (X190 n6).
+# (authority, batch, checkpoint count, clip) whose line was written but whose record was not (X190 n6). It lives only
+# in this process: a supervisor restarted under a persistent replace failure appends that checkpoint once more per
+# restart (a bound, not a defect: X217 n6).
 _FAILED_CHECKPOINTS: set = set()
 
 
@@ -132,7 +134,9 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
 
     A same-state heartbeat writes no trail event, except the one that brings the Short's credit
     ``CHECKPOINT_SECONDS`` past its last checkpoint (``capacity-checkpoint``, while fewer than ``MAX_CHECKPOINTS``)
-    or that names or clears its stall (``capacityState`` in the event, M-050).
+    or that names or clears its stall (``capacityState`` in the event, M-050). An owner's end is a settling line
+    (``_settled_line``) only when it removes an owner row (its own, or a recovered or orphaned one); the end of an
+    owner the record no longer holds is a heartbeat, so settling lines stay bounded by the rows (X217 M1).
     """
     from studio.native_budget_binding import advance_clock
     record = session.read()
@@ -146,27 +150,39 @@ def _observe_locked(session: object, context: dict, observation: dict, recovered
     before, stall = queue_clock.excluded(clip), queue_stall.state(clip)
     after = queue_clock.observe_worker(record, context, observation, elapsed)
     named = {'capacityState': queue_stall.state(clip)} if queue_stall.state(clip) != stall else {}   # M-050
-    event = 'capacity-settled' if state == 'finished' else 'capacity-heartbeat' if heartbeat and not named \
-        else 'capacity-observed'
+    settles = state == 'finished' and (prior is not None or bool(removed or orphaned))
+    quiet = heartbeat or state == 'finished' and not settles
+    event = 'capacity-settled' if settles else 'capacity-heartbeat' if quiet and not named else 'capacity-observed'
     # A checkpoint carries only what queue_audit reads (X183 m5); every other event also carries its evidence.
     mark = {'event': 'capacity-checkpoint', 'clipId': clip_id, 'worker': context['workerId'], 'state': state,
             'elapsed': elapsed, 'excludedSeconds': after}
-    if event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
+    if heartbeat and event == 'capacity-heartbeat' and _checkpoint_due(clip, mark):
         count = clip['capacityClock']['checkpoint']['count']   # the checkpoint this heartbeat makes due
         _commit_checkpoint(session, record, mark, (context.get('authority'), context.get('batchId'), count))
         return after
     from studio.native_budget_store import TrailFull
+    line = _settled_line(mark, removed, orphaned, named) if settles else {
+        **mark, 'event': event, 'creditedSeconds': after - before, 'resource': observation['resource'],
+        'evidence': observation['evidence'], 'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named}
     try:
-        session.commit(record, {**mark, 'event': event, 'creditedSeconds': after - before,
-                                'resource': observation['resource'], 'evidence': observation['evidence'],
-                                'recoveredWorkers': removed, 'orphanedWorkers': orphaned, **named})
+        session.commit(record, line)
     except TrailFull:
-        if not (heartbeat and named):
+        if not (quiet and named):
             raise
         # X184 (ruling b): at a full trail a stall change is committed record-only, as the heartbeat it was: the
         # record and status still name the state, and the waiting render does not fail (as at 2bda52b5).
         session.commit(record, {**mark, 'event': 'capacity-heartbeat'})
     return after
+
+
+def _settled_line(mark: dict, removed: list[str], orphaned: list[str], named: dict) -> dict:
+    """An owner's end as its settling line: only what ``queue_audit`` reads, every owner named by its 16-hex digest
+    (``queue_audit.owner_digest``), so the line's size does not depend on the owners' paths (X217 M1)."""
+    from studio.production.queue_audit import owner_digest
+    return {'event': 'capacity-settled', 'clipId': mark['clipId'], 'workerDigest': owner_digest(mark['worker']),
+            'state': mark['state'], 'elapsed': mark['elapsed'], 'excludedSeconds': mark['excludedSeconds'],
+            'recoveredDigests': sorted(map(owner_digest, removed)),
+            'orphanedDigests': sorted(map(owner_digest, orphaned)), **named}
 
 
 def _commit_checkpoint(session: object, record: dict, mark: dict, key: tuple) -> None:

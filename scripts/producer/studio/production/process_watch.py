@@ -4,7 +4,7 @@
 ``native_export.py`` forwards to, ``native_batch.py run-media`` and the legacy
 ``resume_final_qc.py``). The watchdog holds no pool lease, reserves nothing and charges nothing.
 It starts the exporter in its own session with a one-use claim (``process.write_claim``) and the
-owned-session ledger variable, relays its output (at most ``OUTPUT_LIMIT_BYTES``), and watches:
+owned-session ledger variable, relays its output (at most ``OUTPUT_LIMIT_BYTES``, ``process_output``), and watches:
 
 - the deadline, which always exists, and is a Short's (another format's project is refused). A
   task's or a bound project's batch gives its delivery deadline
@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import json
 import os
-import selectors
 import shutil
 import subprocess
 import sys
@@ -36,18 +35,18 @@ from headless.process_runner import LEDGER_ENV
 from studio import native_budget_store as store
 from studio.native_budget_batches import BudgetRefused
 from studio.native_budget_clock import BudgetClockError, ClockAnchor, allocation, allocation_remaining, observe
-from studio.native_budget_clock import start_anchor
+from studio.native_budget_clock import start_anchor, uncredited_remaining
 from studio.native_budget_registry import owner_binding
 from studio.native_budget_store import BudgetAuthorityError
 from studio.native_export import export_adapter
 from studio.production import process, process_group, queue_credit
 from studio.production.process import ExportLaunch, TaskClaim
+from studio.production.process_output import OUTPUT_LIMIT_BYTES, OutputRelay  # noqa: F401  re-exported (P1-RP5)
 from studio.production.process_settle import STOP_REQUESTED, UNACKNOWLEDGED, Ending, settle
 
 DEADLINE, INTERRUPTED = 'watchdog-deadline', 'watchdog-interrupted'
 ONE_OUTPUT_SECONDS = 3600.0
 ACK_SECONDS = 60.0
-OUTPUT_LIMIT_BYTES = 4 * 1024 ** 2
 REFUSED_EXIT = 3
 
 
@@ -128,7 +127,11 @@ def _task_row(task: TaskClaim) -> dict | None:
 
 
 def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
-    """Why the child must stop now, or None; a named credit error after the owner's grace (queue_credit)."""
+    """Why the child must stop now, or None; a named credit error after the owner's grace (queue_credit).
+
+    The grace pauses the claim, cancel and acknowledgement checks only: while it runs, the batch deadline still stops
+    the child, read without credit (``uncredited_remaining``, never later than the credited deadline, X218 F-m5).
+    """
     if stops.reason:
         return INTERRUPTED, f'the watchdog {stops.reason}'
     try:
@@ -137,6 +140,8 @@ def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
         if grant:
             remaining = min(remaining, allocation_remaining(grant) + process.DEADLINE_GRACE_SECONDS)
     except queue_credit.CREDIT_ERRORS as error:
+        if uncredited_remaining(watch.deadline) <= 0:
+            return DEADLINE, 'the export ran past its batch deadline'
         return queue_credit.watchdog_stop(error)
     if remaining <= 0:
         return DEADLINE, 'the export ran past its launch grant' if grant else 'the export ran past its batch deadline'
@@ -151,52 +156,6 @@ def _reason(watch: ExportWatch, stops: object) -> tuple[str, str] | None:
     if row is not None and row['handle'] is None and time.monotonic() - watch.started > ACK_SECONDS:
         return UNACKNOWLEDGED, f'the exporter did not acknowledge its claim within {ACK_SECONDS:.0f} s; nothing ran'
     return None
-
-
-class OutputRelay:
-    """The child's stdout and stderr copied to this process's, at most ``OUTPUT_LIMIT_BYTES`` in all."""
-
-    def __init__(self, child: subprocess.Popen) -> None:
-        """Watch both pipes of ``child``."""
-        self.selector, self.written, self.cut = selectors.DefaultSelector(), 0, False
-        for pipe, target in ((child.stdout, sys.stdout), (child.stderr, sys.stderr)):
-            os.set_blocking(pipe.fileno(), False)
-            self.selector.register(pipe, selectors.EVENT_READ, target)
-
-    def pump(self, timeout: float) -> None:
-        """Copy what the child wrote within ``timeout`` seconds (bounded); with both pipes closed, just wait."""
-        if not self.selector.get_map():
-            time.sleep(timeout)
-            return
-        for key, _mask in self.selector.select(timeout):
-            chunk = os.read(key.fileobj.fileno(), 65536)
-            if not chunk:
-                self.selector.unregister(key.fileobj)
-                continue
-            self._write(key.data, chunk)
-
-    def _write(self, target: object, chunk: bytes) -> None:
-        """Forward what fits under the bound; past it, one marker and nothing more."""
-        kept = chunk[:max(OUTPUT_LIMIT_BYTES - self.written, 0)]
-        binary = getattr(target, 'buffer', None)
-        if kept and binary is None:
-            target.write(kept.decode('utf-8', errors='replace'))
-        elif kept:
-            binary.write(kept)
-        target.flush()
-        self.written += len(kept)
-        if len(kept) < len(chunk) and not self.cut:
-            self.cut = True
-            sys.stderr.write(f'[export output past {OUTPUT_LIMIT_BYTES} bytes is not shown]\n')
-
-    def drain(self) -> None:
-        """Copy what is left once the child's group has ended (bounded: the pipes close with it)."""
-        deadline = time.monotonic() + process.REAP_SECONDS
-        while self.selector.get_map() and time.monotonic() < deadline:
-            self.pump(0.2)
-        for key in list(self.selector.get_map().values()):
-            self.selector.unregister(key.fileobj)
-            key.fileobj.close()
 
 
 def watch_child(child: subprocess.Popen, watch: ExportWatch, stops: object, relay: OutputRelay) -> tuple | None:

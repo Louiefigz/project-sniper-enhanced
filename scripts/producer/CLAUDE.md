@@ -1365,10 +1365,11 @@ docs belong to P3b.
   writes a row (a `finished` observation, a recovery), and a hand-off removes none. Status, wait and archive commit
   through `native_budget_status.commit_observation`: an empty observation at a full trail is record-only
   (`observed-record-only`, `native_budget_store.RECORD_ONLY`), one that marked dead launches abandoned is always
-  written (`native_budget_store._terminal`, F1). The trail's reserve is 4 MiB and its bound 19 MiB, so every settling
-  class's worst case fits (`test_trail_reserve_budget`). A failed checkpoint is written once (`_FAILED_CHECKPOINTS`,
-  n6); status shows a handed-off Short as not stalled (`queue_stall.shown_state`, s1); a settlement re-track only
-  clears a stall. Tests: `test_queue_clock_v2_f.py`, `test_queue_clock_stall_c.py`, `test_trail_reserve_budget.py`.
+  written (`native_budget_store._terminal`, F1). The trail's reserve was raised to 4 MiB and its bound to 19 MiB (12
+  and 27 MiB since M-RP5, which counts every settling class; `test_trail_reserve_budget`). A failed checkpoint is
+  written once (`_FAILED_CHECKPOINTS`, n6); status shows a handed-off Short as not stalled (`queue_stall.shown_state`,
+  s1); a settlement re-track only clears a stall. Tests: `test_queue_clock_v2_f.py`, `test_queue_clock_stall_c.py`,
+  `test_trail_reserve_budget.py`.
 - **Lock-free credit reads (M-053; C9).** `production/queue_credit.py` reads a Short's settled credit and a task row
   without the batch lock (`snapshot`: the atomically replaced `authority.json`, checked only by
   `queue_clock_schema.problem` for the clip and by the batch status). Credit is cached per clip for
@@ -1383,8 +1384,9 @@ docs belong to P3b.
   `queue_credit.watchdog_stop`), and `process_settle._name_credit_stop` gives a launch the exporter closed as
   `cancelled` the watchdog's credit category, so a regression gets no retry. `TRANSIENT` gains
   `capacity-credit-unavailable` (L-J J1): one retry. Documented limits: the watchdog's claim, cancel and ack checks
-  pause at most 15 s during a credit grace (D-O10); the task row's own tolerance can end one poll before the credit
-  error, which loses the name but not the retry (D3). `process_watch.py` is 299/300: its next editor splits it.
+  pause at most 15 s during a credit grace (D-O10; the batch deadline never pauses since M-RP5, X218 F-m5); the task
+  row's own tolerance can end one poll before the credit error, which loses the name but not the retry (D3).
+  `process_watch.py` was split at M-RP5 (`OutputRelay` in `production/process_output.py`).
   Tests: `test_queue_credit_snapshot.py`, `test_queue_credit_aborts.py`, `test_queue_clock_v2_f.GrantDeltaTests`.
 - **Counted time stops at delivery; the hand-off is timed (M-054; C12).** `queue_clock.status` (v2 clocks,
   `queue_handoff.frozen_times`) freezes `countedProductionSeconds` at the first delivery (`countedAtDeliverySeconds`,
@@ -1409,3 +1411,32 @@ docs belong to P3b.
   `native_budget_launch.PS_TIMEOUT_SECONDS` (L-J J2) = 27.5 s; `queue_audit.SETTLE_TOLERANCE` follows it (M-RPIF's
   n1 tolerance). Tests: `test_queue_clock_v2_c.CadenceTests`,
   `test_native_queue_accounting_waits.TrailBoundTests`, `test_queue_clock_v2_d.OrphanTests`.
+- **P1 fix round (M-RP5; X217, X218).** The trail's bound, terminal reserve and settling classes live in
+  `studio/native_budget_trail.py` (re-exported by the store). New work stops at 15 MiB; the reserve is 12 MiB and the
+  bound 27 MiB, because `test_trail_reserve_budget` derives its classes from `TERMINAL_EVENTS` plus the abandoning
+  `observed` line (a class without a worst case in `tests/_trail_budget_classes.py` fails) and counts every writer:
+  about 10.6 MiB (M1). The counting basis, and its one limit (a command repeated under a persistent record replace
+  failure is outside the reserve), is in `native_budget_trail`'s docstring. What keeps the count bounded:
+  - an owner's end (`capacity-settled`, `queue_authority._settled_line`) names owners by 16-hex digest, which
+    `queue_audit` reads beside the older form, and is a line only when it removes an owner row;
+  - `commit-failed` carries `native_budget_trail.error_text` (ASCII-escaped, 96 characters); `commit-unsynced` is no
+    longer a settling event (its commit stands without the line);
+  - a review continuation's outcome line cuts its status and leaves the path to its start line;
+  - a hand-off's evidence paths are bounded at `settlement.DELIVERY_PATH_BYTES`, its times at `handoff.TIME_CHARS`.
+  `api.close` puts its reconcile's settled changes on the close or drain line (`reconciled`, M2); a close that leaves
+  a draining batch draining records nothing (m2a). `api.settle_resource` takes one statement per task and phase
+  (`phase`: `revocation` or `unresolved resource`, m2b), read through `approvals.committed_events`, which decodes only
+  the trail lines naming the event, so it works at a full or padded trail. `queue_audit._cap`
+  caps the waiting window by the checkpoint cadence (m1); `_capacity_rows` reads only the event, its `changes` and
+  its `reconciled` (n1). `native_budget_status.commit_observation` writes an abandoned launch's line once per attempt
+  while its record cannot be replaced (`_FAILED_ABANDONMENTS`, m3). `change-approval` refuses, by `outputs.same_job`'s
+  text, a change into another clip's job (m4). Known limit (m5): a kept word is identified by its transcript index, so
+  the same source seconds bound to a re-numbered transcript of that source are a new job.
+  X218: the hand-off row validator refuses an `onTime` that disagrees with the row's times, times outside
+  `countedSeconds <= totalSeconds <= elapsed`, and a row on a clip not handed off (F-m1); `record_handoff` refuses a
+  second call by name (F-m2); `native_budget_status.SLA_BASIS` names a recorded late hand-off (F-m3); inside a credit
+  grace the watchdog still stops a passed batch deadline, read without credit
+  (`native_budget_clock.uncredited_remaining`, F-m5). By design (K7), a hand-off is judged with the credit settled
+  when it is recorded: credit that accrued before it but settles after it (at most one poll bound, 30 s) does not
+  count. Tests: `test_trail_reserve_budget.py`, `test_queue_clock_v2_g.py`, `test_production_settling_writers.py`,
+  `test_production_duplication_check_b.py`, `test_production_handoff_clock_b.py`, `test_queue_credit_pins.py`.

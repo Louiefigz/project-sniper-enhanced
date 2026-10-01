@@ -29,13 +29,18 @@ from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
 
+from studio.production.host_contract import encoded_length
 from studio.production.media import parse_json
+from studio.production.settlement import DELIVERY_PATH_BYTES
 
 RECORD, CONFIRMATION = 'native-visible-handoff', 'native-visible-handoff-confirmation'
 VISIBLE, VIEWS_READY = 'visible-handoff', 'views-ready'
 VERIFIER = ('studio.native_handoff_confirm', 'verify_confirmation')
 MAX_RECORD_BYTES = 4 * 1024 ** 2
 CLOCK_TOLERANCE_SECONDS = 2.0
+# The hand-off's settling line (``clip-handed-off``) carries its evidence paths and times, so both are bounded for
+# the trail's reserve (X217 M1): a path to DELIVERY_PATH_BYTES encoded, as a delivery's; a time to these characters.
+TIME_CHARS = 64
 
 
 class HandoffEvidenceError(ValueError):
@@ -60,6 +65,9 @@ def _read(path: Path, limit: int = MAX_RECORD_BYTES) -> tuple[bytes, dict]:
         fd = os.open(file, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     except OSError as error:
         raise HandoffEvidenceError(f'{path} cannot be read: {error}') from error
+    if encoded_length(str(file)) > DELIVERY_PATH_BYTES:
+        os.close(fd)
+        raise HandoffEvidenceError(f'{path} is a path longer than {DELIVERY_PATH_BYTES} encoded bytes')
     with os.fdopen(fd, 'rb') as handle:
         info = os.fstat(fd)
         if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
@@ -81,11 +89,11 @@ def _json(path: Path) -> tuple[dict, dict]:
 def _time(value: object, name: str) -> datetime:
     """An ISO-8601 timestamp with its offset."""
     try:
-        moment = datetime.fromisoformat(value) if type(value) is str else None
+        moment = datetime.fromisoformat(value) if type(value) is str and len(value) <= TIME_CHARS else None
     except ValueError:
         moment = None
     if moment is None or moment.tzinfo is None:
-        raise HandoffEvidenceError(f'{name} is not an ISO-8601 time with its offset')
+        raise HandoffEvidenceError(f'{name} is not an ISO-8601 time with its offset (at most {TIME_CHARS} characters)')
     return moment
 
 

@@ -36,8 +36,8 @@ BATCH = 'batch-auth'
 CANCEL = ('capacity-stall', '--batch', BATCH, '--clip', 'A', '--decision', 'cancel', '--reason', 'TEST give A up')
 
 
-class FullTrailTests(unittest.TestCase):
-    """X189 F1 (status, wait, and an abandoning observation) and X190 s2 (B1, B2) at a full trail."""
+class FullTrailCase(unittest.TestCase):
+    """Batch ``batch-auth`` with Short A, a trail that can be filled, and its TEST process table (no tests here)."""
 
     def setUp(self) -> None:
         """Batch ``batch-auth`` with Short A on the private root; the process table is unreadable unless a test
@@ -74,6 +74,10 @@ class FullTrailTests(unittest.TestCase):
         code, result = run_cli('status', '--batch', BATCH)
         self.assertEqual(code, 0, result)
         return result
+
+
+class FullTrailTests(FullTrailCase):
+    """X189 F1 (status, wait, and an abandoning observation) and X190 s2 (B1, B2) at a full trail."""
 
     def test_status_answers_at_a_full_trail_before_and_after_the_cancel_and_after_close(self) -> None:
         """Stalled, then cancelled, then closed: status answers each time, and names the stall first."""

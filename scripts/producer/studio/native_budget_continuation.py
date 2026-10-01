@@ -15,7 +15,8 @@ from studio.native_budget_store import locked_batch
 from studio.native_export_history import attempt_reservation, require_current_section_attempt
 from studio.native_segments.owners import current_window, revision_windows
 from studio.production.outputs import long_launch_binding
-from studio.production.settlement import launch_outcome
+from studio.production.host_contract import clip_text
+from studio.production.settlement import RESULT_TEXT_BYTES, launch_outcome
 
 
 def reserve_section_review(prior: dict, project: Path, output: Path) -> dict:
@@ -91,7 +92,12 @@ def record_review_outcome(request: dict, result: dict) -> None:
 
 
 def apply_review_outcome(record: dict, request: dict, result: dict, elapsed: float) -> dict | None:
-    """Apply one outcome in the caller's held authority lock; exact already-committed replay is harmless."""
+    """Apply one outcome in the caller's held authority lock; exact already-committed replay is harmless.
+
+    The outcome line is a settling line, bounded for the trail's reserve (X217 M1): the result status, as text, is
+    cut to ``RESULT_TEXT_BYTES`` as launch outcomes are, and the output path is on the continuation's own
+    ``section-review-continuation`` line, not repeated here.
+    """
     binding = request['productionBudget']
     if record['batchId'] != binding['batchId']:
         raise BudgetRefused('Review outcome received another production authority')
@@ -100,8 +106,8 @@ def apply_review_outcome(record: dict, request: dict, result: dict, elapsed: flo
     if result['status'] == 'native-long-checked-for-review' and not append_delivery(clip, binding, result, elapsed):
         return None
     return {'event': 'launch-completed', 'kind': 'section-review-continuation',
-            'attemptId': binding['continuationOf'], 'output': request['output'],
-            'status': result['status'], 'elapsed': elapsed}
+            'attemptId': binding['continuationOf'], 'status': clip_text(str(result['status']), RESULT_TEXT_BYTES),
+            'elapsed': elapsed}
 
 
 def append_delivery(clip: dict, binding: dict, result: dict, elapsed: float) -> bool:

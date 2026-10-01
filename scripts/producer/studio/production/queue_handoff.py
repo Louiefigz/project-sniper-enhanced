@@ -36,9 +36,13 @@ def record_handoff(record: dict, clip: dict, elapsed: float) -> dict | None:
     credit it holds now, and whether the hand-off met it.
 
     Returns the row, or None for a clip without a writable clock (a v1 Short or a Long: its rules are unchanged).
+    A second call is refused by name. Credit that accrued before the hand-off but settles after it (at most one poll
+    bound later, M-055) is not counted: the hand-off is judged with the credit settled when it is recorded (X218 K7).
     """
     if not writable(clip):
         return None
+    if clip['capacityClock']['handoff'] is not None:   # a clock is never reset (X218 F-m2)
+        raise ValueError("This Short's hand-off is already timed on its clock; a clip is handed off once")
     from studio.production.formats import clip_deadlines
     authorized = clip.get('output', {}).get('authorizedElapsed', 0.0)
     deadline = clip_deadlines(record, clip)['deliverySeconds']

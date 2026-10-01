@@ -28,11 +28,17 @@ the run; the forecast admits it or names the conflict. The same job is refused
 by name: the same title (compared after folding case, width, spacing and
 invisible characters), source and ordered kept words as another clip, or a
 revision in that clip's `change-approval` lineage. Rename a clip with
-`change-approval`, which keeps its clock, never by adding it again. A distinct
+`change-approval`, which keeps its clock, never by adding it again; a change
+that would make a clip another clip's job is refused by name too. A distinct
 job whose source seconds overlap another clip's is admitted; the overlap is
 recorded as `duplicationCheck` on its adding event, shown per output by
 `status`, and noted once as a coordinator decision. A decision line the trail
-could not take stays listed under `status`'s `pendingDecisions`.
+could not take stays listed under `status`'s `pendingDecisions`. If writing the
+decision line fails for another reason, `add-clip` reports the error after the
+clip was added: the clip stands, and running the same `add-clip` again is a
+replay that adds nothing. Known limit: kept words are identified by their
+transcript indices, so the same source seconds bound to a second transcript of
+that source whose numbering is shifted are a new job.
 
 Each newly authorized Short has 2,400 counted production seconds. Only intervals
 observed by the heavy-work scheduler as waiting solely for occupied render
@@ -166,14 +172,26 @@ most 512 bytes; an owner path too long for that writes none, which only loosens
 the check), and `status` checks each Short's credit against
 its trail (`capacityAudit`; per output `creditVerified`: false for a total the
 trail cannot account for). Each capacity line's total is checked against the
-line before it, so a hand-edited total stays visible after the Short's next
-event carries it; a watchdog or reconcile settlement writes the credit and the
-owners it removed on its own settling line; an owner the record lost with no
-line explaining it is `unexplained-removal`, and a malformed line is
-`malformed-trail`. This detects a hand-edited record, not a writer who
-rewrites the record and its trail together. Settling lines (outcomes,
-settlements, stall decisions, abandoned launches, the close) always fit the
-trail's 4 MiB reserve; new work stops 15 MiB in. A delivered Short's counted time
+line before it, and credit can grow past a line by at most the checkpoint
+cadence (300 s) without another line, so a hand-edited total stays visible
+after the Short's next event carries it, even one made while its waiting owner
+was silent. A watchdog, reconcile, close or drain settlement writes the credit
+and the owners it removed on its own settling line; an owner the record lost
+with no line explaining it is `unexplained-removal`, and a malformed line is
+`malformed-trail`. A checkpoint whose record could not be replaced is written
+once and leaves the committed trail, so the next audit window is one cadence
+short: a false `exceeds-trail`, never a missed edit. This detects a hand-edited
+record, not a writer who rewrites the record and its trail together. New work
+stops 15 MiB into the trail. Past that point only settling lines are written
+(outcomes, settlements, statements, stall decisions, abandoned launches,
+hand-offs, the close), each a bounded number of times, and their worst case
+fits the trail's 12 MiB reserve (`test_trail_reserve_budget`), so a full trail
+can still settle every task and close. A close that leaves a draining batch
+draining records nothing, and `settle-resource` takes one statement per task
+and phase. One limit: a commit whose record cannot be replaced writes its line
+and `commit-failed`, and the reserve holds one such failure only for the
+automatic writers (checkpoints, abandoned launches); repeating a command under a
+persistent write failure is outside it. A delivered Short's counted time
 stops at its first delivery (`countedAtDeliverySeconds`, from the credit frozen
 there). `handoff` records on the Short's clock its counted and total time and
 whether the visible hand-off met the Short's deadline with the credit it held

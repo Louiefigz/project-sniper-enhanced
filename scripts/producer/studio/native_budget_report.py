@@ -3,9 +3,12 @@
 The coordinator reads this instead of reconstructing state from history. It
 states SLA misses plainly: an output without a delivery made by its own deadline
 (a Short's minute 40, a Long's 180 minutes) is a miss, never a success because
-work stopped on time or finished late. Each output is reported under its own
-format policy; a run holding a Long also reports the mixed forecast. That
-``slaMiss`` is necessary, not sufficient: the SLA is a visible hand-off, which
+work stopped on time or finished late. A v2 Short whose visible hand-off is
+recorded is judged by that hand-off instead (M-054, C12; ``sla_miss``): a late
+hand-off is a miss even after an on-time export, and an on-time one is not (X218
+F-m3). Each output is reported under its own format policy; a run holding a Long
+also reports the mixed forecast. Without a recorded hand-off, ``slaMiss`` is
+necessary, not sufficient: the SLA is a visible hand-off, which
 ``native_budget_status.production_status`` (``native_batch.py status``) reports per
 output beside it. ``wait`` and ``close`` keep this authority-only ``batch_status``.
 """
@@ -40,7 +43,7 @@ NO_VIEWS = TrailViews()
 
 def batch_status(record: dict, elapsed: float, views: TrailViews = NO_VIEWS) -> dict:
     """Summarize the authoritative record at one observed elapsed time (``views``: what ``status`` read)."""
-    deadlines = clip_deadlines(record, None)  # a Shorts-only run: exactly its batch deadlines
+    deadlines = clip_deadlines(record, None)  # the run's: its outputs' latest, with credit and added Shorts (X217 n2)
     authorization = record['production']['authorization']
     clips = {clip_id: clip_status(record, clip_id, elapsed, views) for clip_id in record['clips']}
     status = {'batchId': record['batchId'], 'status': record['status'],

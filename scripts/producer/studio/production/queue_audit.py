@@ -9,7 +9,13 @@ passes, and only while an owner waits, so:
   and must equal it when the trail leaves no owner of the clip waiting (``_waiting_after``, X183 m2);
 - each row's total may exceed its predecessor's only by the seconds between them while the trail up to the
   predecessor leaves an owner waiting (``_chain_break``, X190 m2), so a hand edit stays visible after the engine's
-  next event carries it.
+  next event carries it;
+- both windows are capped by the checkpoint cadence (``_cap``, X217 m1): a waiting owner's heartbeat writes a
+  ``capacity-checkpoint`` once credit is ``CHECKPOINT_SECONDS`` past the last, so while the Short has fewer than
+  ``MAX_CHECKPOINTS`` such lines and every waiting owner's line fits ``CHECKPOINT_EVENT_BYTES``, credit cannot grow
+  further without a line, however long the waiter is silent. An edit made before a settlement therefore stays
+  visible after it. Known limit: a checkpoint whose record replace failed is written once (X190 n6) and drops out
+  of the committed trail, so the window then falls short by one cadence: a false ``exceeds-trail``, failing closed.
 Both bounds allow ``SETTLE_TOLERANCE``: pending credit (at most ``POLL_BOUND_SECONDS``) accrued before one owner's
 event can settle at another's heartbeat after it (X190 n1). A clip is:
 - ``consistent`` inside those bounds (or with no credit and no row);
@@ -18,7 +24,7 @@ event can settle at another's heartbeat after it (X190 n1). A clip is:
 - ``no-trail`` with credit but no capacity row;
 - ``unexplained-removal`` when the record no longer holds an owner the trail leaves waiting and no row explains it
   (X192): every legitimate removal writes one (a ``finished`` observation, a recovery of ended or orphaned owners, a
-  watchdog or reconcile settlement), and a hand-off removes no owner row;
+  watchdog, reconcile, close or drain settlement), and a hand-off removes no owner row;
 - ``malformed-trail`` when one of its capacity rows is not the shape the engine writes (X190 n2), named, never a
   crash.
 Only rows at or before the clip's ``observedElapsed`` count: a later event (committed after this record was
@@ -28,17 +34,23 @@ Longs and historical clips are not audited. Status reads it; ``wait`` does not.
 """
 from __future__ import annotations
 
+import functools
 import hashlib
+import math
+import sys
 from pathlib import Path
 
 from studio.production.approvals import trail_events
 from studio.production.queue_clock import POLL_BOUND_SECONDS, SETTLED, writable
-from studio.production.queue_clock_schema import number
+from studio.production.queue_clock_schema import MAX_CHECKPOINTS, number
 
 CAPACITY_EVENTS = ('capacity-observed', 'capacity-checkpoint', 'capacity-settled')
 SETTLEMENT = 'capacity-settlement'   # one settlement entry, read as a row of its Short (X189 F2)
 TOLERANCE = 1e-6
 SETTLE_TOLERANCE = POLL_BOUND_SECONDS + TOLERANCE
+# The event lists whose dict items can carry a settlement entry (X217 n1): tasks-reconciled's changes and the close's
+# or drain's settled changes. A settlement on the event itself (task-*) is read too; no other list is.
+SETTLING_LISTS = ('changes', 'reconciled')
 
 
 def owner_digest(worker: str) -> str:
@@ -70,7 +82,7 @@ def _capacity_rows(events: list[dict]) -> list[dict]:
     """The capacity events, and each settlement entry as a ``capacity-settlement`` row of its Short, in order."""
     rows = []
     for event in events:
-        holders = [event, *(item for value in event.values() if type(value) is list for item in value
+        holders = [event, *(item for key in SETTLING_LISTS if type(event.get(key)) is list for item in event[key]
                             if type(item) is dict)]
         rows += [event] if event.get('event') in CAPACITY_EVENTS else []
         rows += [{**entry, 'event': SETTLEMENT, 'clipId': clip_id} for holder in holders
@@ -90,21 +102,30 @@ def _committed_trail(root: Path, batch_id: str) -> list[dict]:
         raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
 
 
+def _names(row: dict) -> list:
+    """The owner lists a row names: a settlement's removed digests; a compact ``capacity-settled`` line's own,
+    recovered and orphaned digests (X217 M1); any other event's (or a legacy settled line's) owner keys."""
+    if row['event'] == SETTLEMENT:
+        return [row.get('removedWorkers')]
+    if 'workerDigest' in row:
+        return [[row['workerDigest']], row.get('recoveredDigests'), row.get('orphanedDigests')]
+    return [[row.get('worker')], row.get('recoveredWorkers', []), row.get('orphanedWorkers', [])]
+
+
 def _well_formed(row: dict) -> bool:
-    """A row the engine writes: numeric time and total, and (an event) a str owner and state and lists of str
-    owners, or (a settlement) a list of str digests."""
+    """A row the engine writes: numeric time and total, lists of str owners or digests (``_names``), and (an event)
+    a str state."""
     if not (number(row.get('elapsed')) and number(row.get('excludedSeconds'))):
         return False
-    names = [row.get('removedWorkers')] if row['event'] == SETTLEMENT else \
-        [row.get('recoveredWorkers', []), row.get('orphanedWorkers', [])]
-    worker_ok = row['event'] == SETTLEMENT or (type(row.get('worker')) is str and type(row.get('state')) is str)
-    return worker_ok and all(type(value) is list and all(type(name) is str for name in value) for value in names)
+    state_ok = row['event'] == SETTLEMENT or type(row.get('state')) is str
+    return state_ok and all(type(value) is list and all(type(name) is str for name in value) for value in _names(row))
 
 
 def _step(waiting: set, row: dict) -> None:
-    """Apply one row to the owners the trail leaves waiting."""
-    if row['event'] == SETTLEMENT:
-        waiting -= {key for key in waiting if owner_digest(key) in row['removedWorkers']}
+    """Apply one row to the owners the trail leaves waiting (a row naming digests removes the owners they name)."""
+    if row['event'] == SETTLEMENT or 'workerDigest' in row:
+        named = {name for value in _names(row) for name in value}
+        waiting -= {key for key in waiting if owner_digest(key) in named}
         return
     waiting -= {*row.get('recoveredWorkers', ()), *row.get('orphanedWorkers', ())}
     (waiting.add if row['state'] == 'waiting' else waiting.discard)(row['worker'])
@@ -124,13 +145,39 @@ def _waiting_after(trail: list[dict]) -> bool:
     return bool(_waiting_set(trail))
 
 
+def _cap(waiting: set, clip_id: object, checkpoints: int) -> float:
+    """How far credit can grow past a row with no line (X217 m1): ``CHECKPOINT_SECONDS`` while fewer than
+    ``MAX_CHECKPOINTS`` checkpoint lines precede it and every waiting owner's line fits ``CHECKPOINT_EVENT_BYTES`` at
+    its widest (``queue_authority._checkpoint_due``); otherwise unbounded here. A row with no clip id is measured
+    with the longest one (looser, never a false alarm)."""
+    from studio.production.queue_authority import CHECKPOINT_SECONDS
+    clip = clip_id if type(clip_id) is str else 'C' * 64
+    fits = all(_fits(clip, key) for key in waiting)
+    return CHECKPOINT_SECONDS if fits and checkpoints < MAX_CHECKPOINTS else math.inf
+
+
+@functools.lru_cache(maxsize=1024)
+def _fits(clip_id: str, worker: str) -> bool:
+    """Whether this owner's checkpoint line fits ``CHECKPOINT_EVENT_BYTES`` at its widest numbers."""
+    from studio.native_budget_store import canonical
+    from studio.production.queue_authority import CHECKPOINT_EVENT_BYTES
+    widest = sys.float_info.max
+    return len(canonical({'event': 'capacity-checkpoint', 'clipId': clip_id, 'worker': worker, 'state': 'waiting',
+                          'elapsed': widest, 'excludedSeconds': widest})) <= CHECKPOINT_EVENT_BYTES
+
+
 def _chain_break(trail: list[dict]) -> bool:
-    """Whether some row carries more credit than its predecessor's could have grown to (X190 m2)."""
+    """Whether some row carries more credit than its predecessor's could have grown to (X190 m2, X217 m1)."""
     waiting: set = set()
+    checkpoints = 0
     for prior, row in zip(trail, trail[1:]):
         _step(waiting, prior)
-        window = row['elapsed'] - prior['elapsed'] if waiting else 0.0
-        if row['excludedSeconds'] > prior['excludedSeconds'] + max(0.0, window) + SETTLE_TOLERANCE:
+        checkpoints += prior['event'] == 'capacity-checkpoint'
+        growth = row['excludedSeconds'] - prior['excludedSeconds'] - SETTLE_TOLERANCE
+        if growth <= 0.0:
+            continue
+        if not waiting or growth > min(row['elapsed'] - prior['elapsed'], _cap(waiting, prior.get('clipId'),
+                                                                               checkpoints)):
             return True
     return False
 
@@ -147,7 +194,9 @@ def _audit_clip(clip: dict, events: list[dict]) -> dict:
         status = 'consistent' if recorded == 0.0 else 'no-trail'
         return {'status': status, 'recordedSeconds': recorded, 'trailSeconds': None, 'trailElapsed': None}
     last, waiting = trail[-1], _waiting_set(trail)
-    window = max(0.0, observed - last['elapsed']) if waiting else 0.0
+    checkpoints = sum(1 for row in trail if row['event'] == 'capacity-checkpoint')
+    window = min(max(0.0, observed - last['elapsed']), _cap(waiting, last.get('clipId'), checkpoints)) \
+        if waiting else 0.0
     ceiling = last['excludedSeconds'] + window + SETTLE_TOLERANCE
     status = 'unexplained-removal' if waiting - set(clock['workers']) else 'below-trail' \
         if recorded < last['excludedSeconds'] else 'exceeds-trail' \

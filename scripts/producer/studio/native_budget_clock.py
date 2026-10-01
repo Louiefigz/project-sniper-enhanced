@@ -117,12 +117,20 @@ def allocation(anchor: ClockAnchor, remaining: float, cleanup_reserve: float) ->
 
 
 def allocation_remaining(grant: dict) -> float:
-    """Seconds left in one granted allocation; a different boot has none left."""
+    """Seconds left in one granted allocation, with the Short's settled queue credit; a different boot has none left."""
+    if boot_id() != grant['boot']:
+        return uncredited_remaining(grant)
+    from studio.production.queue_authority import credit_delta
+    return uncredited_remaining(grant) + credit_delta(grant)
+
+
+def uncredited_remaining(grant: dict) -> float:
+    """Seconds left in one granted allocation without queue credit (credit only adds, so never more than
+    ``allocation_remaining``); a different boot has none left. It reads no authority (X218 F-m5)."""
     wall = grant['epochDeadline'] - time.time()
     if boot_id() != grant['boot']:
         return min(wall, 0.0)
-    from studio.production.queue_authority import credit_delta
-    return min(wall, grant['continuousDeadline'] - continuous_now()) + credit_delta(grant)
+    return min(wall, grant['continuousDeadline'] - continuous_now())
 
 
 def remaining_seconds(request: dict) -> float | None:

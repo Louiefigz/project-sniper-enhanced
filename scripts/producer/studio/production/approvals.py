@@ -31,7 +31,7 @@ from studio.production.claims import Outcome
 from studio.production.dependencies import refresh
 from studio.production.duplication_check import ADDING_EVENTS, pending_decisions, pending_report, recorded_checks
 from studio.production.host_contract import clip_text, encoded_length
-from studio.production.outputs import OutputAuthorization, authorize_output
+from studio.production.outputs import OutputAuthorization, authorize_output, same_job
 from studio.production.session import transact
 from studio.production.tasks import TaskRefused
 
@@ -158,9 +158,10 @@ def record_script_change(root: Path, batch_id: str, clip_id: str, change: Approv
 
     def operation(record: dict, elapsed: float) -> Outcome:
         """Append the changed approval and report what changed."""
-        result = change_approval(record, clip_id, approval, elapsed)
-        if 'refusal' in result:
-            raise TaskRefused(result['refusal'])
+        result = change_approval(record, clip_id, approval, elapsed)   # never into another clip's job (X217 m4)
+        refusal = result.get('refusal') or same_job(record, clip_id, {'approvals': [result['row']]})
+        if refusal:
+            raise TaskRefused(refusal)
         result['row']['reason'] = reason
         refresh(record, elapsed)                         # work built on the old approval stops satisfying
         event = {'event': 'approval-changed', 'clipId': clip_id, 'changed': result['changed'],
@@ -178,6 +179,19 @@ def committed_trail(session: BatchSession, batch_id: str) -> list[dict]:
     except (OSError, DurableFileError) as error:
         raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
     return trail_events(raw)
+
+
+def committed_events(session: BatchSession, batch_id: str, name: str) -> list[dict]:
+    """The committed ``name`` events of the locked batch's trail. Only the lines that mention ``name`` are decoded (an
+    event and its own ``commit-failed`` both do, and are adjacent), so the rest of the trail, however long or padded,
+    is never parsed: a settling command that reads its own earlier lines works at a full trail (X217 m2b)."""
+    try:
+        raw = read_private_file(session.dir_fd, EVENTS, 2 * MAX_EVENT_BYTES)
+        needle = json.dumps(name).encode()
+        rows = trail_events(b'\n'.join(line for line in raw.splitlines() if needle in line))
+    except (OSError, DurableFileError, UnicodeError, ValueError) as error:
+        raise BudgetAuthorityError(f'Budget event trail for {batch_id} is unreadable: {error}') from error
+    return [row for row in rows if row.get('event') == name]
 
 
 def trail_events(raw: bytes) -> list[dict]:

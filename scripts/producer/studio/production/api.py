@@ -13,14 +13,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from studio.native_budget_binding import advance_clock
 from studio.native_budget_launch import reconcile_running
 from studio.native_budget_policy import close_refusal
 from studio.production import callbacks, claims, director_activity, lifecycle, outputs, queue_stall
 from studio.production.director_activity import DirectorActivity
 from studio.production.queue_stall import StallDecision
 from studio.native_budget_staging import staged_starts  # noqa: F401 - re-exported for the operator's listing
+from studio.native_budget_store import locked_batch
 from studio.production.approvals import (  # noqa: F401 - re-exported: the approval API callers import from here
-    AddedClip, ApprovalChange, add_clip, approval_for_project, read_approval, record_script_change,
+    AddedClip, ApprovalChange, add_clip, approval_for_project, committed_events, read_approval, record_script_change,
     recorded_duplication,
 )
 from studio.production.authorization import discard_staged  # noqa: F401 - re-exported: the operator's discard
@@ -31,7 +33,7 @@ from studio.production.host_contract import clip_text, parse_event
 from studio.production.reconcile import apply_host_event, current_observation, reconcile_tasks
 from studio.production.session import read_now, transact
 from studio.production.tasks import TaskRefused, TaskSpec, enqueue, task_of
-from studio.production.queue_clock import task_deadline
+from studio.production.queue_clock import SETTLED, task_deadline
 
 
 def enqueue_tasks(root: Path, batch_id: str, specs: tuple[TaskSpec, ...]) -> dict:
@@ -181,26 +183,49 @@ def drain(root: Path, batch_id: str, reason: str) -> dict:
 
 
 def close(root: Path, batch_id: str, host: dict | None = None) -> dict:
-    """Close, listing unresolved work in the closure; drain instead while media is live (``native_batch.py close``)."""
+    """Close, listing unresolved work in the closure; drain instead while media is live (``native_batch.py close``).
+
+    The close or drain event carries the ``capacitySettled`` changes of the reconcile it ran (``reconciled``,
+    X217 M2), so ``queue_audit`` reads those owners' removal. A close that leaves a draining batch draining
+    records nothing (X217 m2a): its answer names what still holds the run open, and ``reconcile`` records what
+    ended meanwhile; run close again once the media work ends.
+    """
     def operation(record: dict, elapsed: float) -> Outcome:
         """Close, or drain while media work is live (the process table is read under the lock)."""
-        observation = current_observation(host)
+        observation, before = current_observation(host), record['status']
         reconcile_running(record, elapsed)
         refusal = close_refusal(record, elapsed)
         if refusal:
             raise TaskRefused(refusal)
         result = lifecycle.close_or_drain(record, elapsed, observation, root)
+        if before == result['status'] == 'draining':
+            return Outcome(False, {}, {**result, 'reconciled': []})
         event = 'batch-closed' if result['status'] == 'closed' else 'batch-draining'
+        settled = [change for change in result['reconciled'] if SETTLED in change]
         return Outcome(True, {'event': event, 'unsettled': result['unsettled'],
                               'runningAttempts': result['runningAttempts'], 'directorEnd': result['directorEnd'],
-                              'revoked': result['revoked']}, result)
+                              'revoked': result['revoked'], **({'reconciled': settled} if settled else {})}, result)
     return transact(root, batch_id, operation)
 
 
 def settle_resource(root: Path, batch_id: str, task_id: str, statement: str) -> dict:
-    """Record the operator's statement on unresolved or revoked work, active or draining; it releases nothing."""
-    return transact(root, batch_id,
-                    lambda record, elapsed: callbacks.settle_resource(record, task_id, statement, elapsed))
+    """Record the operator's statement on unresolved or revoked work, active or draining; it releases nothing.
+
+    One statement per task and phase (X217 m2b): one on its revocation while it is unsettled, one on its unresolved
+    resource once it ended. A second is refused by name, from the committed trail read under the same lock, and
+    nothing is written.
+    """
+    with locked_batch(root, batch_id) as session:
+        record = session.read()
+        elapsed = advance_clock(record)
+        outcome = callbacks.settle_resource(record, task_id, statement, elapsed)
+        phase = outcome.event['phase']
+        if any(row.get('taskId') == task_id and row.get('phase', phase) == phase
+               for row in committed_events(session, batch_id, 'task-resource-settled')):
+            raise TaskRefused(f'Task {task_id} already has the operator\'s statement on its {phase}; one statement '
+                              'is recorded per task and phase')
+        session.commit(record, {**outcome.event, 'elapsed': round(elapsed, 3)})
+    return {**outcome.detail, 'elapsed': round(elapsed, 3), 'committed': True}
 
 
 def declare_director_activity(root: Path, batch_id: str, ref: ClaimRef, activity: DirectorActivity) -> dict:

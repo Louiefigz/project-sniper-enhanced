@@ -274,7 +274,8 @@ def record_usage(record: dict, ref: ClaimRef, usage: dict, elapsed: float) -> Ou
 def settle_resource(record: dict, task_id: str, statement: str, elapsed: float) -> Outcome:
     """Record the operator's statement on unresolved or revoked work, while active or draining (G9, X25).
 
-    It goes into the event (``basis: operator-statement``) and the reason; it never releases anything."""
+    It goes into the event (``basis: operator-statement``, with its ``phase``: the task's ``revocation`` while
+    unsettled, or its ``unresolved resource`` once ended, X217 m2b) and the reason; it never releases anything."""
     task = task_of(record, task_id)
     if record['status'] not in ('active', 'draining'):
         raise TaskRefused(f'Batch {record["batchId"]} is {record["status"]}: statements are recorded while it runs')
@@ -285,7 +286,8 @@ def settle_resource(record: dict, task_id: str, statement: str, elapsed: float) 
     if not (task['state'] in TERMINAL and task['unresolved'] or task['revoked'] and not settled(task)):
         raise TaskRefused(f'Task {task_id} is {task["state"]} with no unresolved resource or unsettled revocation '
                           'to settle')
+    phase = 'unresolved resource' if task['state'] in TERMINAL and task['unresolved'] else 'revocation'
     task['reason'] = clip_text(f'{task["reason"] or task["state"]}; operator statement (not evidence): {statement}')
     return Outcome(True, {'event': 'task-resource-settled', 'taskId': task_id, 'basis': 'operator-statement',
-                          'statement': clip_text(statement)},
+                          'statement': clip_text(statement), 'phase': phase},
                    {'taskId': task_id, 'state': task['state'], 'unresolved': task['unresolved']})

@@ -66,6 +66,8 @@ def problem(clip: dict) -> str | None:
     issue = _accounting_problem(clock)
     if issue or policy == POLICY_V1:
         return issue
+    if clock['handoff'] is not None and clip.get('state') != 'handed-off':   # X218 F-m1
+        return 'Short capacity clock hand-off on a clip that is not handed off'
     return _v2_problem(clock)
 
 
@@ -212,4 +214,7 @@ def _handoff_problem(handoff: object) -> str | None:
     if type(handoff) is not dict or set(handoff) != {*HANDOFF_NUMBERS, 'onTime'} \
             or not all(number(handoff[key]) for key in HANDOFF_NUMBERS) or type(handoff['onTime']) is not bool:
         return 'Short capacity clock hand-off'
+    if handoff['onTime'] is not (handoff['elapsed'] <= handoff['deadlineElapsed']) \
+            or not handoff['countedSeconds'] <= handoff['totalSeconds'] <= handoff['elapsed']:   # X218 F-m1
+        return 'Short capacity clock hand-off: its times and its on-time verdict disagree'
     return None

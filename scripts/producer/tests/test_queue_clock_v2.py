@@ -172,7 +172,7 @@ class SchemaTests(unittest.TestCase):
         self.assertEqual(clip['capacityClock'], schema.new_clock())
         validate_record(record)
         self.assertTrue(queue_clock.enabled(clip) and queue_clock.writable(clip))
-        self.assertIsNone(schema.problem({**clip, 'capacityClock': full_v2_clock()}))
+        self.assertIsNone(schema.problem({**clip, 'state': 'handed-off', 'capacityClock': full_v2_clock()}))
 
     def test_v1_clock_stays_readable_and_read_only(self) -> None:
         """A P0 v1 clock validates and keeps its 120 s; checkpoint and observe_worker leave it byte-identical."""
@@ -210,8 +210,9 @@ class SchemaTests(unittest.TestCase):
             with self.subTest(name):
                 clock = full_v2_clock()
                 mutate(clock)
-                self.assertEqual(schema.problem({**clip, 'capacityClock': clock}), message)
+                self.assertEqual(schema.problem({**clip, 'state': 'handed-off', 'capacityClock': clock}), message)
         record = short_record(full_v2_clock())
+        record['clips']['A']['state'] = 'handed-off'
         record['clips']['A']['capacityClock']['stall']['decisions'] *= 2
         with self.assertRaisesRegex(ValueError, 'budget record is invalid: Short capacity clock stall decisions'):
             validate_record(record)
@@ -219,7 +220,7 @@ class SchemaTests(unittest.TestCase):
             clock = full_v2_clock()
             mutate(clock)
             with self.subTest(name):
-                self.assertIsNone(schema.problem({**clip, 'capacityClock': clock}))
+                self.assertIsNone(schema.problem({**clip, 'state': 'handed-off', 'capacityClock': clock}))
 
     def test_v1_clock_keeps_its_p0_checks_and_its_earned_credit(self) -> None:
         """The moved v1 checks keep their P0 messages; deliveries and task deadlines still read v1 credit (W2-D8)."""

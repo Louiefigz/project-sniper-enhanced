@@ -79,6 +79,7 @@ class HandoffClockTests(unittest.TestCase):
         clip = delivered(record, 1500.0, 120.0)
         deadline = clip_deadlines(record, clip)['deliverySeconds']
         row = record_handoff(record, clip, 1800.0)
+        clip['state'] = 'handed-off'
         self.assertEqual(row, {'elapsed': 1800.0, 'countedSeconds': 1680.0, 'totalSeconds': 1800.0,
                                'deadlineElapsed': deadline, 'onTime': True})
         self.assertEqual(clip['capacityClock']['handoff'], row)

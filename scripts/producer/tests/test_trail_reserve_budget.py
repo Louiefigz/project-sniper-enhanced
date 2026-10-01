@@ -1,83 +1,79 @@
-"""The event trail's terminal reserve holds every settling line a batch can still owe (X192, X104's "a close always
-fits", as a check in code rather than a comment).
+"""The event trail's terminal reserve holds every settling line a batch can still owe (X192, X217 M1: X104's "a close
+always fits", as a check in code rather than a comment).
 
-Each class below is built at its largest shape (every field at its validator's bound, encoded as
-``native_budget_store.canonical`` writes it) and counted at its bound from the record's own limits. Their sum must
-fit ``TERMINAL_RESERVE_BYTES``: past ``MAX_EVENT_BYTES - TERMINAL_RESERVE_BYTES`` only these lines are written, so a
-batch at a full trail can still cancel a stalled Short, settle every task, record every abandoned launch and close.
-Pure arithmetic on constants; nothing is written.
+The classes are derived from ``TERMINAL_EVENTS`` plus the abandoning ``observed`` line (``native_budget_trail
+.terminal``): every class needs a worst case in ``_trail_budget_classes.CLASSES``, so a new settling event cannot
+land unbudgeted, and their sum must fit ``TERMINAL_RESERVE_BYTES``. Past ``MAX_EVENT_BYTES - TERMINAL_RESERVE_BYTES``
+only these lines are written, so a batch at a full trail can still cancel a stalled Short, settle every task,
+record every outcome and close. The bounded writers are checked against their counted widest lines, and every
+reader of the trail reads it at ``MAX_EVENT_BYTES`` (or a multiple). Pure arithmetic and source reads; nothing is
+written.
 """
 from __future__ import annotations
 
 import _live_state_isolation  # noqa: F401  private budget/pool roots; live state refused
 
-import sys
+import re
 import unittest
+from pathlib import Path
 
-from studio.native_budget_schema_data import BOUNDS
-from studio.native_budget_store import MAX_EVENT_BYTES, TERMINAL_RESERVE_BYTES, canonical
-from studio.production.queue_authority import CHECKPOINT_EVENT_BYTES
-from studio.production.queue_clock import SETTLED
-from studio.production.queue_clock_schema import MAX_CHECKPOINTS, MAX_WORKERS
-from studio.production.task_schema import MAX_TASK_OWNERS
+from _trail_budget_classes import BIG, CLASSES, CLIP, DIGEST, failed_widest, ids, settled_widest
+from studio.native_budget_store import canonical
+from studio.native_budget_trail import (
+    ERROR_TEXT_CHARS, MAX_EVENT_BYTES, TERMINAL_EVENTS, TERMINAL_RESERVE_BYTES, error_text, terminal,
+)
+from studio.production.queue_authority import _settled_line
 
-BIG = sys.float_info.max                 # the longest float spelling
-TEXT = 'x' * 512                          # clip_text and the validators bound a text at 512 encoded bytes
-TASK = 'T' * 64                           # task_schema.TASK_ID
-CLIP = 'C' * 64                           # native_budget_store.CLIP_ID
-ATTEMPT = 'a' * 32                        # native_budget_schema._attempt_id
-PROCESS = {'type': 'process', 'pid': 2 ** 31, 'pgid': 2 ** 31, 'started': 's' * 64}   # host_contract.valid_handle
-CLIPS, TASKS, ATTEMPTS = BOUNDS['clips'], BOUNDS['tasks'], BOUNDS['clips'] * BOUNDS['attempts']
-
-
-def size(value: dict) -> int:
-    """Bytes of one trail line."""
-    return len(canonical(value))
-
-
-def settlement() -> dict:
-    """One task's largest ``capacitySettled``: its own Short, every owner row of the clock removed."""
-    return {CLIP: {'elapsed': BIG, 'excludedSeconds': BIG, 'removedWorkers': ['f' * 16] * MAX_WORKERS}}
-
-
-def budget() -> dict:
-    """Each settling class's worst case in bytes."""
-    stall = {'event': 'capacity-stall-decided', 'clipId': CLIP, 'kind': 'cancel', 'reason': TEXT, 'state': 'cancelled',
-             'frozen': []}
-    settle = {'event': 'task-completed', 'epoch': 2 ** 31, 'taskId': TASK, 'state': 'superseded',
-              'failure': {'category': 'c' * 64, 'detail': TEXT}, 'owners': [PROCESS] * MAX_TASK_OWNERS,
-              SETTLED: settlement()}
-    change = {'taskId': TASK, 'from': 'cancel-requested', 'to': 'superseded', 'unresolved': True, 'reason': TEXT,
-              SETTLED: settlement()}
-    close = {'event': 'batch-closed', 'unsettled': [TASK] * TASKS, 'runningAttempts': [ATTEMPT] * ATTEMPTS,
-             'revoked': [TASK] * TASKS, 'directorEnd': {'taskId': TASK, 'cause': 'closure', 'detail': TEXT}}
-    return {
-        'capacity-checkpoint': MAX_CHECKPOINTS * CLIPS * CHECKPOINT_EVENT_BYTES,
-        # one per Short (decide refuses a second); a task is frozen by at most one cancel
-        'capacity-stall-decided': CLIPS * size(stall) + TASKS * len(canonical([TASK])),
-        # an observation that marked dead launches abandoned: at most one line per attempt
-        'observed (abandoned)': ATTEMPTS * size({'event': 'observed', 'elapsed': BIG, 'abandoned': [ATTEMPT]}),
-        # each task settles once, by its watchdog (task-*) or by reconcile (a tasks-reconciled change), and is
-        # counted here for both, each carrying the largest capacitySettled
-        'task settlement (task-*)': TASKS * size(settle),
-        'task settlement (tasks-reconciled)': TASKS * len(canonical(change)) + size({'event': 'tasks-reconciled',
-                                                                                     'changes': []}),
-        'batch-closed': size(close),
-    }
+STUDIO = Path(__file__).resolve().parents[1] / 'studio'
+READ = re.compile(r'read_private_file\([^)]*\bEVENTS\b,\s*([^)]*)\)')
 
 
 class ReserveBudgetTests(unittest.TestCase):
-    """The worst case of every settling class fits the reserve, and new work keeps its own room."""
+    """Every settling class has a worst case, their sum fits the reserve, and new work keeps its own room."""
+
+    def test_every_settling_class_has_a_worst_case(self) -> None:
+        """The budget's classes are exactly the terminal events and the abandoning observation."""
+        self.assertTrue(terminal({'event': 'observed', 'abandoned': ['TEST']}))
+        self.assertEqual(set(CLASSES), set(TERMINAL_EVENTS) | {'observed'})
 
     def test_every_settling_class_fits_the_terminal_reserve(self) -> None:
         """The sum of the classes' worst cases is within TERMINAL_RESERVE_BYTES."""
-        rows = budget()
-        total = sum(rows.values())
-        self.assertLessEqual(total, TERMINAL_RESERVE_BYTES, rows)
+        rows = {name: bound() for name, bound in CLASSES.items()}
+        self.assertTrue(all(type(value) is int and value > 0 for value in rows.values()), rows)
+        self.assertLessEqual(sum(rows.values()), TERMINAL_RESERVE_BYTES, rows)
 
     def test_new_work_keeps_fifteen_mebibytes(self) -> None:
         """Raising the reserve raised the trail bound with it: new work still stops at 15 MiB."""
         self.assertEqual(MAX_EVENT_BYTES - TERMINAL_RESERVE_BYTES, 15 * 1024 ** 2)
+
+
+class WriterBoundTests(unittest.TestCase):
+    """The writers whose lines the budget bounds write no wider line than it counts."""
+
+    def test_an_owner_end_names_owners_by_digest_whatever_their_paths(self) -> None:
+        """``capacity-settled`` from a 4 KiB owner path is no wider than the counted line plus its named digests."""
+        mark = {'clipId': CLIP, 'worker': '/' + 'w' * 4095, 'state': 'finished', 'elapsed': BIG,
+                'excludedSeconds': BIG}
+        removed = [f'/{index}' + 'r' * 4000 for index in range(3)]
+        line = _settled_line(mark, removed, [], {'capacityState': 'capacity-stalled'})
+        self.assertLessEqual(len(canonical(line)), settled_widest() + ids(len(removed), DIGEST))
+        self.assertNotIn('worker', line)
+
+    def test_a_failed_commit_line_is_bounded_whatever_the_error(self) -> None:
+        """``error_text`` escapes and cuts any error, so a ``commit-failed`` line fits its counted width."""
+        text = error_text(OSError('\U0001F600\n"\\' * 10_000))
+        self.assertEqual(len(text), ERROR_TEXT_CHARS)
+        self.assertTrue(text.isascii() and text.isprintable())
+        self.assertLessEqual(len(canonical({'event': 'commit-failed', 'failedEvent': 'capacity-stall-decided',
+                                            'error': text})), failed_widest())
+
+    def test_every_reader_reads_the_trail_at_its_bound(self) -> None:
+        """Each read of ``events.jsonl`` in studio passes MAX_EVENT_BYTES (or a multiple) as its limit."""
+        reads = {path.name: READ.findall(path.read_text()) for path in STUDIO.rglob('*.py')}
+        found = {name: limits for name, limits in reads.items() if limits}
+        self.assertGreaterEqual(len(found), 4, found)
+        for name, limits in found.items():
+            self.assertTrue(all('MAX_EVENT_BYTES' in limit for limit in limits), (name, limits))
 
 
 if __name__ == '__main__':

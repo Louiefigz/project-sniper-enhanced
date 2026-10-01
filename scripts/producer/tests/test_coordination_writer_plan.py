@@ -12,11 +12,12 @@ from pathlib import Path
 
 from _coordination_fixture import PlanFixture, leaves, moved, perturbed, summarised
 from studio.native_short_regions import region_map, shared_inputs
-from studio.production.coordination_catalog import GENERATED_EXEMPT, SUMMARY_SOURCES
+from studio.production.coordination_catalog import GENERATED_EXEMPT, PREPARED_READERS, SUMMARY_SOURCES
 from studio.production.plan_record import changed_entries, classify
 from studio.production.plan_short_unlisted import unlisted_keys
 
 PREPARED = frozenset({'audio-dialogue', 'captions-timing', 'source-speaker-fidelity'})
+EXEMPT = ('prebuildReview', 'guidedBinding', 'draft')   # generated from inputs that move slices (X211(1))
 REVEAL = '<div data-hf-reveal="0.6">TEST lower third</div>'
 
 
@@ -60,7 +61,8 @@ class Summaries(Case):
     def test_summaries_and_generated_bindings_are_not_global_keys(self) -> None:
         """No summary, generated binding, prepared media or evidence binding becomes a key-entry."""
         keys = unlisted_keys(written(self.homes))
-        for root in (*SUMMARY_SOURCES, *GENERATED_EXEMPT, 'preparedSources', 'sharedEvidence'):
+        self.assertEqual(set(GENERATED_EXEMPT), set(EXEMPT))
+        for root in (*SUMMARY_SOURCES, *EXEMPT, 'preparedSources', 'sharedEvidence'):
             with self.subTest(root=root):
                 self.assertEqual([key for key in keys if key == f'plan.{root}' or key.startswith(f'plan.{root}.')], [])
 
@@ -103,8 +105,9 @@ class Prepared(Case):
         """A re-prepared package (new sha256) moves exactly those slices, through their four entries."""
         after, _plan = self.after(lambda plan: plan['preparedSources'].update(sha256='5' * 64), 'prepared')
         self.assertEqual((classify(self.record, after), moved(self.record, after)), ('local', PREPARED))
-        self.assertEqual({row['id'] for row in changed_entries(self.record, after)},
-                         {'audio-finishing', 'caption-style', 'view-0', 'view-1'})
+        rows = changed_entries(self.record, after)
+        self.assertEqual({row['id'] for row in rows}, {'audio-finishing', 'caption-style', 'view-0', 'view-1'})
+        self.assertEqual({row['section'] for row in rows}, set(PREPARED_READERS))
 
     def test_dropping_prepared_media_moves_the_same(self) -> None:
         """Removing the package is the same change as replacing it."""

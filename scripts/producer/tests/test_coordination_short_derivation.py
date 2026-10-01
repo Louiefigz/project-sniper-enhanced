@@ -74,8 +74,10 @@ ROWS = (
      frozenset({'captions-timing'})),
     ('graphics', 'region composition bytes: a data-hf-reveal cue (F-1; L-B native-reveal-declarations.ts:18)',
      composed('lower-third.html', '<div data-hf-reveal="0.6">TEST lower third</div>'), 'local', GRAPHICS),
-    ('graphics', 'a composition outside every region (F-1)', composed('extra.html', '<div>TEST changed</div>'),
-     'global', ALL),
+    ('graphics', 'a catalog composition outside every region (F-1; its catalog row follows)',
+     composed('extra.html', '<div>TEST changed</div>'), 'global', ALL),
+    ('graphics', 'a composition no region and no catalog row names (F-1: compositions-unmapped alone sees it)',
+     composed('orphan.html', '<div>TEST orphan</div>'), 'global', ALL),
     ('graphics', 'no REVIEW-REGIONS.json: one global project unit', bare, 'global', ALL),
     ('graphics', 'canvas.titleCard (native-short-composition.ts:46)',
      planned(lambda plan: plan['canvas']['titleCard'].update(top=120)), 'local', GRAPHICS),
@@ -95,9 +97,10 @@ ROWS = (
     ('audio', 'assets stay global (F-2; native-short-strategy.ts:12-17)',
      planned(lambda plan: plan['assets'].append({**plan['assets'][0], 'file': 'assets/other.mp4', 'role': 'image'})),
      'global', ALL),
-    ('graphics', 'speakerPictureDecisions (F-4; P2-08 plan text, L-R, not integrated)',
+    ('framing', 'speakerPictureDecisions (P2-08; L-R 4f1f4704 Interfaces: top level, author-written; replaces F-4)',
      planned(lambda plan: plan.__setitem__('speakerPictureDecisions', [
-         {'startFrame': 0, 'endFrame': 45, 'kind': 'two-shot', 'reason': 'TEST reason'}])), 'global', ALL),
+         {'startFrame': 0, 'endFrame': 45, 'kind': 'two-shot', 'reason': 'TEST reason'}])), 'local',
+     frozenset({'source-speaker-fidelity'})),
     ('graphics', 'strategy.pacing.holds outside the projection (F-5)',
      planned(lambda plan: plan['strategy']['pacing']['holds'][0].update(minimumFrames=6)), 'global', ALL),
     ('graphics', 'an unlisted projection key: extension (F-3; native-short-project.ts:52)',
@@ -151,9 +154,11 @@ class DerivationRows(PlanFixture):
         self.assertEqual(moved(self.record, after), frozenset({'source-speaker-fidelity'}))
 
     def test_without_regions_a_composition_change_is_global(self) -> None:
-        """With no REVIEW-REGIONS.json, a change to any composition moves every slice (the project unit)."""
-        before = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-before'))
-        with self.staged({'extra.html': '<div>TEST changed</div>'}):
+        """With no REVIEW-REGIONS.json, a change to any composition, one no catalog row names included, moves every
+        slice (the project unit is all that sees it)."""
+        with self.staged({'orphan.html': '<div>TEST orphan</div>'}):
+            before = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-before'))
+        with self.staged({'orphan.html': '<div>TEST orphan changed</div>'}):
             after = self.short_record(bare(self, copy.deepcopy(self.plan), 'bare-after'))
         self.assertEqual(classify(before, after), 'global')
         self.assertEqual(moved(before, after), ALL)

@@ -5,8 +5,10 @@ then ``role_packet_evidence_speakers.mapped_intervals``, U-T4). ``sourceFacts``:
 mapped through its cuts onto output frames (P2-08's frame rule inverted), one entry per segment it reaches, in P2-07's
 vocabulary. ``speaker-evidence`` (a whole-output framing entry): what P2-08's picture rules read beyond one fact, i.e.
 every person with a face region on this source (named or not), the bound speaker observations, and every interval on
-this source. P2 fields fail closed (W3-D8): the plan binds ``sharedEvidence`` exactly when homes pins a record, and a
-phrase the record protects on retained words needs ``canvas.captionProtectedPhrases``.
+this source. ``speaker-picture-decisions`` (also whole-output framing): the plan's ``speakerPictureDecisions``, which
+only P2-08 reads, over whole speaker intervals and exit runs (L-R 4f1f4704). P2 fields fail closed (W3-D8): the plan
+binds ``sharedEvidence`` exactly when homes pins a record, decisions need that binding (the writer's
+``unboundDecisions``), and a phrase the record protects on retained words needs ``canvas.captionProtectedPhrases``.
 """
 from __future__ import annotations
 
@@ -14,7 +16,7 @@ from fractions import Fraction
 from math import ceil, floor
 
 from cut_preview_io import digest
-from studio.production.coordination_catalog import SPEAKER_EVIDENCE
+from studio.production.coordination_catalog import SPEAKER_DECISIONS, SPEAKER_EVIDENCE
 from studio.production.plan_fields import check, derived_entry, read_pinned_json, refuse
 
 
@@ -74,6 +76,8 @@ def sealed_sections(native_plan: dict, evidence: dict | None) -> tuple[list[dict
     binding = native_plan.get('sharedEvidence')
     check((binding is None) == (evidence is None), 'derived',
           'the native plan binds sharedEvidence (P2-08) exactly when homes pins a sealed record')
+    check(binding is not None or 'speakerPictureDecisions' not in native_plan, 'derived',
+          'speakerPictureDecisions need sharedEvidence: they answer sealed speaker facts (P2-08)')
     if evidence is None:
         return [], []
     check(binding['path'] == evidence['path'] and binding['sha256'] == evidence['sha256'], 'derived',
@@ -85,4 +89,5 @@ def sealed_sections(native_plan: dict, evidence: dict | None) -> tuple[list[dict
     regions = [row for row in record['speakers']['people'] if (row.get('faceRegion') or {}).get('source') in ours]
     observed = (record.get('coverage') or {}).get('observations')
     summary = {'people': regions, 'observations': observed, 'intervals': [row for row in intervals if row['source'] in ours]}
-    return _facts(native_plan, intervals, people, ours), [derived_entry(SPEAKER_EVIDENCE, None, summary)]
+    decisions = derived_entry(SPEAKER_DECISIONS, None, native_plan.get('speakerPictureDecisions'))
+    return _facts(native_plan, intervals, people, ours), [derived_entry(SPEAKER_EVIDENCE, None, summary), decisions]

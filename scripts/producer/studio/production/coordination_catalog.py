@@ -12,6 +12,10 @@ derivation table as the rulings correct it (checked against the writer at stack 
   ``audio-finishing`` only, and ``assets`` is a global key.
 - X201 F-3: ``native_short_regions.plan_projection(plan, local)`` gets the region rows' files as ``local``.
 - X201 F-4, X205 F-5: every native-plan path neither derived nor generated is a global ``key-<path>`` entry.
+- L-R 4f1f4704 (its HANDOVER Interfaces table; coordinator, X211 round): ``speakerPictureDecisions`` is a top-level,
+  author-written list that only P2-08 reads (``native-short-speaker-picture.ts``: over whole speaker intervals, exit
+  runs, and the visual windows a supporting-visual decision needs). It is the whole-output framing entry
+  ``SPEAKER_DECISIONS`` (source-speaker-fidelity) instead of F-4's global entry, pending L-R's review.
 - X211(1): only ``GENERATED_EXEMPT`` is skipped; ``preparedSources`` is an input its ``PREPARED_READERS`` digest.
 - X211(2): row fields ``plan_projection`` drops are digested (global for assets, the region's own entry for a
   region-bound catalog file, else global); only a row's ``path`` (a location its sha256 pins) is not.
@@ -47,7 +51,7 @@ SHORT_DERIVATION = {
     'speech': ('canvas.occurrences', 'canvas.cuts', 'canvas.segments'),
     'story': ('strategy.pacing.beats',),
     'holds': ('strategy.scenes',),
-    'framing': ('canvas.pictureViews', 'preparedSources', 'homes.sharedEvidence'),
+    'framing': ('canvas.pictureViews', 'preparedSources', 'homes.sharedEvidence', 'speakerPictureDecisions'),
     'captions': ('canvas.captionGroups', 'canvas.occurrences', 'canvas.captionCorrections', 'canvas.captionMode',
                  'canvas.captionViews', 'canvas.captionProtectedPhrases', 'canvas.captionSuppressions',
                  'preparedSources'),
@@ -98,7 +102,8 @@ SUMMARY_WRITERS = {   # where the writer computes each summary (file:line at sta
     'strategy.visualPlanApplication': 'native-visual-plan-application.ts:115-128; native-visual-execution-binding.ts:1',
 }
 # Native-plan paths outside plan_projection the derivation covers; every other one is global (F-4, F-5).
-PLAN_DERIVED = ('strategy.scenes', 'visualSources.decisions', 'sharedEvidence', 'preparedSources', *SUMMARY_SOURCES)
+PLAN_DERIVED = ('strategy.scenes', 'visualSources.decisions', 'sharedEvidence', 'preparedSources', 'speakerPictureDecisions',
+                *SUMMARY_SOURCES)
 # The writer's key vocabulary at stack 35eca01b plus P2's fields (native-short-project.ts:34-55,
 # native-short-composition.ts:33-47; P2-05 P2-EARLY-CHECKS:590, P2-08 :721-722). Anything else stops by name.
 WRITER_KEYS = ('visualSources', 'catalogFiles', 'catalogTitle', 'schemaVersion', 'request', 'strategy', 'canvas',
@@ -109,6 +114,7 @@ CANVAS_KEYS = ('title', 'frameRate', 'totalFrames', 'background', 'sourceSize', 
                'pictureViews', 'captionViews', 'text', 'shapes', 'motion', 'titleCard', 'captionProtectedPhrases')
 P2_FIELDS = ('canvas.captionProtectedPhrases', 'sharedEvidence', 'speakerPictureDecisions')   # not yet integrated
 SPEAKER_EVIDENCE = 'speaker-evidence'             # the sealed record's picture-relevant facts (X211(3))
+SPEAKER_DECISIONS = 'speaker-picture-decisions'   # the plan's answers to those facts (P2-08; L-R 4f1f4704)
 UNMAPPED_COMPOSITIONS = 'compositions-unmapped'   # compositions no region row covers (F-1)
 PROJECT_UNIT = 'project'                          # no REVIEW-REGIONS.json: one global graphics unit
 

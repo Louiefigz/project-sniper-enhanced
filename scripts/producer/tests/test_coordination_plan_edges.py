@@ -17,7 +17,7 @@ from _coordination_fixture import BATCH, TASK, UNIT, PlanFixture, authored, long
 from role_packet_native import plan_hash
 from studio.native_short_regions import DERIVATION
 from studio.production.coordination_catalog import RESPONSIBILITIES
-from studio.production.plan_fields import raw_depth
+from studio.production.plan_fields import nesting_problem, raw_depth
 from studio.production.plan_record import (
     affected_sections, approved_content_problem, classify, changed_entries, homes_problem, read_plan_record, task_slice,
     validate_plan_record,
@@ -31,6 +31,7 @@ RANGES = {('graphics', 'region-0'): [15, 45], ('graphics', 'title-card'): [0, 30
           ('holds', 'scene-1'): [45, 60], ('transitions', 'boundary-0'): [0, 60], ('framing', 'view-0'): [0, 45],
           ('framing', 'view-1'): [45, 60], ('framing', 'speaker-evidence'): None, ('audio', 'audio-finishing'): None,
           ('sourceFacts', 'interval-1-0'): [0, 45], ('sourceFacts', 'interval-2-1'): [45, 60]}
+UNPROVEN = {**UNIT, 'isolation': {'status': 'global', 'reason': 'TEST isolation not proven'}}
 SECTIONS = ('story', 'holds', 'framing', 'captions', 'graphics', 'transitions', 'audio', 'sourceFacts')
 
 
@@ -53,12 +54,11 @@ class Case(PlanFixture):
         self.homes = self.project(self.plan, evidence=self.evidence)
         self.record = self.short_record(self.homes)
 
-    def unproven(self, name: str) -> dict:
-        """Homes of a project whose region map records the lower third's isolation as unproven (global)."""
+    def mapped(self, name: str, units: list[dict], schema: int = 2) -> dict:
+        """Homes of a project whose pinned region map holds ``units`` (a TEST rewrite of the generated map)."""
         homes = self.project(self.plan, name=name, evidence=self.evidence)
         file = Path(homes['project']) / 'REVIEW-REGIONS.json'
-        file.write_text(json.dumps({'schemaVersion': 2, 'derivation': DERIVATION, 'units': [
-            {**UNIT, 'isolation': {'status': 'global', 'reason': 'TEST isolation not proven'}}]}))
+        file.write_text(json.dumps({'schemaVersion': schema, 'derivation': DERIVATION, 'units': units}))
         return {**homes, 'regions': pin_of(file)}
 
 
@@ -81,15 +81,23 @@ class Ranges(Case):
                          ('local', ['motion-0']))
 
 
+    def test_a_plan_without_beats_has_one_beat_holding_every_word(self) -> None:
+        """No pacing beats derive beat-0 over the whole clock with every kept word (V16)."""
+        plan = copy.deepcopy(self.plan)
+        plan['strategy']['pacing']['beats'] = []
+        story = self.short_record(self.project(plan, name='beatless', evidence=self.evidence))['story']
+        self.assertEqual([(row['id'], row['range'], row['occurrenceIds']) for row in story], [('beat-0', [0, 60], [0, 1, 2])])
+
+
 class Regions(Case):
     """A region's recorded verdict and its one pinned read (kills V1, V8; X211 minor)."""
 
     def test_an_unproven_region_is_a_global_entry(self) -> None:
         """A region whose map says ``global`` is a global graphics entry, and its composition change is global (V1)."""
-        record = self.short_record(self.unproven('unproven-a'))
+        record = self.short_record(self.mapped('unproven-a', [UNPROVEN]))
         self.assertEqual({row['id']: row for row in record['graphics']}['region-0']['isolation'], 'global')
         with self.staged({'lower-third.html': '<div data-hf-reveal="0.6">TEST lower third</div>'}):
-            after = self.short_record(self.unproven('unproven-b'))
+            after = self.short_record(self.mapped('unproven-b', [UNPROVEN]))
         self.assertEqual(classify(record, after), 'global')
 
     def test_the_derivation_reads_the_pinned_region_bytes_once(self) -> None:
@@ -100,6 +108,13 @@ class Regions(Case):
         file.write_text(json.dumps(json.loads(file.read_text()), indent=1))
         with self.assertRaisesRegex(ValueError, '^Coordination plan: derived: '):
             short_sections(self.homes)
+
+    def test_the_region_map_header_and_rows_are_checked(self) -> None:
+        """A map of another schema, and a unit that is not its composition's actual mount, are refused."""
+        with self.assertRaisesRegex(ValueError, 'derived: invalid native Short review region map'):
+            short_sections(self.mapped('schema', [UNIT], schema=1))
+        with self.assertRaisesRegex(ValueError, '^Coordination plan: derived: .*review region must cover'):
+            short_sections(self.mapped('mount', [{**UNIT, 'startFrame': 14}]))
 
     def test_the_regions_pin_names_the_project_file(self) -> None:
         """An identical copy of the map pinned from elsewhere is refused by path (V8)."""
@@ -147,6 +162,14 @@ class Depth(unittest.TestCase):
         file.write_bytes(b'[' * 200_000)
         with self.assertRaisesRegex(ValueError, 'Coordination plan: read: plan record nests deeper than 32 levels'):
             read_plan_record(pin_of(file))
+
+    def test_the_bound_admits_its_limit(self) -> None:
+        """32 levels pass and 33 are refused, for values and for bytes."""
+        value: list = []
+        for _ in range(31):
+            value = [value]
+        self.assertEqual((nesting_problem(value, 32), raw_depth(json.dumps(value).encode())), (None, 32))
+        self.assertEqual(nesting_problem([value], 32), 'nests deeper than 32 levels')
 
     def test_brackets_inside_strings_do_not_count(self) -> None:
         """``raw_depth`` counts structure only."""

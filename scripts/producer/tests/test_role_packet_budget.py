@@ -12,6 +12,7 @@ import io
 import json
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import context as entry
 import role_packet_budget as budget
@@ -20,11 +21,13 @@ from _role_packet_fixture import RolePacketFixture, sha
 from role_packet_budget import BudgetRequest, receipt_rows, review_budget
 from role_packet_files import ArtifactError
 from role_packet_native import plan_hash
-from role_packets import RoleRequest, resolve_role_packet
+from role_packet_text import render_role_packet
+from role_packets import RoleRequest, resolve_role_packet, role_checks
 from studio.native_budget_clock import start_anchor
 from studio.native_budget_policy import BatchSpec, new_batch_record
 
 REPO = entry.REPO
+DOCTRINE = "names, IDs, stills sheets and shared evidence do not replace inspecting this plan's retained intervals"
 
 
 def record() -> dict:
@@ -75,6 +78,11 @@ class BudgetTests(unittest.TestCase):
         found = budget.resolution_budget('A', budget.budget_terms(False))(record(), 1000.0)
         self.assertEqual(found, plan_budget(1000.0))
         self.assertEqual(budget.resolution_budget('A', budget.budget_terms(True))(record(), 1000.0)['hardBy'], 1360.0)
+
+    def test_cutoff_rounds_down(self) -> None:
+        """A fractional preparation deadline: hardBy is never past preparation - 60 s, even by a rounding step."""
+        with mock.patch.object(budget, 'clip_deadlines', return_value={'preparationSeconds': 1500.0006}):
+            self.assertEqual(plan_budget(1000.0)['hardBy'], 1440.0)
 
 
 class ReceiptFixture(RolePacketFixture):
@@ -140,6 +148,9 @@ class ReceiptTests(ReceiptFixture):
             receipt_rows((str(report), str(failed)), self.wanted())
         with self.assertRaisesRegex(ArtifactError, "neither an early report nor a built project's"):
             receipt_rows((str(report), str(self.planned)), self.wanted())
+        renamed = self.write('clip/native-v1/OTHER-MANIFEST.json', json.loads(manifest.read_text()))
+        with self.assertRaisesRegex(ArtifactError, "neither an early report nor a built project's PROJECT-MANIFEST"):
+            receipt_rows((str(report), str(renamed)), self.wanted())   # a build receipt only under its own name
 
 
 class PacketReceiptTests(ReceiptFixture):
@@ -154,11 +165,20 @@ class PacketReceiptTests(ReceiptFixture):
         reading = {row['key']: row['read'] for row in packet['artifacts']}
         self.assertEqual((reading['receipt:early-report'], reading['receipt:build']), ('bound', 'bound'))
         self.assertEqual((packet['budget']['kind'], packet['budget']['hardSeconds']), ('plan-critic', 600))
-        prior = self.write('reviews/PREBUILD-REVIEW-v1.json', {'TEST': 'earlier plan review'})
+        prior = self.write('reviews/PREBUILD-REVIEW-v1.json', {'scope': budget.PLAN_REVIEW_SCOPE})
         repair = resolve_role_packet(RoleRequest(role='plan-critic', plan=str(self.planned), prior_reviews=str(prior)),
                                      REPO)['packet']
         self.assertEqual((repair['budget']['kind'], repair['mechanicalReceipts']), ('plan-critic-repair', None))
         self.assertIn(('prior-plan-review', 'history'), [(row['key'], row['read']) for row in repair['artifacts']])
+
+    def test_prior_review_must_be_a_plan_review(self) -> None:
+        """A plan critic's prior is an earlier plan review; an owner's prior binds no prior plan review."""
+        motion = self.write('reviews/MOTION-REVIEW-v1.json', {'scope': 'native-short-motion-preview'})
+        with self.assertRaisesRegex(ArtifactError, f'names an earlier plan review .*; {motion} is not one'):
+            budget.review_inputs('plan-critic', (), str(motion), json.loads(self.plan().read_text()))
+        prior = self.write('reviews/PREBUILD-REVIEW-v1.json', {'scope': budget.PLAN_REVIEW_SCOPE})
+        owner = budget.review_inputs('clip-owner', (), str(prior), json.loads(self.plan().read_text()))
+        self.assertEqual(owner, {'artifacts': [], 'receipts': None, 'repair': False})
 
     def test_receipt_checks_added_only_when_bound(self) -> None:
         """PC-21 and the feature only with receipts; OW-21 for an owner with receipts; no receipts for other critics."""
@@ -171,15 +191,45 @@ class PacketReceiptTests(ReceiptFixture):
                                                 receipts=(str(report), str(manifest))), REPO)['packet']
         self.assertIn('PC-21', [row['id'] for row in bound['checks']])
         self.assertIs(bound['features']['mechanical-receipts'], True)
-        owner = resolve_role_packet(RoleRequest(role='clip-owner', plan=str(self.planned),
-                                                receipts=(str(report), str(manifest))), REPO)['packet']
-        self.assertIn('OW-21', [row['id'] for row in owner['checks']])
-        self.assertNotIn('budget', owner)
-        with self.assertRaisesRegex(ArtifactError, '--receipt binds a plan'):
-            resolve_role_packet(RoleRequest(role='clip-owner', project=str(self.root / 'clip'),
+        owner = resolve_role_packet(RoleRequest(role='clip-owner', plan=str(self.planned)), REPO)['packet']
+        self.assertNotIn('budget', owner)   # only a plan critic has a review budget
+        with self.assertRaisesRegex(ArtifactError, '--receipt binds a plan'):   # an owner produces receipts
+            resolve_role_packet(RoleRequest(role='clip-owner', plan=str(self.planned),
                                             receipts=(str(report), str(manifest))), REPO)
         with self.assertRaisesRegex(ArtifactError, '--receipt binds a plan'):   # a final critic's parts carry a plan
             budget.review_inputs('final-critic', (str(report), str(manifest)), None, json.loads(self.planned.read_text()))
+
+    def test_owner_duty_is_an_approval_check(self) -> None:
+        """OW-21 reaches every batch-bound owner (APPROVAL_CHECKS); an unbound owner and every critic lack it."""
+        bound, unbound = ({'summary': None, 'given': {'status': status}} for status in ('bound', 'not-supplied'))
+        self.assertIn('OW-21', [row['id'] for row in role_checks('clip-owner', bound, None, None)])
+        self.assertNotIn('OW-21', [row['id'] for row in role_checks('clip-owner', unbound, None, None)])
+        self.assertNotIn('OW-21', [row['id'] for row in role_checks('plan-critic', bound, None, [{'kind': 'build'}])])
+
+    def test_unbound_plan_critic_keeps_the_inspection_doctrine(self) -> None:
+        """The product route (no batch, no facts, no receipts) still says names and stills replace no inspection."""
+        result = resolve_role_packet(RoleRequest(role='plan-critic', plan=str(self.plan())), REPO)
+        packet = result['packet']
+        self.assertEqual((packet['sharedEvidence'], packet['mechanicalReceipts'], result['published']['batchClock']),
+                         (None, None, None))
+        self.assertIn(DOCTRINE, packet['obligations']['sourceInspection']['statement'])
+        self.assertIn(DOCTRINE, render_role_packet(packet, result['published']))
+
+    def test_briefing_prints_budget_and_receipts(self) -> None:
+        """The printed briefing gives the budget terms, the recorded deadlines (or why none) and each receipt."""
+        manifest, report = self.built()
+        result = resolve_role_packet(RoleRequest(role='plan-critic', plan=str(self.planned),
+                                                 receipts=(str(report), str(manifest))), REPO)
+        packet, published = result['packet'], result['published']
+        text = render_role_packet(packet, published)
+        self.assertIn('Budget (plan-critic): early findings by 420 s and the final record by 600 s', text)
+        self.assertIn('Outside a batch: no budget and no early findings', text)
+        self.assertIn(f'  early-report no-early-defects-found: {report}', text)
+        self.assertIn(f'  build passed: {manifest}', text)
+        recorded = render_role_packet(packet, {**published, 'batchClock': {'budget': plan_budget(100.0)}})
+        self.assertIn('Recorded at resolution: bounded, earlyBy 520.0 s, hardBy 700.0 s (batch clock).', recorded)
+        missing = render_role_packet(packet, {**published, 'batchClock': {'batchId': 'batch-budget'}})
+        self.assertIn('No budget was recorded at resolution: the final record counts as late', missing)
 
     def test_context_role_takes_repeated_receipts(self) -> None:
         """`context.py --role plan-critic --receipt A --receipt B` binds both; one receipt exits 2 with the reason."""

@@ -76,6 +76,17 @@ class PlanReviewTimingTests(unittest.TestCase):
         self.assertEqual((unknown['reviews'][0]['budget'], unknown['reviews'][0]['final']['late'],
                           unknown['reviews'][0]['final']['lateBasis']), (None, True, 'clock-unknown'))
 
+    def test_overdue_boundary_and_the_latest_final(self) -> None:
+        """At hardBy itself a packet is not yet overdue; of two final events naming it, the latest is its final."""
+        for now, overdue in ((700.0, False), (700.001, True)):
+            with self.subTest(now=now):
+                row = plan_review_timing(observe(batch_record(), now), 'A', (resolved(100.0, budget=BUDGET),))
+                self.assertEqual(row['reviews'][0]['overdue'], overdue)
+        events = (resolved(100.0, budget=BUDGET), submitted(650.0, late=False, lateBasis='budget', hardBy=700.0),
+                  submitted(720.0, late=True, lateBasis='budget', hardBy=700.0))
+        final = plan_review_timing(self.record, 'A', events)['reviews'][0]['final']
+        self.assertEqual((final['submittedElapsed'], final['late'], final['resolutionToFinalSeconds']), (720.0, True, 620.0))
+
 
 class PlanReviewTokenTests(unittest.TestCase):
     """Tokens are the output's charged planReview tasks' own reports: exact, or unknown, never 0."""

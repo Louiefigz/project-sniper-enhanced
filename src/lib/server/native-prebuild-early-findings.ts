@@ -2,19 +2,21 @@
  * A plan critic submits each material issue as soon as it has it (`native-review.ts submit-prebuild-early`), at most
  * three early records per role packet, so the coordinator can route a repair while one can still help. An early record
  * binds the current packet and plan digest, an independent reviewer and 1–16 execution-scoped material issues in the
- * shared issue shape. It is recorded on the batch trail first (`review-early-findings`: packet, issues SHA-256, count,
- * index), then published beside the packet's final record as `<record>-EARLY-<k>.json` (exclusive create), the order
- * the final submission uses. A crash between the two leaves an event without a file: resubmitting the same issues
- * publishes that record at its recorded time (no second event); other issues are refused until it is published, and
- * then take the next index. It never carries a verdict and never admits anything. It is batch-bound only: outside a
- * batch there is no budget to route against, so the critic submits the final record. The final `submit-prebuild` of
- * the same packet must keep every recorded early code as a material issue or withdraw it in `withdrawnEarlyIssues`
- * with a reason; a deleted or edited early record fails it closed.
- * Lateness: the final record is late when it is submitted after the `hardBy` the batch authority recorded at the
- * packet's resolution (reported by the engine's given check as `budget`); a packet without a recorded budget or a
- * batch clock is late with `lateBasis: "clock-unknown"` (never on time). The authority records the same rule on its
- * `review-submitted` event (`studio/production/packets.py`). */
-import { existsSync } from "node:fs";
+ * shared issue shape. It never carries a verdict and never admits anything. Order, so no crash wedges the packet:
+ * the record is staged first (`<record>-EARLY-<k>.<issues sha256 prefix>.staged.json`, exclusive create, its time read
+ * before), then recorded on the batch trail (`review-early-findings`: packet, issues SHA-256, count, index), then
+ * published as `<record>-EARLY-<k>.json`. A crash after staging re-uses the staged copy for the same issues; a crash
+ * after the event is repaired by the next early or final submission, which publishes every recorded record whose file
+ * is missing from its staged copy. Early findings are batch-bound only (outside a batch there is no budget to route
+ * against) and close with the packet's final review: the authority refuses an early record once the final's event
+ * names the packet, and this submission refuses one once the final's file exists. The final `submit-prebuild` of the
+ * same packet must keep every recorded early code as a material issue or withdraw it in `withdrawnEarlyIssues` with a
+ * reason; a deleted or edited early record fails it closed.
+ * Lateness: a batch-bound final is late when it is submitted after the `hardBy` the batch authority recorded at the
+ * packet's resolution (reported by the engine's given check as `budget`); with no recorded budget it is late with
+ * `lateBasis: "clock-unknown"` (never on time). The authority records the same rule on its `review-submitted` event
+ * (`studio/production/packets.py`). An unbound packet has no batch clock: `late: null, lateBasis: "unbatched"` (X227). */
+import { existsSync, rmSync } from "node:fs";
 import path from "node:path";
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { validateProducerReview, type ProducerMaterialIssue } from "@/app/api/producer/auto-edit/review-contract";
@@ -40,8 +42,8 @@ const CONTEXT = path.join(SCRIPTS_DIR, "producer", "context.py");
 
 /** One `review-early-findings` event as the engine reports it for a packet. */
 export interface EarlyEvent { index: number; issuesSha256: string; issues: number; elapsed: number }
-/** Whether a final plan record came after its packet's budget, and on what basis. */
-export interface ReviewLateness { late: boolean; lateBasis: "budget" | "clock-unknown"; hardBy: number | null }
+/** Whether a final plan record came after its packet's budget, and on what basis (null: no batch clock). */
+export interface ReviewLateness { late: boolean | null; lateBasis: "budget" | "clock-unknown" | "unbatched"; hardBy: number | null }
 
 /** The context.py arguments that record one early record on its packet's batch clock. */
 export function earlyFindingsArguments(packetPath: string, issuesSha256: string, counts: { issues: number; index: number },
@@ -56,18 +58,28 @@ export const earlyFindingsCheck = {
     givenCheckReport(pythonInterpreter(), ["-B", CONTEXT, ...earlyFindingsArguments(packetPath, issuesSha256, counts, elapsed)]),
 };
 
-/** The packet's own JSON (budget, submission paths), read again and bound to the bytes the packet was verified as. */
-function packetValue(packet: RolePacket): JsonRecord {
+/** The final record this packet names (`submission.record`), from the packet's own verified bytes. */
+function finalRecordPath(packet: RolePacket): string {
   const observed = readCutPreviewObject(packet.path);
   if (observed.sha256 !== packet.sha256) throw new Error("The role packet changed while this submission read it");
-  return objectValue(observed.value, "role packet");
+  const submission = objectValue(objectValue(observed.value, "role packet").submission, "role packet submission");
+  return stringValue(submission.record, "role packet submission record", 4096);
+}
+
+/** `<final record>-EARLY-<index><suffix>` beside the final record this packet names. */
+function besideFinal(packet: RolePacket, index: number, suffix: string): string {
+  const record = finalRecordPath(packet);
+  return path.join(path.dirname(record), `${path.basename(record, ".json")}-EARLY-${index}${suffix}`);
 }
 
 /** `<final record>-EARLY-<index>.json` beside the final record this packet names. */
 export function earlyRecordPath(packet: RolePacket, index: number): string {
-  const submission = objectValue(packetValue(packet).submission, "role packet submission");
-  const record = stringValue(submission.record, "role packet submission record", 4096);
-  return path.join(path.dirname(record), `${path.basename(record, ".json")}-EARLY-${index}.json`);
+  return besideFinal(packet, index, ".json");
+}
+
+/** The staged copy of an early record, named by its index and issues hash (written before its event). */
+function stagedPath(packet: RolePacket, index: number, issuesSha256: string): string {
+  return besideFinal(packet, index, `.${issuesSha256.slice(0, 16)}.staged.json`);
 }
 
 /** What the batch authority recorded for a batch-bound plan-critic packet: its budget and early records (none, and
@@ -144,106 +156,141 @@ function readEarlyObservations(file: string, packet: RolePacket, clock: FrameClo
     issues: earlyIssues(value.materialIssues, clock) };
 }
 
-/** The next early record of a batch-bound packet: a recorded one whose file a crash never published (resubmitted with
- * the same issues), else the next index; refused past the third. The output must be that record's exact path. */
-function nextRecord(packet: RolePacket, output: string): { index: number; recorded: EarlyEvent | null } {
-  const early = recordedReview(packet).early, last = early.at(-1);
-  const pending = last && !existsSync(earlyRecordPath(packet, last.index)) ? last : null;
-  const index = pending ? pending.index : early.length + 1;
+/** An early record (published or staged) that is exactly what the authority recorded for its index on this packet. */
+function verifiedRecord(packet: RolePacket, event: { index: number; issuesSha256: string; elapsed?: number },
+  value: JsonRecord, file: string): JsonRecord {
+  const bound = objectValue(value.rolePacket, "early record packet"), timing = objectValue(value.timing, "early record timing");
+  if (bound.sha256 !== packet.sha256 || value.index !== event.index || value.issuesSha256 !== event.issuesSha256
+      || canonicalJsonSha256(value.materialIssues) !== event.issuesSha256
+      || (event.elapsed !== undefined && timing.submittedElapsed !== event.elapsed)) {
+    throw new Error(`Early findings record ${file} differs from what the batch authority recorded for record ${event.index}`);
+  }
+  return value;
+}
+
+/** Write `value` to a new file through the shared publication (exclusive create, re-read before linking). */
+function publish(file: string, value: JsonRecord): void {
+  publishValidatedJson(file, value, candidate => {
+    if (canonicalJson(readCutPreviewObject(candidate).value) !== canonicalJson(value)) throw new Error("Early record re-read differs");
+  });
+}
+
+/** Publish every recorded early record whose file is missing (a crash after its event) from its staged copy. */
+function publishPending(packet: RolePacket, recorded: EarlyEvent[]): void {
+  for (const event of recorded.filter(row => !existsSync(earlyRecordPath(packet, row.index)))) {
+    const staged = stagedPath(packet, event.index, event.issuesSha256), file = earlyRecordPath(packet, event.index);
+    if (!existsSync(staged)) {
+      throw new Error(`Early findings record ${event.index} of this packet was recorded on the batch trail, but neither ${file} `
+        + "nor its staged copy exists; resolve a new role packet");
+    }
+    publish(file, verifiedRecord(packet, event, objectValue(readCutPreviewObject(staged).value, "staged early record"), staged));
+    rmSync(staged, { force: true });
+  }
+}
+
+/** The next early record of a batch-bound packet: its index and exact path, refused past the third. */
+function nextIndex(packet: RolePacket, output: string, recorded: EarlyEvent[]): number {
+  const index = recorded.length + 1;
   if (index > MAX_EARLY_RECORDS) {
     throw new Error(`A plan critic records at most ${MAX_EARLY_RECORDS} early findings per role packet; put later issues in the final record`);
   }
   const expected = earlyRecordPath(packet, index);
   if (output !== expected) throw new Error(`The next early findings record of this packet is ${expected}`);
-  return { index, recorded: pending };
+  return index;
 }
 
-/** Record the event (a fresh record) or confirm the recorded one (a crash recovery); returns its batch-clock time. */
-function recordEvent(packet: RolePacket, next: { index: number; recorded: EarlyEvent | null },
-  issues: { sha256: string; count: number }, now: number): number {
-  if (next.recorded) {
-    if (next.recorded.issuesSha256 !== issues.sha256 || next.recorded.issues !== issues.count) {
-      throw new Error(`Early findings record ${next.index} was recorded but never published; resubmit exactly its issues to `
-        + "publish it, then submit new issues as the next record");
-    }
-    return next.recorded.elapsed;
-  }
-  const report = earlyFindingsCheck.record(packet.path, issues.sha256, { issues: issues.count, index: next.index }, now);
+/** Record the event for a staged record; the authority must echo exactly its index, issues and time. */
+function recordEvent(packet: RolePacket, record: JsonRecord, count: number): void {
+  const index = record.index as number, issuesSha256 = String(record.issuesSha256);
+  const elapsed = objectValue(record.timing, "early record timing").submittedElapsed as number;
+  const report = earlyFindingsCheck.record(packet.path, issuesSha256, { issues: count, index }, elapsed);
   const event = objectValue(report.event, "recorded early findings event");
-  if (report.status !== "early-findings-recorded" || event.index !== next.index || event.issuesSha256 !== issues.sha256
-      || typeof event.elapsed !== "number") {
+  if (report.status !== "early-findings-recorded" || event.index !== index || event.issuesSha256 !== issuesSha256
+      || event.elapsed !== elapsed) {
     throw new Error("The batch authority did not record this early findings record; nothing was published");
   }
-  return event.elapsed;
+}
+
+/** Refused once the packet's final review is published: its early findings are closed. */
+function assertOpen(packet: RolePacket): void {
+  const final = finalRecordPath(packet);
+  if (existsSync(final)) throw new Error(`The final plan review of this packet is published (${final}); its early findings are closed`);
 }
 
 /** Record early material issues of a batch-bound plan-critic packet; never a verdict and never an admission. */
 export function submitNativePrebuildEarlyFindings(paths: ReviewSubmissionPaths) {
   const packet = readRolePacket(paths.packet, "plan-critic");
   assertPacketCurrent(packet);
-  const plan = currentPlan(packet), current = currentGiven(packet);
-  if (!current.batchClock) throw new Error("Early findings are recorded only for a batch-bound packet; outside a batch submit the final record");
+  const plan = currentPlan(packet), current = currentGiven(packet), clock = current.batchClock;
+  if (!clock) throw new Error("Early findings are recorded only for a batch-bound packet; outside a batch submit the final record");
   if (canonicalJson(current.given) !== canonicalJson(packet.given)) {
     throw new Error("The batch authority's approval no longer yields this packet's given block; re-resolve the role packet");
   }
-  const output = canonicalOutput(paths.output, "Early findings record", packet.subject), next = nextRecord(packet, output);
+  assertOpen(packet);
+  const recorded = recordedReview(packet).early;
+  publishPending(packet, recorded);
+  const output = canonicalOutput(paths.output, "Early findings record", packet.subject), index = nextIndex(packet, output, recorded);
   const observations = readEarlyObservations(paths.observations, packet, plan.clock);
-  const issuesSha256 = canonicalJsonSha256(observations.issues), clock = current.batchClock;
-  const submittedElapsed = recordEvent(packet, next, { sha256: issuesSha256, count: observations.issues.length },
-    clock.nowElapsed);
-  const record = { schemaVersion: 1, scope: EARLY_SCOPE, index: next.index, planHash: plan.planHash,
-    rolePacket: { path: packet.path, sha256: packet.sha256 }, observations: observations.file, reviewer: observations.reviewer,
-    materialIssues: observations.issues, issuesSha256, timing: { basis: "batch-authority", batchId: clock.batchId,
-      clipId: clock.clipId, resolvedElapsed: clock.resolvedElapsed, submittedElapsed } };
-  const published = publishValidatedJson(output, record, candidate => {
-    if (canonicalJson(readCutPreviewObject(candidate).value) !== canonicalJson(record)) throw new Error("Early record re-read differs");
-  });
-  return { status: "early-findings-recorded" as const, record: published.path, issues: observations.issues.length,
-    index: next.index };
+  const issuesSha256 = canonicalJsonSha256(observations.issues), staged = stagedPath(packet, index, issuesSha256);
+  const record = existsSync(staged)   // a crash before the event: the same issues re-use the staged record and its time
+    ? verifiedRecord(packet, { index, issuesSha256 }, objectValue(readCutPreviewObject(staged).value, "staged early record"), staged)
+    : { schemaVersion: 1, scope: EARLY_SCOPE, index, planHash: plan.planHash,
+      rolePacket: { path: packet.path, sha256: packet.sha256 }, observations: observations.file, reviewer: observations.reviewer,
+      materialIssues: observations.issues, issuesSha256, timing: { basis: "batch-authority", batchId: clock.batchId,
+        clipId: clock.clipId, resolvedElapsed: clock.resolvedElapsed, submittedElapsed: clock.nowElapsed } };
+  if (!existsSync(staged)) publish(staged, record);
+  recordEvent(packet, record, observations.issues.length);
+  publish(output, record);
+  rmSync(staged, { force: true });
+  return { status: "early-findings-recorded" as const, record: output, issues: observations.issues.length, index };
 }
 
-/** The recorded early codes of this packet, each read from its own record (bytes and issues hash re-checked). */
+/** The recorded early codes of this packet, each read from its own record (bytes, index and issues hash re-checked). */
 function earlyCodes(packet: RolePacket, recorded: EarlyEvent[]): string[] {
+  publishPending(packet, recorded);
   return recorded.flatMap(event => {
     const file = earlyRecordPath(packet, event.index);
-    let value: JsonRecord;
-    try { value = objectValue(readCutPreviewObject(file).value, "early findings record"); } catch {
-      throw new Error(`Early findings record ${event.index} of this packet is missing or unreadable (${file}); it was recorded `
-        + "on the batch trail: resubmit the same early findings to publish it");
-    }
-    const bound = objectValue(value.rolePacket, "early record packet");
-    if (bound.sha256 !== packet.sha256 || value.issuesSha256 !== event.issuesSha256
-        || canonicalJsonSha256(value.materialIssues) !== event.issuesSha256) {
-      throw new Error(`Early findings record ${file} differs from what the batch authority recorded`);
-    }
+    const value = verifiedRecord(packet, event, objectValue(readCutPreviewObject(file).value, "early findings record"), file);
     return (value.materialIssues as JsonRecord[]).map(row => String(row.code));
   });
 }
 
 /** Every recorded early code is kept as a material issue or withdrawn with a reason of at least 20 characters. */
 export function assertEarlyFindingsAccounted(packet: RolePacket, observations: JsonRecord,
-  recorded: EarlyEvent[]): { early: string[]; withdrawn: string[] } {
+  recorded: EarlyEvent[]): { early: string[]; withdrawn: { code: string; reason: string }[] } {
   const early = earlyCodes(packet, recorded), listed = observations.withdrawnEarlyIssues ?? [];
   if (!Array.isArray(listed)) throw new Error("withdrawnEarlyIssues must be an array of {code, reason}");
   const withdrawn = listed.map((value, index) => {
     const row = objectValue(value, `withdrawnEarlyIssues[${index}]`);
     exactKeys(row, ["code", "reason"], ["code", "reason"], `withdrawnEarlyIssues[${index}]`);
     const code = stringValue(row.code, `withdrawnEarlyIssues[${index}].code`, 128);
-    if (stringValue(row.reason, `withdrawnEarlyIssues[${index}].reason`, 2000).trim().length < WITHDRAW_REASON_MIN) {
+    const reason = stringValue(row.reason, `withdrawnEarlyIssues[${index}].reason`, 2000);
+    if (reason.trim().length < WITHDRAW_REASON_MIN) {
       throw new Error(`withdrawnEarlyIssues[${index}].reason must explain the withdrawal in at least ${WITHDRAW_REASON_MIN} characters`);
     }
     if (!early.includes(code)) throw new Error(`withdrawnEarlyIssues[${index}] names ${code}, which no early finding of this packet raised`);
-    return code;
+    return { code, reason };
   });
   const kept = new Set(((observations.materialIssues ?? []) as JsonRecord[]).map(row => String(row.code)));
-  const missing = early.find(code => !kept.has(code) && !withdrawn.includes(code));
+  const missing = early.find(code => !kept.has(code) && !withdrawn.some(row => row.code === code));
   if (missing) throw new Error(`Final plan review omits early finding ${missing}; keep it as a material issue or withdraw it with a reason`);
   return { early, withdrawn };
 }
 
-/** Late when submitted after the recorded `hardBy`; an unknown budget or batch clock is late (fail closed). */
+/** After the final's event: no early record was added since the final read them (a concurrent early submission). */
+export function assertEarlyUnchanged(packet: RolePacket, accounted: number): void {
+  const now = recordedReview(packet).early.length;
+  if (now !== accounted) {
+    throw new Error(`An early findings record was added while this final was submitted (${now} recorded, ${accounted} `
+      + "accounted for); submit the final again so it accounts for every early finding");
+  }
+}
+
+/** Late when submitted after the recorded `hardBy`; a batch-bound final without a budget is late (fail closed); an
+ * unbound final has no batch clock (`late: null`, X227). */
 export function reviewLateness(budget: JsonRecord | null, timing: SubmissionTiming): ReviewLateness {
+  if (timing.basis !== "batch-authority") return { late: null, lateBasis: "unbatched", hardBy: null };
   const hardBy = budget?.hardBy;
-  if (timing.basis !== "batch-authority" || typeof hardBy !== "number") return { late: true, lateBasis: "clock-unknown", hardBy: null };
+  if (typeof hardBy !== "number") return { late: true, lateBasis: "clock-unknown", hardBy: null };
   return { late: timing.submittedElapsed > hardBy, lateBasis: "budget", hardBy };
 }

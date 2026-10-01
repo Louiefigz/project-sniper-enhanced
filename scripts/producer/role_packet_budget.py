@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,6 +38,7 @@ from studio.production.formats import clip_deadlines
 EARLY_SCOPE, EARLY_PASS, EARLY_SCHEMA = "native-short-early-defect-report", "no-early-defects-found", 2
 BUILD_SCOPE, BUILD_PASS = "native-short-review-project", "passed"
 PLAN_FILE, MANIFEST, MAX_PLAN_BYTES = "SHORT-PROJECT.json", "PROJECT-MANIFEST.json", 16 * 1024 * 1024
+PLAN_REVIEW_SCOPE = "native-short-full-plan"
 RECEIPT_WHY = {"early-report": "Passing early report (static preflight, reveal probe) of the built project.",
                "build": "Built project's manifest: the build's structural checks passed for this plan hash."}
 
@@ -61,7 +63,8 @@ def review_budget(request: BudgetRequest) -> dict:
         return {"kind": kind, "status": "unbatched", "resolvedElapsed": None, "earlyBy": None, "hardBy": None}
     seconds, resolved = REVIEW_BUDGETS[kind], request.resolved
     preparation = clip_deadlines(request.record, request.record["clips"][request.clip])["preparationSeconds"]
-    hard = round(min(resolved + seconds["hardSeconds"], preparation - REPAIR_START_MARGIN_SECONDS), 3)
+    cutoff = math.floor((preparation - REPAIR_START_MARGIN_SECONDS) * 1000) / 1000   # rounded down: never past it
+    hard = min(round(resolved + seconds["hardSeconds"], 3), cutoff)
     early = round(min(resolved + seconds["earlySeconds"], hard), 3)
     return {"kind": kind, "status": "no-repair-window" if hard <= resolved else "bounded", "resolvedElapsed": resolved,
             "earlyBy": early, "hardBy": hard}
@@ -71,8 +74,8 @@ def budget_terms(repair: bool) -> dict:
     """The budget terms a plan-critic packet carries; its deadlines are recorded at its resolution (batch only)."""
     kind = "plan-critic-repair" if repair else "plan-critic"
     return {"kind": kind, **REVIEW_BUDGETS[kind], "repairStartMarginSeconds": REPAIR_START_MARGIN_SECONDS,
-            "deadlines": "recorded on the packet-resolved event (context.py --role: batchClock.budget; "
-                         "--given-check: budget)"}
+            "deadlines": "recorded on the packet-resolved event (the packet briefing prints them; context.py "
+                         "--role: batchClock.budget; --given-check: budget)"}
 
 
 def resolution_budget(clip: str, terms: dict) -> Callable[[dict, float], dict]:
@@ -134,17 +137,20 @@ def receipt_rows(paths: tuple[str, ...], wanted: str) -> list[dict]:
 def review_inputs(role: str, receipts: tuple[str, ...], prior: str | None, plan: dict | None) -> dict:
     """Receipt and prior-review artifacts of one packet request, its receipt rows and whether it is a repair.
 
-    Receipts bind only a plan-critic or clip-owner packet with a plan; a plan-critic packet that names an earlier
-    plan review (``--prior-reviews``) is a repair, and that record is frozen as history.
+    Receipts bind only a plan-critic packet with a plan (the owner's duty to produce them, OW-21, reaches every
+    batch-bound owner through APPROVAL_CHECKS). A plan-critic packet that names an earlier plan review
+    (``--prior-reviews``, a ``native-short-full-plan`` record) is a repair, and that record is frozen as history.
     """
     rows: list[dict] = []
     if receipts:
         if role not in RECEIPT_CHECKS or plan is None:
-            raise ArtifactError("--receipt binds a plan's receipts: only for a plan-critic or clip-owner packet with a "
-                                "plan (--plan, or an owner's --native-project)")
+            raise ArtifactError("--receipt binds a plan's receipts: only for a plan-critic packet with --plan")
         rows = receipt_rows(receipts, plan_hash(plan))
     frozen = [{key: row[key] for key in ("key", "path", "sha256", "bytes", "observation", "why")} for row in rows]
     if role == "plan-critic" and prior:
+        if read_json(canonical_file(prior)).get("scope") != PLAN_REVIEW_SCOPE:
+            raise ArtifactError(f"--prior-reviews for a plan critic names an earlier plan review ({PLAN_REVIEW_SCOPE} "
+                                f"record); {prior} is not one")
         frozen.append(artifact("prior-plan-review", prior, "The earlier plan review this repair critic follows."))
     summary = [{key: row[key] for key in ("kind", "path", "sha256", "status", "project", "planHash")} for row in rows]
     return {"artifacts": frozen, "receipts": summary if receipts else None,

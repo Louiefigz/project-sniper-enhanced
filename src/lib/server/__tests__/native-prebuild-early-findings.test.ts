@@ -2,7 +2,7 @@
  * synthetic plans and packets: no fixture project is built and no Python runs (the engine's given check and early
  * record are TEST doubles over `_native-review-fixture`'s); nobody reviewed anything. */
 import assert from "node:assert/strict";
-import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { test, type TestContext } from "node:test";
 import type { JsonRecord } from "@/lib/producer/contracts/validation";
@@ -87,18 +87,78 @@ test("records early material issues without a verdict", async t => {
     (JSON.parse(readFileSync(s.early(2), "utf8")) as JsonRecord).issuesSha256]]);
 });
 
-test("a crash between the event and the file: the same issues publish it; other issues wait for it", t => {
+/** The TEST early-record double crashes once, `before` recording the event or `after` it (restored after the test). */
+function crashing(t: TestContext, when: "before" | "after") {
+  t.mock.restoreAll();
+  const real = earlyFindingsCheck.record;
+  let crashed = false;
+  const crash = (moment: string): void => {
+    if (crashed || moment !== when) return;
+    crashed = true;
+    throw new Error(`TEST crash ${moment} the event`);
+  };
+  t.mock.method(earlyFindingsCheck, "record", (packetPath: string, issuesSha256: string,
+    counts: { issues: number; index: number }, elapsed: number) => {
+    crash("before");
+    const report = real(packetPath, issuesSha256, counts, elapsed);
+    crash("after");
+    return report;
+  });
+}
+
+const staged = (s: ReturnType<typeof setup>) => readdirSync(path.dirname(s.packet)).filter(name => name.endsWith(".staged.json"));
+
+test("a crash before the event: the same issues re-use the staged record and its time", t => {
+  const s = setup(t);
+  crashing(t, "before");
+  assert.throws(() => s.submitEarly(1), /TEST crash before the event/);
+  assert.deepEqual([existsSync(s.early(1)), EARLY.get(s.packet), staged(s).length], [false, undefined, 1]);
+  const kept = JSON.parse(readFileSync(path.join(path.dirname(s.packet), staged(s)[0]), "utf8")) as JsonRecord;
+  assert.equal(s.submitEarly(1).index, 1);
+  assert.deepEqual((JSON.parse(readFileSync(s.early(1), "utf8")) as JsonRecord).timing, kept.timing);
+  assert.deepEqual([EARLY.get(s.packet)!.length, staged(s)], [1, []]);
+});
+
+test("a crash after the event: the next early or final submission publishes it from its staged copy", t => {
+  const s = setup(t);
+  crashing(t, "after");
+  assert.throws(() => s.submitEarly(1), /TEST crash after the event/);
+  assert.deepEqual([existsSync(s.early(1)), EARLY.get(s.packet)!.length, staged(s).length], [false, 1, 1]);
+  assert.equal(s.submitEarly(2).index, 2);
+  assert.deepEqual([existsSync(s.early(1)), staged(s)], [true, []]);
+  const f = setup(t);
+  crashing(t, "after");
+  assert.throws(() => f.submitEarly(1), /TEST crash after the event/);
+  assert.deepEqual(f.submitFinal(["TEST_EARLY_1"]).earlyFindings, { early: ["TEST_EARLY_1"], withdrawn: [] });
+  assert.deepEqual([existsSync(f.early(1)), staged(f)], [true, []]);
+});
+
+test("every pending record is published; one whose file and staged copy are gone is refused by index", t => {
   const s = setup(t);
   s.submitEarly(1);
-  const recorded = JSON.parse(readFileSync(s.early(1), "utf8")) as JsonRecord;
-  renameSync(s.early(1), `${s.early(1)}.lost`);   // the event exists; the file was never published
-  assert.throws(() => s.submitEarly(1, [issue("TEST_OTHER")]), /recorded but never published; resubmit exactly its issues/);
-  assert.throws(() => s.submitEarly(2), /The next early findings record of this packet is .*EARLY-1\.json/);
-  const again = s.submitEarly(1);
-  assert.deepEqual([again.index, EARLY.get(s.packet)!.length], [1, 1]);
-  const published = JSON.parse(readFileSync(s.early(1), "utf8")) as JsonRecord;
-  assert.deepEqual(published.timing, recorded.timing);   // the recorded time, not a new one
-  assert.equal(s.submitEarly(2).index, 2);
+  s.submitEarly(2);
+  for (const index of [1, 2]) {   // two recorded events whose files were never published, each with its staged copy
+    const row = EARLY.get(s.packet)![index - 1];
+    copyFileSync(s.early(index), s.early(index).replace(".json", `.${String(row.issuesSha256).slice(0, 16)}.staged.json`));
+    rmSync(s.early(index));
+  }
+  assert.equal(s.submitEarly(3).index, 3);
+  assert.deepEqual([existsSync(s.early(1)), existsSync(s.early(2)), staged(s)], [true, true, []]);
+  rmSync(s.early(2));
+  assert.throws(() => s.submitFinal(["TEST_EARLY_1", "TEST_EARLY_2", "TEST_EARLY_3"]),
+    /Early findings record 2 of this packet was recorded on the batch trail, but neither .*EARLY-2\.json nor its staged copy/);
+});
+
+test("the authority's echo must match exactly; otherwise nothing is published", t => {
+  const s = setup(t);
+  for (const change of [{ index: 2 }, { elapsed: -1 }, { issuesSha256: "e".repeat(64) }]) {
+    t.mock.method(earlyFindingsCheck, "record", (packetPath: string, issuesSha256: string,
+      counts: { issues: number; index: number }, elapsed: number) => ({ status: "early-findings-recorded", event: {
+      event: "review-early-findings", index: counts.index, issuesSha256, issues: counts.issues, elapsed, ...change } }));
+    assert.throws(() => s.submitEarly(1), /did not record this early findings record; nothing was published/);
+    assert.equal(existsSync(s.early(1)), false);
+    t.mock.restoreAll();
+  }
 });
 
 test("refuses a stale plan", t => {
@@ -121,15 +181,21 @@ test("refuses an author as critic", t => {
   assert.equal(existsSync(s.early(1)), false);
 });
 
-test("refuses an empty issue list", t => {
+test("refuses an empty issue list, an issue with no evidence and another packet's observations", t => {
   const s = setup(t);
   assert.throws(() => s.submitEarly(1, []), /1–16 material issues/);
   assert.throws(() => s.submitEarly(1, Array.from({ length: 17 }, (_, index) => issue(`TEST_${index}`))), /1–16 material issues/);
   assert.throws(() => s.submitEarly(1, [{ ...issue("TEST_EARLY_1"), scope: "proposed-change" }]), /scope must be execution/);
-  assert.equal(EARLY.get(s.packet), undefined);
+  assert.throws(() => s.submitEarly(1, [{ ...issue("TEST_EARLY_1"), evidence: [] }]), /needs frames or an evidence reference/);
+  const other = setup(t), observations = path.join(path.dirname(s.packet), "EARLY-OTHER-OBSERVATIONS.json");
+  writeJson(observations, { schemaVersion: 1, kind: EARLY_KIND, rolePacketSha256: other.sha256, reviewer: reviewer(),
+    materialIssues: [issue("TEST_EARLY_1")] });
+  assert.throws(() => submitNativePrebuildEarlyFindings({ packet: s.packet, observations, output: s.early(1) }),
+    /written for a different role packet/);
+  assert.deepEqual([EARLY.get(s.packet), staged(s)], [undefined, []]);
 });
 
-test("refuses a fourth early record", t => {
+test("refuses a fourth early record, an unbound packet and any early record after the final", t => {
   const s = setup(t);
   for (const index of [1, 2, 3]) s.submitEarly(index);
   assert.throws(() => s.submitEarly(4), /at most 3 early findings per role packet/);
@@ -138,6 +204,8 @@ test("refuses a fourth early record", t => {
     output: other.early(2) }), /The next early findings record of this packet is .*EARLY-1\.json/);
   const unbound = setup(t, { bound: false });
   assert.throws(() => unbound.submitEarly(1), /only for a batch-bound packet/);
+  other.submitFinal(["TEST_MATERIAL"]);
+  assert.throws(() => other.submitEarly(1), /The final plan review of this packet is published .*; its early findings are closed/);
 });
 
 test("final review must account for early findings", t => {
@@ -145,18 +213,43 @@ test("final review must account for early findings", t => {
   s.submitEarly(1);
   assert.throws(() => s.submitFinal(["TEST_OTHER"]),
     /^Error: Final plan review omits early finding TEST_EARLY_1; keep it as a material issue or withdraw it with a reason$/);
-  assert.throws(() => s.submitFinal(["TEST_OTHER"], [{ code: "TEST_EARLY_1", reason: "TEST too short" }]), /at least 20 characters/);
+  for (const reason of ["TEST nineteen chars", `  ${"TEST nineteen chars"}  `, `${".".repeat(19)}`]) {
+    assert.throws(() => s.submitFinal(["TEST_OTHER"], [{ code: "TEST_EARLY_1", reason }]), /at least 20 characters/);
+  }
   assert.throws(() => s.submitFinal(["TEST_OTHER"], [{ code: "TEST_UNKNOWN", reason: "TEST reason long enough to count" }]),
     /which no early finding of this packet raised/);
-  renameSync(s.early(1), `${s.early(1)}.moved`);
-  assert.throws(() => s.submitFinal(["TEST_EARLY_1"]), /Early findings record 1 of this packet is missing/);
-  const kept = readFileSync(`${s.early(1)}.moved`, "utf8");
+  const kept = readFileSync(s.early(1), "utf8"), record = JSON.parse(kept) as JsonRecord;
   writeFileSync(s.early(1), kept.replace("TEST_EARLY_1", "TEST_EARLY_X"));
   assert.throws(() => s.submitFinal(["TEST_EARLY_1"]), /differs from what the batch authority recorded/);
+  writeJson(s.early(1), { ...record, rolePacket: { path: otherPacket(t), sha256: "f".repeat(64) } });
+  assert.throws(() => s.submitFinal(["TEST_EARLY_1"]), /differs from what the batch authority recorded for record 1/);
+  writeJson(s.early(1), { ...record, timing: { ...(record.timing as JsonRecord), submittedElapsed: 1e6 } });
+  assert.throws(() => s.submitFinal(["TEST_EARLY_1"]), /differs from what the batch authority recorded for record 1/);
   writeFileSync(s.early(1), kept);
-  const done = s.submitFinal(["TEST_OTHER"], [{ code: "TEST_EARLY_1", reason: "TEST the repair made this obsolete" }]);
-  assert.deepEqual(done.earlyFindings, { early: ["TEST_EARLY_1"], withdrawn: ["TEST_EARLY_1"] });
+  const done = s.submitFinal(["TEST_OTHER"], [{ code: "TEST_EARLY_1", reason: "TEST twenty chars ok" }]);
+  assert.deepEqual(done.earlyFindings, { early: ["TEST_EARLY_1"], withdrawn: [{ code: "TEST_EARLY_1",
+    reason: "TEST twenty chars ok" }] });
   assert.equal(done.status, "recorded-plan-review-requires-revision");
+  const keeps = setup(t);
+  keeps.submitEarly(1);
+  assert.deepEqual(keeps.submitFinal(["TEST_EARLY_1"]).earlyFindings, { early: ["TEST_EARLY_1"], withdrawn: [] });
+});
+
+/** A packet path of another TEST packet (a record bound to it is not this packet's). */
+function otherPacket(t: TestContext): string {
+  return setup(t).packet;
+}
+
+test("an early record added while the final was submitted fails the final", t => {
+  const s = setup(t), record = givenCheck.record;
+  t.after(() => { givenCheck.record = record; });
+  givenCheck.record = (packetPath, recordSha256, elapsed) => {
+    EARLY.set(packetPath, [{ index: 1, issuesSha256: "d".repeat(64), issues: 1, elapsed }]);   // a concurrent early record
+    return record(packetPath, recordSha256, elapsed);
+  };
+  assert.throws(() => s.submitFinal(["TEST_MATERIAL"]),
+    /An early findings record was added while this final was submitted \(1 recorded, 0 accounted for\)/);
+  assert.equal(existsSync(s.output), false);
 });
 
 test("late submission is marked late", t => {
@@ -166,11 +259,13 @@ test("late submission is marked late", t => {
   assert.deepEqual(onTime.timing, { late: false, lateBasis: "budget", hardBy: 1e7 });
 });
 
-test("clock-unknown counts as late", t => {
-  for (const options of [{ budget: null }, { bound: false }, { budget: { ...BUDGET, hardBy: null } }]) {
+test("a batch-bound final without a recorded budget is late; an unbound final has no batch clock", t => {
+  for (const options of [{ budget: null }, { budget: { ...BUDGET, hardBy: null } }]) {
     const done = setup(t, options).submitFinal(["TEST_MATERIAL"]);
     assert.deepEqual(done.timing, { late: true, lateBasis: "clock-unknown", hardBy: null }, JSON.stringify(options));
   }
+  assert.deepEqual(setup(t, { bound: false }).submitFinal(["TEST_MATERIAL"]).timing,
+    { late: null, lateBasis: "unbatched", hardBy: null });
 });
 
 test("hardBy itself is on time; an engine report without the budget or early findings is refused", t => {
@@ -179,7 +274,8 @@ test("hardBy itself is on time; an engine report without the budget or early fin
   assert.deepEqual(reviewLateness({ hardBy: 600 }, at(600)), { late: false, lateBasis: "budget", hardBy: 600 });
   assert.deepEqual(reviewLateness({ hardBy: 600 }, at(600.001)), { late: true, lateBasis: "budget", hardBy: 600 });
   assert.equal(reviewLateness(null, at(1)).lateBasis, "clock-unknown");
-  assert.equal(reviewLateness({ hardBy: 600 }, { basis: "declared-not-authenticated" }).lateBasis, "clock-unknown");
+  assert.deepEqual(reviewLateness({ hardBy: 600 }, { basis: "declared-not-authenticated" }),
+    { late: null, lateBasis: "unbatched", hardBy: null });
   const s = setup(t), run = givenCheck.run;
   t.after(() => { givenCheck.run = run; });
   for (const drop of ["budget", "earlyFindings"]) {
